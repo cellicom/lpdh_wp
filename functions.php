@@ -638,3 +638,251 @@ function hide_deck_views_for_players() {
     <?php
 }
 add_action('admin_head', 'hide_deck_views_for_players', 20);
+
+/**
+ * Register Custom Post Type "Place"
+ * Solo gli amministratori possono gestire questo CPT
+ */
+function register_place_post_type() {
+    $labels = array(
+        'name'                  => 'Places',
+        'singular_name'         => 'Place',
+        'menu_name'             => 'Places',
+        'name_admin_bar'        => 'Place',
+        'archives'              => 'Archivio Places',
+        'attributes'            => 'Attributi Place',
+        'parent_item_colon'     => 'Place genitore:',
+        'all_items'             => 'Tutti i Places',
+        'add_new_item'          => 'Aggiungi nuovo Place',
+        'add_new'               => 'Aggiungi nuovo',
+        'new_item'              => 'Nuovo Place',
+        'edit_item'             => 'Modifica Place',
+        'update_item'           => 'Aggiorna Place',
+        'view_item'             => 'Visualizza Place',
+        'view_items'            => 'Visualizza Places',
+        'search_items'          => 'Cerca Place',
+        'not_found'             => 'Nessun place trovato',
+        'not_found_in_trash'    => 'Nessun place nel cestino',
+        'featured_image'        => 'Immagine in evidenza',
+        'set_featured_image'    => 'Imposta immagine in evidenza',
+        'remove_featured_image' => 'Rimuovi immagine in evidenza',
+        'use_featured_image'    => 'Usa come immagine in evidenza',
+        'insert_into_item'      => 'Inserisci in place',
+        'uploaded_to_this_item' => 'Caricato in questo place',
+        'items_list'            => 'Lista places',
+        'items_list_navigation' => 'Navigazione lista places',
+        'filter_items_list'     => 'Filtra lista places',
+    );
+
+    $args = array(
+        'label'                 => 'Place',
+        'description'           => 'Custom Post Type per gestire i luoghi',
+        'labels'                => $labels,
+        'supports'              => array('title', 'editor', 'thumbnail', 'author'),
+        'hierarchical'          => false,
+        'public'                => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'menu_position'         => 22,
+        'menu_icon'             => 'dashicons-location',
+        'show_in_admin_bar'     => true,
+        'show_in_nav_menus'     => true,
+        'can_export'            => true,
+        'has_archive'           => true,
+        'exclude_from_search'   => false,
+        'publicly_queryable'    => true,
+        'capability_type'       => 'post',
+        'show_in_rest'          => true,
+        'rest_base'             => 'places',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
+    );
+
+    register_post_type('place', $args);
+}
+add_action('init', 'register_place_post_type', 0);
+
+/**
+ * Register ACF Field Group for Place Custom Post Type
+ */
+if( function_exists('acf_add_local_field_group') ):
+
+    acf_add_local_field_group(array(
+        'key' => 'group_place_custom_fields',
+        'title' => 'Campi Place',
+        'fields' => array(
+            array(
+                'key' => 'field_place_address',
+                'label' => 'Indirizzo',
+                'name' => 'place_address',
+                'type' => 'text',
+                'instructions' => 'Inserisci l\'indirizzo del luogo',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'Via example 123, Città',
+            ),
+            array(
+                'key' => 'field_place_homepage',
+                'label' => 'Sito Web',
+                'name' => 'place_homepage',
+                'type' => 'url',
+                'instructions' => 'Inserisci il link al sito web del luogo',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'https://example.com',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'place',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+
+endif;
+
+/**
+ * Add custom columns to Place admin list
+ */
+function place_custom_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['title'] = $columns['title'];
+    $new_columns['place_address'] = 'Indirizzo';
+    $new_columns['place_homepage'] = 'Sito Web';
+    $new_columns['author'] = 'Autore';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_place_posts_columns', 'place_custom_columns');
+
+/**
+ * Populate custom columns data for Place
+ */
+function place_custom_columns_data($column, $post_id) {
+    switch ($column) {
+        case 'place_address':
+            $place_address = get_field('field_place_address', $post_id);
+            if ($place_address) {
+                echo esc_html($place_address);
+            } else {
+                echo '-';
+            }
+            break;
+        case 'place_homepage':
+            $place_homepage = get_field('field_place_homepage', $post_id);
+            if ($place_homepage) {
+                echo '<a href="' . esc_url($place_homepage) . '" target="_blank" rel="noopener">' . esc_html($place_homepage) . '</a>';
+            } else {
+                echo '-';
+            }
+            break;
+        case 'author':
+            $author_id = get_post_field('post_author', $post_id);
+            $author_user = get_userdata($author_id);
+            if ($author_user) {
+                echo '<a href="' . esc_url(get_edit_user_link($author_id)) . '">' . esc_html($author_user->display_name) . '</a>';
+            }
+            break;
+    }
+}
+add_action('manage_place_posts_custom_column', 'place_custom_columns_data', 10, 2);
+
+/**
+ * Make custom columns sortable for Place
+ */
+function place_sortable_columns($columns) {
+    $columns['place_address'] = 'place_address';
+    return $columns;
+}
+add_filter('manage_edit-place_sortable_columns', 'place_sortable_columns');
+
+/**
+ * Handle custom column sorting for Place
+ */
+function place_column_orderby($query) {
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    $orderby = $query->get('orderby');
+
+    if ('place_address' == $orderby) {
+        $query->set('meta_key', 'field_place_address');
+        $query->set('orderby', 'meta_value');
+    }
+}
+add_action('pre_get_posts', 'place_column_orderby');
+
+/**
+ * Hide Place menu from non-administrators
+ */
+function hide_place_menu_from_players() {
+    if (!current_user_can('administrator')) {
+        remove_menu_page('edit.php?post_type=place');
+    }
+}
+add_action('admin_menu', 'hide_place_menu_from_players', 999);
+
+/**
+ * Restrict access to Place admin pages for non-administrators
+ */
+function restrict_place_admin_access() {
+    // Check if we're on place post type admin pages
+    if (!current_user_can('administrator')) {
+        $current_screen = get_current_screen();
+        
+        if ($current_screen && $current_screen->post_type === 'place') {
+            wp_redirect(admin_url());
+            exit;
+        }
+    }
+}
+add_action('admin_init', 'restrict_place_admin_access', 999);
+
+/**
+ * Hide Place from admin bar for non-administrators
+ */
+function hide_place_admin_bar($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        $wp_admin_bar->remove_node('new-place');
+    }
+}
+add_action('admin_bar_menu', 'hide_place_admin_bar', 999);
+
+/**
+ * Remove Place from "New" menu in admin bar for non-admins
+ */
+function remove_place_from_new_menu($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
+            if (strpos($id, 'new-place') !== false) {
+                $wp_admin_bar->remove_node($id);
+            }
+        }
+    }
+}
+add_action('admin_bar_menu', 'remove_place_from_new_menu', 999);
