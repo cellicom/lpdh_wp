@@ -1021,3 +1021,294 @@ function remove_faq_from_new_menu($wp_admin_bar) {
     }
 }
 add_action('admin_bar_menu', 'remove_faq_from_new_menu', 999);
+
+/**
+ * Register Custom Post Type "Event"
+ * Solo gli amministratori possono gestire questo CPT
+ */
+function register_event_post_type() {
+    $labels = array(
+        'name'                  => 'Events',
+        'singular_name'         => 'Event',
+        'menu_name'             => 'Events',
+        'name_admin_bar'        => 'Event',
+        'archives'              => 'Archivio Events',
+        'attributes'            => 'Attributi Event',
+        'parent_item_colon'     => 'Event genitore:',
+        'all_items'             => 'Tutti gli Events',
+        'add_new_item'          => 'Aggiungi nuovo Event',
+        'add_new'               => 'Aggiungi nuovo',
+        'new_item'              => 'Nuovo Event',
+        'edit_item'             => 'Modifica Event',
+        'update_item'           => 'Aggiorna Event',
+        'view_item'             => 'Visualizza Event',
+        'view_items'            => 'Visualizza Events',
+        'search_items'          => 'Cerca Event',
+        'not_found'             => 'Nessun event trovato',
+        'not_found_in_trash'    => 'Nessun event nel cestino',
+        'featured_image'        => 'Immagine in evidenza',
+        'set_featured_image'    => 'Imposta immagine in evidenza',
+        'remove_featured_image' => 'Rimuovi immagine in evidenza',
+        'use_featured_image'    => 'Usa come immagine in evidenza',
+        'insert_into_item'      => 'Inserisci in event',
+        'uploaded_to_this_item' => 'Caricato in questo event',
+        'items_list'            => 'Lista events',
+        'items_list_navigation' => 'Navigazione lista events',
+        'filter_items_list'     => 'Filtra lista events',
+    );
+
+    $args = array(
+        'label'                 => 'Event',
+        'description'           => 'Custom Post Type per gestire gli eventi',
+        'labels'                => $labels,
+        'supports'              => array('title', 'editor', 'thumbnail'),
+        'hierarchical'          => false,
+        'public'                => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'menu_position'         => 24,
+        'menu_icon'             => 'dashicons-calendar',
+        'show_in_admin_bar'     => true,
+        'show_in_nav_menus'     => true,
+        'can_export'            => true,
+        'has_archive'           => true,
+        'exclude_from_search'   => false,
+        'publicly_queryable'    => true,
+        'capability_type'       => 'post',
+        'show_in_rest'          => true,
+        'rest_base'             => 'events',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
+    );
+
+    register_post_type('event', $args);
+}
+add_action('init', 'register_event_post_type', 0);
+
+/**
+ * Register ACF Field Group for Event Custom Post Type
+ */
+if( function_exists('acf_add_local_field_group') ):
+
+    acf_add_local_field_group(array(
+        'key' => 'group_event_custom_fields',
+        'title' => 'Campi Event',
+        'fields' => array(
+            array(
+                'key' => 'field_event_place',
+                'label' => 'Place',
+                'name' => 'event_place',
+                'type' => 'post_object',
+                'instructions' => 'Seleziona il luogo dell\'evento',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'post_type' => array(
+                    0 => 'place',
+                ),
+                'taxonomy' => array(),
+                'allow_null' => 1,
+                'multiple' => 0,
+                'return_format' => 'object',
+                'ui' => 1,
+            ),
+            array(
+                'key' => 'field_event_date',
+                'label' => 'Date',
+                'name' => 'event_date',
+                'type' => 'date_time_picker',
+                'instructions' => 'Seleziona la data e l\'ora dell\'evento',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'display_format' => 'd/m/Y H:i',
+                'return_format' => 'Y-m-d H:i:s',
+                'first_day' => 1,
+            ),
+            array(
+                'key' => 'field_event_fb_link',
+                'label' => 'Link Facebook Event',
+                'name' => 'event_fb_link',
+                'type' => 'url',
+                'instructions' => 'Inserisci il link all\'evento Facebook',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'https://facebook.com/events/...',
+            ),
+            array(
+                'key' => 'field_event_rankings_json',
+                'label' => 'Rankings JSON',
+                'name' => 'event_rankings_json',
+                'type' => 'textarea',
+                'instructions' => 'Inserisci i ranking in formato JSON',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '{"player1": 1, "player2": 2, ...}',
+                'maxlength' => '',
+                'rows' => 10,
+                'new_lines' => '',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'event',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+
+endif;
+
+/**
+ * Add custom columns to Event admin list
+ */
+function event_custom_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['title'] = $columns['title'];
+    $new_columns['event_place'] = 'Place';
+    $new_columns['event_date'] = 'Date';
+    $new_columns['event_fb_link'] = 'Facebook Event';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_event_posts_columns', 'event_custom_columns');
+
+/**
+ * Populate custom columns data for Event
+ */
+function event_custom_columns_data($column, $post_id) {
+    switch ($column) {
+        case 'event_place':
+            $event_place = get_field('field_event_place', $post_id);
+            if ($event_place) {
+                echo esc_html($event_place->post_title);
+            } else {
+                echo '-';
+            }
+            break;
+        case 'event_date':
+            $event_date = get_field('field_event_date', $post_id);
+            if ($event_date) {
+                echo esc_html(date_i18n('d/m/Y H:i', strtotime($event_date)));
+            } else {
+                echo '-';
+            }
+            break;
+        case 'event_fb_link':
+            $event_fb_link = get_field('field_event_fb_link', $post_id);
+            if ($event_fb_link) {
+                echo '<a href="' . esc_url($event_fb_link) . '" target="_blank" rel="noopener">Link Facebook</a>';
+            } else {
+                echo '-';
+            }
+            break;
+    }
+}
+add_action('manage_event_posts_custom_column', 'event_custom_columns_data', 10, 2);
+
+/**
+ * Make custom columns sortable for Event
+ */
+function event_sortable_columns($columns) {
+    $columns['event_date'] = 'event_date';
+    return $columns;
+}
+add_filter('manage_edit-event_sortable_columns', 'event_sortable_columns');
+
+/**
+ * Handle custom column sorting for Event
+ */
+function event_column_orderby($query) {
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    $orderby = $query->get('orderby');
+
+    if ('event_date' == $orderby) {
+        $query->set('meta_key', 'field_event_date');
+        $query->set('orderby', 'meta_value');
+    }
+}
+add_action('pre_get_posts', 'event_column_orderby');
+
+/**
+ * Hide Event menu from non-administrators
+ */
+function hide_event_menu_from_players() {
+    if (!current_user_can('administrator')) {
+        remove_menu_page('edit.php?post_type=event');
+    }
+}
+add_action('admin_menu', 'hide_event_menu_from_players', 999);
+
+/**
+ * Restrict access to Event admin pages for non-administrators
+ */
+function restrict_event_admin_access() {
+    // Check if we're on event post type admin pages
+    if (!current_user_can('administrator')) {
+        $current_screen = get_current_screen();
+        
+        if ($current_screen && $current_screen->post_type === 'event') {
+            wp_redirect(admin_url());
+            exit;
+        }
+    }
+}
+add_action('admin_init', 'restrict_event_admin_access', 999);
+
+/**
+ * Hide Event from admin bar for non-administrators
+ */
+function hide_event_admin_bar($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        $wp_admin_bar->remove_node('new-event');
+    }
+}
+add_action('admin_bar_menu', 'hide_event_admin_bar', 999);
+
+/**
+ * Remove Event from "New" menu in admin bar for non-admins
+ */
+function remove_event_from_new_menu($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
+            if (strpos($id, 'new-event') !== false) {
+                $wp_admin_bar->remove_node($id);
+            }
+        }
+    }
+}
+add_action('admin_bar_menu', 'remove_event_from_new_menu', 999);
