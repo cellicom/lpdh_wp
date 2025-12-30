@@ -909,3 +909,115 @@ function remove_place_from_new_menu($wp_admin_bar) {
     }
 }
 add_action('admin_bar_menu', 'remove_place_from_new_menu', 999);
+
+/**
+ * Register Custom Post Type "FAQ"
+ * Solo gli amministratori possono gestire questo CPT
+ */
+function register_faq_post_type() {
+    $labels = array(
+        'name'                  => 'FAQ',
+        'singular_name'         => 'FAQ',
+        'menu_name'             => 'FAQ',
+        'name_admin_bar'        => 'FAQ',
+        'archives'              => 'Archivio FAQ',
+        'attributes'            => 'Attributi FAQ',
+        'parent_item_colon'     => 'FAQ genitore:',
+        'all_items'             => 'Tutte le FAQ',
+        'add_new_item'          => 'Aggiungi nuova FAQ',
+        'add_new'               => 'Aggiungi nuovo',
+        'new_item'              => 'Nuova FAQ',
+        'edit_item'             => 'Modifica FAQ',
+        'update_item'           => 'Aggiorna FAQ',
+        'view_item'             => 'Visualizza FAQ',
+        'view_items'            => 'Visualizza FAQ',
+        'search_items'          => 'Cerca FAQ',
+        'not_found'             => 'Nessuna FAQ trovata',
+        'not_found_in_trash'    => 'Nessuna FAQ nel cestino',
+        'featured_image'        => 'Immagine in evidenza',
+        'set_featured_image'    => 'Imposta immagine in evidenza',
+        'remove_featured_image' => 'Rimuovi immagine in evidenza',
+        'use_featured_image'    => 'Usa come immagine in evidenza',
+        'insert_into_item'      => 'Inserisci in FAQ',
+        'uploaded_to_this_item' => 'Caricato in questa FAQ',
+        'items_list'            => 'Lista FAQ',
+        'items_list_navigation' => 'Navigazione lista FAQ',
+        'filter_items_list'     => 'Filtra lista FAQ',
+    );
+
+    $args = array(
+        'label'                 => 'FAQ',
+        'description'           => 'Custom Post Type per gestire le FAQ',
+        'labels'                => $labels,
+        'supports'              => array('title', 'editor'),
+        'hierarchical'          => false,
+        'public'                => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'menu_position'         => 23,
+        'menu_icon'             => 'dashicons-format-list-numbered',
+        'show_in_admin_bar'     => true,
+        'show_in_nav_menus'     => true,
+        'can_export'            => true,
+        'has_archive'           => true,
+        'exclude_from_search'   => false,
+        'publicly_queryable'    => true,
+        'capability_type'       => 'post',
+        'show_in_rest'          => true,
+        'rest_base'             => 'faq',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
+    );
+
+    register_post_type('faq', $args);
+}
+add_action('init', 'register_faq_post_type', 0);
+
+/**
+ * Hide FAQ menu from non-administrators
+ */
+function hide_faq_menu_from_players() {
+    if (!current_user_can('administrator')) {
+        remove_menu_page('edit.php?post_type=faq');
+    }
+}
+add_action('admin_menu', 'hide_faq_menu_from_players', 999);
+
+/**
+ * Restrict access to FAQ admin pages for non-administrators
+ */
+function restrict_faq_admin_access() {
+    // Check if we're on faq post type admin pages
+    if (!current_user_can('administrator')) {
+        $current_screen = get_current_screen();
+        
+        if ($current_screen && $current_screen->post_type === 'faq') {
+            wp_redirect(admin_url());
+            exit;
+        }
+    }
+}
+add_action('admin_init', 'restrict_faq_admin_access', 999);
+
+/**
+ * Hide FAQ from admin bar for non-administrators
+ */
+function hide_faq_admin_bar($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        $wp_admin_bar->remove_node('new-faq');
+    }
+}
+add_action('admin_bar_menu', 'hide_faq_admin_bar', 999);
+
+/**
+ * Remove FAQ from "New" menu in admin bar for non-admins
+ */
+function remove_faq_from_new_menu($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
+            if (strpos($id, 'new-faq') !== false) {
+                $wp_admin_bar->remove_node($id);
+            }
+        }
+    }
+}
+add_action('admin_bar_menu', 'remove_faq_from_new_menu', 999);
