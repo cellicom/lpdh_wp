@@ -313,6 +313,9 @@ function restrict_admin_menu_for_players() {
         remove_menu_page('separator-theme');
         remove_menu_page('separator-custom');
         remove_menu_page('separator-last');
+        
+        // Banned Card CPT
+        remove_menu_page('edit.php?post_type=banned_card');
     }
 }
 add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
@@ -378,3 +381,192 @@ function redirect_players_from_restricted_pages() {
     }
 }
 add_action('admin_init', 'redirect_players_from_restricted_pages');
+
+/**
+ * Register Custom Post Type "Banned Card"
+ * Solo gli amministratori possono gestire questo CPT
+ */
+function register_banned_card_post_type() {
+    $labels = array(
+        'name'                  => 'Banned Cards',
+        'singular_name'         => 'Banned Card',
+        'menu_name'             => 'Banned Cards',
+        'name_admin_bar'        => 'Banned Card',
+        'archives'              => 'Archivio Banned Cards',
+        'attributes'            => 'Attributi Banned Card',
+        'parent_item_colon'     => 'Banned Card genitore:',
+        'all_items'             => 'Tutti i Banned Cards',
+        'add_new_item'          => 'Aggiungi nuovo Banned Card',
+        'add_new'               => 'Aggiungi nuovo',
+        'new_item'              => 'Nuovo Banned Card',
+        'edit_item'             => 'Modifica Banned Card',
+        'update_item'           => 'Aggiorna Banned Card',
+        'view_item'             => 'Visualizza Banned Card',
+        'view_items'            => 'Visualizza Banned Cards',
+        'search_items'          => 'Cerca Banned Card',
+        'not_found'             => 'Nessun banned card trovato',
+        'not_found_in_trash'    => 'Nessun banned card nel cestino',
+        'featured_image'        => 'Immagine in evidenza',
+        'set_featured_image'    => 'Imposta immagine in evidenza',
+        'remove_featured_image' => 'Rimuovi immagine in evidenza',
+        'use_featured_image'    => 'Usa come immagine in evidenza',
+        'insert_into_item'      => 'Inserisci in banned card',
+        'uploaded_to_this_item' => 'Caricato in questo banned card',
+        'items_list'            => 'Lista banned cards',
+        'items_list_navigation' => 'Navigazione lista banned cards',
+        'filter_items_list'     => 'Filtra lista banned cards',
+    );
+
+    $args = array(
+        'label'                 => 'Banned Card',
+        'description'           => 'Custom Post Type per gestire le carte bannate',
+        'labels'                => $labels,
+        'supports'              => array('title', 'editor', 'thumbnail'),
+        'hierarchical'          => false,
+        'public'                => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'menu_position'         => 21,
+        'menu_icon'             => 'dashicons-dismiss',
+        'show_in_admin_bar'     => true,
+        'show_in_nav_menus'     => true,
+        'can_export'            => true,
+        'has_archive'           => true,
+        'exclude_from_search'   => false,
+        'publicly_queryable'    => true,
+        'capability_type'       => 'post',
+        'show_in_rest'          => true,
+        'rest_base'             => 'banned_cards',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
+    );
+
+    register_post_type('banned_card', $args);
+}
+add_action('init', 'register_banned_card_post_type', 0);
+
+/**
+ * Register ACF Field Group for Banned Card Custom Post Type
+ */
+if( function_exists('acf_add_local_field_group') ):
+
+    acf_add_local_field_group(array(
+        'key' => 'group_banned_card_custom_fields',
+        'title' => 'Campi Banned Card',
+        'fields' => array(
+            array(
+                'key' => 'field_scryfall_link',
+                'label' => 'Scryfall Link',
+                'name' => 'scryfall_link',
+                'type' => 'url',
+                'instructions' => 'Inserisci il link alla carta su Scryfall',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'https://scryfall.com/card/...',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'banned_card',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+
+endif;
+
+/**
+ * Add custom columns to Banned Card admin list
+ */
+function banned_card_custom_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['title'] = $columns['title'];
+    $new_columns['scryfall_link'] = 'Scryfall Link';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_banned_card_posts_columns', 'banned_card_custom_columns');
+
+/**
+ * Populate custom columns data for Banned Card
+ */
+function banned_card_custom_columns_data($column, $post_id) {
+    switch ($column) {
+        case 'scryfall_link':
+            $scryfall_link = get_field('field_scryfall_link', $post_id);
+            if ($scryfall_link) {
+                echo '<a href="' . esc_url($scryfall_link) . '" target="_blank" rel="noopener">Link Scryfall</a>';
+            } else {
+                echo '-';
+            }
+            break;
+    }
+}
+add_action('manage_banned_card_posts_custom_column', 'banned_card_custom_columns_data', 10, 2);
+
+/**
+ * Hide Banned Card menu from non-administrators
+ */
+function hide_banned_card_menu_from_players() {
+    if (!current_user_can('administrator')) {
+        remove_menu_page('edit.php?post_type=banned_card');
+    }
+}
+add_action('admin_menu', 'hide_banned_card_menu_from_players', 999);
+
+/**
+ * Restrict access to Banned Card admin pages for non-administrators
+ */
+function restrict_banned_card_admin_access() {
+    // Check if we're on banned_card post type admin pages
+    if (!current_user_can('administrator')) {
+        $current_screen = get_current_screen();
+        
+        if ($current_screen && $current_screen->post_type === 'banned_card') {
+            wp_redirect(admin_url());
+            exit;
+        }
+    }
+}
+add_action('admin_init', 'restrict_banned_card_admin_access', 999);
+
+/**
+ * Hide Banned Card from admin bar for non-administrators
+ */
+function hide_banned_card_admin_bar($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        $wp_admin_bar->remove_node('new-banned_card');
+    }
+}
+add_action('admin_bar_menu', 'hide_banned_card_admin_bar', 999);
+
+/**
+ * Remove Banned Card from "New" menu in admin bar for non-admins
+ */
+function remove_banned_card_from_new_menu($wp_admin_bar) {
+    if (!current_user_can('administrator')) {
+        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
+            if (strpos($id, 'new-banned_card') !== false) {
+                $wp_admin_bar->remove_node($id);
+            }
+        }
+    }
+}
+add_action('admin_bar_menu', 'remove_banned_card_from_new_menu', 999);
