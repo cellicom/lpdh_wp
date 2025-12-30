@@ -640,6 +640,29 @@ function hide_deck_views_for_players() {
 add_action('admin_head', 'hide_deck_views_for_players', 20);
 
 /**
+ * Redirect players from dashboard to deck list
+ * Administrators see normal dashboard (admin has priority)
+ */
+function redirect_players_to_deck_list() {
+    // If user is admin, do nothing (admin sees normal dashboard)
+    if (current_user_can('administrator')) {
+        return;
+    }
+    
+    // If user is player, redirect from dashboard to deck list
+    if (current_user_can('player')) {
+        $current_screen = get_current_screen();
+        
+        // Only redirect if on dashboard main page
+        if ($current_screen && $current_screen->id === 'dashboard') {
+            wp_redirect(admin_url('edit.php?post_type=deck'));
+            exit;
+        }
+    }
+}
+add_action('current_screen', 'redirect_players_to_deck_list');
+
+/**
  * Register Custom Post Type "Place"
  * Solo gli amministratori possono gestire questo CPT
  */
