@@ -570,3 +570,71 @@ function remove_banned_card_from_new_menu($wp_admin_bar) {
     }
 }
 add_action('admin_bar_menu', 'remove_banned_card_from_new_menu', 999);
+
+/**
+ * Remove "All" and "Published" tabs for players in deck list
+ * Only show "Mine" tab for players, administrators see everything
+ */
+function restrict_deck_list_tabs_for_players($views) {
+    // Only apply to deck post type
+    global $post_type;
+    if ($post_type !== 'deck') {
+        return $views;
+    }
+    
+    // If user is admin, show all tabs
+    if (current_user_can('administrator')) {
+        return $views;
+    }
+    
+    // If user is player, only show "Mine" tab
+    if (current_user_can('player')) {
+        // Keep only the "Mine" tab
+        $mine_count = isset($views['mine']) ? $views['mine'] : '';
+        return array('mine' => $mine_count);
+    }
+    
+    return $views;
+}
+add_filter('views_edit-deck', 'restrict_deck_list_tabs_for_players');
+
+/**
+ * Hide "All" and "Published" views via inline styles for players in deck list
+ * This ensures tabs are hidden even if the filter doesn't catch them
+ */
+function hide_deck_views_for_players() {
+    // Only apply to deck post type in admin
+    if (!is_admin()) {
+        return;
+    }
+    
+    global $post_type, $pagenow;
+    
+    // Only on deck list page
+    if ($pagenow !== 'edit.php' || $post_type !== 'deck') {
+        return;
+    }
+    
+    // If user is admin, do nothing
+    if (current_user_can('administrator')) {
+        return;
+    }
+    
+    // If user is player, hide all views except "Mine"
+    ?>
+    <style>
+        .subsubsub li:not(.mine) {
+            display: none !important;
+        }
+        .subsubsub li.mine a {
+            color: #000;
+            font-weight: 600;
+        }
+        .subsubsub li.mine::before {
+            content: "Visualizzazione: ";
+            color: #646970;
+        }
+    </style>
+    <?php
+}
+add_action('admin_head', 'hide_deck_views_for_players', 20);
