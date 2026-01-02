@@ -1966,6 +1966,94 @@ function register_custom_admin_color_schemes() {
 add_action('admin_init', 'register_custom_admin_color_schemes');
 
 /**
+ * Remove default WordPress admin color schemes
+ * Only keep "Default" and our custom color schemes
+ */
+function remove_default_admin_color_schemes() {
+    global $_wp_admin_css_colors;
+    
+    // Remove non-default color schemes - do this after all schemes are registered
+    $schemes_to_remove = array('light', 'modern', 'blue', 'coffee', 'ectoplasm', 'midnight', 'ocean', 'sunrise');
+    
+    foreach ($schemes_to_remove as $scheme) {
+        if (isset($_wp_admin_css_colors[$scheme])) {
+            unset($_wp_admin_css_colors[$scheme]);
+        }
+    }
+}
+// Run this later to ensure all schemes are registered
+add_action('admin_init', 'remove_default_admin_color_schemes', 999);
+
+/**
+ * Filter the color schemes shown in the admin color picker
+ * Only show our custom schemes and the default one
+ */
+function filter_admin_color_schemes($to_return) {
+    global $_wp_admin_css_colors;
+    
+    // Get our custom scheme keys
+    $our_schemes = array('mono-verde', 'mono-blu', 'mono-rosso', 'mono-bianco', 'mono-nero');
+    
+    // Build an array with only our schemes plus default
+    $allowed_schemes = array();
+    
+    // Always include default
+    if (isset($_wp_admin_css_colors['fresh'])) {
+        $allowed_schemes['fresh'] = $_wp_admin_css_colors['fresh'];
+    }
+    
+    // Add only our custom schemes
+    foreach ($our_schemes as $scheme_key) {
+        if (isset($_wp_admin_css_colors[$scheme_key])) {
+            $allowed_schemes[$scheme_key] = $_wp_admin_css_colors[$scheme_key];
+        }
+    }
+    
+    // Replace the global with our filtered list
+    $_wp_admin_css_colors = $allowed_schemes;
+    
+    return $allowed_schemes;
+}
+add_filter('admin_color_scheme_picker', 'filter_admin_color_schemes');
+
+/**
+ * Hide unwanted color schemes with JavaScript as additional fallback
+ */
+function hide_unwanted_color_schemes_js() {
+    // Only apply on user profile page
+    if (!current_user_can('edit_users')) {
+        return;
+    }
+    
+    global $pagenow;
+    if ($pagenow !== 'profile.php' && $pagenow !== 'user-edit.php') {
+        return;
+    }
+    
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide unwanted color schemes by their index (0-based)
+        // Default is at the beginning, then unwanted schemes
+        var colorWraps = document.querySelectorAll('.user-admin-color-wrap');
+        var schemeNames = ['Light', 'Modern', 'Blue', 'Coffee', 'Ectoplasm', 'Midnight', 'Ocean', 'Sunrise'];
+        
+        colorWraps.forEach(function(wrap) {
+            var label = wrap.querySelector('label');
+            if (label) {
+                var text = label.textContent.trim();
+                if (schemeNames.indexOf(text) !== -1) {
+                    wrap.style.display = 'none';
+                }
+            }
+        });
+    });
+    </script>
+    <?php
+}
+add_action('admin_footer', 'hide_unwanted_color_schemes_js');
+
+/**
  * Create admin color scheme CSS files for all custom color schemes
  * This ensures the CSS files are generated if they don't exist
  */
