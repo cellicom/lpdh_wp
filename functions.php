@@ -1191,7 +1191,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Posizione',
                         'name' => 'pos',
                         'type' => 'number',
-                        'instructions' => 'Posizione in classifica',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1212,7 +1211,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Giocatore',
                         'name' => 'player_id',
                         'type' => 'user',
-                        'instructions' => 'Seleziona il giocatore registrato',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1232,7 +1230,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Nome',
                         'name' => 'name',
                         'type' => 'text',
-                        'instructions' => 'Nome del giocatore (opzionale se selezionato player_id)',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1249,7 +1246,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Punti',
                         'name' => 'points',
                         'type' => 'number',
-                        'instructions' => 'Punti totali',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1270,7 +1266,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Vittorie',
                         'name' => 'win',
                         'type' => 'number',
-                        'instructions' => 'Numero di vittorie',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1291,7 +1286,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Pareggi',
                         'name' => 'draw',
                         'type' => 'number',
-                        'instructions' => 'Numero di pareggi',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1312,7 +1306,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Sconfitte',
                         'name' => 'lose',
                         'type' => 'number',
-                        'instructions' => 'Numero di sconfitte',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1333,7 +1326,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Via%',
                         'name' => 'via',
                         'type' => 'text',
-                        'instructions' => 'Percentuale di win via',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -1350,7 +1342,6 @@ if( function_exists('acf_add_local_field_group') ):
                         'label' => 'Deck',
                         'name' => 'deck',
                         'type' => 'text',
-                        'instructions' => 'Nome del deck utilizzato',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
