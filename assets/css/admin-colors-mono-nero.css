@@ -1,0 +1,137 @@
+/* Mono Nero Admin Color Scheme */
+/* Based on rgb(166,159,157) = #a69f9d and rgb(21,11,0) = #150b00 */
+
+:root {
+    --mono-nero-base: #150b00;
+    --mono-nero-light: #a69f9d;
+    --mono-nero-darker: #0a0500;
+    --mono-nero-text: #ffffff;
+}
+
+/* Admin Bar */
+#wpadminbar {
+    background-color: #150b00 !important;
+}
+
+#wpadminbar .ab-top-menu > li > a,
+#wpadminbar .ab-top-menu > li > .ab-item {
+    color: #ffffff !important;
+}
+
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > a:focus,
+#wpadminbar .ab-top-menu > li:hover > .ab-item {
+    background-color: #0a0500 !important;
+}
+
+/* Admin Menu */
+#adminmenu,
+#adminmenu .wp-submenu,
+#adminmenuback,
+#adminmenuwrap {
+    background-color: #150b00 !important;
+}
+
+#adminmenu li.menu-top {
+    border-bottom: 1px solid #a69f9d20 !important;
+}
+
+#adminmenu .wp-menu-name {
+    color: #ffffff !important;
+}
+
+#adminmenu .wp-menu-image img {
+    filter: brightness(0) invert(1);
+}
+
+/* Menu hover and active states */
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    background-color: #0a0500 !important;
+}
+
+#adminmenu li.current a.menu-top,
+#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu li.wp-has-current-submenu a.menu-top,
+#adminmenu li.current .menu-item-top {
+    background-color: #a69f9d !important;
+}
+
+#adminmenu li.current .menu-item-top .menu-item-icon {
+    background-color: #a69f9d !important;
+}
+
+/* Submenu */
+#adminmenu .wp-submenu {
+    border-left: 3px solid #a69f9d !important;
+}
+
+#adminmenu .wp-submenu a {
+    color: #ffffff99 !important;
+}
+
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu a:focus {
+    color: #ffffff !important;
+}
+
+/* Buttons */
+.button-primary {
+    background-color: #150b00 !important;
+    border-color: #0a0500 !important;
+    color: #ffffff !important;
+}
+
+.button-primary:hover,
+.button-primary:focus {
+    background-color: #0a0500 !important;
+    border-color: #150b00 !important;
+}
+
+/* Misc admin elements */
+.wp-color-result {
+    background-color: #150b00 !important;
+    border-color: #0a0500 !important;
+}
+
+.wp-color-result-text {
+    color: #ffffff !important;
+}
+
+/* Login page accents */
+.login #login .button-primary {
+    background-color: #150b00 !important;
+    border-color: #150b00 !important;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #150b00 !important;
+    box-shadow: 0 0 0 1px #150b00 !important;
+}
+
+/* Links */
+#adminmenu a:hover,
+#adminmenu a:focus {
+    color: #a69f9d !important;
+}
+
+/* Tabs */
+.wp-ui-text-icon {
+    color: #150b00 !important;
+}
+
+/* Notifications */
+.update-plugins {
+    background-color: #a69f9d !important;
+    color: #0a0500 !important;
+}
+
+/* Quicktags */
+.quicktags-toolbar {
+    background-color: #150b00 !important;
+}
+

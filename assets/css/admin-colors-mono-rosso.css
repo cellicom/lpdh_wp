@@ -1,0 +1,137 @@
+/* Nono Rosso Admin Color Scheme */
+/* Based on rgb(235,159,130) = #eb9f82 and rgb(211,32,42) = #d3202a */
+
+:root {
+    --nono-rosso-base: #d3202a;
+    --nono-rosso-light: #eb9f82;
+    --nono-rosso-darker: #9e181f;
+    --nono-rosso-text: #ffffff;
+}
+
+/* Admin Bar */
+#wpadminbar {
+    background-color: #d3202a !important;
+}
+
+#wpadminbar .ab-top-menu > li > a,
+#wpadminbar .ab-top-menu > li > .ab-item {
+    color: #ffffff !important;
+}
+
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > a:focus,
+#wpadminbar .ab-top-menu > li:hover > .ab-item {
+    background-color: #9e181f !important;
+}
+
+/* Admin Menu */
+#adminmenu,
+#adminmenu .wp-submenu,
+#adminmenuback,
+#adminmenuwrap {
+    background-color: #d3202a !important;
+}
+
+#adminmenu li.menu-top {
+    border-bottom: 1px solid #eb9f8220 !important;
+}
+
+#adminmenu .wp-menu-name {
+    color: #ffffff !important;
+}
+
+#adminmenu .wp-menu-image img {
+    filter: brightness(0) invert(1);
+}
+
+/* Menu hover and active states */
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    background-color: #9e181f !important;
+}
+
+#adminmenu li.current a.menu-top,
+#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu li.wp-has-current-submenu a.menu-top,
+#adminmenu li.current .menu-item-top {
+    background-color: #eb9f82 !important;
+}
+
+#adminmenu li.current .menu-item-top .menu-item-icon {
+    background-color: #eb9f82 !important;
+}
+
+/* Submenu */
+#adminmenu .wp-submenu {
+    border-left: 3px solid #eb9f82 !important;
+}
+
+#adminmenu .wp-submenu a {
+    color: #ffffff99 !important;
+}
+
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu a:focus {
+    color: #ffffff !important;
+}
+
+/* Buttons */
+.button-primary {
+    background-color: #d3202a !important;
+    border-color: #9e181f !important;
+    color: #ffffff !important;
+}
+
+.button-primary:hover,
+.button-primary:focus {
+    background-color: #9e181f !important;
+    border-color: #d3202a !important;
+}
+
+/* Misc admin elements */
+.wp-color-result {
+    background-color: #d3202a !important;
+    border-color: #9e181f !important;
+}
+
+.wp-color-result-text {
+    color: #ffffff !important;
+}
+
+/* Login page accents */
+.login #login .button-primary {
+    background-color: #d3202a !important;
+    border-color: #d3202a !important;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #d3202a !important;
+    box-shadow: 0 0 0 1px #d3202a !important;
+}
+
+/* Links */
+#adminmenu a:hover,
+#adminmenu a:focus {
+    color: #eb9f82 !important;
+}
+
+/* Tabs */
+.wp-ui-text-icon {
+    color: #d3202a !important;
+}
+
+/* Notifications */
+.update-plugins {
+    background-color: #eb9f82 !important;
+    color: #9e181f !important;
+}
+
+/* Quicktags */
+.quicktags-toolbar {
+    background-color: #d3202a !important;
+}
+
