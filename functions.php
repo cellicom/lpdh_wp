@@ -1512,39 +1512,44 @@ add_action('admin_bar_menu', 'remove_event_from_new_menu', 999);
 
 /**
  * Auto-fill ranking name field when player is selected
+ * Uses AJAX to get the user's display_name from WordPress
  */
 function event_ranking_auto_fill_name() {
     ?>
     <script type="text/javascript">
     (function($) {
+        // AJAX function to get user display_name
+        function getUserDisplayName(userId, $nameField) {
+            if (!userId) return;
+            
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'get_user_display_name',
+                    user_id: userId,
+                    nonce: '<?php echo wp_create_nonce('get_user_display_name_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success && response.data) {
+                        $nameField.val(response.data.display_name);
+                    }
+                }
+            });
+        }
+        
         // Select2 selection handler
         $(document).on('select2:select', 'select[name*="field_ranking_player_id"]', function(e) {
             var $row = $(this).closest('tr.acf-row');
             var $nameField = $row.find('input[name*="field_ranking_name"]');
+            var userId = $(this).val();
             
-            if (e.params.data && e.params.data.text) {
-                $nameField.val(e.params.data.text);
+            if (userId) {
+                getUserDisplayName(userId, $nameField);
             }
         });
         
-        // Select2 close fallback
-        $(document).on('select2:close', 'select[name*="field_ranking_player_id"]', function() {
-            var $select = $(this);
-            var $row = $select.closest('tr.acf-row');
-            var $nameField = $row.find('input[name*="field_ranking_name"]');
-            var userId = $select.val();
-            
-            if (userId && !$nameField.val()) {
-                var $rendered = $select.parent().find('.select2-selection__rendered');
-                var text = $rendered.text().trim();
-                
-                if (text && text !== '- Selezionare -' && text !== 'Selezionare') {
-                    $nameField.val(text);
-                }
-            }
-        });
-        
-        // ACF user action
+        // ACF user action - this handles the AJAX loaded user data
         if (typeof acf !== 'undefined') {
             acf.add_action('user', function(userData, $el) {
                 if (userData && userData.display_name) {
@@ -1588,9 +1593,6 @@ function event_ranking_auto_fill_name() {
                 
                 // Clear existing rows
                 $tbody.find('.acf-row').remove();
-                
-                // Find a template row to clone
-                var $templateRow = null;
                 
                 // Get field keys from the repeater
                 var fieldKeys = {
@@ -1767,6 +1769,27 @@ function event_ranking_auto_fill_name() {
     <?php
 }
 add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
+
+/**
+ * AJAX handler to get user's display_name
+ */
+function ajax_get_user_display_name() {
+    check_ajax_referer('get_user_display_name_nonce', 'nonce');
+    
+    $user_id = intval($_POST['user_id']);
+    
+    if ($user_id) {
+        $user = get_userdata($user_id);
+        if ($user) {
+            wp_send_json_success(array(
+                'display_name' => $user->display_name
+            ));
+        }
+    }
+    
+    wp_send_json_error();
+}
+add_action('wp_ajax_get_user_display_name', 'ajax_get_user_display_name');
 
 /**
  * Add "Populate Rankings" and "Clear Rankings" buttons after rankings_json field
