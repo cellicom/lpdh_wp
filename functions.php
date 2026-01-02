@@ -1162,10 +1162,207 @@ if( function_exists('acf_add_local_field_group') ):
                     'id' => '',
                 ),
                 'default_value' => '',
-                'placeholder' => '{"player1": 1, "player2": 2, ...}',
+                'placeholder' => '[{"pos":1,"via":"40,7%","win":2,"deck":"Gut + Inspiring Leader","draw":0,"lose":1,"name":"Angelo Mar.","points":6},...]',
                 'maxlength' => '',
                 'rows' => 10,
                 'new_lines' => '',
+            ),
+            array(
+                'key' => 'field_event_ranking',
+                'label' => 'Ranking',
+                'name' => 'event_ranking',
+                'type' => 'repeater',
+                'instructions' => 'Aggiungi i ranking dei giocatori. Compila i campi manualmente o importali dal JSON sopra.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'collapsed' => 'field_ranking_pos',
+                'min' => 0,
+                'max' => 0,
+                'layout' => 'table',
+                'button_label' => 'Aggiungi Ranking',
+                'sub_fields' => array(
+                    array(
+                        'key' => 'field_ranking_pos',
+                        'label' => 'Posizione',
+                        'name' => 'pos',
+                        'type' => 'number',
+                        'instructions' => 'Posizione in classifica',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => 1,
+                        'max' => '',
+                        'step' => 1,
+                    ),
+                    array(
+                        'key' => 'field_ranking_player_id',
+                        'label' => 'Giocatore',
+                        'name' => 'player_id',
+                        'type' => 'user',
+                        'instructions' => 'Seleziona il giocatore registrato',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '25',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'role' => array(
+                            0 => 'player',
+                        ),
+                        'allow_null' => 1,
+                        'multiple' => 0,
+                        'return_format' => 'array',
+                    ),
+                    array(
+                        'key' => 'field_ranking_name',
+                        'label' => 'Nome',
+                        'name' => 'name',
+                        'type' => 'text',
+                        'instructions' => 'Nome del giocatore (opzionale se selezionato player_id)',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '20',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => 'Nome giocatore',
+                        'maxlength' => '',
+                    ),
+                    array(
+                        'key' => 'field_ranking_points',
+                        'label' => 'Punti',
+                        'name' => 'points',
+                        'type' => 'number',
+                        'instructions' => 'Punti totali',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => 0,
+                        'max' => '',
+                        'step' => 1,
+                    ),
+                    array(
+                        'key' => 'field_ranking_win',
+                        'label' => 'Vittorie',
+                        'name' => 'win',
+                        'type' => 'number',
+                        'instructions' => 'Numero di vittorie',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => 0,
+                        'max' => '',
+                        'step' => 1,
+                    ),
+                    array(
+                        'key' => 'field_ranking_draw',
+                        'label' => 'Pareggi',
+                        'name' => 'draw',
+                        'type' => 'number',
+                        'instructions' => 'Numero di pareggi',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => 0,
+                        'max' => '',
+                        'step' => 1,
+                    ),
+                    array(
+                        'key' => 'field_ranking_lose',
+                        'label' => 'Sconfitte',
+                        'name' => 'lose',
+                        'type' => 'number',
+                        'instructions' => 'Numero di sconfitte',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => 0,
+                        'max' => '',
+                        'step' => 1,
+                    ),
+                    array(
+                        'key' => 'field_ranking_via',
+                        'label' => 'Via%',
+                        'name' => 'via',
+                        'type' => 'text',
+                        'instructions' => 'Percentuale di win via',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '10',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => '40,7%',
+                        'maxlength' => '',
+                    ),
+                    array(
+                        'key' => 'field_ranking_deck',
+                        'label' => 'Deck',
+                        'name' => 'deck',
+                        'type' => 'text',
+                        'instructions' => 'Nome del deck utilizzato',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                        'placeholder' => 'Nome del deck',
+                        'maxlength' => '',
+                    ),
+                ),
             ),
         ),
         'location' => array(
@@ -1312,3 +1509,321 @@ function remove_event_from_new_menu($wp_admin_bar) {
     }
 }
 add_action('admin_bar_menu', 'remove_event_from_new_menu', 999);
+
+/**
+ * Auto-fill ranking name field when player is selected
+ */
+function event_ranking_auto_fill_name() {
+    ?>
+    <script type="text/javascript">
+    (function($) {
+        // Select2 selection handler
+        $(document).on('select2:select', 'select[name*="field_ranking_player_id"]', function(e) {
+            var $row = $(this).closest('tr.acf-row');
+            var $nameField = $row.find('input[name*="field_ranking_name"]');
+            
+            if (e.params.data && e.params.data.text) {
+                $nameField.val(e.params.data.text);
+            }
+        });
+        
+        // Select2 close fallback
+        $(document).on('select2:close', 'select[name*="field_ranking_player_id"]', function() {
+            var $select = $(this);
+            var $row = $select.closest('tr.acf-row');
+            var $nameField = $row.find('input[name*="field_ranking_name"]');
+            var userId = $select.val();
+            
+            if (userId && !$nameField.val()) {
+                var $rendered = $select.parent().find('.select2-selection__rendered');
+                var text = $rendered.text().trim();
+                
+                if (text && text !== '- Selezionare -' && text !== 'Selezionare') {
+                    $nameField.val(text);
+                }
+            }
+        });
+        
+        // ACF user action
+        if (typeof acf !== 'undefined') {
+            acf.add_action('user', function(userData, $el) {
+                if (userData && userData.display_name) {
+                    var $row = $el.closest('tr.acf-row');
+                    var $nameField = $row.find('input[name*="field_ranking_name"]');
+                    $nameField.val(userData.display_name);
+                }
+            });
+        }
+        
+        // Populate Rankings button functionality
+        $(document).on('click', '#populate-rankings-btn', function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var $jsonField = $('#acf-field_event_rankings_json');
+            var jsonData = $jsonField.val();
+            
+            if (!jsonData) {
+                console.warn('Nessun dato JSON presente nel campo Rankings JSON');
+                return;
+            }
+            
+            try {
+                var rankings = JSON.parse(jsonData);
+                
+                if (!Array.isArray(rankings) || rankings.length === 0) {
+                    console.warn('Il formato JSON non è valido o è vuoto');
+                    return;
+                }
+                
+                // Find the ranking repeater
+                var $repeater = $('[data-name="event_ranking"]');
+                
+                if (!$repeater.length) {
+                    console.warn('Repeater rankings non trovato');
+                    return;
+                }
+                
+                var $tbody = $repeater.find('tbody');
+                
+                // Clear existing rows
+                $tbody.find('.acf-row').remove();
+                
+                // Find a template row to clone
+                var $templateRow = null;
+                
+                // Get field keys from the repeater
+                var fieldKeys = {
+                    pos: 'field_ranking_pos',
+                    player_id: 'field_ranking_player_id',
+                    name: 'field_ranking_name',
+                    points: 'field_ranking_points',
+                    win: 'field_ranking_win',
+                    draw: 'field_ranking_draw',
+                    lose: 'field_ranking_lose',
+                    via: 'field_ranking_via',
+                    deck: 'field_ranking_deck'
+                };
+                
+                // Create new rows directly in DOM
+                rankings.forEach(function(ranking, index) {
+                    var rowId = 'row_' + Date.now() + '_' + index;
+                    
+                    // Find the row number
+                    var rowNum = index + 1;
+                    
+                    var $row = $('<tr class="acf-row" data-id="' + rowId + '"></tr>');
+                    
+                    // Handle column
+                    $row.append('<td class="acf-row-handle order ui-sortable-handle">' +
+                        '<a class="acf-icon -collapse small" href="#" data-event="collapse-row" title="Clicca per alternare"></a>' +
+                        '<span class="acf-row-number" title="Trascinare per riordinare">' + rowNum + '</span>' +
+                    '</td>');
+                    
+                    // Pos field
+                    var posValue = ranking.pos !== undefined ? ranking.pos : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-pos -collapsed-target" data-name="pos" data-type="number" data-key="' + fieldKeys.pos + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.pos + ']" value="' + posValue + '" min="1" step="1">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Player ID field (empty - user selects manually)
+                    $row.append('<td class="acf-field acf-field-user acf-field-ranking-player-id" data-name="player_id" data-type="user" data-key="' + fieldKeys.player_id + '">' +
+                        '<div class="acf-input">' +
+                            '<input type="hidden" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_id + ']">' +
+                            '<select id="acf-field_event_ranking-' + rowId + '-' + fieldKeys.player_id + '" ' +
+                                'class="select2-hidden-accessible" ' +
+                                'name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_id + ']" ' +
+                                'data-ui="1" data-multiple="0" data-placeholder="Selezionare" data-allow_null="1" ' +
+                                'data-nonce="" tabindex="-1" aria-hidden="true" data-ajax="1">' +
+                            '</select>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Name field
+                    var nameValue = ranking.name !== undefined ? ranking.name : '';
+                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-name" data-name="name" data-type="text" data-key="' + fieldKeys.name + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.name + ']" value="' + nameValue + '" placeholder="Nome giocatore">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Points field
+                    var pointsValue = ranking.points !== undefined ? ranking.points : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-points" data-name="points" data-type="number" data-key="' + fieldKeys.points + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.points + ']" value="' + pointsValue + '" min="0" step="1">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Win field
+                    var winValue = ranking.win !== undefined ? ranking.win : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-win" data-name="win" data-type="number" data-key="' + fieldKeys.win + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.win + ']" value="' + winValue + '" min="0" step="1">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Draw field
+                    var drawValue = ranking.draw !== undefined ? ranking.draw : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-draw" data-name="draw" data-type="number" data-key="' + fieldKeys.draw + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.draw + ']" value="' + drawValue + '" min="0" step="1">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Lose field
+                    var loseValue = ranking.lose !== undefined ? ranking.lose : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-lose" data-name="lose" data-type="number" data-key="' + fieldKeys.lose + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.lose + ']" value="' + loseValue + '" min="0" step="1">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Via field
+                    var viaValue = ranking.via !== undefined ? ranking.via : '';
+                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-via" data-name="via" data-type="text" data-key="' + fieldKeys.via + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.via + ']" value="' + viaValue + '" placeholder="%">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Deck field
+                    var deckValue = ranking.deck !== undefined ? ranking.deck : '';
+                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-deck" data-name="deck" data-type="text" data-key="' + fieldKeys.deck + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.deck + ']" value="' + deckValue + '" placeholder="Nome del deck">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+                    
+                    // Remove column
+                    $row.append('<td class="acf-row-handle remove">' +
+                        '<a class="acf-icon -plus small acf-js-tooltip hide-on-shift" href="#" data-event="add-row" title="Aggiungi riga"></a>' +
+                        '<a class="acf-icon -duplicate small acf-js-tooltip show-on-shift" href="#" data-event="duplicate-row" title="Duplicate row"></a>' +
+                        '<a class="acf-icon -minus small acf-js-tooltip" href="#" data-event="remove-row" title="Rimuovi riga"></a>' +
+                    '</td>');
+                    
+                    $tbody.append($row);
+                });
+                
+                // Initialize ACF on the new rows
+                acf.doAction('append', $tbody);
+                
+                // Update row numbers
+                $tbody.find('.acf-row-number').each(function(index) {
+                    $(this).text(index + 1);
+                });
+                
+            } catch (err) {
+                console.error('Errore nel parsing JSON:', err);
+            }
+        });
+        
+    })(jQuery);
+    </script>
+    <?php
+}
+add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
+
+/**
+ * Add "Populate Rankings" button after rankings_json field
+ */
+function add_populate_rankings_button() {
+    ?>
+    <script type="text/javascript">
+    (function($) {
+        // Add button after rankings_json field
+        function addButton() {
+            var $jsonField = $('#acf-field_event_rankings_json');
+            
+            if ($jsonField.length && !$('#populate-rankings-btn').length) {
+                $jsonField.after('<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px;">Populate Rankings</button>');
+            }
+        }
+        
+        // Run on load and after ACF ready
+        $(document).ready(function() {
+            setTimeout(addButton, 100);
+        });
+        
+        acf.add_action('ready', addButton);
+    })(jQuery);
+    </script>
+    <?php
+}
+add_action('acf/input/admin_head', 'add_populate_rankings_button');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Server-side approach - populate name from player_id on save
+ * This ensures the name is always filled even if JS fails
+ */
+function event_populate_ranking_name_on_save($post_id) {
+    // Only process events
+    if (get_post_type($post_id) !== 'event') {
+        return $post_id;
+    }
+    
+    // Only run for front-end saves or AJAX (to avoid infinite loop)
+    if (wp_doing_ajax() || !is_admin()) {
+        return $post_id;
+    }
+    
+    // Get all ranking rows from post meta
+    $rankings = get_post_meta($post_id, 'event_ranking', true);
+    
+    if (is_array($rankings) && !empty($rankings)) {
+        $updated = false;
+        
+        foreach ($rankings as $index => &$ranking) {
+            // If player_id is set but name is empty, populate it
+            if (!empty($ranking['player_id']) && empty($ranking['name'])) {
+                $user_data = get_userdata($ranking['player_id']);
+                if ($user_data) {
+                    $ranking['name'] = $user_data->display_name;
+                    $updated = true;
+                }
+            }
+        }
+        
+        // Update the meta with the modified data
+        if ($updated) {
+            update_post_meta($post_id, 'event_ranking', $rankings);
+        }
+    }
+    
+    return $post_id;
+}
+add_action('acf/save_post', 'event_populate_ranking_name_on_save', 20);
