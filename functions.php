@@ -1736,6 +1736,32 @@ function event_ranking_auto_fill_name() {
             }
         });
         
+        // Clear Rankings button functionality
+        $(document).on('click', '#clear-rankings-btn', function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var $repeater = $('[data-name="event_ranking"]');
+            
+            if (!$repeater.length) {
+                console.warn('Repeater rankings non trovato');
+                return;
+            }
+            
+            var $tbody = $repeater.find('tbody');
+            
+            // Remove all existing rows
+            $tbody.find('.acf-row').remove();
+            
+            // Trigger ACF update for the repeater
+            acf.doAction('remove', $tbody);
+            
+            // Update row numbers
+            $tbody.find('.acf-row-number').each(function(index) {
+                $(this).text(index + 1);
+            });
+        });
+        
     })(jQuery);
     </script>
     <?php
@@ -1743,27 +1769,30 @@ function event_ranking_auto_fill_name() {
 add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
 
 /**
- * Add "Populate Rankings" button after rankings_json field
+ * Add "Populate Rankings" and "Clear Rankings" buttons after rankings_json field
  */
 function add_populate_rankings_button() {
     ?>
     <script type="text/javascript">
     (function($) {
-        // Add button after rankings_json field
-        function addButton() {
+        // Add buttons after rankings_json field
+        function addButtons() {
             var $jsonField = $('#acf-field_event_rankings_json');
             
             if ($jsonField.length && !$('#populate-rankings-btn').length) {
-                $jsonField.after('<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px;">Populate Rankings</button>');
+                $jsonField.after(
+                    '<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px; margin-right:5px;">Populate Rankings</button>' +
+                    '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>'
+                );
             }
         }
         
         // Run on load and after ACF ready
         $(document).ready(function() {
-            setTimeout(addButton, 100);
+            setTimeout(addButtons, 100);
         });
         
-        acf.add_action('ready', addButton);
+        acf.add_action('ready', addButtons);
     })(jQuery);
     </script>
     <?php
