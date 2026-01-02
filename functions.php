@@ -1188,13 +1188,13 @@ if( function_exists('acf_add_local_field_group') ):
                 'sub_fields' => array(
                     array(
                         'key' => 'field_ranking_pos',
-                        'label' => 'Posizione',
+                        'label' => 'Pos.',
                         'name' => 'pos',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
-                            'width' => '10',
+                            'width' => '8',
                             'class' => '',
                             'id' => '',
                         ),
@@ -1208,13 +1208,13 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_player_id',
-                        'label' => 'Giocatore',
+                        'label' => 'Player',
                         'name' => 'player_id',
                         'type' => 'user',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
-                            'width' => '25',
+                            'width' => '20',
                             'class' => '',
                             'id' => '',
                         ),
@@ -1227,7 +1227,7 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_name',
-                        'label' => 'Nome',
+                        'label' => 'Name',
                         'name' => 'name',
                         'type' => 'text',
                         'required' => 0,
@@ -1243,7 +1243,7 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_points',
-                        'label' => 'Punti',
+                        'label' => 'Pt.',
                         'name' => 'points',
                         'type' => 'number',
                         'required' => 0,
@@ -1263,13 +1263,13 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_win',
-                        'label' => 'Vittorie',
+                        'label' => 'Wins',
                         'name' => 'win',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
-                            'width' => '10',
+                            'width' => '8',
                             'class' => '',
                             'id' => '',
                         ),
@@ -1283,13 +1283,13 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_draw',
-                        'label' => 'Pareggi',
+                        'label' => 'Draws',
                         'name' => 'draw',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
-                            'width' => '10',
+                            'width' => '8',
                             'class' => '',
                             'id' => '',
                         ),
@@ -1303,13 +1303,13 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                     array(
                         'key' => 'field_ranking_lose',
-                        'label' => 'Sconfitte',
+                        'label' => 'Loses',
                         'name' => 'lose',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
-                            'width' => '10',
+                            'width' => '8',
                             'class' => '',
                             'id' => '',
                         ),
@@ -1334,7 +1334,7 @@ if( function_exists('acf_add_local_field_group') ):
                             'id' => '',
                         ),
                         'default_value' => '',
-                        'placeholder' => '40,7%',
+                        'placeholder' => '%',
                         'maxlength' => '',
                     ),
                     array(
@@ -1350,7 +1350,7 @@ if( function_exists('acf_add_local_field_group') ):
                             'id' => '',
                         ),
                         'default_value' => '',
-                        'placeholder' => 'Nome del deck',
+                        'placeholder' => 'Deck name',
                         'maxlength' => '',
                     ),
                 ),
@@ -1870,3 +1870,163 @@ function event_populate_ranking_name_on_save($post_id) {
     return $post_id;
 }
 add_action('acf/save_post', 'event_populate_ranking_name_on_save', 20);
+
+/**
+ * AJAX handler to get user's decks
+ * Returns decks as JSON for populating the player_deck select field
+ */
+function ajax_get_user_decks() {
+    check_ajax_referer('get_user_decks_nonce', 'nonce');
+    
+    $user_id = intval($_POST['user_id']);
+    
+    if ($user_id) {
+        $decks = get_posts(array(
+            'post_type' => 'deck',
+            'author' => $user_id,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC',
+        ));
+        
+        if ($decks) {
+            $deck_data = array();
+            foreach ($decks as $deck) {
+                $deck_data[] = array(
+                    'ID' => $deck->ID,
+                    'post_title' => $deck->post_title,
+                );
+            }
+            wp_send_json_success($deck_data);
+        } else {
+            wp_send_json_success(array());
+        }
+    } else {
+        wp_send_json_error(array('message' => 'User ID non valido'));
+    }
+}
+add_action('wp_ajax_get_user_decks', 'ajax_get_user_decks');
+
+/**
+ * Add AJAX handler for populating player_deck based on player_id selection
+ * This script adds a temporary select dropdown with search below the deck field
+ */
+function event_ranking_populate_player_deck() {
+    ?>
+    <script type="text/javascript">
+    (function($) {
+        // Function to add temporary select with search below deck field
+        function addDeckSelector($row, playerId) {
+            // Remove any existing deck selector
+            $row.find('.temp-deck-selector').remove();
+            
+            // Find the deck field
+            var $deckField = $row.find('.acf-field-ranking-deck');
+            
+            if (!$deckField.length || !playerId) {
+                return;
+            }
+            
+            // Create temporary select element with Select2
+            var $selector = $(
+                '<div class="temp-deck-selector" style="margin-top:8px;">' +
+                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Seleziona deck:</label>' +
+                    '<select class="deck-quick-select" style="width:100%;">' +
+                        '<option value="">-- Cerca deck --</option>' +
+                    '</select>' +
+                '</div>'
+            );
+            
+            // Find the deck input and populate when selection changes
+            var $deckInput = $deckField.find('input[type="text"]');
+            
+            $selector.find('select').on('change', function() {
+                var selectedDeckId = $(this).val();
+                var selectedDeckTitle = $(this).find('option:selected').text();
+                
+                if (selectedDeckId) {
+                    $deckInput.val(selectedDeckTitle);
+                }
+            });
+            
+            // Add selector after the deck field
+            $deckField.append($selector);
+            
+            // Initialize Select2 on the new select
+            $selector.find('select').select2({
+                placeholder: '-- Cerca deck --',
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Fetch decks for this player
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'get_user_decks',
+                    user_id: playerId,
+                    nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
+                },
+                beforeSend: function() {
+                    $selector.find('select').html('<option value="">Caricamento...</option>');
+                },
+                success: function(response) {
+                    var $select = $selector.find('select');
+                    $select.html('<option value="">-- Cerca deck --</option>');
+                    
+                    if (response.success && response.data && response.data.length > 0) {
+                        $.each(response.data, function(index, deck) {
+                            $select.append(
+                                $('<option></option>')
+                                    .val(deck.ID)
+                                    .text(deck.post_title)
+                            );
+                        });
+                    } else {
+                        $select.html('<option value="">Nessun deck disponibile</option>');
+                    }
+                    
+                    // Refresh Select2
+                    $select.trigger('change.select2');
+                },
+                error: function() {
+                    $selector.find('select').html('<option value="">Errore caricamento</option>');
+                    $selector.find('select').trigger('change.select2');
+                }
+            });
+        }
+        
+        // Handler for player_id selection in ranking repeater
+        $(document).on('change', 'select[name*="field_ranking_player_id"]', function(e) {
+            var $row = $(this).closest('tr.acf-row');
+            var playerId = $(this).val();
+            
+            // Update the deck selector for this row
+            addDeckSelector($row, playerId);
+        });
+        
+        // Handle ACF's ready/append events
+        acf.add_action('ready append', function($el) {
+            // Find all player_id selects in ranking rows
+            $el.find('select[name*="field_ranking_player_id"]').each(function() {
+                var $row = $(this).closest('tr.acf-row');
+                var playerId = $(this).val();
+                
+                if (playerId) {
+                    addDeckSelector($row, playerId);
+                }
+            });
+        });
+        
+        // Clean up deck selector when row is removed
+        $(document).on('acf/remove', '.acf-row', function() {
+            $(this).find('.temp-deck-selector').remove();
+        });
+        
+    })(jQuery);
+    </script>
+    <?php
+}
+add_action('acf/input/admin_footer', 'event_ranking_populate_player_deck');
