@@ -1,0 +1,155 @@
+/* Beleren Bold */
+@font-face {
+  font-family: "Beleren Bold";
+  src:
+          url("../fonts/Beleren2016-Bold.woff") format("woff"),
+          url("../fonts/Beleren2016-Bold.ttf") format("truetype"),
+          url("../fonts/Beleren2016-Bold.svg#Beleren2016-Bold") format("svg");
+  font-style: normal;
+  font-weight: bold;
+  text-rendering: optimizeLegibility;
+}
+
+/* Beleren SmallCaps Bold */
+@font-face {
+  font-family: "Beleren SmallCaps Bold";
+  src:
+          url("../fonts/Beleren2016SmallCaps-Bold.woff") format("woff"),
+          url("../fonts/Beleren2016SmallCaps-Bold.ttf") format("truetype"),
+          url("../fonts/Beleren2016SmallCaps-Bold.svg#Beleren2016SmallCaps-Bold") format("svg");
+  font-style: normal;
+  font-weight: bold;
+  text-rendering: optimizeLegibility;
+}
+
+/* Beleren SmallCaps BoldItalic */
+@font-face {
+  font-family: "Beleren SmallCaps BoldItalic";
+  src:
+          url("../fonts/Beleren2016SmallCaps-BoldItalic.woff") format("woff"),
+          url("../fonts/Beleren2016SmallCaps-BoldItalic.ttf") format("truetype"),
+          url("../fonts/Beleren2016SmallCaps-BoldItalic.svg#Beleren2016SmallCaps-BoldItalic") format("svg");
+  font-style: italic;
+  font-weight: bold;
+  text-rendering: optimizeLegibility;
+}
+
+/* Plantin */
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-Semibold.eot');
+  src: url('../fonts/PlantinMTPro-Semibold.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-Semibold.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-Semibold.woff') format('woff'),
+  url('../fonts/PlantinMTPro-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-Italic.eot');
+  src: url('../fonts/PlantinMTPro-Italic.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-Italic.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-Italic.woff') format('woff'),
+  url('../fonts/PlantinMTPro-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-BoldItalic.eot');
+  src: url('../fonts/PlantinMTPro-BoldItalic.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-BoldItalic.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-BoldItalic.woff') format('woff'),
+  url('../fonts/PlantinMTPro-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-LightItalic.eot');
+  src: url('../fonts/PlantinMTPro-LightItalic.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-LightItalic.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-LightItalic.woff') format('woff'),
+  url('../fonts/PlantinMTPro-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-SemiboldIt.eot');
+  src: url('../fonts/PlantinMTPro-SemiboldIt.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-SemiboldIt.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-SemiboldIt.woff') format('woff'),
+  url('../fonts/PlantinMTPro-SemiboldIt.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-Regular.eot');
+  src: url('../fonts/PlantinMTPro-Regular.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-Regular.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-Regular.woff') format('woff'),
+  url('../fonts/PlantinMTPro-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro Bold Cond';
+  src: url('../fonts/PlantinMTPro-BoldCondensed.eot');
+  src: url('../fonts/PlantinMTPro-BoldCondensed.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-BoldCondensed.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-BoldCondensed.woff') format('woff'),
+  url('../fonts/PlantinMTPro-BoldCondensed.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-Bold.eot');
+  src: url('../fonts/PlantinMTPro-Bold.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-Bold.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-Bold.woff') format('woff'),
+  url('../fonts/PlantinMTPro-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plantin MT Pro';
+  src: url('../fonts/PlantinMTPro-Light.eot');
+  src: url('../fonts/PlantinMTPro-Light.eot?#iefix') format('embedded-opentype'),
+  url('../fonts/PlantinMTPro-Light.woff2') format('woff2'),
+  url('../fonts/PlantinMTPro-Light.woff') format('woff'),
+  url('../fonts/PlantinMTPro-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+.f-beleren {
+  font-family: 'Beleren Bold', serif;
+}
+
+.f-plantin {
+    font-family: 'Plantin MT Pro', serif;
+}
+
+
+

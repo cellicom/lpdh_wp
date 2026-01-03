@@ -14,9 +14,13 @@ defined('ABSPATH') || exit;
 add_action('wp_enqueue_scripts', 'bootscore_child_enqueue_styles');
 function bootscore_child_enqueue_styles() {
 
-  // Compiled main.css
+  // Fonts CSS
+  $modified_fontsCss = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/css/fonts.css'));
+  wp_enqueue_style('fonts', get_stylesheet_directory_uri() . '/assets/css/fonts.css', array(), $modified_fontsCss);
+
+  // Compiled main.css (depends on parent-style and fonts to load after font definitions)
   $modified_bootscoreChildCss = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/css/main.css'));
-  wp_enqueue_style('main', get_stylesheet_directory_uri() . '/assets/css/main.css', array('parent-style'), $modified_bootscoreChildCss);
+  wp_enqueue_style('main', get_stylesheet_directory_uri() . '/assets/css/main.css', array('parent-style', 'fonts'), $modified_bootscoreChildCss);
 
   // style.css
   wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
