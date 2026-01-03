@@ -71,7 +71,7 @@ function register_deck_post_type() {
         'show_ui'               => true,
         'show_in_menu'          => true,
         'menu_position'         => 20,
-        'menu_icon'             => 'dashicons-playlist-video',
+        'menu_icon'             => 'dashicons-category',
         'show_in_admin_bar'     => true,
         'show_in_nav_menus'     => true,
         'can_export'            => true,
@@ -955,7 +955,7 @@ function register_faq_post_type() {
         'show_ui'               => true,
         'show_in_menu'          => true,
         'menu_position'         => 23,
-        'menu_icon'             => 'dashicons-format-list-numbered',
+        'menu_icon'             => 'dashicons-editor-help',
         'show_in_admin_bar'     => true,
         'show_in_nav_menus'     => true,
         'can_export'            => true,
@@ -2393,3 +2393,59 @@ function event_ranking_populate_player_deck() {
     <?php
 }
 add_action('acf/input/admin_footer', 'event_ranking_populate_player_deck');
+
+/**
+ * AJAX handler for real-time username availability check
+ */
+function ajax_check_username_availability() {
+    check_ajax_referer('bootscore_register_nonce', 'nonce');
+    
+    $user_login = isset($_POST['user_login']) ? sanitize_user($_POST['user_login']) : '';
+    
+    if ( empty($user_login) ) {
+        wp_send_json_error(array('message' => __('Il nome utente è richiesto.', 'bootscore')));
+    }
+    
+    if ( !validate_username($user_login) ) {
+        wp_send_json_error(array('message' => __('Il nome utente non è valido.', 'bootscore')));
+    }
+    
+    if ( username_exists($user_login) ) {
+        wp_send_json_error(array('message' => __('Questo nome utente è già in uso.', 'bootscore')));
+    }
+    
+    // Check if username is reserved
+    $reserved_usernames = array('admin', 'administrator', 'root', 'superuser', 'guest', 'test', 'testing');
+    if ( in_array(strtolower($user_login), $reserved_usernames) ) {
+        wp_send_json_error(array('message' => __('Questo nome utente è riservato.', 'bootscore')));
+    }
+    
+    wp_send_json_success(array('available' => true, 'message' => __('Il nome utente è disponibile!', 'bootscore')));
+}
+add_action('wp_ajax_bootscore_check_username', 'ajax_check_username_availability');
+add_action('wp_ajax_nopriv_bootscore_check_username', 'ajax_check_username_availability');
+
+/**
+ * AJAX handler for real-time email availability check
+ */
+function ajax_check_email_availability() {
+    check_ajax_referer('bootscore_register_nonce', 'nonce');
+    
+    $user_email = isset($_POST['user_email']) ? sanitize_email($_POST['user_email']) : '';
+    
+    if ( empty($user_email) ) {
+        wp_send_json_error(array('message' => __('L\'indirizzo email è richiesto.', 'bootscore')));
+    }
+    
+    if ( !is_email($user_email) ) {
+        wp_send_json_error(array('message' => __('L\'indirizzo email non è valido.', 'bootscore')));
+    }
+    
+    if ( email_exists($user_email) ) {
+        wp_send_json_error(array('message' => __('Questo indirizzo email è già registrato.', 'bootscore')));
+    }
+    
+    wp_send_json_success(array('available' => true, 'message' => __('L\'indirizzo email è disponibile!', 'bootscore')));
+}
+add_action('wp_ajax_bootscore_check_email', 'ajax_check_email_availability');
+add_action('wp_ajax_nopriv_bootscore_check_email', 'ajax_check_email_availability');
