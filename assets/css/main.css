@@ -14,3 +14,7 @@
  * {
   font-family: 'Plantin MT Pro', serif;
 }
+
+.navbar-brand img {
+  max-width: 250px;
+}
