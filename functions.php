@@ -2116,158 +2116,6 @@ function ensure_admin_color_css_exists() {
 }
 
 /**
- * Generate CSS content for an admin color scheme
- */
-function generate_admin_color_css($scheme_name, $colors) {
-    $base = $colors['base'];
-    $light = $colors['light'];
-    $darker = $colors['darker'];
-    $text = $colors['text'];
-    
-    $css_content = <<<CSS
-/* {$scheme_name} Admin Color Scheme */
-/* Based on {$base} and {$light} */
-
-:root {
-    --{$scheme_name}-base: {$base};
-    --{$scheme_name}-light: {$light};
-    --{$scheme_name}-darker: {$darker};
-    --{$scheme_name}-text: {$text};
-}
-
-/* Admin Bar */
-#wpadminbar {
-    background-color: {$base} !important;
-}
-
-#wpadminbar .ab-top-menu > li > a,
-#wpadminbar .ab-top-menu > li > .ab-item {
-    color: {$text} !important;
-}
-
-#wpadminbar .ab-top-menu > li.hover > .ab-item,
-#wpadminbar .ab-top-menu > li > a:focus,
-#wpadminbar .ab-top-menu > li:hover > .ab-item {
-    background-color: {$darker} !important;
-}
-
-/* Admin Menu */
-#adminmenu,
-#adminmenu .wp-submenu,
-#adminmenuback,
-#adminmenuwrap {
-    background-color: {$base} !important;
-}
-
-#adminmenu li.menu-top {
-    border-bottom: 1px solid {$light}20 !important;
-}
-
-#adminmenu .wp-menu-name {
-    color: {$text} !important;
-}
-
-#adminmenu .wp-menu-image img {
-    filter: brightness(0) invert(1);
-}
-
-/* Menu hover and active states */
-#adminmenu li.menu-top:hover,
-#adminmenu li.opensub > a.menu-top,
-#adminmenu li > a.menu-top:focus {
-    background-color: {$darker} !important;
-}
-
-#adminmenu li.current a.menu-top,
-#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
-#adminmenu li.wp-has-current-submenu a.menu-top,
-#adminmenu li.current .menu-item-top {
-    background-color: {$light} !important;
-}
-
-#adminmenu li.current .menu-item-top .menu-item-icon {
-    background-color: {$light} !important;
-}
-
-/* Submenu */
-#adminmenu .wp-submenu {
-    border-left: 3px solid {$light} !important;
-}
-
-#adminmenu .wp-submenu a {
-    color: {$text}99 !important;
-}
-
-#adminmenu .wp-submenu a:hover,
-#adminmenu .wp-submenu a:focus {
-    color: {$text} !important;
-}
-
-/* Buttons */
-.button-primary {
-    background-color: {$base} !important;
-    border-color: {$darker} !important;
-    color: {$text} !important;
-}
-
-.button-primary:hover,
-.button-primary:focus {
-    background-color: {$darker} !important;
-    border-color: {$base} !important;
-}
-
-/* Misc admin elements */
-.wp-color-result {
-    background-color: {$base} !important;
-    border-color: {$darker} !important;
-}
-
-.wp-color-result-text {
-    color: {$text} !important;
-}
-
-/* Login page accents */
-.login #login .button-primary {
-    background-color: {$base} !important;
-    border-color: {$base} !important;
-}
-
-/* Focus states */
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: {$base} !important;
-    box-shadow: 0 0 0 1px {$base} !important;
-}
-
-/* Links */
-#adminmenu a:hover,
-#adminmenu a:focus {
-    color: {$light} !important;
-}
-
-/* Tabs */
-.wp-ui-text-icon {
-    color: {$base} !important;
-}
-
-/* Notifications */
-.update-plugins {
-    background-color: {$light} !important;
-    color: {$darker} !important;
-}
-
-/* Quicktags */
-.quicktags-toolbar {
-    background-color: {$base} !important;
-}
-CSS;
-    
-    return $css_content;
-}
-add_action('admin_init', 'ensure_admin_color_css_exists', 5);
-
-/**
  * Also ensure CSS files are created on theme activation
  */
 function custom_admin_colors_on_theme_activation() {
@@ -2453,3 +2301,199 @@ function ajax_check_email_availability() {
 }
 add_action('wp_ajax_bootscore_check_email', 'ajax_check_email_availability');
 add_action('wp_ajax_nopriv_bootscore_check_email', 'ajax_check_email_availability');
+
+
+function existTemplate($slug): bool
+{
+    $located = locate_template('template-parts/' . $slug . '-loop.php');
+
+    return ! empty($located);
+}
+
+function getTitleFromAcfBox($box, $id)
+{
+    if (! empty($box['titolo'])) {
+        $cta = $box['titolo'];
+    } else {
+        $cta = $box['acf_fc_layout'] . $id;
+    }
+
+    return $cta;
+}
+
+function getUrlHashtagFromAcfBox($box, $id, $hash = '')
+{
+    if (!empty($box['titolo'])) {
+        $url = $hash . sanitize_title_for_query(strtolower($box['titolo']) . $id);
+    } else {
+        $url = null;
+    }
+
+    return $url;
+}
+
+function og_printFileImg($icon, $color = null)
+{
+    ?>
+    <svg class="icon"
+        <?php if (! empty($color)) { ?>
+            style="fill: <?php echo $color; ?>;"
+        <?php } ?>
+    >
+        <use xlink:href="<?php getBootstrapIcon($icon); ?>"></use>
+    </svg>
+    <?php
+}
+
+
+/**
+ * Generate CSS content for an admin color scheme
+ */
+add_action('admin_init', 'ensure_admin_color_css_exists', 5);
+function generate_admin_color_css($scheme_name, $colors) {
+    $base = $colors['base'];
+    $light = $colors['light'];
+    $darker = $colors['darker'];
+    $text = $colors['text'];
+    
+    $css_content = <<<CSS
+/* {$scheme_name} Admin Color Scheme */
+/* Based on {$base} and {$light} */
+
+:root {
+    --{$scheme_name}-base: {$base};
+    --{$scheme_name}-light: {$light};
+    --{$scheme_name}-darker: {$darker};
+    --{$scheme_name}-text: {$text};
+}
+
+/* Admin Bar */
+#wpadminbar {
+    background-color: {$base} !important;
+}
+
+#wpadminbar .ab-top-menu > li > a,
+#wpadminbar .ab-top-menu > li > .ab-item {
+    color: {$text} !important;
+}
+
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > a:focus,
+#wpadminbar .ab-top-menu > li:hover > .ab-item {
+    background-color: {$darker} !important;
+}
+
+/* Admin Menu */
+#adminmenu,
+#adminmenu .wp-submenu,
+#adminmenuback,
+#adminmenuwrap {
+    background-color: {$base} !important;
+}
+
+#adminmenu li.menu-top {
+    border-bottom: 1px solid {$light}20 !important;
+}
+
+#adminmenu .wp-menu-name {
+    color: {$text} !important;
+}
+
+#adminmenu .wp-menu-image img {
+    filter: brightness(0) invert(1);
+}
+
+/* Menu hover and active states */
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    background-color: {$darker} !important;
+}
+
+#adminmenu li.current a.menu-top,
+#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu li.wp-has-current-submenu a.menu-top,
+#adminmenu li.current .menu-item-top {
+    background-color: {$light} !important;
+}
+
+#adminmenu li.current .menu-item-top .menu-item-icon {
+    background-color: {$light} !important;
+}
+
+/* Submenu */
+#adminmenu .wp-submenu {
+    border-left: 3px solid {$light} !important;
+}
+
+#adminmenu .wp-submenu a {
+    color: {$text}99 !important;
+}
+
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu a:focus {
+    color: {$text} !important;
+}
+
+/* Buttons */
+.button-primary {
+    background-color: {$base} !important;
+    border-color: {$darker} !important;
+    color: {$text} !important;
+}
+
+.button-primary:hover,
+.button-primary:focus {
+    background-color: {$darker} !important;
+    border-color: {$base} !important;
+}
+
+/* Misc admin elements */
+.wp-color-result {
+    background-color: {$base} !important;
+    border-color: {$darker} !important;
+}
+
+.wp-color-result-text {
+    color: {$text} !important;
+}
+
+/* Login page accents */
+.login #login .button-primary {
+    background-color: {$base} !important;
+    border-color: {$base} !important;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: {$base} !important;
+    box-shadow: 0 0 0 1px {$base} !important;
+}
+
+/* Links */
+#adminmenu a:hover,
+#adminmenu a:focus {
+    color: {$light} !important;
+}
+
+/* Tabs */
+.wp-ui-text-icon {
+    color: {$base} !important;
+}
+
+/* Notifications */
+.update-plugins {
+    background-color: {$light} !important;
+    color: {$darker} !important;
+}
+
+/* Quicktags */
+.quicktags-toolbar {
+    background-color: {$base} !important;
+}
+CSS;
+    
+    return $css_content;
+}
