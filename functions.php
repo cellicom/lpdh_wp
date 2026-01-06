@@ -28,7 +28,7 @@ function bootscore_child_enqueue_styles() {
   // custom.js
   // Get modification time. Enqueue file with modification date to prevent browser from loading cached scripts when file content changes. 
   $modificated_CustomJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/custom.js'));
-  wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), $modificated_CustomJS, false, true);
+  wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), $modificated_CustomJS, false);
 }
 
 /**
@@ -2645,3 +2645,13 @@ CSS;
     
     return $css_content;
 }
+
+/**
+ * Imposta il numero di post per pagina nell'archivio Eventi
+ */
+function bootscore_child_event_posts_per_page( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'event' ) ) {
+        $query->set( 'posts_per_page', 12 );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_event_posts_per_page' );
