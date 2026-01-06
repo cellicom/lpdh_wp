@@ -2478,6 +2478,7 @@ function getUrlHashtagFromAcfBox($box, $id, $hash = '')
     return $url;
 }
 
+/* do not remove
 function og_printFileImg($icon, $color = null)
 {
     ?>
@@ -2490,6 +2491,7 @@ function og_printFileImg($icon, $color = null)
     </svg>
     <?php
 }
+ */
 
 
 /**
