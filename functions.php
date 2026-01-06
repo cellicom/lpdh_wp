@@ -32,6 +32,168 @@ function bootscore_child_enqueue_styles() {
 }
 
 /**
+ * Registrazione Custom Post Type: Leaderboard
+ */
+function register_leaderboard_cpt() {
+    $labels = array(
+        'name'                  => _x( 'Leaderboards', 'Post Type General Name', 'text_domain' ),
+        'singular_name'         => _x( 'Leaderboard', 'Post Type Singular Name', 'text_domain' ),
+        'menu_name'             => __( 'Leaderboards', 'text_domain' ),
+        'name_admin_bar'        => __( 'Leaderboard', 'text_domain' ),
+        'archives'              => __( 'Archivio Leaderboard', 'text_domain' ),
+        'attributes'            => __( 'Attributi Leaderboard', 'text_domain' ),
+        'parent_item_colon'     => __( 'Leaderboard Genitore:', 'text_domain' ),
+        'all_items'             => __( 'Tutte le Leaderboards', 'text_domain' ),
+        'add_new_item'          => __( 'Aggiungi Nuova Leaderboard', 'text_domain' ),
+        'add_new'               => __( 'Aggiungi Nuova', 'text_domain' ),
+        'new_item'              => __( 'Nuova Leaderboard', 'text_domain' ),
+        'edit_item'             => __( 'Modifica Leaderboard', 'text_domain' ),
+        'update_item'           => __( 'Aggiorna Leaderboard', 'text_domain' ),
+        'view_item'             => __( 'Visualizza Leaderboard', 'text_domain' ),
+        'view_items'            => __( 'Visualizza Leaderboards', 'text_domain' ),
+        'search_items'          => __( 'Cerca Leaderboard', 'text_domain' ),
+        'not_found'             => __( 'Non trovata', 'text_domain' ),
+        'not_found_in_trash'    => __( 'Non trovata nel cestino', 'text_domain' ),
+    );
+
+    $args = array(
+        'label'                 => __( 'Leaderboard', 'text_domain' ),
+        'labels'                => $labels,
+        'supports'              => array( 'title' ), // Solo titolo come richiesto
+        'hierarchical'          => false,
+        'public'                => true,
+        'show_ui'               => true,
+        'show_in_menu'          => true,
+        'menu_position'         => 5,
+        'menu_icon'             => 'dashicons-editor-ol',
+        'show_in_admin_bar'     => true,
+        'show_in_nav_menus'     => true,
+        'can_export'            => true,
+        'has_archive'           => true,
+        'exclude_from_search'   => false,
+        'publicly_queryable'    => true,
+        // Impostazioni di sicurezza per limitare l'accesso
+        'capability_type'       => 'leaderboard',
+        'map_meta_cap'          => true,
+    );
+    register_post_type( 'leaderboard', $args );
+}
+add_action( 'init', 'register_leaderboard_cpt', 0 );
+
+/**
+ * Assegnazione delle capabilities 'leaderboard' solo all'Amministratore.
+ * Questo assicura che solo gli admin possano gestire questo CPT.
+ */
+function add_leaderboard_caps_to_admin() {
+    $role = get_role( 'administrator' );
+    
+    if ( $role ) {
+        $caps = array(
+            'edit_leaderboard',
+            'read_leaderboard',
+            'delete_leaderboard',
+            'edit_leaderboards',
+            'edit_others_leaderboards',
+            'publish_leaderboards',
+            'read_private_leaderboards',
+            'delete_leaderboards',
+            'delete_private_leaderboards',
+            'delete_published_leaderboards',
+            'delete_others_leaderboards',
+            'edit_private_leaderboards',
+            'edit_published_leaderboards',
+        );
+
+        foreach ( $caps as $cap ) {
+            if ( ! $role->has_cap( $cap ) ) {
+                $role->add_cap( $cap );
+            }
+        }
+    }
+}
+add_action( 'admin_init', 'add_leaderboard_caps_to_admin' );
+
+/**
+ * Registrazione campi ACF: Year e Rankings JSON
+ */
+if( function_exists('acf_add_local_field_group') ):
+
+    // Generiamo dinamicamente una lista di anni (es. da 5 anni fa a 1 anno nel futuro)
+    $years = array();
+    $current_year = intval( date('Y') );
+    for ( $i = $current_year - 5; $i <= $current_year + 1; $i++ ) {
+        $years[ $i ] = $i;
+    }
+
+    acf_add_local_field_group(array(
+        'key' => 'group_leaderboard_fields',
+        'title' => 'Dettagli Leaderboard',
+        'fields' => array(
+            array(
+                'key' => 'field_leaderboard_year',
+                'label' => 'Year',
+                'name' => 'year',
+                'type' => 'select',
+                'instructions' => 'Seleziona l\'anno di riferimento.',
+                'required' => 1,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => $years,
+                'default_value' => $current_year,
+                'allow_null' => 0,
+                'multiple' => 0,
+                'ui' => 1,
+                'ajax' => 0,
+                'return_format' => 'value',
+                'placeholder' => '',
+            ),
+            array(
+                'key' => 'field_leaderboard_rankings_json',
+                'label' => 'Rankings JSON',
+                'name' => 'rankings_json',
+                'type' => 'textarea',
+                'instructions' => 'Inserisci qui i dati della classifica in formato JSON.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '100',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+                'maxlength' => '',
+                'rows' => 10,
+                'new_lines' => '', // Nessuna formattazione automatica per preservare il JSON
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'leaderboard',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+
+endif;
+
+
+/**
  * Register Custom Post Type "Deck"
  */
 function register_deck_post_type() {
@@ -1816,22 +1978,6 @@ function add_populate_rankings_button() {
     <?php
 }
 add_action('acf/input/admin_head', 'add_populate_rankings_button');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Server-side approach - populate name from player_id on save
