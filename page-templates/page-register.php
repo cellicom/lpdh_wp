@@ -10,6 +10,12 @@
 // Exit if accessed directly
 defined('ABSPATH') || exit;
 
+// Redirect logged in users to profile
+if (is_user_logged_in()) {
+    wp_redirect(admin_url('profile.php'));
+    exit;
+}
+
 /**
  * Send custom new user notification email
  * More reliable than default wp_new_user_notification
@@ -241,9 +247,15 @@ get_header(); ?>
                                         '<strong>' . esc_html($current_user->display_name) . '</strong>'
                                     ); 
                                     ?>
-                                    <a href="<?php echo esc_url(wp_logout_url(get_permalink())); ?>" class="alert-link">
-                                        <?php esc_html_e('Effettua il logout per registrarti con un altro account.', 'bootscore'); ?>
-                                    </a>
+                                    <div class="mt-2">
+                                        <a href="<?php echo esc_url(admin_url('profile.php')); ?>" class="alert-link me-3">
+                                            <?php esc_html_e('Vai al tuo profilo', 'bootscore'); ?>
+                                        </a>
+                                        <br>
+                                        <a href="<?php echo esc_url(wp_logout_url(get_permalink())); ?>" class="alert-link">
+                                            <?php esc_html_e('Effettua il logout per registrarti con un altro account.', 'bootscore'); ?>
+                                        </a>
+                                    </div>
                                 </div>
                             <?php elseif ( $register_success ?? false ) : ?>
                                 <div class="alert alert-success">
@@ -793,4 +805,3 @@ get_header(); ?>
 </script>
 
 <?php get_footer(); ?>
-
