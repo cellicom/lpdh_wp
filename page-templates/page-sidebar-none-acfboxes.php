@@ -26,7 +26,7 @@ get_header();
           <?php the_post(); ?>
           <?php do_action( 'bootscore_before_title', 'page-sidebar-none' ); ?>
           <?php if(!is_front_page()) {
-            the_title('<h1 class="entry-title ' . esc_attr(apply_filters('bootscore/class/entry/title', '', 'page-sidebar-none')) . '">', '</h1>');
+            the_title('<h1 class="entry-title text-center ' . esc_attr(apply_filters('bootscore/class/entry/title', '', 'page-sidebar-none')) . '">', '</h1>');
           }
           ?>
           <?php do_action( 'bootscore_after_title', 'page-sidebar-none' ); ?>

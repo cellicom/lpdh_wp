@@ -5,6 +5,13 @@ if(!empty($acf)) {
         ?>
         <div class="acf-section-box acf-section-box-<?php echo $sectionkey; ?>">
         <?php
+            if (!empty($section['title'])) {
+                ?>
+                <div class="row d-flex justify-center">
+                    <h1 class="acf-section-box-title mb-3 text-center"><?php echo esc_html($section['title']); ?></h1>
+                </div>
+                <?php
+            }
             if (!empty($section['box'])) {
                 foreach ($section['box'] as $key => $box) {
                     $box['acf_index'] = $key;
