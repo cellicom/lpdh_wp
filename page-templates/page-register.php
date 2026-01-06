@@ -792,6 +792,5 @@ get_header(); ?>
 })(jQuery);
 </script>
 
-<?php get_sidebar(); ?>
 <?php get_footer(); ?>
 

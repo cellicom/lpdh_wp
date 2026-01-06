@@ -76,19 +76,25 @@ get_header(); ?>
                             <div class="card mb-4 border-0 shadow-sm overflow-hidden">
                                 <div class="row g-0">
                                     <div class="col-md-4">
-                                        <?php if ( has_post_thumbnail() ) : ?>
-                                            <div class="h-100">
-                                                <?php the_post_thumbnail('large', array('class' => 'img-fluid h-100 w-100 object-fit-cover', 'style' => 'min-height: 250px; object-fit: cover;')); ?>
-                                            </div>
-                                        <?php else : ?>
-                                            <div class="bg-light d-flex align-items-center justify-content-center h-100" style="min-height: 250px;">
-                                                <i class="fas fa-map-marker-alt fa-3x text-muted"></i>
-                                            </div>
-                                        <?php endif; ?>
+                                        <a href="<?php the_permalink(); ?>" class="d-block h-100 text-decoration-none">
+                                            <?php if ( has_post_thumbnail() ) : ?>
+                                                <div class="h-100">
+                                                    <?php the_post_thumbnail('large', array('class' => 'img-fluid h-100 w-100 object-fit-cover', 'style' => 'min-height: 250px; object-fit: cover;')); ?>
+                                                </div>
+                                            <?php else : ?>
+                                                <div class="bg-light d-flex align-items-center justify-content-center h-100" style="min-height: 250px;">
+                                                    <i class="fas fa-map-marker-alt fa-3x text-muted"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </a>
                                     </div>
                                     <div class="col-md-8">
                                         <div class="card-body p-4">
-                                            <h3 class="card-title h4 mb-3"><?php the_title(); ?></h3>
+                                            <h3 class="card-title h4 mb-3">
+                                                <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark">
+                                                    <?php the_title(); ?>
+                                                </a>
+                                            </h3>
                                             
                                             <div class="card-text mb-4">
                                                 <?php the_content(); ?>
