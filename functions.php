@@ -311,6 +311,38 @@ if( function_exists('acf_add_local_field_group') ):
                 'default_value' => '',
                 'placeholder' => 'https://example.com/decklist',
             ),
+            array(
+                'key' => 'field_commander',
+                'label' => 'Commander',
+                'name' => 'commander',
+                'type' => 'text',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+            ),
+            array(
+                'key' => 'field_partner',
+                'label' => 'Partner\Background',
+                'name' => 'partner',
+                'type' => 'text',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+            ),
         ),
         'location' => array(
             array(
@@ -323,6 +355,47 @@ if( function_exists('acf_add_local_field_group') ):
         ),
         'menu_order' => 0,
         'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+
+    acf_add_local_field_group(array(
+        'key' => 'group_deck_partner_image',
+        'title' => 'Immagine in evidenza_partner',
+        'fields' => array(
+            array(
+                'key' => 'field_featured_image_partner',
+                'label' => 'Immagine in evidenza_partner',
+                'name' => 'featured_image_partner',
+                'type' => 'image',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'return_format' => 'array',
+                'preview_size' => 'medium',
+                'library' => 'all',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'deck',
+                ),
+            ),
+        ),
+        'menu_order' => 10,
+        'position' => 'side',
         'style' => 'default',
         'label_placement' => 'top',
         'instruction_placement' => 'label',
@@ -496,7 +569,7 @@ function hide_admin_bar_items_for_players($wp_admin_bar) {
     
     if (current_user_can('player')) {
         // Keep only user-related items, remove others
-        $nodes_to_keep = array('user-info', 'edit-profile', 'logout');
+        $nodes_to_keep = array('user-info', 'edit-profile', 'logout', 'top-secondary', 'my-account', 'site-name', 'user-actions', 'go-to-homepage');
         
         foreach ($wp_admin_bar->get_nodes() as $id => $node) {
             if (!in_array($id, $nodes_to_keep)) {
@@ -2324,6 +2397,7 @@ add_action( 'pre_get_posts', 'bootscore_child_event_posts_per_page' );
 /**
  * Add "Go to Homepage" link to admin bar
  */
+/*
 function add_homepage_link_to_admin_bar($wp_admin_bar) {
     $args = array(
         'id'    => 'go-to-homepage',
@@ -2337,3 +2411,4 @@ function add_homepage_link_to_admin_bar($wp_admin_bar) {
     $wp_admin_bar->add_node($args);
 }
 add_action('admin_bar_menu', 'add_homepage_link_to_admin_bar', 999);
+*/

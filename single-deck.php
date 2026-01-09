@@ -33,11 +33,38 @@ get_header(); ?>
                     </div>
                 </header>
 
-                <?php if ( has_post_thumbnail() ) : ?>
-                    <div class="entry-featured-image">
-                        <?php the_post_thumbnail( 'large', array( 'class' => 'img-fluid' ) ); ?>
-                    </div>
-                <?php endif; ?>
+                <div class="deck-visuals d-flex justify-content-center flex-wrap gap-4 mb-5">
+                    <?php 
+                    $commander = get_field('commander');
+                    if ( has_post_thumbnail() || $commander ) : ?>
+                        <div class="deck-image-wrapper text-center">
+                            <?php if ( has_post_thumbnail() ) : ?>
+                                <?php the_post_thumbnail( 'large', array( 'class' => 'img-fluid rounded shadow-sm' ) ); ?>
+                            <?php endif; ?>
+                            
+                            <?php if ( $commander ) : ?>
+                                <div class="mt-2 fw-bold text-muted small text-uppercase"><?php esc_html_e('Commander', 'bootscore'); ?></div>
+                                <div class="fw-bold"><?php echo esc_html( $commander ); ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php 
+                    $partner_image = get_field('featured_image_partner');
+                    $partner = get_field('partner');
+                    if ( $partner_image || $partner ) : ?>
+                        <div class="deck-image-wrapper text-center">
+                            <?php if ( $partner_image ) : ?>
+                                <?php echo wp_get_attachment_image( $partner_image['ID'], 'large', false, array( 'class' => 'img-fluid rounded shadow-sm' ) ); ?>
+                            <?php endif; ?>
+                            
+                            <?php if ( $partner ) : ?>
+                                <div class="mt-2 fw-bold text-muted small text-uppercase"><?php esc_html_e('Partner / Background', 'bootscore'); ?></div>
+                                <div class="fw-bold"><?php echo esc_html( $partner ); ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
                 <div class="entry-content">
                     <?php the_content(); ?>
@@ -45,20 +72,18 @@ get_header(); ?>
 
                 <?php
                 // Display custom fields
-                $decklist = get_field('field_decklist');
+                $decklist = get_field('decklist');
                 
                 if ( $decklist ) : ?>
                     <div class="deck-custom-fields">
                         <h3>Informazioni Deck</h3>
                         
-                        <?php if ( $decklist ) : ?>
                             <div class="decklist-field">
                                 <strong>Decklist:</strong>
                                 <a href="<?php echo esc_url( $decklist ); ?>" target="_blank" rel="noopener" class="btn btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> Vedi Decklist
+                                    <i class="fas fa-external-link-alt"></i> <?php esc_html_e('Vedi Decklist', 'bootscore'); ?>
                                 </a>
                             </div>
-                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
@@ -112,6 +137,11 @@ get_header(); ?>
     border-radius: 8px;
     padding: 20px;
     margin: 30px 0;
+}
+
+.deck-image-wrapper {
+    max-width: 300px;
+    width: 100%;
 }
 
 .deck-custom-fields h3 {
