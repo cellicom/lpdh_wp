@@ -806,6 +806,33 @@ function hide_deck_views_for_players() {
 add_action('admin_head', 'hide_deck_views_for_players', 20);
 
 /**
+ * Restrict deck list query to show only own decks for players
+ * Administrators see all decks
+ */
+function restrict_deck_list_query_for_players($query) {
+    // Only in admin and main query
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    global $pagenow;
+
+    // Only for deck post type list
+    if ($pagenow === 'edit.php' && $query->get('post_type') === 'deck') {
+        // If user is admin, do nothing (see all)
+        if (current_user_can('administrator')) {
+            return;
+        }
+
+        // If user is player, restrict to own posts
+        if (current_user_can('player')) {
+            $query->set('author', get_current_user_id());
+        }
+    }
+}
+add_action('pre_get_posts', 'restrict_deck_list_query_for_players');
+
+/**
  * Redirect players from dashboard to deck list
  * Administrators see normal dashboard (admin has priority)
  */
@@ -2493,6 +2520,16 @@ function og_printFileImg($icon, $color = null)
 }
  */
 
+/**
+ * Imposta il numero di post per pagina nell'archivio Eventi
+ */
+function bootscore_child_event_posts_per_page( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'event' ) ) {
+        $query->set( 'posts_per_page', 12 );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_event_posts_per_page' );
+
 
 /**
  * Generate CSS content for an admin color scheme
@@ -2645,13 +2682,3 @@ CSS;
     
     return $css_content;
 }
-
-/**
- * Imposta il numero di post per pagina nell'archivio Eventi
- */
-function bootscore_child_event_posts_per_page( $query ) {
-    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'event' ) ) {
-        $query->set( 'posts_per_page', 12 );
-    }
-}
-add_action( 'pre_get_posts', 'bootscore_child_event_posts_per_page' );

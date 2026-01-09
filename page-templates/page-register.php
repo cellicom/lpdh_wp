@@ -92,6 +92,7 @@ HTML;
     
     // Send email
     $sent = wp_mail($user_email, $subject, $message, $headers);
+    $current = current_time('mysql');
     
     // Also send admin notification
     $admin_email = get_option('admin_email');
@@ -122,7 +123,7 @@ HTML;
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Nome utente:</strong> {$user_login}</p>
             <p style="margin: 5px 0;"><strong>Email:</strong> {$user_email}</p>
-            <p style="margin: 5px 0;"><strong>Data registrazione:</strong> {current_time('mysql')}</p>
+            <p style="margin: 5px 0;"><strong>Data registrazione:</strong> {$current}</p>
         </div>
         
         <p>
