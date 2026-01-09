@@ -1619,6 +1619,20 @@ if( function_exists('acf_add_local_field_group') ):
                         'placeholder' => 'Deck name',
                         'maxlength' => '',
                     ),
+                    array(
+                        'key' => 'field_ranking_player_deck_id',
+                        'label' => 'Deck ID',
+                        'name' => 'player_deck_id',
+                        'type' => 'number',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => 'acf-hidden',
+                            'id' => '',
+                        ),
+                        'default_value' => '',
+                    ),
                 ),
             ),
         ),
@@ -1861,7 +1875,8 @@ function event_ranking_auto_fill_name() {
                     draw: 'field_ranking_draw',
                     lose: 'field_ranking_lose',
                     via: 'field_ranking_via',
-                    deck: 'field_ranking_deck'
+                    deck: 'field_ranking_deck',
+                    player_deck_id: 'field_ranking_player_deck_id'
                 };
                 
                 // Create new rows directly in DOM
@@ -1972,6 +1987,16 @@ function event_ranking_auto_fill_name() {
                         '</div>' +
                     '</td>');
                     
+                    // Player Deck ID field
+                    var playerDeckIdValue = ranking.player_deck_id !== undefined ? ranking.player_deck_id : '';
+                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-player-deck-id" data-name="player_deck_id" data-type="number" data-key="' + fieldKeys.player_deck_id + '">' +
+                        '<div class="acf-input">' +
+                            '<div class="acf-input-wrap">' +
+                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_deck_id + ']" value="' + playerDeckIdValue + '">' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>');
+
                     // Remove column
                     $row.append('<td class="acf-row-handle remove">' +
                         '<a class="acf-icon -plus small acf-js-tooltip hide-on-shift" href="#" data-event="add-row" title="Aggiungi riga"></a>' +
@@ -2166,6 +2191,9 @@ require_once get_stylesheet_directory() . '/function-schema-color.php';
  */
 function event_ranking_populate_player_deck() {
     ?>
+    <style>
+        .acf-field-ranking-player-deck-id { display: none !important; }
+    </style>
     <script type="text/javascript">
     (function($) {
         // Function to add temporary select with search below deck field
@@ -2175,6 +2203,7 @@ function event_ranking_populate_player_deck() {
             
             // Find the deck field
             var $deckField = $row.find('.acf-field-ranking-deck');
+            var $deckIdField = $row.find('.acf-field-ranking-player-deck-id');
             
             if (!$deckField.length || !playerId) {
                 return;
@@ -2192,6 +2221,7 @@ function event_ranking_populate_player_deck() {
             
             // Find the deck input and populate when selection changes
             var $deckInput = $deckField.find('input[type="text"]');
+            var $deckIdInput = $deckIdField.find('input[type="number"]');
             
             $selector.find('select').on('change', function() {
                 var selectedDeckId = $(this).val();
@@ -2199,6 +2229,7 @@ function event_ranking_populate_player_deck() {
                 
                 if (selectedDeckId) {
                     $deckInput.val(selectedDeckTitle);
+                    $deckIdInput.val(selectedDeckId);
                 }
             });
             
