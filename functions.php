@@ -2320,3 +2320,20 @@ function bootscore_child_event_posts_per_page( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'bootscore_child_event_posts_per_page' );
+
+/**
+ * Add "Go to Homepage" link to admin bar
+ */
+function add_homepage_link_to_admin_bar($wp_admin_bar) {
+    $args = array(
+        'id'    => 'go-to-homepage',
+        'title' => '<span class="ab-icon dashicons dashicons-admin-home"></span> ' . __('Go to Homepage', 'bootscore'),
+        'href'  => home_url('/'),
+        'meta'  => array(
+            'class' => 'go-to-homepage-link',
+            'title' => __('Go to Homepage', 'bootscore'),
+        ),
+    );
+    $wp_admin_bar->add_node($args);
+}
+add_action('admin_bar_menu', 'add_homepage_link_to_admin_bar', 999);
