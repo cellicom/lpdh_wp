@@ -66,24 +66,32 @@ get_header(); ?>
                     <?php endif; ?>
                 </div>
 
-                <div class="entry-content">
-                    <?php the_content(); ?>
-                </div>
-
                 <?php
                 // Display custom fields
                 $decklist = get_field('decklist');
+                $decklist_text = get_field('decklist_text');
                 
-                if ( $decklist ) : ?>
+                if ( $decklist || $decklist_text ) : ?>
                     <div class="deck-custom-fields">
                         <h3>Informazioni Deck</h3>
                         
-                            <div class="decklist-field">
+                        <?php if ( $decklist ) : ?>
+                            <div class="decklist-field mb-4">
                                 <strong>Decklist:</strong>
                                 <a href="<?php echo esc_url( $decklist ); ?>" target="_blank" rel="noopener" class="btn btn-primary">
                                     <i class="fas fa-external-link-alt"></i> <?php esc_html_e('Vedi Decklist', 'bootscore'); ?>
                                 </a>
                             </div>
+                        <?php endif; ?>
+
+                        <?php if ( $decklist_text ) : ?>
+                            <div class="decklist-text-field">
+                                <h4><?php esc_html_e('Lista Carte', 'bootscore'); ?></h4>
+                                <div class="decklist-content bg-light p-3 rounded border">
+                                    <?php echo nl2br( esc_html( $decklist_text ) ); ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
