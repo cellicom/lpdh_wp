@@ -1654,6 +1654,37 @@ if( function_exists('acf_add_local_field_group') ):
                     ),
                 ),
             ),
+            array(
+                'key' => 'field_event_survey',
+                'label' => 'Survey (Partecipanti)',
+                'name' => 'survey',
+                'type' => 'repeater',
+                'instructions' => 'Lista utenti che hanno partecipato',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'collapsed' => '',
+                'min' => 0,
+                'max' => 0,
+                'layout' => 'table',
+                'button_label' => 'Aggiungi Utente',
+                'sub_fields' => array(
+                    array(
+                        'key' => 'field_survey_user',
+                        'label' => 'Utente',
+                        'name' => 'user',
+                        'type' => 'user',
+                        'required' => 1,
+                        'return_format' => 'id',
+                        'allow_null' => 0,
+                        'multiple' => 0,
+                    ),
+                ),
+            ),
         ),
         'location' => array(
             array(
@@ -2462,3 +2493,57 @@ function add_homepage_link_to_admin_bar($wp_admin_bar) {
 }
 add_action('admin_bar_menu', 'add_homepage_link_to_admin_bar', 999);
 */
+
+/**
+ * Handle event participation survey via AJAX
+ */
+function ajax_toggle_event_participation() {
+    // Verify nonce
+    check_ajax_referer('event_participation_nonce', 'nonce');
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Devi essere loggato.']);
+    }
+
+    $event_id = isset($_POST['event_id']) ? intval($_POST['event_id']) : 0;
+    $user_id = get_current_user_id();
+
+    if (!$event_id) {
+        wp_send_json_error(['message' => 'ID evento non valido.']);
+    }
+
+    // Get current survey data
+    $survey = get_field('survey', $event_id);
+    if (!is_array($survey)) {
+        $survey = [];
+    }
+
+    $found_index = -1;
+    foreach ($survey as $index => $row) {
+        // Check if user exists in repeater (assuming return_format is ID)
+        $stored_user = is_array($row['user']) ? $row['user']['ID'] : (is_object($row['user']) ? $row['user']->ID : $row['user']);
+        
+        if ($stored_user == $user_id) {
+            $found_index = $index;
+            break;
+        }
+    }
+
+    $action = '';
+    if ($found_index >= 0) {
+        // Remove user
+        unset($survey[$found_index]);
+        $survey = array_values($survey); // Re-index
+        $action = 'removed';
+    } else {
+        // Add user
+        $survey[] = ['user' => $user_id];
+        $action = 'added';
+    }
+
+    // Update the field
+    update_field('survey', $survey, $event_id);
+
+    wp_send_json_success(['action' => $action, 'count' => count($survey)]);
+}
+add_action('wp_ajax_toggle_event_participation', 'ajax_toggle_event_participation');

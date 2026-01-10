@@ -65,6 +65,84 @@ get_header(); ?>
                             </div>
 
                             <?php
+                            // Survey Section
+                            $survey = get_field('survey');
+                            $participant_count = is_array($survey) ? count($survey) : 0;
+                            
+                            if ( is_user_logged_in() ) : 
+                                $current_user_id = get_current_user_id();
+                                $participated = false;
+
+                                if ( is_array($survey) ) {
+                                    foreach ( $survey as $row ) {
+                                        $u_id = is_array($row['user']) ? $row['user']['ID'] : (is_object($row['user']) ? $row['user']->ID : $row['user']);
+                                        if ( $u_id == $current_user_id ) {
+                                            $participated = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                ?>
+                                <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
+                                    <h4><?php esc_html_e('Hai partecipato a questo evento?', 'bootscore'); ?></h4>
+                                    <p class="text-muted mb-3 survey-count-text"><?php printf(esc_html__('Attualmente ci sono %d partecipanti confermati.', 'bootscore'), $participant_count); ?></p>
+                                    
+                                    <button id="btn-event-participation" class="btn <?php echo $participated ? 'btn-danger' : 'btn-success'; ?>" data-event-id="<?php echo get_the_ID(); ?>" data-participated="<?php echo $participated ? '1' : '0'; ?>">
+                                        <?php echo $participated ? esc_html__('Rimuovi partecipazione', 'bootscore') : esc_html__('Sì, ho partecipato', 'bootscore'); ?>
+                                    </button>
+                                    <div id="participation-message" class="mt-2 fw-bold"></div>
+                                </div>
+
+                                <script>
+                                jQuery(document).ready(function($) {
+                                    $('#btn-event-participation').on('click', function() {
+                                        var $btn = $(this);
+                                        var eventId = $btn.data('event-id');
+                                        
+                                        $btn.prop('disabled', true);
+                                        
+                                        $.ajax({
+                                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                                            type: 'POST',
+                                            data: {
+                                                action: 'toggle_event_participation',
+                                                event_id: eventId,
+                                                nonce: '<?php echo wp_create_nonce('event_participation_nonce'); ?>'
+                                            },
+                                            success: function(response) {
+                                                if (response.success) {
+                                                    if (response.data.action === 'added') {
+                                                        $btn.data('participated', 1);
+                                                        $btn.removeClass('btn-success').addClass('btn-danger');
+                                                        $btn.text('<?php esc_html_e('Rimuovi partecipazione', 'bootscore'); ?>');
+                                                        $('#participation-message').html('<span class="text-success"><?php esc_html_e('Partecipazione registrata!', 'bootscore'); ?></span>');
+                                                    } else {
+                                                        $btn.data('participated', 0);
+                                                        $btn.removeClass('btn-danger').addClass('btn-success');
+                                                        $btn.text('<?php esc_html_e('Sì, ho partecipato', 'bootscore'); ?>');
+                                                        $('#participation-message').html('<span class="text-warning"><?php esc_html_e('Partecipazione rimossa.', 'bootscore'); ?></span>');
+                                                    }
+                                                    $('.survey-count-text').text('Attualmente ci sono ' + response.data.count + ' partecipanti confermati.');
+                                                } else {
+                                                    alert(response.data.message || 'Errore');
+                                                }
+                                            },
+                                            complete: function() {
+                                                $btn.prop('disabled', false);
+                                            }
+                                        });
+                                    });
+                                });
+                                </script>
+                            <?php else : ?>
+                                <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
+                                    <h4><?php esc_html_e('Partecipazione Evento', 'bootscore'); ?></h4>
+                                    <p class="text-muted"><?php printf(esc_html__('Attualmente ci sono %d partecipanti confermati.', 'bootscore'), $participant_count); ?></p>
+                                    <p class="small mb-0"><?php esc_html_e('Effettua il login per confermare la tua partecipazione.', 'bootscore'); ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php
                             // Rankings Table
                             $rankings = get_field('field_event_ranking');
                             if ( is_array($rankings) && !empty($rankings) ) : ?>
