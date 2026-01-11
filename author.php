@@ -30,6 +30,29 @@ $author_id = $author->ID;
                             <?php echo wp_kses_post(get_the_author_meta('description', $author_id)); ?>
                         </div>
                     <?php endif; ?>
+
+                    <!-- Social Links -->
+                    <div class="author-social mt-3">
+                        <?php
+                        $socials = array(
+                            'user_url'  => 'fas fa-globe',
+                            'facebook'  => 'fab fa-facebook',
+                            'twitter'   => 'fab fa-twitter',
+                            'instagram' => 'fab fa-instagram',
+                            'linkedin'  => 'fab fa-linkedin',
+                            'github'    => 'fab fa-github',
+                            'youtube'   => 'fab fa-youtube',
+                            'discord'   => 'fab fa-discord',
+                        );
+                        
+                        foreach ($socials as $key => $icon) {
+                            $url = get_the_author_meta($key, $author_id);
+                            if ($url) {
+                                echo '<a href="' . esc_url($url) . '" class="text-decoration-none text-muted mx-2" target="_blank" rel="noopener"><i class="' . esc_attr($icon) . ' fa-lg"></i></a>';
+                            }
+                        }
+                        ?>
+                    </div>
                 </div>
             </div>
 
@@ -149,14 +172,23 @@ $author_id = $author->ID;
             <!-- Decks List -->
             <?php if ($decks_query->have_posts()) : ?>
                 <div class="decks-section pt-4 border-top">
-                    <h2 class="mb-4 text-center">I miei Decks</h2>
+                    <h2 class="mb-4 text-center">Mazzi</h2>
                     <div class="row g-4">
                         <?php while ($decks_query->have_posts()) : $decks_query->the_post(); ?>
                             <div class="col-md-6 col-lg-4">
                                 <div class="card h-100 shadow-sm border-0 deck-card">
-                                    <?php if (has_post_thumbnail()) : ?>
+                                    <?php 
+                                    $partner_img = get_field('featured_image_partner');
+                                    if ($partner_img) : ?>
+                                        <a href="<?php the_permalink(); ?>" class="d-flex overflow-hidden rounded-top" style="height: 220px;">
+                                            <?php if (has_post_thumbnail()) : ?>
+                                                <?php the_post_thumbnail('medium_large', array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
+                                            <?php endif; ?>
+                                            <?php echo wp_get_attachment_image($partner_img['ID'], 'medium_large', false, array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
+                                        </a>
+                                    <?php elseif (has_post_thumbnail()) : ?>
                                         <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top">
-                                            <?php the_post_thumbnail('medium_large', array('class' => 'card-img-top object-fit-cover transition-transform', 'style' => 'height: 220px;')); ?>
+                                            <?php the_post_thumbnail('medium_large', array('class' => 'card-img-top object-fit-cover transition-transform', 'style' => 'height: 220px; object-position: top;')); ?>
                                         </a>
                                     <?php else: ?>
                                         <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
@@ -171,9 +203,13 @@ $author_id = $author->ID;
                                         </h5>
                                         <?php 
                                         $commander = get_field('commander');
+                                        $partner = get_field('partner');
                                         if ($commander) : ?>
                                             <p class="card-text small text-muted mb-0">
                                                 <i class="fas fa-user-shield me-1"></i> <?php echo esc_html($commander); ?>
+                                                <?php if ($partner) : ?>
+                                                    <span class="mx-1">+</span> <?php echo esc_html($partner); ?>
+                                                <?php endif; ?>
                                             </p>
                                         <?php endif; ?>
                                     </div>
