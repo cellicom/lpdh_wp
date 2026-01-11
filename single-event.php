@@ -25,9 +25,10 @@ get_header(); ?>
                                 <?php
                                 $event_date = get_field('field_event_date');
                                 $place_obj = get_field('field_event_place');
+                                $fb_link = get_field('field_event_fb_link');
                                 ?>
                                 
-                                <div class="event-details text-muted d-flex justify-content-center gap-4 mt-2">
+                                <div class="event-details text-muted d-flex justify-content-center gap-4 mt-2 align-items-center">
                                     <?php if ($event_date) : ?>
                                         <div class="event-date">
                                             <i class="fas fa-calendar-alt text-primary me-1"></i>
@@ -38,7 +39,17 @@ get_header(); ?>
                                     <?php if ($place_obj) : ?>
                                         <div class="event-place">
                                             <i class="fas fa-map-marker-alt text-primary me-1"></i>
-                                            <?php echo esc_html($place_obj->post_title); ?>
+                                            <a href="<?php echo get_permalink($place_obj->ID); ?>" class="text-decoration-none text-muted">
+                                                <?php echo esc_html($place_obj->post_title); ?>
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($fb_link) : ?>
+                                        <div class="event-fb">
+                                            <a href="<?php echo esc_url($fb_link); ?>" target="_blank" class="text-decoration-none" title="Evento Facebook">
+                                                <i class="fab fa-facebook fa-lg text-primary"></i>
+                                            </a>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -52,17 +63,92 @@ get_header(); ?>
 
                             <div class="entry-content mb-5">
                                 <?php the_content(); ?>
-                                
-                                <?php 
-                                $fb_link = get_field('field_event_fb_link');
-                                if ($fb_link) : ?>
-                                    <div class="mt-4 text-center">
-                                        <a href="<?php echo esc_url($fb_link); ?>" target="_blank" class="btn btn-outline-primary">
-                                            <i class="fab fa-facebook me-2"></i> Evento Facebook
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
                             </div>
+
+                            <?php
+                            // Rankings Table
+                            $rankings = get_field('field_event_ranking');
+                            if ( is_array($rankings) && !empty($rankings) ) : ?>
+                                <div class="event-rankings mb-5">
+                                    <h3 class="mb-3 border-bottom pb-2">Classifica Giocatori</h3>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th scope="col" class="text-center" style="width: 60px;">#</th>
+                                                    <th scope="col">Giocatore</th>
+                                                    <th scope="col">Deck</th>
+                                                    <th scope="col" class="text-center">Punti</th>
+                                                    <th scope="col" class="text-center d-none d-sm-table-cell">W-D-L</th>
+                                                    <th scope="col" class="text-center d-none d-md-table-cell">Via %</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php 
+                                                $total_rankings = count($rankings);
+                                                foreach ( $rankings as $index => $rank ) : 
+                                                    $pos = isset($rank['pos']) ? $rank['pos'] : '';
+                                                    $name = isset($rank['name']) ? $rank['name'] : '';
+                                                    $deck = isset($rank['deck']) ? $rank['deck'] : '';
+                                                    $player_deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : '';
+                                                    $points = isset($rank['points']) ? $rank['points'] : '0';
+                                                    $win = isset($rank['win']) ? $rank['win'] : '0';
+                                                    $draw = isset($rank['draw']) ? $rank['draw'] : '0';
+                                                    $lose = isset($rank['lose']) ? $rank['lose'] : '0';
+                                                    $via = isset($rank['via']) ? $rank['via'] : '-';
+                                                    
+                                                    // Colors for top 3
+                                                    $row_class = '';
+                                                    $pos_int = intval($pos);
+                                                    
+                                                    if ( $pos_int === 1 ) {
+                                                        $row_class = 'rank-gold';
+                                                    } elseif ( $pos_int === 2 ) {
+                                                        $row_class = 'rank-silver';
+                                                    } elseif ( $pos_int === 3 ) {
+                                                        $row_class = 'rank-bronze';
+                                                    }
+                                                    
+                                                    // Last player clown emoji
+                                                    $display_pos = ($index === $total_rankings - 1) ? '🤡' : esc_html($pos);
+                                                    
+                                                    // Deck display
+                                                    $deck_display = esc_html($deck);
+                                                    if ($player_deck_id) {
+                                                        $deck_post = get_post($player_deck_id);
+                                                        if ($deck_post) {
+                                                            $commander = get_field('commander', $player_deck_id);
+                                                            $partner = get_field('partner', $player_deck_id);
+                                                            
+                                                            $deck_display = '<div>' . esc_html($deck_post->post_title) . '</div>';
+                                                            if ($commander) {
+                                                                $deck_display .= '<div class="small text-muted">(' . esc_html($commander) . ($partner ? ' + ' . esc_html($partner) : '') . ')</div>';
+                                                            }
+                                                        }
+                                                    }
+                                                ?>
+                                                    <tr class="<?php echo esc_attr($row_class); ?>">
+                                                        <td class="text-center fw-bold"><?php echo $display_pos; ?></td>
+                                                        <td>
+                                                            <?php echo esc_html($name); ?>
+                                                        </td>
+                                                        <td class="fst-italic"><?php echo $deck_display; ?></td>
+                                                        <td class="text-center fw-bold"><?php echo esc_html($points); ?></td>
+                                                        <td class="text-center d-none d-sm-table-cell">
+                                                            <span class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
+                                                            <span class="text-muted">-</span>
+                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary"><?php echo esc_html($draw); ?></span>
+                                                            <span class="text-muted">-</span>
+                                                            <span class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
+                                                        </td>
+                                                        <td class="text-center d-none d-md-table-cell small"><?php echo esc_html($via); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
 
                             <?php
                             // Survey Section
@@ -91,6 +177,26 @@ get_header(); ?>
                                         <?php echo $participated ? esc_html__('Rimuovi partecipazione', 'bootscore') : esc_html__('Sì, ho partecipato', 'bootscore'); ?>
                                     </button>
                                     <div id="participation-message" class="mt-2 fw-bold"></div>
+                                    
+                                    <?php if ( $participant_count > 0 ) : ?>
+                                        <div class="survey-participants mt-4">
+                                            <div class="d-flex justify-content-center flex-wrap gap-2">
+                                                <?php
+                                                if ( is_array($survey) ) {
+                                                    foreach ( $survey as $row ) {
+                                                        $u_id = is_array($row['user']) ? $row['user']['ID'] : (is_object($row['user']) ? $row['user']->ID : $row['user']);
+                                                        $user_info = get_userdata($u_id);
+                                                        if ($user_info) {
+                                                            echo '<a href="' . esc_url(get_author_posts_url($u_id)) . '" title="' . esc_attr($user_info->display_name) . '" class="text-decoration-none">';
+                                                            echo get_avatar($u_id, 40, '', esc_attr($user_info->display_name), array('class' => 'rounded-circle border'));
+                                                            echo '</a>';
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <script>
@@ -139,75 +245,21 @@ get_header(); ?>
                                     <h4><?php esc_html_e('Partecipazione Evento', 'bootscore'); ?></h4>
                                     <p class="text-muted"><?php printf(esc_html__('Attualmente ci sono %d partecipanti confermati.', 'bootscore'), $participant_count); ?></p>
                                     <p class="small mb-0"><?php esc_html_e('Effettua il login per confermare la tua partecipazione.', 'bootscore'); ?></p>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php
-                            // Rankings Table
-                            $rankings = get_field('field_event_ranking');
-                            if ( is_array($rankings) && !empty($rankings) ) : ?>
-                                <div class="event-rankings mb-5">
-                                    <h3 class="mb-3 border-bottom pb-2">Classifica Giocatori</h3>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th scope="col" class="text-center" style="width: 60px;">#</th>
-                                                    <th scope="col">Giocatore</th>
-                                                    <th scope="col">Deck</th>
-                                                    <th scope="col" class="text-center">Punti</th>
-                                                    <th scope="col" class="text-center d-none d-sm-table-cell">W-D-L</th>
-                                                    <th scope="col" class="text-center d-none d-md-table-cell">Via %</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php 
-                                                $total_rankings = count($rankings);
-                                                foreach ( $rankings as $index => $rank ) : 
-                                                    $pos = isset($rank['pos']) ? $rank['pos'] : '';
-                                                    $name = isset($rank['name']) ? $rank['name'] : '';
-                                                    $deck = isset($rank['deck']) ? $rank['deck'] : '';
-                                                    $points = isset($rank['points']) ? $rank['points'] : '0';
-                                                    $win = isset($rank['win']) ? $rank['win'] : '0';
-                                                    $draw = isset($rank['draw']) ? $rank['draw'] : '0';
-                                                    $lose = isset($rank['lose']) ? $rank['lose'] : '0';
-                                                    $via = isset($rank['via']) ? $rank['via'] : '-';
-                                                    
-                                                    // Colors for top 3
-                                                    $row_class = '';
-                                                    $pos_int = intval($pos);
-                                                    
-                                                    if ( $pos_int === 1 ) {
-                                                        $row_class = 'rank-gold';
-                                                    } elseif ( $pos_int === 2 ) {
-                                                        $row_class = 'rank-silver';
-                                                    } elseif ( $pos_int === 3 ) {
-                                                        $row_class = 'rank-bronze';
+                                    
+                                    <?php if ( $participant_count > 0 ) : ?>
+                                        <div class="survey-participants mt-4">
+                                            <div class="d-flex justify-content-center flex-wrap gap-2">
+                                                <?php
+                                                if ( is_array($survey) ) {
+                                                    foreach ( $survey as $row ) {
+                                                        $u_id = is_array($row['user']) ? $row['user']['ID'] : (is_object($row['user']) ? $row['user']->ID : $row['user']);
+                                                        echo get_avatar($u_id, 40, '', '', array('class' => 'rounded-circle border'));
                                                     }
-                                                    
-                                                    // Last player clown emoji
-                                                    $display_pos = ($index === $total_rankings - 1) ? '🤡' : esc_html($pos);
+                                                }
                                                 ?>
-                                                    <tr class="<?php echo esc_attr($row_class); ?>">
-                                                        <td class="text-center fw-bold"><?php echo $display_pos; ?></td>
-                                                        <td>
-                                                            <?php echo esc_html($name); ?>
-                                                        </td>
-                                                        <td class="fst-italic text-muted"><?php echo esc_html($deck); ?></td>
-                                                        <td class="text-center fw-bold"><?php echo esc_html($points); ?></td>
-                                                        <td class="text-center d-none d-sm-table-cell">
-                                                            <span class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
-                                                            <span class="text-muted">-</span>
-                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary"><?php echo esc_html($draw); ?></span>
-                                                            <span class="text-muted">-</span>
-                                                            <span class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
-                                                        </td>
-                                                        <td class="text-center d-none d-md-table-cell small"><?php echo esc_html($via); ?></td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
 
