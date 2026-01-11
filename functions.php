@@ -2547,3 +2547,162 @@ function ajax_toggle_event_participation() {
     wp_send_json_success(['action' => $action, 'count' => count($survey)]);
 }
 add_action('wp_ajax_toggle_event_participation', 'ajax_toggle_event_participation');
+
+/**
+ * Add "Update Survey" button before survey repeater in Event CPT
+ */
+function add_update_survey_button_script() {
+    ?>
+    <script type="text/javascript">
+    (function($) {
+        // Add button before survey field
+        function addUpdateSurveyButton() {
+            // Target specific field by key to be safe
+            var $surveyField = $('.acf-field[data-key="field_event_survey"]');
+            
+            if ($surveyField.length && !$('#update-survey-btn').length) {
+                // Append to the label area of the survey field
+                $surveyField.find('> .acf-label').append(
+                    '<div class="update-survey-controls" style="margin-top: 10px;">' +
+                        '<button type="button" id="update-survey-btn" class="button button-primary">Update Survey</button>' +
+                        '<span id="update-survey-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>' +
+                        '<p class="description" style="margin-top: 5px;">Aggiunge automaticamente i giocatori presenti nella classifica al campo survey se non sono già presenti.</p>' +
+                    '</div>'
+                );
+            }
+        }
+        
+        // Run on load and after ACF ready
+        $(document).ready(function() {
+            setTimeout(addUpdateSurveyButton, 500);
+        });
+        
+        if (typeof acf !== 'undefined') {
+            acf.add_action('ready', addUpdateSurveyButton);
+        }
+
+        // Handle click
+        $(document).on('click', '#update-survey-btn', function(e) {
+            e.preventDefault();
+            
+            var $msg = $('#update-survey-msg');
+            // Reset message
+            $msg.hide().css('color', '');
+            
+            var players = [];
+            
+            // Get players from rankings
+            var $rankingRows = $('[data-name="event_ranking"] .acf-row:not(.acf-clone)');
+            $rankingRows.each(function() {
+                var $field = $(this).find('[data-name="player_id"]');
+                var $select = $field.find('select');
+                var val = $select.val();
+                
+                // Try to get text for the option
+                var text = '';
+                if ($select.length && val) {
+                    text = $select.find('option[value="'+val+'"]').text();
+                }
+                
+                // Fallback if text is empty (get it from the name field)
+                if (!text) {
+                    var $nameInput = $(this).find('[data-name="name"] input');
+                    if ($nameInput.length) {
+                        text = $nameInput.val();
+                    }
+                }
+                
+                if (val) {
+                    players.push({ id: val, text: text || 'User ' + val });
+                }
+            });
+            
+            // Get existing survey users
+            var existingIds = [];
+            var $surveyRepeater = $('.acf-field[data-key="field_event_survey"]');
+            var $surveyRows = $surveyRepeater.find('.acf-row:not(.acf-clone)');
+            $surveyRows.each(function() {
+                // Check both select and hidden input (for different ACF versions/settings)
+                var $field = $(this).find('[data-key="field_survey_user"]');
+                var $input = $field.find('select');
+                if (!$input.length) $input = $field.find('input[type="hidden"]');
+                var val = $input.val();
+                if (val) {
+                    existingIds.push(val);
+                }
+            });
+            
+            // Filter new users
+            var newPlayers = players.filter(function(player) {
+                return existingIds.indexOf(player.id) === -1;
+            });
+            
+            // Remove duplicates
+            var uniquePlayers = [];
+            var uniqueIds = [];
+            $.each(newPlayers, function(i, el){
+                if($.inArray(el.id, uniqueIds) === -1) {
+                    uniqueIds.push(el.id);
+                    uniquePlayers.push(el);
+                }
+            });
+            newPlayers = uniquePlayers;
+            
+            if (newPlayers.length === 0) {
+                $msg.text('Tutti i giocatori sono già presenti.').css('color', '#d63638').show();
+                return;
+            }
+            
+            if (!confirm('Verranno aggiunti ' + newPlayers.length + ' utenti alla survey. Continuare?')) {
+                return;
+            }
+            
+            // Add rows using DOM manipulation with delay to ensure fields are ready
+            var $addButton = $surveyRepeater.find('.acf-button[data-event="add-row"]');
+            
+            if ($addButton.length) {
+                var addedCount = 0;
+                
+                function addNextUser(index) {
+                    if (index >= newPlayers.length) {
+                        $msg.text('Aggiunti ' + addedCount + ' utenti con successo!').css('color', '#46b450').show();
+                        setTimeout(function() { $msg.fadeOut(); }, 5000);
+                        return;
+                    }
+                    
+                    var player = newPlayers[index];
+                    $addButton.click();
+                    
+                    // Wait a tick for DOM update and ACF initialization
+                    setTimeout(function() {
+                        var $newRow = $surveyRepeater.find('.acf-row:not(.acf-clone)').last();
+                        var $field = $newRow.find('[data-key="field_survey_user"]');
+                        var $select = $field.find('select');
+                        
+                        if ($select.length) {
+                            // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
+                            if ($select.find('option[value="' + player.id + '"]').length === 0) {
+                                $select.append(new Option(player.text, player.id, true, true));
+                            }
+                            $select.val(player.id).trigger('change');
+                        } else {
+                            // Fallback for hidden input
+                            $field.find('input[type="hidden"]').val(player.id).trigger('change');
+                        }
+                        
+                        addedCount++;
+                        addNextUser(index + 1);
+                    }, 200);
+                }
+                
+                addNextUser(0);
+            } else {
+                alert('Errore: Impossibile trovare il pulsante "Aggiungi riga".');
+            }
+        });
+        
+    })(jQuery);
+    </script>
+    <?php
+}
+add_action('acf/input/admin_footer', 'add_update_survey_button_script');
