@@ -1904,8 +1904,9 @@ function event_ranking_auto_fill_name() {
                 
                 // Find the ranking repeater
                 var $repeater = $('[data-name="event_ranking"]');
+                var $addButton = $repeater.find('.acf-button[data-event="add-row"]');
                 
-                if (!$repeater.length) {
+                if (!$repeater.length || !$addButton.length) {
                     console.warn('Repeater rankings non trovato');
                     return;
                 }
@@ -1913,156 +1914,26 @@ function event_ranking_auto_fill_name() {
                 var $tbody = $repeater.find('tbody');
                 
                 // Clear existing rows
-                $tbody.find('.acf-row').remove();
+                $tbody.find('.acf-row:not(.acf-clone)').remove();
                 
-                // Get field keys from the repeater
-                var fieldKeys = {
-                    pos: 'field_ranking_pos',
-                    player_id: 'field_ranking_player_id',
-                    name: 'field_ranking_name',
-                    points: 'field_ranking_points',
-                    win: 'field_ranking_win',
-                    draw: 'field_ranking_draw',
-                    lose: 'field_ranking_lose',
-                    via: 'field_ranking_via',
-                    deck: 'field_ranking_deck',
-                    player_deck_id: 'field_ranking_player_deck_id'
-                };
-                
-                // Create new rows directly in DOM
-                rankings.forEach(function(ranking, index) {
-                    var rowId = 'row_' + Date.now() + '_' + index;
+                // Use ACF's native add row functionality to ensure correct initialization (including nonces)
+                rankings.forEach(function(ranking) {
+                    // Trigger add row
+                    $addButton.trigger('click');
                     
-                    // Find the row number
-                    var rowNum = index + 1;
+                    // Get the new row (last one)
+                    var $row = $tbody.find('.acf-row:not(.acf-clone)').last();
                     
-                    var $row = $('<tr class="acf-row" data-id="' + rowId + '"></tr>');
-                    
-                    // Handle column
-                    $row.append('<td class="acf-row-handle order ui-sortable-handle">' +
-                        '<a class="acf-icon -collapse small" href="#" data-event="collapse-row" title="Clicca per alternare"></a>' +
-                        '<span class="acf-row-number" title="Trascinare per riordinare">' + rowNum + '</span>' +
-                    '</td>');
-                    
-                    // Pos field
-                    var posValue = ranking.pos !== undefined ? ranking.pos : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-pos -collapsed-target" data-name="pos" data-type="number" data-key="' + fieldKeys.pos + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.pos + ']" value="' + posValue + '" min="1" step="1">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Player ID field (empty - user selects manually)
-                    $row.append('<td class="acf-field acf-field-user acf-field-ranking-player-id" data-name="player_id" data-type="user" data-key="' + fieldKeys.player_id + '">' +
-                        '<div class="acf-input">' +
-                            '<input type="hidden" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_id + ']">' +
-                            '<select id="acf-field_event_ranking-' + rowId + '-' + fieldKeys.player_id + '" ' +
-                                'class="select2-hidden-accessible" ' +
-                                'name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_id + ']" ' +
-                                'data-ui="1" data-multiple="0" data-placeholder="Selezionare" data-allow_null="1" ' +
-                                'data-nonce="" tabindex="-1" aria-hidden="true" data-ajax="1">' +
-                            '</select>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Name field
-                    var nameValue = ranking.name !== undefined ? ranking.name : '';
-                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-name" data-name="name" data-type="text" data-key="' + fieldKeys.name + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.name + ']" value="' + nameValue + '" placeholder="Nome giocatore">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Points field
-                    var pointsValue = ranking.points !== undefined ? ranking.points : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-points" data-name="points" data-type="number" data-key="' + fieldKeys.points + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.points + ']" value="' + pointsValue + '" min="0" step="1">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Win field
-                    var winValue = ranking.win !== undefined ? ranking.win : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-win" data-name="win" data-type="number" data-key="' + fieldKeys.win + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.win + ']" value="' + winValue + '" min="0" step="1">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Draw field
-                    var drawValue = ranking.draw !== undefined ? ranking.draw : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-draw" data-name="draw" data-type="number" data-key="' + fieldKeys.draw + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.draw + ']" value="' + drawValue + '" min="0" step="1">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Lose field
-                    var loseValue = ranking.lose !== undefined ? ranking.lose : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-lose" data-name="lose" data-type="number" data-key="' + fieldKeys.lose + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.lose + ']" value="' + loseValue + '" min="0" step="1">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Via field
-                    var viaValue = ranking.via !== undefined ? ranking.via : '';
-                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-via" data-name="via" data-type="text" data-key="' + fieldKeys.via + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.via + ']" value="' + viaValue + '" placeholder="%">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Deck field
-                    var deckValue = ranking.deck !== undefined ? ranking.deck : '';
-                    $row.append('<td class="acf-field acf-field-text acf-field-ranking-deck" data-name="deck" data-type="text" data-key="' + fieldKeys.deck + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="text" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.deck + ']" value="' + deckValue + '" placeholder="Nome del deck">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-                    
-                    // Player Deck ID field
-                    var playerDeckIdValue = ranking.player_deck_id !== undefined ? ranking.player_deck_id : '';
-                    $row.append('<td class="acf-field acf-field-number acf-field-ranking-player-deck-id" data-name="player_deck_id" data-type="number" data-key="' + fieldKeys.player_deck_id + '">' +
-                        '<div class="acf-input">' +
-                            '<div class="acf-input-wrap">' +
-                                '<input type="number" name="acf[field_event_ranking][' + rowId + '][' + fieldKeys.player_deck_id + ']" value="' + playerDeckIdValue + '">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>');
-
-                    // Remove column
-                    $row.append('<td class="acf-row-handle remove">' +
-                        '<a class="acf-icon -plus small acf-js-tooltip hide-on-shift" href="#" data-event="add-row" title="Aggiungi riga"></a>' +
-                        '<a class="acf-icon -duplicate small acf-js-tooltip show-on-shift" href="#" data-event="duplicate-row" title="Duplicate row"></a>' +
-                        '<a class="acf-icon -minus small acf-js-tooltip" href="#" data-event="remove-row" title="Rimuovi riga"></a>' +
-                    '</td>');
-                    
-                    $tbody.append($row);
-                });
-                
-                // Initialize ACF on the new rows
-                acf.doAction('append', $tbody);
-                
-                // Update row numbers
-                $tbody.find('.acf-row-number').each(function(index) {
-                    $(this).text(index + 1);
+                    // Populate fields
+                    if (ranking.pos !== undefined) $row.find('[data-name="pos"] input').val(ranking.pos);
+                    if (ranking.name !== undefined) $row.find('[data-name="name"] input').val(ranking.name);
+                    if (ranking.points !== undefined) $row.find('[data-name="points"] input').val(ranking.points);
+                    if (ranking.win !== undefined) $row.find('[data-name="win"] input').val(ranking.win);
+                    if (ranking.draw !== undefined) $row.find('[data-name="draw"] input').val(ranking.draw);
+                    if (ranking.lose !== undefined) $row.find('[data-name="lose"] input').val(ranking.lose);
+                    if (ranking.via !== undefined) $row.find('[data-name="via"] input').val(ranking.via);
+                    if (ranking.deck !== undefined) $row.find('[data-name="deck"] input').val(ranking.deck);
+                    if (ranking.player_deck_id !== undefined) $row.find('[data-name="player_deck_id"] input').val(ranking.player_deck_id);
                 });
                 
             } catch (err) {
