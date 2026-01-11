@@ -11,6 +11,10 @@ get_header(); ?>
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
 
+        <div class="container pb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+
         <?php while ( have_posts() ) : the_post(); ?>
 
             <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -121,12 +125,6 @@ get_header(); ?>
             </article>
 
             <?php
-            // Post navigation
-            the_post_navigation( array(
-                'prev_text' => '<span class="nav-subtitle">' . esc_html__( 'Deck precedente:', 'bootscore' ) . '</span> <span class="nav-title">%title</span>',
-                'next_text' => '<span class="nav-subtitle">' . esc_html__( 'Deck successivo:', 'bootscore' ) . '</span> <span class="nav-title">%title</span>',
-            ) );
-
             // If comments are open or we have at least one comment, load up the comment template.
             if ( comments_open() || get_comments_number() ) :
                 comments_template();
@@ -134,6 +132,10 @@ get_header(); ?>
             ?>
 
         <?php endwhile; ?>
+
+                </div>
+            </div>
+        </div>
 
     </main>
 </div>

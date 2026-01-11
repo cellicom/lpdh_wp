@@ -88,7 +88,31 @@ get_header(); ?>
                                                 $total_rankings = count($rankings);
                                                 foreach ( $rankings as $index => $rank ) : 
                                                     $pos = isset($rank['pos']) ? $rank['pos'] : '';
+                                                    
+                                                    // Logic for Player Name and Link
                                                     $name = isset($rank['name']) ? $rank['name'] : '';
+                                                    $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
+                                                    $display_name = $name;
+                                                    $player_profile_url = '';
+                                                    $user_id = 0;
+
+                                                    if ( $player_id_field ) {
+                                                        if ( is_array( $player_id_field ) && isset( $player_id_field['ID'] ) ) {
+                                                            $user_id = $player_id_field['ID'];
+                                                            $display_name = $player_id_field['display_name'];
+                                                        } elseif ( is_numeric( $player_id_field ) ) {
+                                                            $user_id = $player_id_field;
+                                                            $user_info = get_userdata( $user_id );
+                                                            if ( $user_info ) {
+                                                                $display_name = $user_info->display_name;
+                                                            }
+                                                        }
+                                                        
+                                                        if ( $user_id ) {
+                                                            $player_profile_url = get_author_posts_url( $user_id );
+                                                        }
+                                                    }
+
                                                     $deck = isset($rank['deck']) ? $rank['deck'] : '';
                                                     $player_deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : '';
                                                     $points = isset($rank['points']) ? $rank['points'] : '0';
@@ -96,6 +120,35 @@ get_header(); ?>
                                                     $draw = isset($rank['draw']) ? $rank['draw'] : '0';
                                                     $lose = isset($rank['lose']) ? $rank['lose'] : '0';
                                                     $via = isset($rank['via']) ? $rank['via'] : '-';
+                                                    
+                                                    // Commander & Partner Images for Popover
+                                                    $icon_html = '';
+                                                    $popover_content = '';
+                                                    
+                                                    if ($player_deck_id) {
+                                                        $cmdr_img_url = has_post_thumbnail($player_deck_id) ? get_the_post_thumbnail_url($player_deck_id, 'medium') : '';
+                                                        $partner_img_array = get_field('featured_image_partner', $player_deck_id);
+                                                        $partner_img_url = $partner_img_array ? $partner_img_array['sizes']['medium'] : '';
+                                                        
+                                                        if ($cmdr_img_url && $partner_img_url) {
+                                                            // Both images - Split Icon
+                                                            $icon_html = '<div class="position-relative overflow-hidden rounded-circle" style="width: 40px; height: 40px;">';
+                                                            $icon_html .= '<img src="' . esc_url($cmdr_img_url) . '" style="width: 100%; height: 100%; object-fit: cover; position: absolute; left: 0; top: 0; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">';
+                                                            $icon_html .= '<img src="' . esc_url($partner_img_url) . '" style="width: 100%; height: 100%; object-fit: cover; position: absolute; left: 0; top: 0; clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);">';
+                                                            $icon_html .= '</div>';
+                                                            $popover_content = '<div class=\'d-flex\'><img src=\'' . esc_url($cmdr_img_url) . '\' style=\'width: 150px; height: auto;\' class=\'me-1 rounded\'><img src=\'' . esc_url($partner_img_url) . '\' style=\'width: 150px; height: auto;\' class=\'rounded\'></div>';
+                                                        } elseif ($cmdr_img_url) {
+                                                            // Only Commander
+                                                            $icon_html = '<img src="' . esc_url($cmdr_img_url) . '" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">';
+                                                            $popover_content = '<img src=\'' . esc_url($cmdr_img_url) . '\' style=\'width: 200px; height: auto;\' class=\'rounded\'>';
+                                                        }
+                                                        
+                                                        if ($icon_html && $popover_content) {
+                                                            $icon_html = '<a tabindex="0" class="text-decoration-none d-inline-block me-2" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="' . $popover_content . '">' . $icon_html . '</a>';
+                                                        } elseif ($icon_html) {
+                                                            $icon_html = '<div class="d-inline-block me-2">' . $icon_html . '</div>';
+                                                        }
+                                                    }
                                                     
                                                     // Colors for top 3
                                                     $row_class = '';
@@ -120,7 +173,11 @@ get_header(); ?>
                                                             $commander = get_field('commander', $player_deck_id);
                                                             $partner = get_field('partner', $player_deck_id);
                                                             
-                                                            $deck_display = '<div>' . esc_html($deck_post->post_title) . '</div>';
+                                                            // Link to deck
+                                                            $deck_link = get_permalink($player_deck_id);
+                                                            $deck_title_html = '<a href="' . esc_url($deck_link) . '" class="text-decoration-none text-reset">' . esc_html($deck_post->post_title) . '</a>';
+                                                            
+                                                            $deck_display = '<div>' . $deck_title_html . '</div>';
                                                             if ($commander) {
                                                                 $deck_display .= '<div class="small text-muted">(' . esc_html($commander) . ($partner ? ' + ' . esc_html($partner) : '') . ')</div>';
                                                             }
@@ -130,9 +187,17 @@ get_header(); ?>
                                                     <tr class="<?php echo esc_attr($row_class); ?>">
                                                         <td class="text-center fw-bold"><?php echo $display_pos; ?></td>
                                                         <td>
-                                                            <?php echo esc_html($name); ?>
+                                                            <?php 
+                                                            $avatar = get_avatar($user_id ? $user_id : 0, 24, 'mp', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
+                                                            
+                                                            if ( $player_profile_url ) {
+                                                                echo '<a href="' . esc_url($player_profile_url) . '" class="text-decoration-none text-reset d-flex align-items-center">' . $avatar . esc_html($display_name) . '</a>';
+                                                            } else {
+                                                                echo '<div class="d-flex align-items-center">' . $avatar . esc_html($display_name) . '</div>';
+                                                            }
+                                                            ?>
                                                         </td>
-                                                        <td class="fst-italic"><?php echo $deck_display; ?></td>
+                                                        <td class="fst-italic"><div class="d-flex align-items-center"><?php echo $icon_html; ?><div><?php echo $deck_display; ?></div></div></td>
                                                         <td class="text-center fw-bold"><?php echo esc_html($points); ?></td>
                                                         <td class="text-center d-none d-sm-table-cell">
                                                             <span class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
@@ -149,6 +214,15 @@ get_header(); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
+
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+                                var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                                    return new bootstrap.Popover(popoverTriggerEl)
+                                })
+                            });
+                            </script>
 
                             <?php
                             // Survey Section
@@ -278,6 +352,7 @@ get_header(); ?>
 .rank-gold td { color: #d4af37; font-weight: bold; }
 .rank-silver td { color: #8a8a8a; font-weight: bold; }
 .rank-bronze td { color: #cd7f32; font-weight: bold; }
+.event-rankings a:hover { cursor: pointer; text-decoration: underline !important; }
 </style>
 
 <?php get_footer(); ?>

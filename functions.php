@@ -1876,7 +1876,8 @@ function event_ranking_auto_fill_name() {
                 if (userData && userData.display_name) {
                     var $row = $el.closest('tr.acf-row');
                     var $nameField = $row.find('input[name*="field_ranking_name"]');
-                    $nameField.val(userData.display_name);
+                    //Non aggiornare più il display name
+                    //$nameField.val(userData.display_name);
                 }
             });
         }
