@@ -3205,6 +3205,7 @@ function render_player_stats_page() {
                         $place_name = $place_obj ? $place_obj->post_title : '-';
                         
                         $deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : 0;
+                        $deck_name_manual = isset($rank['deck']) ? $rank['deck'] : '';
                         $deck_name = '-';
                         if ($deck_id) {
                             $d_post = get_post($deck_id);
@@ -3235,6 +3236,8 @@ function render_player_stats_page() {
                                     <a href="<?php echo get_edit_post_link($deck_id); ?>">
                                         <?php echo esc_html($deck_name); ?>
                                     </a>
+                                <?php elseif ( ! empty($deck_name_manual) ) : ?>
+                                    <?php echo esc_html($deck_name_manual); ?>
                                 <?php else : ?>
                                     -
                                 <?php endif; ?>
