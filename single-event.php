@@ -144,7 +144,7 @@ get_header(); ?>
                                                         }
                                                         
                                                         if ($icon_html && $popover_content) {
-                                                            $icon_html = '<a tabindex="0" class="text-decoration-none d-inline-block me-2" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="' . $popover_content . '">' . $icon_html . '</a>';
+                                                            $icon_html = '<a tabindex="0" class="text-decoration-none d-inline-block me-2" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-custom-class="deck-popover" data-bs-content="' . $popover_content . '">' . $icon_html . '</a>';
                                                         } elseif ($icon_html) {
                                                             $icon_html = '<div class="d-inline-block me-2">' . $icon_html . '</div>';
                                                         }
@@ -353,6 +353,7 @@ get_header(); ?>
 .rank-silver td { color: #8a8a8a; font-weight: bold; }
 .rank-bronze td { color: #cd7f32; font-weight: bold; }
 .event-rankings a:hover { cursor: pointer; text-decoration: underline !important; }
+.deck-popover { max-width: 500px; }
 </style>
 
 <?php get_footer(); ?>
