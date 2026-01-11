@@ -1941,6 +1941,77 @@ function event_ranking_auto_fill_name() {
             }
         });
         
+        // Sync Players button functionality
+        $(document).on('click', '#sync-players-btn', function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var $repeater = $('[data-name="event_ranking"]');
+            var $rows = $repeater.find('.acf-row:not(.acf-clone)');
+            
+            if (!$rows.length) {
+                alert('Nessuna riga trovata nella classifica.');
+                return;
+            }
+            
+            $btn.prop('disabled', true).text('Syncing...');
+            
+            var namesToSync = [];
+            $rows.each(function(index) {
+                var $row = $(this);
+                var name = $row.find('[data-name="name"] input').val();
+                
+                if (name) {
+                    namesToSync.push({
+                        row_index: index,
+                        name: name
+                    });
+                }
+            });
+            
+            if (namesToSync.length === 0) {
+                $btn.prop('disabled', false).text('Sync Player');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'sync_ranking_players',
+                    names: namesToSync,
+                    nonce: '<?php echo wp_create_nonce('sync_ranking_players_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var matchCount = 0;
+                        response.data.forEach(function(match) {
+                            var $row = $rows.eq(match.row_index);
+                            var $select = $row.find('[data-name="player_id"] select');
+                            
+                            if ($select.length && match.user_id) {
+                                // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
+                                if ($select.find('option[value="' + match.user_id + '"]').length === 0) {
+                                    $select.append(new Option(match.display_name, match.user_id, true, true));
+                                }
+                                $select.val(match.user_id).trigger('change');
+                                matchCount++;
+                            }
+                        });
+                        alert('Sincronizzazione completata: ' + matchCount + ' giocatori abbinati.');
+                    } else {
+                        alert('Nessun giocatore trovato.');
+                    }
+                },
+                error: function() {
+                    alert('Errore durante la sincronizzazione.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Sync Player');
+                }
+            });
+        });
+        
         // Clear Rankings button functionality
         $(document).on('click', '#clear-rankings-btn', function(e) {
             e.preventDefault();
@@ -2008,6 +2079,7 @@ function add_populate_rankings_button() {
             if ($jsonField.length && !$('#populate-rankings-btn').length) {
                 $jsonField.after(
                     '<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px; margin-right:5px;">Populate Rankings</button>' +
+                    '<button type="button" id="sync-players-btn" class="button button-secondary" style="margin-top:5px; margin-right:5px;">Sync Player</button>' +
                     '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>'
                 );
             }
@@ -2024,6 +2096,58 @@ function add_populate_rankings_button() {
     <?php
 }
 add_action('acf/input/admin_head', 'add_populate_rankings_button');
+
+/**
+ * AJAX handler to sync ranking players based on name
+ */
+function ajax_sync_ranking_players() {
+    check_ajax_referer('sync_ranking_players_nonce', 'nonce');
+    
+    $names = isset($_POST['names']) ? $_POST['names'] : array();
+    $matches = array();
+    
+    if (!empty($names)) {
+        // Get all users with role 'player'
+        $users = get_users(array(
+            'role' => 'player',
+        ));
+        
+        foreach ($names as $item) {
+            $search_name = trim($item['name']);
+            $found_user = null;
+            
+            // Try to parse "Name Sur." (Firstname + 3 chars of Lastname + dot)
+            $parts = explode(' ', $search_name);
+            if (count($parts) > 1) {
+                $last_chunk = end($parts);
+                // Check if it ends with dot and has length 4 (3 chars + dot) e.g. "Mar."
+                if (substr($last_chunk, -1) === '.') {
+                    $short_last = substr($last_chunk, 0, -1); // "Mar"
+                    $first_part = implode(' ', array_slice($parts, 0, -1)); // "Angelo"
+                    
+                    foreach ($users as $user) {
+                        // Check first name exact match and last name starts with short_last
+                        if (strcasecmp($user->first_name, $first_part) === 0 && stripos($user->last_name, $short_last) === 0) {
+                            $found_user = $user;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if ($found_user) {
+                $matches[] = array(
+                    'row_index' => $item['row_index'],
+                    'user_id' => $found_user->ID,
+                    'display_name' => $found_user->display_name
+                );
+            }
+        }
+    }
+    
+    wp_send_json_success($matches);
+}
+add_action('wp_ajax_sync_ranking_players', 'ajax_sync_ranking_players');
 
 /**
  * Server-side approach - populate name from player_id on save
