@@ -169,6 +169,14 @@ $author_id = $author->ID;
                 </div>
             </div>
 
+            <?php if (is_user_logged_in() && get_current_user_id() == $author_id) : ?>
+                <div class="row justify-content-center mb-5">
+                    <div class="col-auto">
+                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg"><i class="fas fa-chart-bar me-2"></i> View my stats</a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <!-- Decks List -->
             <?php if ($decks_query->have_posts()) : ?>
                 <div class="decks-section pt-4 border-top">
