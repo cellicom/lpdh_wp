@@ -1839,37 +1839,6 @@ function event_ranking_auto_fill_name() {
     ?>
     <script type="text/javascript">
     (function($) {
-        // AJAX function to get user display_name
-        function getUserDisplayName(userId, $nameField) {
-            if (!userId) return;
-            
-            $.ajax({
-                url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                type: 'POST',
-                data: {
-                    action: 'get_user_display_name',
-                    user_id: userId,
-                    nonce: '<?php echo wp_create_nonce('get_user_display_name_nonce'); ?>'
-                },
-                success: function(response) {
-                    if (response.success && response.data) {
-                        $nameField.val(response.data.display_name);
-                    }
-                }
-            });
-        }
-        
-        // Select2 selection handler
-        $(document).on('select2:select', 'select[name*="field_ranking_player_id"]', function(e) {
-            var $row = $(this).closest('tr.acf-row');
-            var $nameField = $row.find('input[name*="field_ranking_name"]');
-            var userId = $(this).val();
-            
-            if (userId) {
-                getUserDisplayName(userId, $nameField);
-            }
-        });
-        
         // ACF user action - this handles the AJAX loaded user data
         if (typeof acf !== 'undefined') {
             acf.add_action('user', function(userData, $el) {
@@ -2044,27 +2013,6 @@ function event_ranking_auto_fill_name() {
     <?php
 }
 add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
-
-/**
- * AJAX handler to get user's display_name
- */
-function ajax_get_user_display_name() {
-    check_ajax_referer('get_user_display_name_nonce', 'nonce');
-    
-    $user_id = intval($_POST['user_id']);
-    
-    if ($user_id) {
-        $user = get_userdata($user_id);
-        if ($user) {
-            wp_send_json_success(array(
-                'display_name' => $user->display_name
-            ));
-        }
-    }
-    
-    wp_send_json_error();
-}
-add_action('wp_ajax_get_user_display_name', 'ajax_get_user_display_name');
 
 /**
  * Add "Populate Rankings" and "Clear Rankings" buttons after rankings_json field
@@ -3288,3 +3236,173 @@ function add_stats_link_to_user_row($actions, $user) {
     return $actions;
 }
 add_filter('user_row_actions', 'add_stats_link_to_user_row', 10, 2);
+
+/**
+ * Add "Update Leaderboard" button for Leaderboard CPT
+ */
+function add_update_leaderboard_button() {
+    $screen = get_current_screen();
+    if (!$screen || $screen->post_type !== 'leaderboard') {
+        return;
+    }
+    ?>
+    <script type="text/javascript">
+    (function($) {
+        function addUpdateLeaderboardButton() {
+            var $jsonField = $('.acf-field[data-key="field_leaderboard_rankings_json"]');
+            
+            if ($jsonField.length && !$('#update-leaderboard-btn').length) {
+                $jsonField.find('.acf-input').append(
+                    '<button type="button" id="update-leaderboard-btn" class="button button-primary" style="margin-top:10px;">Update Leaderboard</button>' +
+                    '<span id="update-leaderboard-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
+                );
+            }
+        }
+        
+        $(document).ready(function() {
+            setTimeout(addUpdateLeaderboardButton, 500);
+        });
+        
+        if (typeof acf !== 'undefined') {
+            acf.add_action('ready', addUpdateLeaderboardButton);
+        }
+
+        $(document).on('click', '#update-leaderboard-btn', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var $msg = $('#update-leaderboard-msg');
+            var $yearField = $('.acf-field[data-key="field_leaderboard_year"] select');
+            var year = $yearField.val();
+            
+            if (!year) {
+                alert('Seleziona un anno prima di aggiornare.');
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Updating...');
+            $msg.hide();
+
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'update_leaderboard_rankings',
+                    year: year,
+                    post_id: <?php echo get_the_ID() ? get_the_ID() : 0; ?>,
+                    nonce: '<?php echo wp_create_nonce('update_leaderboard_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        var $textarea = $('.acf-field[data-key="field_leaderboard_rankings_json"] textarea');
+                        $textarea.val(JSON.stringify(response.data, null, 2));
+                        $msg.text('Leaderboard aggiornata!').css('color', '#46b450').show();
+                    } else {
+                        $msg.text('Errore: ' + (response.data || 'Sconosciuto')).css('color', '#d63638').show();
+                    }
+                },
+                error: function() {
+                    $msg.text('Errore di connessione.').css('color', '#d63638').show();
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Update Leaderboard');
+                    setTimeout(function() { $msg.fadeOut(); }, 5000);
+                }
+            });
+        });
+    })(jQuery);
+    </script>
+    <?php
+}
+add_action('acf/input/admin_footer', 'add_update_leaderboard_button');
+
+/**
+ * AJAX handler to calculate and update leaderboard rankings
+ */
+function ajax_update_leaderboard_rankings() {
+    check_ajax_referer('update_leaderboard_nonce', 'nonce');
+    
+    $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
+    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    
+    if (!$year) {
+        wp_send_json_error('Anno non valido');
+    }
+
+    $args = array(
+        'post_type' => 'event',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_query' => array(
+            array(
+                'key' => 'event_date',
+                'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
+                'compare' => 'BETWEEN',
+                'type' => 'DATETIME'
+            )
+        )
+    );
+    
+    $events = get_posts($args);
+    $general = array();
+    
+    foreach ($events as $event) {
+        $rankings = get_field('event_ranking', $event->ID);
+        
+        if (is_array($rankings)) {
+            $total_players = count($rankings);
+            
+            foreach ($rankings as $rank) {
+                $name = isset($rank['name']) ? trim($rank['name']) : '';
+                
+                if (empty($name) && !empty($rank['player_id'])) {
+                    $user = get_userdata($rank['player_id']);
+                    if ($user) {
+                        $name = $user->display_name;
+                    }
+                }
+                
+                if (empty($name)) continue;
+                
+                if (!isset($general[$name])) {
+                    $general[$name] = array(
+                        'name' => $name,
+                        'points' => 0,
+                        'win' => 0,
+                        'lose' => 0,
+                        'draw' => 0,
+                        'count' => 0,
+                        'first' => 0,
+                        'last' => 0
+                    );
+                }
+                
+                $general[$name]['points'] += intval(isset($rank['points']) ? $rank['points'] : 0);
+                $general[$name]['win'] += intval(isset($rank['win']) ? $rank['win'] : 0);
+                $general[$name]['lose'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                $general[$name]['draw'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                $general[$name]['count']++;
+                
+                $pos = intval(isset($rank['pos']) ? $rank['pos'] : 0);
+                if ($pos === 1) {
+                    $general[$name]['first']++;
+                }
+                if ($pos === $total_players) {
+                    $general[$name]['last']++;
+                }
+            }
+        }
+    }
+    
+    $result = array_values($general);
+    
+    usort($result, function($a, $b) {
+        return $b['points'] - $a['points'];
+    });
+    
+    if ($post_id) {
+        update_field('field_leaderboard_rankings_json', json_encode($result), $post_id);
+    }
+    
+    wp_send_json_success($result);
+}
+add_action('wp_ajax_update_leaderboard_rankings', 'ajax_update_leaderboard_rankings');
