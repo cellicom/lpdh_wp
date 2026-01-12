@@ -279,6 +279,13 @@ get_header(); ?>
                                             
                                             rows.forEach((row, index) => {
                                                 row.children[0].textContent = index + 1;
+                                                
+                                                // Update row classes for top 3
+                                                row.classList.remove('rank-gold', 'rank-silver', 'rank-bronze');
+                                                if (index === 0) row.classList.add('rank-gold');
+                                                else if (index === 1) row.classList.add('rank-silver');
+                                                else if (index === 2) row.classList.add('rank-bronze');
+                                                
                                                 tbody.appendChild(row);
                                             });
                                         });
