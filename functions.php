@@ -3353,9 +3353,19 @@ function ajax_update_leaderboard_rankings() {
             
             foreach ($rankings as $rank) {
                 $name = isset($rank['name']) ? trim($rank['name']) : '';
+                $user_id = 0;
                 
-                if (empty($name) && !empty($rank['player_id'])) {
-                    $user = get_userdata($rank['player_id']);
+                $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : 0;
+                if ( ! empty( $player_id_field ) ) {
+                    if ( is_array( $player_id_field ) && isset( $player_id_field['ID'] ) ) {
+                        $user_id = $player_id_field['ID'];
+                    } elseif ( is_numeric( $player_id_field ) ) {
+                        $user_id = $player_id_field;
+                    }
+                }
+                
+                if (empty($name) && $user_id) {
+                    $user = get_userdata($user_id);
                     if ($user) {
                         $name = $user->display_name;
                     }
@@ -3366,6 +3376,7 @@ function ajax_update_leaderboard_rankings() {
                 if (!isset($general[$name])) {
                     $general[$name] = array(
                         'name' => $name,
+                        'user_id' => $user_id,
                         'points' => 0,
                         'win' => 0,
                         'lose' => 0,
@@ -3374,6 +3385,11 @@ function ajax_update_leaderboard_rankings() {
                         'first' => 0,
                         'last' => 0
                     );
+                } else {
+                    // Update user_id if it was missing and now we have it
+                    if (empty($general[$name]['user_id']) && $user_id) {
+                        $general[$name]['user_id'] = $user_id;
+                    }
                 }
                 
                 $general[$name]['points'] += intval(isset($rank['points']) ? $rank['points'] : 0);
