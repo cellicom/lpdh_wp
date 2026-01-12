@@ -3584,3 +3584,56 @@ function ajax_update_leaderboard_rankings() {
     wp_send_json_success($result);
 }
 add_action('wp_ajax_update_leaderboard_rankings', 'ajax_update_leaderboard_rankings');
+
+/**
+ * Aggiunge voce Login/Profilo al menu principale
+ */
+function lpdh_add_login_logout_menu($items, $args) {
+    // Verifica che sia il menu principale (solitamente 'menu-1' in Bootscore)
+    if ($args->theme_location == 'main-menu') {
+        
+        if (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            $profile_url = get_author_posts_url($current_user->ID);
+            $logout_url = wp_logout_url(home_url());
+            $my_decks_url = admin_url('edit.php?post_type=deck');
+            $avatar = get_avatar($current_user->ID, 24, '', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
+            
+            // Voce utente con Avatar e Nome
+            $items .= '<li class="menu-item menu-item-has-children dropdown user-menu-item">';
+            // Rimuoviamo data-bs-toggle per permettere il click sul link, gestiamo il dropdown via CSS hover
+            $items .= '<a href="' . esc_url($profile_url) . '" class="nav-link d-flex align-items-center">';
+            $items .= $avatar . esc_html($current_user->display_name);
+            $items .= '</a>';
+            
+            // Dropdown menu
+            $items .= '<ul class="dropdown-menu dropdown-menu-end">';
+            $items .= '<li class="menu-item"><a href="' . esc_url($my_decks_url) . '" class="dropdown-item"><i class="fas fa-layer-group me-2"></i>I miei mazzi</a></li>';
+            $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
+            $items .= '</ul>';
+            
+            // CSS per gestire l'hover (solo desktop)
+            $items .= '<style>
+                @media (min-width: 992px) {
+                    .user-menu-item:hover .dropdown-menu {
+                        display: block;
+                        margin-top: 0;
+                        right: 0;
+                        left: auto;
+                    }
+                }
+            </style>';
+            
+            $items .= '</li>';
+            
+        } else {
+            // Voce Login (porta a pagina login personalizzata)
+            $login_url = home_url('/login');
+            $items .= '<li class="menu-item">';
+            $items .= '<a href="' . esc_url($login_url) . '" class="nav-link"><i class="fas fa-user me-1"></i> Login</a>';
+            $items .= '</li>';
+        }
+    }
+    return $items;
+}
+add_filter('wp_nav_menu_items', 'lpdh_add_login_logout_menu', 10, 2);
