@@ -2693,7 +2693,7 @@ function render_player_stats_page() {
         'post_status' => 'publish',
         'meta_key' => 'event_date',
         'orderby' => 'meta_value',
-        'order' => 'DESC' // Latest first for the table
+        'order' => 'ASC' // Chronological for ELO calc
     ));
 
     // Collect available years
@@ -2713,6 +2713,11 @@ function render_player_stats_page() {
     
     $selected_year = isset($_GET['stats_year']) ? $_GET['stats_year'] : 'global';
 
+    // ELO Tracking
+    $player_elos = array();
+    $elo_history_labels = array();
+    $elo_history_data = array();
+
     if ($events_query->have_posts()) {
         while ($events_query->have_posts()) {
             $events_query->the_post();
@@ -2726,6 +2731,34 @@ function render_player_stats_page() {
             
             if (is_array($rankings)) {
                 $total_players = count($rankings);
+                
+                // ELO Pre-calculation for this event (Average ELO)
+                $event_participants_names = array();
+                $total_event_elo = 0;
+                foreach ($rankings as $rank) {
+                    $name = isset($rank['name']) ? trim($rank['name']) : '';
+                    if (empty($name)) {
+                        $pid = isset($rank['player_id']) ? $rank['player_id'] : 0;
+                        if (is_array($pid) && isset($pid['ID'])) $pid = $pid['ID'];
+                        elseif (is_object($pid)) $pid = $pid->ID;
+                        
+                        if ($pid) {
+                            $u = get_userdata($pid);
+                            if ($u) $name = $u->display_name;
+                        }
+                    }
+                    if (empty($name)) continue;
+                    
+                    if (!isset($player_elos[$name])) {
+                        $player_elos[$name] = 1200;
+                    }
+                    $event_participants_names[] = $name;
+                    $total_event_elo += $player_elos[$name];
+                }
+                $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : 1200;
+
+                // Process Rankings for Stats & ELO Update
+                $user_found_in_event = false;
                 foreach ($rankings as $index => $rank) {
                     $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
                     // Handle user array or ID
@@ -2738,8 +2771,38 @@ function render_player_stats_page() {
                         $p_id = $player_id_field;
                     }
 
+                    // Resolve name for ELO tracking
+                    $name = isset($rank['name']) ? trim($rank['name']) : '';
+                    if (empty($name) && $p_id) {
+                        $u = get_userdata($p_id);
+                        if ($u) $name = $u->display_name;
+                    }
+                    
+                    // ELO Update Logic
+                    if (!empty($name)) {
+                        $current_elo = $player_elos[$name];
+                        $wins = intval(isset($rank['win']) ? $rank['win'] : 0);
+                        $draws = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                        $losses = intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                        $games_played = $wins + $draws + $losses;
+                        
+                        if ($games_played > 0) {
+                            $actual_score = $wins + ($draws * 0.5);
+                            $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+                            $expected_score = $expected_score_rate * $games_played;
+                            $k_factor = 32;
+                            
+                            $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                            $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+                            $position_adjustment = 20 * ($rank_score - 0.5);
+                            
+                            $player_elos[$name] = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;
+                        }
+                    }
+
                     if ($p_id == $user_id) {
                         // Found the user
+                        $user_found_in_event = true;
                         
                         // Collect Yearly Stats (Global)
                         if ($event_year) {
@@ -2755,7 +2818,7 @@ function render_player_stats_page() {
 
                         // Filter for main stats
                         if ($selected_year !== 'global' && $event_year !== $selected_year) {
-                            break; 
+                            continue; 
                         }
 
                         $total_attendance++;
@@ -2806,13 +2869,20 @@ function render_player_stats_page() {
                             'total_players' => $total_players
                         );
                         
-                        break; // User found in this event, move to next event
+                        // Track ELO history for chart
+                        if (!empty($name)) {
+                            $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
+                            $elo_history_data[] = round($player_elos[$name]);
+                        }
                     }
                 }
             }
         }
         wp_reset_postdata();
     }
+    
+    // Reverse events for display (Newest first)
+    $player_events = array_reverse($player_events);
 
     // Prepare Chart Data
     $chart_labels = array();
@@ -2976,6 +3046,12 @@ function render_player_stats_page() {
                 <h2 class="title">Andamento Win Rate</h2>
                 <canvas id="winRateChart" style="max-height: 300px;"></canvas>
             </div>
+
+            <!-- Box 4: Andamento ELO -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title">Andamento ELO</h2>
+                <canvas id="eloChart" style="max-height: 300px;"></canvas>
+            </div>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -3025,6 +3101,28 @@ function render_player_stats_page() {
                             ticks: { callback: function(value) { return value + "%" } }
                         }
                     },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // ELO Chart
+            var ctxElo = document.getElementById('eloChart').getContext('2d');
+            new Chart(ctxElo, {
+                type: 'line',
+                data: {
+                    labels: <?php echo json_encode($elo_history_labels); ?>,
+                    datasets: [{
+                        label: 'ELO',
+                        data: <?php echo json_encode($elo_history_data); ?>,
+                        borderColor: '#8e44ad',
+                        backgroundColor: 'rgba(142, 68, 173, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } }
                 }
             });
@@ -3332,6 +3430,9 @@ function ajax_update_leaderboard_rankings() {
         'post_type' => 'event',
         'posts_per_page' => -1,
         'post_status' => 'publish',
+        'meta_key' => 'event_date',
+        'orderby' => 'meta_value',
+        'order' => 'ASC', // Ordine cronologico per calcolo ELO
         'meta_query' => array(
             array(
                 'key' => 'event_date',
@@ -3344,12 +3445,40 @@ function ajax_update_leaderboard_rankings() {
     
     $events = get_posts($args);
     $general = array();
+    $player_elos = array(); // Tracciamento ELO dei giocatori
     
     foreach ($events as $event) {
         $rankings = get_field('event_ranking', $event->ID);
         
         if (is_array($rankings)) {
             $total_players = count($rankings);
+            
+            // Passaggio 1: Calcola ELO medio del torneo (forza del campo)
+            $event_participants_names = array();
+            $total_event_elo = 0;
+
+            foreach ($rankings as $rank) {
+                $name = isset($rank['name']) ? trim($rank['name']) : '';
+                // Risoluzione nome se mancante (logica semplificata per pre-calcolo)
+                if (empty($name)) {
+                    $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : 0;
+                    if ( ! empty( $player_id_field ) ) {
+                        $uid = is_array($player_id_field) ? $player_id_field['ID'] : $player_id_field;
+                        $u = get_userdata($uid);
+                        if ($u) $name = $u->display_name;
+                    }
+                }
+                
+                if (empty($name)) continue;
+
+                if (!isset($player_elos[$name])) {
+                    $player_elos[$name] = 1200; // ELO Base
+                }
+                $event_participants_names[] = $name;
+                $total_event_elo += $player_elos[$name];
+            }
+            
+            $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : 1200;
             
             foreach ($rankings as $rank) {
                 $name = isset($rank['name']) ? trim($rank['name']) : '';
@@ -3383,7 +3512,8 @@ function ajax_update_leaderboard_rankings() {
                         'draw' => 0,
                         'count' => 0,
                         'first' => 0,
-                        'last' => 0
+                        'last' => 0,
+                        'elo' => 1200
                     );
                 } else {
                     // Update user_id if it was missing and now we have it
@@ -3391,11 +3521,15 @@ function ajax_update_leaderboard_rankings() {
                         $general[$name]['user_id'] = $user_id;
                     }
                 }
+
+                $wins = intval(isset($rank['win']) ? $rank['win'] : 0);
+                $draws = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                $losses = intval(isset($rank['lose']) ? $rank['lose'] : 0);
                 
                 $general[$name]['points'] += intval(isset($rank['points']) ? $rank['points'] : 0);
-                $general[$name]['win'] += intval(isset($rank['win']) ? $rank['win'] : 0);
-                $general[$name]['lose'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                $general[$name]['draw'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                $general[$name]['win'] += $wins;
+                $general[$name]['lose'] += $losses;
+                $general[$name]['draw'] += $draws;
                 $general[$name]['count']++;
                 
                 $pos = intval(isset($rank['pos']) ? $rank['pos'] : 0);
@@ -3405,6 +3539,28 @@ function ajax_update_leaderboard_rankings() {
                 if ($pos === $total_players) {
                     $general[$name]['last']++;
                 }
+
+                // Calcolo ELO
+                $current_elo = $player_elos[$name];
+                $games_played = $wins + $draws + $losses;
+                
+                if ($games_played > 0) {
+                    $actual_score = $wins + ($draws * 0.5);
+                    $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+                    $expected_score = $expected_score_rate * $games_played;
+                    $k_factor = 32; // K-factor standard
+                    
+                    $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score);
+                    
+                    // Position Adjustment
+                    $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+                    $position_adjustment = 20 * ($rank_score - 0.5);
+                    $new_elo += $position_adjustment;
+                    
+                    $player_elos[$name] = $new_elo;
+                }
+                
+                $general[$name]['elo'] = round($player_elos[$name]);
             }
         }
     }
@@ -3417,6 +3573,12 @@ function ajax_update_leaderboard_rankings() {
     
     if ($post_id) {
         update_field('field_leaderboard_rankings_json', json_encode($result), $post_id);
+        // Aggiorna la data di modifica del post
+        wp_update_post(array(
+            'ID' => $post_id,
+            'post_modified' => current_time('mysql'),
+            'post_modified_gmt' => current_time('mysql', 1)
+        ));
     }
     
     wp_send_json_success($result);

@@ -24,9 +24,9 @@ get_header(); ?>
                                 
                                 <?php
                                 $year = get_field('field_leaderboard_year');
-                                if ($year) : ?>
-                                    <div class="text-muted">
-                                        <span class="badge bg-secondary"><?php echo esc_html($year); ?></span>
+                                if (get_the_modified_date()) : ?>
+                                    <div class="text-muted small mt-2">
+                                        <i class="fas fa-clock me-1"></i> Ultimo aggiornamento: <?php the_modified_date('d/m/Y H:i'); ?>
                                     </div>
                                 <?php endif; ?>
                             </header>
@@ -40,6 +40,125 @@ get_header(); ?>
                             $rankings = json_decode($rankings_json, true);
                             
                             if ( is_array($rankings) && !empty($rankings) ) : ?>
+                                
+                                <?php
+                                // Calcolo Statistiche per i riquadri
+                                $best_points = null;
+                                $best_first = null;
+                                $best_attendance = null;
+                                $best_last = null;
+                                
+                                foreach ($rankings as $r) {
+                                    // Punti (già ordinato, ma per sicurezza)
+                                    if (!$best_points || $r['points'] > $best_points['points']) $best_points = $r;
+                                    // Primi posti
+                                    if (!$best_first || $r['first'] > $best_first['first']) $best_first = $r;
+                                    // Presenze
+                                    if (!$best_attendance || $r['count'] > $best_attendance['count']) $best_attendance = $r;
+                                    // Ultimi posti
+                                    if (!$best_last || $r['last'] > $best_last['last']) $best_last = $r;
+                                }
+
+                                // Miglior Torneo (più presenze)
+                                $best_event = null;
+                                $max_event_players = 0;
+                                if ($year) {
+                                    $events = get_posts(array(
+                                        'post_type' => 'event',
+                                        'posts_per_page' => -1,
+                                        'meta_query' => array(
+                                            array(
+                                                'key' => 'event_date',
+                                                'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
+                                                'compare' => 'BETWEEN',
+                                                'type' => 'DATETIME'
+                                            )
+                                        )
+                                    ));
+                                    
+                                    foreach ($events as $evt) {
+                                        $evt_rankings = get_field('event_ranking', $evt->ID);
+                                        $count = is_array($evt_rankings) ? count($evt_rankings) : 0;
+                                        if ($count > $max_event_players) {
+                                            $max_event_players = $count;
+                                            $best_event = $evt;
+                                        }
+                                    }
+                                }
+
+                                // Helper per link profilo
+                                function get_player_link_html($p) {
+                                    $name = esc_html($p['name']);
+                                    if (!empty($p['user_id'])) {
+                                        return '<a href="' . esc_url(get_author_posts_url($p['user_id'])) . '" class="fw-bold text-decoration-none">' . $name . '</a>';
+                                    }
+                                    return '<span class="fw-bold">' . $name . '</span>';
+                                }
+                                ?>
+
+                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3 mb-3 justify-content-center text-center">
+                                    <!-- Miglior player con più punti -->
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0 bg-light">
+                                            <div class="card-body">
+                                                <div class="small text-muted text-uppercase mb-1">Punteggio</div>
+                                                <div class="mb-1"><?php echo get_player_link_html($best_points); ?></div>
+                                                <div class="h4 mb-0 text-primary"><?php echo $best_points['points']; ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Miglior player con primi posti -->
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0 bg-light">
+                                            <div class="card-body">
+                                                <div class="small text-muted text-uppercase mb-1">🥇 Vittorie</div>
+                                                <div class="mb-1"><?php echo get_player_link_html($best_first); ?></div>
+                                                <div class="h4 mb-0 text-warning"><?php echo $best_first['first']; ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Miglior player con presenze -->
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0 bg-light">
+                                            <div class="card-body">
+                                                <div class="small text-muted text-uppercase mb-1">Presenze</div>
+                                                <div class="mb-1"><?php echo get_player_link_html($best_attendance); ?></div>
+                                                <div class="h4 mb-0 text-info"><?php echo $best_attendance['count']; ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Miglior player con più ultimi posti -->
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0 bg-light">
+                                            <div class="card-body">
+                                                <div class="small text-muted text-uppercase mb-1">🤡 Ultimi</div>
+                                                <div class="mb-1"><?php echo get_player_link_html($best_last); ?></div>
+                                                <div class="h4 mb-0 text-danger"><?php echo $best_last['last']; ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3 mb-5 justify-content-center text-center">
+                                    <!-- Miglior torneo -->
+                                    <?php if ($best_event) : 
+                                        $place = get_field('field_event_place', $best_event->ID);
+                                        $date = get_field('field_event_date', $best_event->ID);
+                                    ?>
+                                    <div class="col-12">
+                                        <div class="card h-100 shadow-sm border-0 bg-light">
+                                            <div class="card-body">
+                                                <div class="small text-muted text-uppercase mb-1">Miglior Torneo</div>
+                                                <div class="mb-1 fw-bold"><a href="<?php echo get_permalink($best_event->ID); ?>" class="text-decoration-none"><?php echo esc_html($best_event->post_title); ?></a></div>
+                                                <div class="small text-muted"><?php echo date_i18n('d/m/Y', strtotime($date)); ?></div>
+                                                <div class="small text-muted"><?php echo $place ? esc_html($place->post_title) : '-'; ?></div>
+                                                <div class="fw-bold mt-1"><?php echo $max_event_players; ?> Players</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+
                                 <div class="leaderboard-rankings mb-5">
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle" id="leaderboardTable">
@@ -48,6 +167,7 @@ get_header(); ?>
                                                     <th scope="col" class="text-center" style="width: 60px;">#</th>
                                                     <th scope="col" class="sortable" style="cursor: pointer;">Giocatore <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">Punti <i class="fas fa-sort small text-muted ms-1"></i></th>
+                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">ELO <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">W <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">D <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">L <i class="fas fa-sort small text-muted ms-1"></i></th>
@@ -62,6 +182,7 @@ get_header(); ?>
                                                     $pos = $index + 1;
                                                     $name = isset($rank['name']) ? $rank['name'] : '';
                                                     $points = isset($rank['points']) ? $rank['points'] : 0;
+                                                    $elo = isset($rank['elo']) ? $rank['elo'] : 1200;
                                                     $win = isset($rank['win']) ? $rank['win'] : 0;
                                                     $draw = isset($rank['draw']) ? $rank['draw'] : 0;
                                                     $lose = isset($rank['lose']) ? $rank['lose'] : 0;
@@ -108,6 +229,7 @@ get_header(); ?>
                                                             ?>
                                                         </td>
                                                         <td class="text-center fw-bold" data-value="<?php echo esc_attr($points); ?>"><?php echo esc_html($points); ?></td>
+                                                        <td class="text-center" data-value="<?php echo esc_attr($elo); ?>"><?php echo esc_html($elo); ?></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($win); ?>"><span class="text-success"><?php echo esc_html($win); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($draw); ?>"><span class="text-secondary"><?php echo esc_html($draw); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($lose); ?>"><span class="text-danger"><?php echo esc_html($lose); ?></span></td>
@@ -155,7 +277,10 @@ get_header(); ?>
                                                 return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
                                             });
                                             
-                                            rows.forEach(row => tbody.appendChild(row));
+                                            rows.forEach((row, index) => {
+                                                row.children[0].textContent = index + 1;
+                                                tbody.appendChild(row);
+                                            });
                                         });
                                     });
                                 });
