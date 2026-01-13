@@ -24,7 +24,7 @@ if ($args['visible']) {
                 <div class="col-lg-8">
                     <?php if(!empty($title)) { ?>
                         <div class="text-center mb-5">
-                            <h2 class="section-title"><?php echo esc_html($title); ?></h2>
+                            <h2 class="section-title"><strong><?php echo esc_html($title); ?></strong></h2>
                         </div>
                     <?php } ?>
                     

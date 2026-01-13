@@ -74,4 +74,11 @@ $args = array(
     </main>
 </div>
 
+<style>
+.accordion {
+    max-width: 800px;
+    margin: 0 auto;
+}
+</style>
+
 <?php get_footer(); ?>
