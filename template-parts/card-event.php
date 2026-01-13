@@ -36,7 +36,7 @@ if ( is_array($rankings) ) {
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class('event-card'); ?>>
-    <div class="event-card-inner">
+    <div class="event-card-inner d-flex flex-column h-100">
         <div class="event-thumbnail">
             <?php if ( has_post_thumbnail() ) : ?>
                 <?php the_post_thumbnail('medium', array('class' => 'img-fluid w-100')); ?>
@@ -47,7 +47,7 @@ if ( is_array($rankings) ) {
             <?php endif; ?>
         </div>
 
-        <div class="event-content p-3">
+        <div class="event-content p-3 d-flex flex-column flex-grow-1">
             <h2 class="event-title h6 mb-2">
                 <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark stretched-link">
                     <?php the_title(); ?>
@@ -56,7 +56,7 @@ if ( is_array($rankings) ) {
 
             <hr class="event-divider">
 
-            <div class="event-meta small">
+            <div class="event-meta small d-flex flex-column flex-grow-1">
                 <?php if ( $show_place && $place_name ) : ?>
                     <div class="event-place mb-1 text-truncate" title="<?php echo esc_attr($place_name); ?>">
                         <i class="fas fa-map-marker-alt text-danger me-2"></i>
@@ -72,7 +72,7 @@ if ( is_array($rankings) ) {
                 <?php endif; ?>
 
                 <?php if ( $winner_name ) : ?>
-                    <div class="event-winner mt-3 pt-2 border-top">
+                    <div class="event-winner mt-auto pt-2 border-top">
                         <div class="fw-bold mb-1" style="font-size: 0.9em; color: #ffc107;">
                             <i class="fas fa-trophy me-1"></i> Winner
                         </div>
