@@ -59,21 +59,21 @@ if ( is_array($rankings) ) {
             <div class="event-meta small">
                 <?php if ( $show_place && $place_name ) : ?>
                     <div class="event-place mb-1 text-truncate" title="<?php echo esc_attr($place_name); ?>">
-                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
                         <?php echo esc_html( $place_name ); ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if ( $formatted_date ) : ?>
                     <div class="event-time mb-2">
-                        <i class="far fa-clock text-primary me-2"></i>
+                        <i class="fas fa-calendar-alt me-2" style="color: #003366;"></i>
                         <?php echo esc_html( $formatted_date ); ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if ( $winner_name ) : ?>
                     <div class="event-winner mt-3 pt-2 border-top">
-                        <div class="fw-bold text-success mb-1" style="font-size: 0.9em;">
+                        <div class="fw-bold mb-1" style="font-size: 0.9em; color: #ffc107;">
                             <i class="fas fa-trophy me-1"></i> Winner
                         </div>
                         <div class="winner-name fw-bold text-truncate"><?php echo esc_html( $winner_name ); ?></div>

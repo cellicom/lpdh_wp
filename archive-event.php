@@ -99,7 +99,6 @@ get_header(); ?>
 }
 
 .event-thumbnail {
-    height: 300px;
     overflow: hidden;
     background-color: #f8f9fa;
     display: flex;
@@ -139,10 +138,9 @@ get_header(); ?>
     opacity: 0.1;
 }
 
-/* Icons Colors */
-.event-place i, .fa-map-marker-alt { color: #dc3545 !important; } /* Red */
-.event-date i, .fa-calendar-alt { color: #0d6efd !important; } /* Dark Blue */
-.winner-label, .winner-icon { color: #FFD700 !important; } /* Gold */
+.event-archive-grid > .event-card {
+    width: 100%;
+}
 
 /* Tablet: 2 card per riga */
 @media (min-width: 768px) {
@@ -152,14 +150,10 @@ get_header(); ?>
 }
 
 /* Desktop: 4 card per riga */
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
     .event-archive-grid > .event-card {
         width: calc(25% - 15px);
     }
-}
-
-.event-archive-grid > .event-card {
-    width: 100%;
 }
 
 /* Pagination Styling */

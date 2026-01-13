@@ -31,14 +31,14 @@ get_header(); ?>
                                 <div class="event-details text-muted d-flex justify-content-center gap-4 mt-2 align-items-center">
                                     <?php if ($event_date) : ?>
                                         <div class="event-date">
-                                            <i class="fas fa-calendar-alt text-primary me-1"></i>
+                                            <i class="fas fa-calendar-alt me-1" style="color: #003366;"></i>
                                             <?php echo esc_html(date_i18n('d/m/Y H:i', strtotime($event_date))); ?>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($place_obj) : ?>
                                         <div class="event-place">
-                                            <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                            <i class="fas fa-map-marker-alt text-danger me-1"></i>
                                             <a href="<?php echo get_permalink($place_obj->ID); ?>" class="text-decoration-none text-muted">
                                                 <?php echo esc_html($place_obj->post_title); ?>
                                             </a>
