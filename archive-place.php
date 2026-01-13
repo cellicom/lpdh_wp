@@ -11,7 +11,7 @@ get_header(); ?>
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
 
-        <header class="page-header container my-4">
+        <header class="page-header container my-4 text-center">
             <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
         </header>
 

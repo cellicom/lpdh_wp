@@ -25,14 +25,15 @@ get_header(); ?>
                 <?php endwhile; ?>
             </div>
 
-            <?php
-            // Pagination
-            the_posts_pagination( array(
-                'mid_size'  => 2,
-                'prev_text' => __( 'Previous', 'bootscore' ),
-                'next_text' => __( 'Next', 'bootscore' ),
-            ) );
-            ?>
+            <div class="mt-5">
+                <?php
+                the_posts_pagination( array(
+                    'mid_size'  => 2,
+                    'prev_text' => __( 'Previous', 'bootscore' ),
+                    'next_text' => __( 'Next', 'bootscore' ),
+                ) );
+                ?>
+            </div>
 
         <?php else : ?>
 
@@ -134,6 +135,51 @@ get_header(); ?>
 .archive-description {
     color: #6c757d;
     font-size: 1.1rem;
+}
+
+/* Pagination Styling */
+.navigation.pagination .nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.navigation.pagination .page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.navigation.pagination .page-numbers:hover {
+    background-color: #e9ecef;
+    color: #0a58ca;
+    border-color: #dee2e6;
+}
+
+.navigation.pagination .page-numbers.current {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+    pointer-events: none;
+}
+
+.navigation.pagination .page-numbers.dots {
+    border: none;
+    background: transparent;
+    color: #6c757d;
 }
 </style>
 

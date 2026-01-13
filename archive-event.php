@@ -77,8 +77,8 @@ get_header(); ?>
 
 <style>
 .event-archive-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Mobile: 1 card per riga */
+    display: flex;
+    flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
 }
@@ -146,16 +146,20 @@ get_header(); ?>
 
 /* Tablet: 2 card per riga */
 @media (min-width: 768px) {
-    .event-archive-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .event-archive-grid > .event-card {
+        width: calc(50% - 10px);
     }
 }
 
 /* Desktop: 4 card per riga */
 @media (min-width: 1200px) {
-    .event-archive-grid {
-        grid-template-columns: repeat(4, 1fr);
+    .event-archive-grid > .event-card {
+        width: calc(25% - 15px);
     }
+}
+
+.event-archive-grid > .event-card {
+    width: 100%;
 }
 
 /* Pagination Styling */

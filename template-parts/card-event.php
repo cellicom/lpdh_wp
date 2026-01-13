@@ -74,7 +74,7 @@ if ( is_array($rankings) ) {
                 <?php if ( $winner_name ) : ?>
                     <div class="event-winner mt-3 pt-2 border-top">
                         <div class="fw-bold text-success mb-1" style="font-size: 0.9em;">
-                            <i class="fas fa-trophy me-1"></i> Vincitore
+                            <i class="fas fa-trophy me-1"></i> Winner
                         </div>
                         <div class="winner-name fw-bold text-truncate"><?php echo esc_html( $winner_name ); ?></div>
                         <?php if ( $winner_deck ) : ?>

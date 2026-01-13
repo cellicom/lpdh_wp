@@ -360,6 +360,14 @@ get_header(); ?>
                                 </div>
                             <?php endif; ?>
 
+                            <footer class="entry-footer mt-5 pt-4 border-top">
+                                <div class="text-center">
+                                    <a href="<?php echo esc_url( get_post_type_archive_link( 'event' ) ); ?>" class="btn btn-outline-primary">
+                                        <i class="fas fa-arrow-left me-2"></i><?php esc_html_e( 'Back to Events', 'bootscore' ); ?>
+                                    </a>
+                                </div>
+                            </footer>
+
                         </article>
 
                     <?php endwhile; ?>

@@ -36,11 +36,11 @@ $has_future_events = $events_check_query->have_posts();
 ?>
 <div class="card mb-4 border-0 shadow-sm overflow-hidden">
     <div class="row g-0">
-        <div class="col-md-4 position-relative">
-            <a href="<?php the_permalink(); ?>" class="d-block h-100 text-decoration-none">
+        <div class="col-md-4 position-relative bg-light d-flex align-items-center justify-content-center">
+            <a href="<?php the_permalink(); ?>" class="d-block w-100 text-decoration-none text-center">
                 <?php if ( has_post_thumbnail() ) : ?>
-                    <div class="h-100">
-                        <?php the_post_thumbnail('large', array('class' => 'img-fluid h-100 w-100 object-fit-cover', 'style' => 'min-height: 250px; object-fit: cover;')); ?>
+                    <div class="p-3">
+                        <?php the_post_thumbnail('large', array('class' => 'img-fluid', 'style' => 'max-height: 300px; width: auto; object-fit: contain;')); ?>
                     </div>
                 <?php else : ?>
                     <div class="bg-light d-flex align-items-center justify-content-center h-100" style="min-height: 250px;">
