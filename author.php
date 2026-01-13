@@ -180,7 +180,7 @@ $author_id = $author->ID;
             <!-- Decks List -->
             <?php if ($decks_query->have_posts()) : ?>
                 <div class="decks-section pt-4 border-top">
-                    <h2 class="mb-4 text-center">Mazzi</h2>
+                    <h2 class="mb-4 text-center">Decks</h2>
                     <div class="row g-4">
                         <?php while ($decks_query->have_posts()) : $decks_query->the_post(); ?>
                             <?php get_template_part('template-parts/card', 'deck', ['show_author' => false]); ?>
