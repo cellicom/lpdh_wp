@@ -3691,3 +3691,46 @@ function bootscore_child_leaderboard_archive_query( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'bootscore_child_leaderboard_archive_query' );
+
+/**
+ * Register custom query var for Place search
+ */
+function lpdh_register_place_query_vars( $vars ) {
+    $vars[] = 'place_q';
+    return $vars;
+}
+add_filter( 'query_vars', 'lpdh_register_place_query_vars' );
+
+/**
+ * Handle Place search (Title OR Address)
+ */
+function lpdh_place_search_join( $join, $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive('place') && $query->get('place_q') ) {
+        global $wpdb;
+        $join .= " LEFT JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id AND {$wpdb->postmeta}.meta_key = 'place_address') ";
+    }
+    return $join;
+}
+add_filter('posts_join', 'lpdh_place_search_join', 10, 2);
+
+function lpdh_place_search_where( $where, $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive('place') && $query->get('place_q') ) {
+        global $wpdb;
+        $search_term = $wpdb->esc_like($query->get('place_q'));
+        // Search in Title OR place_address meta
+        $where .= " AND ({$wpdb->posts}.post_title LIKE '%{$search_term}%' OR {$wpdb->postmeta}.meta_value LIKE '%{$search_term}%') ";
+    }
+    return $where;
+}
+add_filter('posts_where', 'lpdh_place_search_where', 10, 2);
+
+/**
+ * Ensure distinct results for Place search
+ */
+function lpdh_place_search_distinct( $distinct, $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive('place') && $query->get('place_q') ) {
+        return "DISTINCT";
+    }
+    return $distinct;
+}
+add_filter('posts_distinct', 'lpdh_place_search_distinct', 10, 2);

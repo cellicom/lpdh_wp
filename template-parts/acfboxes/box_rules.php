@@ -18,19 +18,26 @@ $cards = $args['cards'];
                     $card_border = ($type === 'ban') ? 'border-danger' : 'border-0';
                     $card_bg = ($type === 'ban') ? 'bg-danger-subtle' : 'bg-white';
                     ?>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm <?php echo esc_attr($card_border . ' ' . $card_bg); ?>">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <?php if($icon) { ?>
-                                        <img src="<?php echo esc_url($icon); ?>" class="me-3" alt="" style="width: 32px; height: 32px; object-fit: contain;">
-                                    <?php } ?>
+                    <div class="col-md-6 col-lg-4 mt-5">
+                        <div class="card h-100 shadow-sm <?php echo esc_attr($card_border . ' ' . $card_bg); ?> overflow-visible hover-lift">
+                            <?php if($icon) { ?>
+                                <div class="position-absolute top-0 start-50 translate-middle z-1">
+                                    <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                        <img src="<?php echo esc_url($icon); ?>" alt="" style="width: 40px; height: 40px; object-fit: contain;">
+                                    </div>
+                                </div>
+                            <?php } ?>
+                            
+                            <div class="card-body p-0 d-flex flex-column">
+                                <div class="text-center pt-5 pb-3 px-3 border-bottom">
                                     <?php if($title) { ?>
-                                        <h4 class="card-title h5 mb-0"><?php echo esc_html($title); ?></h4>
+                                        <h4 class="card-title h5 mb-0 mt-3"><?php echo esc_html($title); ?></h4>
                                     <?php } ?>
                                 </div>
-                                <?php if($rows) { ?>
-                                    <ul class="list-unstyled mb-0">
+                                
+                                <div class="p-4 text-center flex-grow-1">
+                                    <?php if($rows) { ?>
+                                        <ul class="list-unstyled mb-0">
                                         <?php foreach($rows as $row) { 
                                             $text = $row['text'];
                                             $url = $row['url'];
@@ -48,7 +55,8 @@ $cards = $args['cards'];
                                             </li>
                                         <?php } ?>
                                     </ul>
-                                <?php } ?>
+                                    <?php } ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -57,3 +65,7 @@ $cards = $args['cards'];
         <?php } ?>
     </div>
 </div>
+<style>
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.hover-lift:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+</style>
