@@ -3924,3 +3924,70 @@ function bootscore_child_event_archive_filter( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'bootscore_child_event_archive_filter' );
+
+/**
+ * AJAX handler to update player deck in event ranking
+ */
+function ajax_update_player_deck_ranking() {
+    check_ajax_referer('update_player_deck_nonce', 'nonce');
+
+    $event_id = isset($_POST['event_id']) ? intval($_POST['event_id']) : 0;
+    $row_index = isset($_POST['row_index']) ? intval($_POST['row_index']) : -1;
+    $deck_id = isset($_POST['deck_id']) ? intval($_POST['deck_id']) : 0;
+    $user_id = get_current_user_id();
+
+    if (!$event_id || $row_index < 0 || !$user_id) {
+        wp_send_json_error('Invalid data');
+    }
+
+    // Get current rankings
+    $rankings = get_field('event_ranking', $event_id, false);
+    
+    if (!isset($rankings[$row_index])) {
+        wp_send_json_error('Ranking row not found');
+    }
+
+    // Verify user permission (must be the player in the row)
+    $rank_player = $rankings[$row_index]['player_id'];
+    $rank_player_id = 0;
+    
+    if (is_array($rank_player) && isset($rank_player['ID'])) {
+        $rank_player_id = $rank_player['ID'];
+    } elseif (is_object($rank_player)) {
+        $rank_player_id = $rank_player->ID;
+    } else {
+        $rank_player_id = intval($rank_player);
+    }
+
+    if ($rank_player_id !== $user_id && !current_user_can('administrator')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    // Get Deck Name
+    $deck_title = '';
+    if ($deck_id) {
+        $deck_post = get_post($deck_id);
+        if ($deck_post && $deck_post->post_type === 'deck') {
+            $deck_title = $deck_post->post_title;
+        }
+    }
+
+    // Check if value is actually changing to avoid update_field returning false on no change
+    if ( isset($rankings[$row_index]['player_deck_id']) && $rankings[$row_index]['player_deck_id'] == $deck_id ) {
+        wp_send_json_success();
+    }
+
+    // Update the specific row
+    $rankings[$row_index]['player_deck_id'] = $deck_id;
+    $rankings[$row_index]['deck'] = $deck_title;
+
+    // Update the field
+    $updated = update_field('event_ranking', $rankings, $event_id);
+
+    if ($updated) {
+        wp_send_json_success();
+    } else {
+        wp_send_json_error('Update failed');
+    }
+}
+add_action('wp_ajax_update_player_deck_ranking', 'ajax_update_player_deck_ranking');
