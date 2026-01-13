@@ -90,6 +90,10 @@ get_header(); ?>
                                 function get_player_link_html($p) {
                                     $name = esc_html($p['name']);
                                     if (!empty($p['user_id'])) {
+                                        $user_info = get_userdata($p['user_id']);
+                                        if ($user_info) {
+                                            $name = esc_html($user_info->display_name);
+                                        }
                                         return '<a href="' . esc_url(get_author_posts_url($p['user_id'])) . '" class="fw-bold text-decoration-none">' . $name . '</a>';
                                     }
                                     return '<span class="fw-bold">' . $name . '</span>';
@@ -201,6 +205,13 @@ get_header(); ?>
                                                         ));
                                                         if (!empty($user)) {
                                                             $user_id = $user[0]->ID;
+                                                        }
+                                                    }
+
+                                                    if ($user_id) {
+                                                        $user_info = get_userdata($user_id);
+                                                        if ($user_info) {
+                                                            $name = $user_info->display_name;
                                                         }
                                                     }
 

@@ -1918,9 +1918,13 @@ function event_ranking_auto_fill_name() {
             var $btn = $(this);
             var $repeater = $('[data-name="event_ranking"]');
             var $rows = $repeater.find('.acf-row:not(.acf-clone)');
+            var $msg = $('#sync-players-msg');
+            
+            $msg.hide().css('color', '');
             
             if (!$rows.length) {
-                alert('Nessuna riga trovata nella classifica.');
+                $msg.text('Nessuna riga trovata nella classifica.').css('color', '#d63638').show();
+                setTimeout(function() { $msg.fadeOut(); }, 5000);
                 return;
             }
             
@@ -1968,16 +1972,17 @@ function event_ranking_auto_fill_name() {
                                 matchCount++;
                             }
                         });
-                        alert('Sincronizzazione completata: ' + matchCount + ' giocatori abbinati.');
+                        $msg.text('Sincronizzazione completata: ' + matchCount + ' giocatori abbinati.').css('color', '#46b450').show();
                     } else {
-                        alert('Nessun giocatore trovato.');
+                        $msg.text('Nessun giocatore trovato.').css('color', '#d63638').show();
                     }
                 },
                 error: function() {
-                    alert('Errore durante la sincronizzazione.');
+                    $msg.text('Errore durante la sincronizzazione.').css('color', '#d63638').show();
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text('Sync Player');
+                    setTimeout(function() { $msg.fadeOut(); }, 5000);
                 }
             });
         });
@@ -2029,7 +2034,8 @@ function add_populate_rankings_button() {
                 $jsonField.after(
                     '<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px; margin-right:5px;">Populate Rankings</button>' +
                     '<button type="button" id="sync-players-btn" class="button button-secondary" style="margin-top:5px; margin-right:5px;">Sync Player</button>' +
-                    '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>'
+                    '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>' +
+                    '<span id="sync-players-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
                 );
             }
         }
@@ -2594,10 +2600,6 @@ function add_update_survey_button_script() {
             
             if (newPlayers.length === 0) {
                 $msg.text('Tutti i giocatori sono già presenti.').css('color', '#d63638').show();
-                return;
-            }
-            
-            if (!confirm('Verranno aggiunti ' + newPlayers.length + ' utenti alla survey. Continuare?')) {
                 return;
             }
             
