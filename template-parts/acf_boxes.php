@@ -8,7 +8,7 @@ if(!empty($acf)) {
             if (!empty($section['title'])) {
                 ?>
                 <div class="row d-flex justify-center">
-                    <h1 class="acf-section-box-title mb-3 text-center"><?php echo esc_html($section['title']); ?></h1>
+                    <h2 class="acf-section-box-title mb-3 text-center"><?php echo esc_html($section['title']); ?></h2>
                 </div>
                 <?php
             }
