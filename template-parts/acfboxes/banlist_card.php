@@ -21,45 +21,29 @@ if ($args['visible']) {
     <div class="container-fluid py-5 <?php echo esc_attr($containerclass); ?>">
         <a name="<?php echo getUrlHashtagFromAcfBox($args_for_hash, $args['acf_index']); ?>"></a>
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6 mt-5">
-                    <div class="card shadow-sm border-danger overflow-visible hover-lift">
+            <?php if($title) { ?>
+                <div class="row justify-content-center mb-5">
+                    <div class="col-12 text-center">
                         <?php if($icon) { ?>
-                            <div class="position-absolute top-0 start-50 translate-middle z-1">
-                                <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                                    <img src="<?php echo esc_url($icon); ?>" alt="" style="width: 40px; height: 40px; object-fit: contain;">
-                                </div>
-                            </div>
+                            <img src="<?php echo esc_url($icon); ?>" alt="" style="width: 60px; height: 60px; object-fit: contain;" class="mb-3">
                         <?php } ?>
-                        
-                        <div class="card-body p-0 d-flex flex-column">
-                            <div class="text-center pt-5 pb-3 px-3 border-bottom">
-                                <?php if($title) { ?>
-                                    <h4 class="card-title h5 mb-0 mt-3 text-danger fw-bold"><?php echo esc_html($title); ?></h4>
-                                <?php } ?>
-                            </div>
-
-                            <div class="p-4 text-center flex-grow-1">
-                                <?php if ($banned_cards_query->have_posts()) : ?>
-                                    <ul class="list-unstyled mb-0">
-                                        <?php while($banned_cards_query->have_posts()) : $banned_cards_query->the_post(); ?>
-                                            <?php $scryfall_link = get_field('scryfall_link'); ?>
-                                            <li class="mb-2">
-                                                <a href="<?php echo esc_url($scryfall_link); ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-medium">
-                                                    <?php the_title(); ?>
-                                                </a>
-                                            </li>
-                                        <?php endwhile; ?>
-                                    </ul>
-                                    <?php wp_reset_postdata(); ?>
-                                <?php else : ?>
-                                    <p class="text-muted mb-0"><?php esc_html_e('Nessuna carta in questa lista al momento.', 'bootscore'); ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+                        <h2 class="section-title text-danger fw-bold"><?php echo esc_html($title); ?></h2>
                     </div>
                 </div>
-            </div>
+            <?php } ?>
+
+            <?php if ($banned_cards_query->have_posts()) : ?>
+                <div class="banned-cards-list mx-auto" style="max-width: 900px;">
+                    <?php while($banned_cards_query->have_posts()) : $banned_cards_query->the_post(); ?>
+                        <?php get_template_part('template-parts/card', 'banned-card'); ?>
+                    <?php endwhile; ?>
+                </div>
+                <?php wp_reset_postdata(); ?>
+            <?php else : ?>
+                <div class="text-center">
+                    <p class="text-muted mb-0"><?php esc_html_e('Nessuna carta in questa lista al momento.', 'bootscore'); ?></p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
     <style>

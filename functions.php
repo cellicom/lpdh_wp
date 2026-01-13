@@ -3873,6 +3873,19 @@ function bootscore_child_banned_card_archive_query( $query ) {
     if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'banned_card' ) ) {
         $query->set( 'orderby', 'date' );
         $query->set( 'order', 'DESC' );
+        $query->set( 'posts_per_page', -1 );
     }
 }
 add_action( 'pre_get_posts', 'bootscore_child_banned_card_archive_query' );
+
+/**
+ * Ordina archivio FAQ per data crescente (ordine di inserimento)
+ */
+function bootscore_child_faq_archive_query( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'faq' ) ) {
+        $query->set( 'orderby', 'date' );
+        $query->set( 'order', 'ASC' );
+        $query->set( 'posts_per_page', -1 );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_faq_archive_query' );

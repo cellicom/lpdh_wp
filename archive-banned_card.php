@@ -15,7 +15,6 @@ get_header(); ?>
             <h1 class="page-title text-danger">
                 <i class="fas fa-ban me-2"></i><?php post_type_archive_title(); ?>
             </h1>
-            <?php the_archive_description( '<div class="archive-description lead text-muted">', '</div>' ); ?>
         </header>
 
         <div class="container pb-5">
@@ -41,16 +40,6 @@ get_header(); ?>
                     <?php while ( have_posts() ) : the_post(); ?>
                         <?php get_template_part('template-parts/card', 'banned-card'); ?>
                     <?php endwhile; ?>
-                </div>
-
-                <div class="mt-5">
-                    <?php
-                    the_posts_pagination( array(
-                        'mid_size'  => 2,
-                        'prev_text' => __( 'Previous', 'bootscore' ),
-                        'next_text' => __( 'Next', 'bootscore' ),
-                    ) );
-                    ?>
                 </div>
 
             <?php else : ?>

@@ -26,7 +26,7 @@ if ($args['visibile'] === true) {
                         ?>
 
                         <div class="accordion-item">
-                            <div class="accordion-header" id="<?php echo $faq_id; ?>>">
+                            <div class="accordion-header" id="<?php echo $faq_id; ?>">
                               <h2>
                                 <button class="accordion-button collapsed text-18px text-eblue" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo $faq_risposta_id; ?>" aria-expanded="false" aria-controls="<?php echo $faq_risposta_id; ?>">
                                     <?php echo $domanda; ?>

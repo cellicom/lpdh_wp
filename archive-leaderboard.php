@@ -15,7 +15,6 @@ get_header();
         <div class="container py-5">
             <header class="page-header text-center mb-5">
                 <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
-                <?php the_archive_description( '<div class="archive-description lead text-muted">', '</div>' ); ?>
             </header>
 
             <?php if ( have_posts() ) : ?>

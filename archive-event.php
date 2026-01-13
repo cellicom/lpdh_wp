@@ -13,7 +13,6 @@ get_header(); ?>
 
         <header class="page-header container my-4">
             <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
-            <?php the_archive_description( '<div class="archive-description">', '</div>' ); ?>
         </header>
 
         <div class="container pb-5">
