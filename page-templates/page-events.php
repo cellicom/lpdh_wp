@@ -104,7 +104,6 @@ get_header(); ?>
 }
 
 .event-thumbnail {
-    height: 160px;
     overflow: hidden;
     background-color: #f8f9fa;
     display: flex;
