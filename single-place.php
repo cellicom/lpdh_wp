@@ -91,7 +91,7 @@ get_header(); ?>
                         if ( $events_query->have_posts() ) : ?>
                             <div class="event-archive-grid">
                                 <?php while ( $events_query->have_posts() ) : $events_query->the_post(); ?>
-                                    <?php get_template_part('template-parts/card', 'event'); ?>
+                                    <?php get_template_part('template-parts/card', 'event', ['show_place' => false]); ?>
                                 <?php endwhile; ?>
                                 <?php wp_reset_postdata(); ?>
                             </div>

@@ -3742,19 +3742,20 @@ add_filter('posts_distinct', 'lpdh_place_search_distinct', 10, 2);
  * @param int $post_id The post ID.
  * @return string The image URL or empty string.
  */
-function lpdh_get_scryfall_image_url($post_id) {
-    $transient_key = 'scryfall_img_url_' . $post_id;
+function lpdh_get_scryfall_image_url($post_id, $card_name = null) {
+    $search_term = $card_name ? $card_name : get_the_title($post_id);
+    
+    if (empty($search_term)) {
+        return '';
+    }
+
+    $transient_key = 'scryfall_img_url_' . md5($search_term);
     $cached_url = get_transient($transient_key);
     if (false !== $cached_url) {
         return $cached_url;
     }
 
-    $card_title = get_the_title($post_id);
-    if (empty($card_title)) {
-        return '';
-    }
-
-    $api_url = 'https://api.scryfall.com/cards/named?exact=' . urlencode($card_title);
+    $api_url = 'https://api.scryfall.com/cards/named?exact=' . urlencode($search_term);
     $response = wp_remote_get($api_url);
 
     if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
@@ -3767,3 +3768,111 @@ function lpdh_get_scryfall_image_url($post_id) {
     set_transient($transient_key, $image_url, 4 * WEEK_IN_SECONDS); // Cache for 4 weeks
     return $image_url;
 }
+
+/**
+ * Get Commander Image URL
+ */
+function get_commander_image($post_id) {
+    // 1. Featured Image
+    if (has_post_thumbnail($post_id)) {
+        return get_the_post_thumbnail_url($post_id, 'medium_large');
+    }
+
+    // 2. Scryfall via Commander Name
+    $commander_name = get_field('commander', $post_id);
+    if ($commander_name) {
+        $scryfall_img = lpdh_get_scryfall_image_url($post_id, $commander_name);
+        if ($scryfall_img && $scryfall_img !== 'error') {
+            return $scryfall_img;
+        }
+    }
+
+    // 3. Fallback
+    return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.png';
+}
+
+/**
+ * Get Partner Image URL
+ */
+function get_partner_image($post_id) {
+    // 1. Featured Image Partner
+    $partner_img = get_field('featured_image_partner', $post_id);
+    if ($partner_img) {
+        return $partner_img['sizes']['medium_large'] ?? $partner_img['url'];
+    }
+
+    // 2. Scryfall via Partner Name
+    $partner_name = get_field('partner', $post_id);
+    if ($partner_name) {
+        $scryfall_img = lpdh_get_scryfall_image_url($post_id, $partner_name);
+        if ($scryfall_img && $scryfall_img !== 'error') {
+            return $scryfall_img;
+        }
+    }
+
+    // 3. Fallback (only if partner exists)
+    if ($partner_img || $partner_name) {
+        return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.png';
+    }
+
+    return false;
+}
+
+/**
+ * Custom CSS for Single Post Layout and Archive Images
+ */
+function lpdh_custom_layout_styles() {
+    $custom_css = "
+        /* Single Post: Featured Image Left with Text Wrap */
+        .single-post .single-post-featured-image {
+            float: left;
+            margin-right: 2rem;
+            max-width: 50%;
+        }
+        
+        @media (max-width: 768px) {
+            .single-post .single-post-featured-image {
+                float: none;
+                margin-right: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        /* Article List: Image Height & Fit */
+        .blog .card-img-top,
+        .archive .card-img-top,
+        .search .card-img-top {
+            height: 350px;
+            object-fit: cover;
+        }
+
+        /* Sticky Sidebar */
+        @media (min-width: 992px) {
+            #secondary {
+                position: sticky;
+                top: 2rem;
+                z-index: 1;
+            }
+        }
+
+        /* Related Posts Image Height */
+        .related-posts .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+    ";
+    wp_add_inline_style( 'main', $custom_css );
+}
+add_action( 'wp_enqueue_scripts', 'lpdh_custom_layout_styles', 20 );
+
+/**
+ * Ordina archivio Banned Card per data decrescente
+ */
+function bootscore_child_banned_card_archive_query( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'banned_card' ) ) {
+        $query->set( 'orderby', 'date' );
+        $query->set( 'order', 'DESC' );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_banned_card_archive_query' );

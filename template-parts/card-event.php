@@ -4,7 +4,13 @@
  *
  * @package Bootscore Child
  * @version 6.0.0
+ *
+ * @param array $args {
+ *     @type bool $show_place Whether to show the place name. Default true.
+ * }
  */
+
+$show_place = $args['show_place'] ?? true;
 
 // Recupero campi ACF
 $place_obj = get_field('field_event_place');
@@ -51,7 +57,7 @@ if ( is_array($rankings) ) {
             <hr class="event-divider">
 
             <div class="event-meta small">
-                <?php if ( $place_name ) : ?>
+                <?php if ( $show_place && $place_name ) : ?>
                     <div class="event-place mb-1 text-truncate" title="<?php echo esc_attr($place_name); ?>">
                         <i class="fas fa-map-marker-alt text-primary me-2"></i>
                         <?php echo esc_html( $place_name ); ?>

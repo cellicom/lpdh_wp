@@ -13,8 +13,8 @@ if ($args['visible']) {
         'post_type' => 'banned_card',
         'posts_per_page' => -1,
         'post_status' => 'publish',
-        'orderby' => 'title',
-        'order' => 'ASC'
+        'orderby' => 'date',
+        'order' => 'DESC'
     ]);
     ?>
 

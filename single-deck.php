@@ -40,11 +40,11 @@ get_header(); ?>
                 <div class="deck-visuals d-flex justify-content-center flex-wrap gap-4 mb-5">
                     <?php 
                     $commander = get_field('commander');
+                    $commander_img = get_commander_image(get_the_ID());
+                    
                     if ( has_post_thumbnail() || $commander ) : ?>
                         <div class="deck-image-wrapper text-center">
-                            <?php if ( has_post_thumbnail() ) : ?>
-                                <?php the_post_thumbnail( 'large', array( 'class' => 'img-fluid rounded shadow-sm' ) ); ?>
-                            <?php endif; ?>
+                            <img src="<?php echo esc_url($commander_img); ?>" class="img-fluid rounded shadow-sm" alt="<?php echo esc_attr($commander ? $commander : get_the_title()); ?>">
                             
                             <?php if ( $commander ) : ?>
                                 <div class="mt-2 fw-bold text-muted small text-uppercase"><?php esc_html_e('Commander', 'bootscore'); ?></div>
@@ -54,13 +54,12 @@ get_header(); ?>
                     <?php endif; ?>
 
                     <?php 
-                    $partner_image = get_field('featured_image_partner');
                     $partner = get_field('partner');
-                    if ( $partner_image || $partner ) : ?>
+                    $partner_img = get_partner_image(get_the_ID());
+                    
+                    if ( $partner_img ) : ?>
                         <div class="deck-image-wrapper text-center">
-                            <?php if ( $partner_image ) : ?>
-                                <?php echo wp_get_attachment_image( $partner_image['ID'], 'large', false, array( 'class' => 'img-fluid rounded shadow-sm' ) ); ?>
-                            <?php endif; ?>
+                            <img src="<?php echo esc_url($partner_img); ?>" class="img-fluid rounded shadow-sm" alt="<?php echo esc_attr($partner ? $partner : 'Partner'); ?>">
                             
                             <?php if ( $partner ) : ?>
                                 <div class="mt-2 fw-bold text-muted small text-uppercase"><?php esc_html_e('Partner / Background', 'bootscore'); ?></div>

@@ -24,47 +24,7 @@ get_header(); ?>
 
             <div class="row g-4">
                 <?php while ( have_posts() ) : the_post(); ?>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm border-0 deck-card">
-                            <?php 
-                            $partner_img = get_field('featured_image_partner');
-                            if ($partner_img && has_post_thumbnail()) : ?>
-                                <a href="<?php the_permalink(); ?>" class="d-flex overflow-hidden rounded-top" style="height: 220px;">
-                                    <?php the_post_thumbnail('medium_large', array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
-                                    <?php echo wp_get_attachment_image($partner_img['ID'], 'medium_large', false, array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
-                                </a>
-                            <?php elseif (has_post_thumbnail()) : ?>
-                                <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top">
-                                    <?php the_post_thumbnail('medium_large', array('class' => 'card-img-top object-fit-cover transition-transform', 'style' => 'height: 220px; object-position: top;')); ?>
-                                </a>
-                            <?php else: ?>
-                                <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-                                    <i class="fas fa-layer-group fa-3x text-muted"></i>
-                                </a>
-                            <?php endif; ?>
-                            <div class="card-body">
-                                <h5 class="card-title mb-2">
-                                    <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark stretched-link">
-                                        <?php the_title(); ?>
-                                    </a>
-                                </h5>
-                                <?php 
-                                $commander = get_field('commander');
-                                $partner = get_field('partner');
-                                if ($commander) : ?>
-                                    <p class="card-text small text-muted mb-0">
-                                        <i class="fas fa-user-shield me-1"></i> <?php echo esc_html($commander); ?>
-                                        <?php if ($partner) : ?>
-                                            <span class="mx-1">+</span> <?php echo esc_html($partner); ?>
-                                        <?php endif; ?>
-                                    </p>
-                                <?php endif; ?>
-                            </div>
-                            <div class="card-footer bg-white border-top-0">
-                                <small class="text-muted">By <?php the_author_posts_link(); ?></small>
-                            </div>
-                        </div>
-                    </div>
+                    <?php get_template_part('template-parts/card', 'deck'); ?>
                 <?php endwhile; ?>
             </div>
 
