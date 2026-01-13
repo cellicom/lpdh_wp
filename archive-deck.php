@@ -11,72 +11,60 @@ get_header(); ?>
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
 
-        <header class="page-header">
+        <header class="page-header container my-4">
             <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
             <?php
             the_archive_description( '<div class="archive-description">', '</div>' );
             ?>
         </header>
 
+        <div class="container pb-5">
+
         <?php if ( have_posts() ) : ?>
 
-            <div class="deck-archive-grid">
+            <div class="row g-4">
                 <?php while ( have_posts() ) : the_post(); ?>
-
-                    <article id="post-<?php the_ID(); ?>" <?php post_class('deck-card'); ?>>
-
-                        <?php if ( has_post_thumbnail() ) : ?>
-                            <div class="deck-thumbnail">
-                                <a href="<?php the_permalink(); ?>">
-                                    <?php the_post_thumbnail( 'medium', array( 'class' => 'img-fluid' ) ); ?>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0 deck-card">
+                            <?php 
+                            $partner_img = get_field('featured_image_partner');
+                            if ($partner_img && has_post_thumbnail()) : ?>
+                                <a href="<?php the_permalink(); ?>" class="d-flex overflow-hidden rounded-top" style="height: 220px;">
+                                    <?php the_post_thumbnail('medium_large', array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
+                                    <?php echo wp_get_attachment_image($partner_img['ID'], 'medium_large', false, array('class' => 'w-50 object-fit-cover transition-transform', 'style' => 'height: 100%; object-position: top;')); ?>
                                 </a>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="deck-content">
-                            <header class="entry-header">
-                                <?php the_title( '<h2 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></h2>' ); ?>
-                                
-                                <div class="entry-meta">
-                                    <span class="posted-on">
-                                        <i class="fas fa-calendar"></i>
-                                        <time class="entry-date published" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
-                                            <?php echo esc_html( get_the_date() ); ?>
-                                        </time>
-                                    </span>
-                                    
-                                    <span class="posted-by">
-                                        <i class="fas fa-user"></i>
-                                        <span class="author vcard"><a class="url fn n" href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><?php echo esc_html( get_the_author() ); ?></a></span>
-                                    </span>
-                                </div>
-                            </header>
-
-                            <div class="entry-summary">
-                                <?php the_excerpt(); ?>
-                            </div>
-
-                            <?php
-                            // Display custom fields
-                            $decklist = get_field('field_decklist');
-                            
-                            if ( $decklist ) : ?>
-                                <div class="decklist-preview">
-                                    <a href="<?php echo esc_url( $decklist ); ?>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt"></i> View Decklist
-                                    </a>
-                                </div>
+                            <?php elseif (has_post_thumbnail()) : ?>
+                                <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top">
+                                    <?php the_post_thumbnail('medium_large', array('class' => 'card-img-top object-fit-cover transition-transform', 'style' => 'height: 220px; object-position: top;')); ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                    <i class="fas fa-layer-group fa-3x text-muted"></i>
+                                </a>
                             <?php endif; ?>
-
-                            <footer class="entry-footer">
-                                <a href="<?php the_permalink(); ?>" class="btn btn-primary">
-                                    <?php esc_html_e( 'Read more', 'bootscore' ); ?>
-                                </a>
-                            </footer>
+                            <div class="card-body">
+                                <h5 class="card-title mb-2">
+                                    <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark stretched-link">
+                                        <?php the_title(); ?>
+                                    </a>
+                                </h5>
+                                <?php 
+                                $commander = get_field('commander');
+                                $partner = get_field('partner');
+                                if ($commander) : ?>
+                                    <p class="card-text small text-muted mb-0">
+                                        <i class="fas fa-user-shield me-1"></i> <?php echo esc_html($commander); ?>
+                                        <?php if ($partner) : ?>
+                                            <span class="mx-1">+</span> <?php echo esc_html($partner); ?>
+                                        <?php endif; ?>
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <small class="text-muted">By <?php the_author_posts_link(); ?></small>
+                            </div>
                         </div>
-
-                    </article>
-
+                    </div>
                 <?php endwhile; ?>
             </div>
 
@@ -103,33 +91,17 @@ get_header(); ?>
 
         <?php endif; ?>
 
+        </div>
+
     </main>
 </div>
 
 <style>
-.deck-archive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 30px;
-    margin-top: 30px;
+.transition-transform {
+    transition: transform 0.3s ease;
 }
-
-.deck-card {
-    background: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
-}
-
-.deck-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.deck-thumbnail {
-    position: relative;
-    overflow: hidden;
+.deck-card:hover .transition-transform {
+    transform: scale(1.05);
 }
 
 .deck-thumbnail img {
@@ -137,10 +109,6 @@ get_header(); ?>
     height: 200px;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.deck-card:hover .deck-thumbnail img {
-    transform: scale(1.05);
 }
 
 .deck-content {
@@ -209,40 +177,6 @@ get_header(); ?>
 .archive-description {
     color: #6c757d;
     font-size: 1.1rem;
-}
-
-.no-results {
-    text-align: center;
-    padding: 60px 20px;
-    color: #6c757d;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .deck-archive-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .deck-content {
-        padding: 15px;
-    }
-    
-    .deck-thumbnail img {
-        height: 180px;
-    }
-}
-
-@media (max-width: 576px) {
-    .deck-archive-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .entry-meta span {
-        display: block;
-        margin-right: 0;
-        margin-bottom: 5px;
-    }
 }
 </style>
 
