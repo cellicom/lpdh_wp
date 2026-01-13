@@ -190,6 +190,7 @@ get_header(); ?>
                                                     $first = isset($rank['first']) ? $rank['first'] : 0;
                                                     $last = isset($rank['last']) ? $rank['last'] : 0;
                                                     $user_id = isset($rank['user_id']) ? $rank['user_id'] : 0;
+                                                    $trend = isset($rank['trend']) ? $rank['trend'] : 0;
                                                     
                                                     // Fallback: try to find user by display name if ID is missing
                                                     if (!$user_id && !empty($name)) {
@@ -214,6 +215,16 @@ get_header(); ?>
                                                     } elseif ( $pos === 3 ) {
                                                         $row_class = 'rank-bronze';
                                                     }
+                                                    
+                                                    // Trend Icon
+                                                    $trend_icon = '';
+                                                    if ($trend === 'new') {
+                                                        $trend_icon = '<span class="badge bg-info text-dark ms-2" style="font-size: 0.6em;">NEW</span>';
+                                                    } elseif ($trend > 0) {
+                                                        $trend_icon = '<span class="text-success ms-2 small" title="Salito di ' . $trend . ' posizioni"><i class="fas fa-arrow-up"></i> ' . $trend . '</span>';
+                                                    } elseif ($trend < 0) {
+                                                        $trend_icon = '<span class="text-danger ms-2 small" title="Sceso di ' . abs($trend) . ' posizioni"><i class="fas fa-arrow-down"></i> ' . abs($trend) . '</span>';
+                                                    }
                                                 ?>
                                                     <tr class="<?php echo esc_attr($row_class); ?>">
                                                         <td class="text-center fw-bold"><?php echo $pos; ?></td>
@@ -222,9 +233,9 @@ get_header(); ?>
                                                             $avatar = get_avatar($user_id ? $user_id : 0, 24, 'mp', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
                                                             
                                                             if ( $player_profile_url ) {
-                                                                echo '<a href="' . esc_url($player_profile_url) . '" class="text-decoration-none text-reset d-flex align-items-center">' . $avatar . esc_html($name) . '</a>';
+                                                                echo '<a href="' . esc_url($player_profile_url) . '" class="text-decoration-none text-reset d-flex align-items-center">' . $avatar . esc_html($name) . $trend_icon . '</a>';
                                                             } else {
-                                                                echo '<div class="d-flex align-items-center">' . $avatar . esc_html($name) . '</div>';
+                                                                echo '<div class="d-flex align-items-center">' . $avatar . esc_html($name) . $trend_icon . '</div>';
                                                             }
                                                             ?>
                                                         </td>

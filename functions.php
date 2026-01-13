@@ -3414,38 +3414,11 @@ function add_update_leaderboard_button() {
 add_action('acf/input/admin_footer', 'add_update_leaderboard_button');
 
 /**
- * AJAX handler to calculate and update leaderboard rankings
+ * Helper function to calculate rankings from a list of events
  */
-function ajax_update_leaderboard_rankings() {
-    check_ajax_referer('update_leaderboard_nonce', 'nonce');
-    
-    $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-    
-    if (!$year) {
-        wp_send_json_error('Anno non valido');
-    }
-
-    $args = array(
-        'post_type' => 'event',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-        'meta_key' => 'event_date',
-        'orderby' => 'meta_value',
-        'order' => 'ASC', // Ordine cronologico per calcolo ELO
-        'meta_query' => array(
-            array(
-                'key' => 'event_date',
-                'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
-                'compare' => 'BETWEEN',
-                'type' => 'DATETIME'
-            )
-        )
-    );
-    
-    $events = get_posts($args);
+function lpdh_calculate_rankings_data($events) {
     $general = array();
-    $player_elos = array(); // Tracciamento ELO dei giocatori
+    $player_elos = array();
     
     foreach ($events as $event) {
         $rankings = get_field('event_ranking', $event->ID);
@@ -3571,6 +3544,72 @@ function ajax_update_leaderboard_rankings() {
         return $b['points'] - $a['points'];
     });
     
+    return $result;
+}
+
+/**
+ * AJAX handler to calculate and update leaderboard rankings
+ */
+function ajax_update_leaderboard_rankings() {
+    check_ajax_referer('update_leaderboard_nonce', 'nonce');
+    
+    $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
+    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    
+    if (!$year) {
+        wp_send_json_error('Anno non valido');
+    }
+
+    $args = array(
+        'post_type' => 'event',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_key' => 'event_date',
+        'orderby' => 'meta_value',
+        'order' => 'ASC', // Ordine cronologico per calcolo ELO
+        'meta_query' => array(
+            array(
+                'key' => 'event_date',
+                'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
+                'compare' => 'BETWEEN',
+                'type' => 'DATETIME'
+            )
+        )
+    );
+    
+    $events = get_posts($args);
+    
+    // 1. Calcolo Classifica Attuale
+    $result = lpdh_calculate_rankings_data($events);
+    
+    // 2. Calcolo Classifica Settimana Precedente (per il trend)
+    $cutoff_date = date('Y-m-d H:i:s', strtotime('-1 week'));
+    $previous_events = array();
+    foreach ($events as $event) {
+        $ed = get_field('event_date', $event->ID);
+        if ($ed < $cutoff_date) {
+            $previous_events[] = $event;
+        }
+    }
+    $previous_result = lpdh_calculate_rankings_data($previous_events);
+    
+    // Mappa posizioni precedenti
+    $prev_rank_map = array();
+    foreach ($previous_result as $idx => $p) {
+        $prev_rank_map[$p['name']] = $idx + 1;
+    }
+    
+    // Calcola Trend
+    foreach ($result as $idx => &$p) {
+        $current_rank = $idx + 1;
+        if (isset($prev_rank_map[$p['name']])) {
+            $prev = $prev_rank_map[$p['name']];
+            $p['trend'] = $prev - $current_rank; // Positivo = salito (es. era 5, ora 2 => +3)
+        } else {
+            $p['trend'] = 'new';
+        }
+    }
+    
     if ($post_id) {
         update_field('field_leaderboard_rankings_json', json_encode($result), $post_id);
         // Aggiorna la data di modifica del post
@@ -3637,3 +3676,16 @@ function lpdh_add_login_logout_menu($items, $args) {
     return $items;
 }
 add_filter('wp_nav_menu_items', 'lpdh_add_login_logout_menu', 10, 2);
+
+/**
+ * Ordina archivio Leaderboard per anno decrescente
+ */
+function bootscore_child_leaderboard_archive_query( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'leaderboard' ) ) {
+        $query->set( 'meta_key', 'year' );
+        $query->set( 'orderby', 'meta_value_num' );
+        $query->set( 'order', 'DESC' );
+        $query->set( 'posts_per_page', -1 );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_leaderboard_archive_query' );
