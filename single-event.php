@@ -126,9 +126,8 @@ get_header(); ?>
                                                     $popover_content = '';
                                                     
                                                     if ($player_deck_id) {
-                                                        $cmdr_img_url = has_post_thumbnail($player_deck_id) ? get_the_post_thumbnail_url($player_deck_id, 'medium') : '';
-                                                        $partner_img_array = get_field('featured_image_partner', $player_deck_id);
-                                                        $partner_img_url = $partner_img_array ? $partner_img_array['sizes']['medium'] : '';
+                                                        $cmdr_img_url = get_commander_image($player_deck_id);
+                                                        $partner_img_url = get_partner_image($player_deck_id);
                                                         
                                                         if ($cmdr_img_url && $partner_img_url) {
                                                             // Both images - Split Icon

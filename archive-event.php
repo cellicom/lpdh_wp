@@ -11,11 +11,43 @@ get_header(); ?>
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
 
-        <header class="page-header container my-4">
+        <header class="page-header container my-4 text-center">
             <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
         </header>
 
         <div class="container pb-5">
+            
+            <!-- Filters -->
+            <form method="get" class="mb-5">
+                <div class="row justify-content-center g-3">
+                    <div class="col-md-4 col-lg-3">
+                        <select name="event_year" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Years</option>
+                            <?php
+                            global $wpdb;
+                            $years = $wpdb->get_col("SELECT DISTINCT YEAR(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date' ORDER BY meta_value DESC");
+                            foreach ($years as $year) {
+                                $selected = (isset($_GET['event_year']) && $_GET['event_year'] == $year) ? 'selected' : '';
+                                echo '<option value="' . esc_attr($year) . '" ' . $selected . '>' . esc_html($year) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <select name="event_place_id" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Places</option>
+                            <?php
+                            $places = get_posts(['post_type' => 'place', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC']);
+                            foreach ($places as $place) {
+                                $selected = (isset($_GET['event_place_id']) && $_GET['event_place_id'] == $place->ID) ? 'selected' : '';
+                                echo '<option value="' . esc_attr($place->ID) . '" ' . $selected . '>' . esc_html($place->post_title) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </form>
+
             <?php if ( have_posts() ) : ?>
                 <div class="event-archive-grid">
                     <?php while ( have_posts() ) : the_post(); ?>
@@ -48,6 +80,7 @@ get_header(); ?>
     display: grid;
     grid-template-columns: 1fr; /* Mobile: 1 card per riga */
     gap: 20px;
+    justify-content: center;
 }
 
 .event-card-inner {
@@ -66,7 +99,7 @@ get_header(); ?>
 }
 
 .event-thumbnail {
-    height: 160px;
+    height: 300px;
     overflow: hidden;
     background-color: #f8f9fa;
     display: flex;
@@ -77,7 +110,7 @@ get_header(); ?>
 .event-thumbnail img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .placeholder-image {
@@ -105,6 +138,11 @@ get_header(); ?>
     margin: 10px 0 15px;
     opacity: 0.1;
 }
+
+/* Icons Colors */
+.event-place i, .fa-map-marker-alt { color: #dc3545 !important; } /* Red */
+.event-date i, .fa-calendar-alt { color: #0d6efd !important; } /* Dark Blue */
+.winner-label, .winner-icon { color: #FFD700 !important; } /* Gold */
 
 /* Tablet: 2 card per riga */
 @media (min-width: 768px) {

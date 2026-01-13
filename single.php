@@ -46,7 +46,7 @@ get_header(); ?>
                             <div class="entry-content clearfix">
                                 <?php if ( has_post_thumbnail() ) : ?>
                                     <div class="single-post-featured-image mb-3">
-                                        <?php the_post_thumbnail( 'large', array( 'class' => 'img-fluid rounded shadow-sm' ) ); ?>
+                                        <?php the_post_thumbnail( 'large', array( 'class' => 'img-fluid rounded shadow-sm', 'style' => 'max-height: 300px; object-fit: contain; width: 100%;' ) ); ?>
                                     </div>
                                 <?php endif; ?>
                                 

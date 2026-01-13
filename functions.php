@@ -3847,15 +3847,6 @@ function lpdh_custom_layout_styles() {
             object-fit: cover;
         }
 
-        /* Sticky Sidebar */
-        @media (min-width: 992px) {
-            #secondary {
-                position: sticky;
-                top: 2rem;
-                z-index: 1;
-            }
-        }
-
         /* Related Posts Image Height */
         .related-posts .card-img-top {
             height: 200px;
@@ -3889,3 +3880,47 @@ function bootscore_child_faq_archive_query( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'bootscore_child_faq_archive_query' );
+
+/**
+ * Ordina archivio Place per data crescente (ordine di inserimento)
+ */
+function bootscore_child_place_archive_query( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'place' ) ) {
+        $query->set( 'orderby', 'date' );
+        $query->set( 'order', 'ASC' );
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_place_archive_query' );
+
+/**
+ * Filtra archivio Eventi per Anno e Place
+ */
+function bootscore_child_event_archive_filter( $query ) {
+    if ( !is_admin() && $query->is_main_query() && is_post_type_archive( 'event' ) ) {
+        $meta_query = array('relation' => 'AND');
+
+        if ( isset($_GET['event_year']) && !empty($_GET['event_year']) ) {
+            $year = intval($_GET['event_year']);
+            $meta_query[] = array(
+                'key' => 'event_date',
+                'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
+                'compare' => 'BETWEEN',
+                'type' => 'DATETIME'
+            );
+        }
+
+        if ( isset($_GET['event_place_id']) && !empty($_GET['event_place_id']) ) {
+            $place_id = intval($_GET['event_place_id']);
+            $meta_query[] = array(
+                'key' => 'event_place',
+                'value' => $place_id,
+                'compare' => '='
+            );
+        }
+
+        if ( count($meta_query) > 1 ) {
+            $query->set('meta_query', $meta_query);
+        }
+    }
+}
+add_action( 'pre_get_posts', 'bootscore_child_event_archive_filter' );
