@@ -3734,3 +3734,36 @@ function lpdh_place_search_distinct( $distinct, $query ) {
     return $distinct;
 }
 add_filter('posts_distinct', 'lpdh_place_search_distinct', 10, 2);
+
+/**
+ * Get card image from Scryfall API if no featured image exists.
+ * Uses transients to cache API responses.
+ *
+ * @param int $post_id The post ID.
+ * @return string The image URL or empty string.
+ */
+function lpdh_get_scryfall_image_url($post_id) {
+    $transient_key = 'scryfall_img_url_' . $post_id;
+    $cached_url = get_transient($transient_key);
+    if (false !== $cached_url) {
+        return $cached_url;
+    }
+
+    $card_title = get_the_title($post_id);
+    if (empty($card_title)) {
+        return '';
+    }
+
+    $api_url = 'https://api.scryfall.com/cards/named?exact=' . urlencode($card_title);
+    $response = wp_remote_get($api_url);
+
+    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+        set_transient($transient_key, 'error', WEEK_IN_SECONDS);
+        return '';
+    }
+
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+    $image_url = isset($data['image_uris']['normal']) ? $data['image_uris']['normal'] : '';
+    set_transient($transient_key, $image_url, 4 * WEEK_IN_SECONDS); // Cache for 4 weeks
+    return $image_url;
+}

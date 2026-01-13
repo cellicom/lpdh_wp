@@ -19,6 +19,23 @@ get_header(); ?>
         </header>
 
         <div class="container pb-5">
+            <form method="get" action="<?php echo esc_url( get_post_type_archive_link( 'banned_card' ) ); ?>" class="mb-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="input-group">
+                            <input type="text" name="s" class="form-control" placeholder="<?php esc_attr_e( 'Search banned cards...', 'bootscore' ); ?>" value="<?php echo get_search_query(); ?>">
+                            <input type="hidden" name="post_type" value="banned_card">
+                            <button class="btn btn-danger" type="submit">
+                                <i class="fas fa-search"></i> <?php esc_html_e( 'Search', 'bootscore' ); ?>
+                            </button>
+                            <?php if ( get_search_query() ) : ?>
+                                <a href="<?php echo esc_url( get_post_type_archive_link( 'banned_card' ) ); ?>" class="btn btn-outline-secondary" title="<?php esc_attr_e( 'Clear', 'bootscore' ); ?>"><i class="fas fa-times"></i></a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
             <?php if ( have_posts() ) : ?>
                 <div class="banned-cards-list mx-auto" style="max-width: 900px;">
                     <?php while ( have_posts() ) : the_post(); ?>
@@ -94,6 +111,13 @@ get_header(); ?>
 
 .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+
+.card-text-ellipsis {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 </style>
 
 <?php get_footer(); ?>
