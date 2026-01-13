@@ -77,20 +77,20 @@ get_header(); ?>
                 
                 if ( $decklist || $decklist_text ) : ?>
                     <div class="deck-custom-fields">
-                        <h3>Informazioni Deck</h3>
+                        <h3>Deck Information</h3>
                         
                         <?php if ( $decklist ) : ?>
                             <div class="decklist-field mb-4">
                                 <strong>Decklist:</strong>
                                 <a href="<?php echo esc_url( $decklist ); ?>" target="_blank" rel="noopener" class="btn btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> <?php esc_html_e('Vedi Decklist', 'bootscore'); ?>
+                                    <i class="fas fa-external-link-alt"></i> <?php esc_html_e('View Decklist', 'bootscore'); ?>
                                 </a>
                             </div>
                         <?php endif; ?>
 
                         <?php if ( $decklist_text ) : ?>
                             <div class="decklist-text-field">
-                                <h4><?php esc_html_e('Lista Carte', 'bootscore'); ?></h4>
+                                <h4><?php esc_html_e('Card List', 'bootscore'); ?></h4>
                                 <div class="decklist-content bg-light p-3 rounded border">
                                     <?php echo nl2br( esc_html( $decklist_text ) ); ?>
                                 </div>
@@ -104,7 +104,7 @@ get_header(); ?>
                     // Display categories and tags if any
                     $categories = get_the_category();
                     if ( ! empty( $categories ) ) {
-                        echo '<div class="cat-links"><i class="fas fa-folder"></i> Categorie: ';
+                        echo '<div class="cat-links"><i class="fas fa-folder"></i> Categories: ';
                         foreach ( $categories as $category ) {
                             echo '<a href="' . esc_url( get_category_link( $category->term_id ) ) . '">' . esc_html( $category->name ) . '</a> ';
                         }
@@ -113,7 +113,7 @@ get_header(); ?>
                     
                     $tags = get_the_tags();
                     if ( ! empty( $tags ) ) {
-                        echo '<div class="tag-links"><i class="fas fa-tags"></i> Tag: ';
+                        echo '<div class="tag-links"><i class="fas fa-tags"></i> Tags: ';
                         foreach ( $tags as $tag ) {
                             echo '<a href="' . esc_url( get_tag_link( $tag->term_id ) ) . '">' . esc_html( $tag->name ) . '</a> ';
                         }

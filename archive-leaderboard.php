@@ -46,15 +46,15 @@ get_header();
                     <?php
                     the_posts_pagination( array(
                         'mid_size'  => 2,
-                        'prev_text' => __( 'Precedente', 'bootscore' ),
-                        'next_text' => __( 'Successivo', 'bootscore' ),
+                        'prev_text' => __( 'Previous', 'bootscore' ),
+                        'next_text' => __( 'Next', 'bootscore' ),
                     ) );
                     ?>
                 </div>
 
             <?php else : ?>
                 <div class="alert alert-info text-center">
-                    <?php esc_html_e( 'Nessuna classifica trovata.', 'bootscore' ); ?>
+                    <?php esc_html_e( 'No leaderboards found.', 'bootscore' ); ?>
                 </div>
             <?php endif; ?>
         </div>

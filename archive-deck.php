@@ -63,14 +63,14 @@ get_header(); ?>
                             if ( $decklist ) : ?>
                                 <div class="decklist-preview">
                                     <a href="<?php echo esc_url( $decklist ); ?>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt"></i> Vedi Decklist
+                                        <i class="fas fa-external-link-alt"></i> View Decklist
                                     </a>
                                 </div>
                             <?php endif; ?>
 
                             <footer class="entry-footer">
                                 <a href="<?php the_permalink(); ?>" class="btn btn-primary">
-                                    <?php esc_html_e( 'Leggi di più', 'bootscore' ); ?>
+                                    <?php esc_html_e( 'Read more', 'bootscore' ); ?>
                                 </a>
                             </footer>
                         </div>
@@ -84,8 +84,8 @@ get_header(); ?>
             // Pagination
             the_posts_pagination( array(
                 'mid_size'  => 2,
-                'prev_text' => __( 'Precedente', 'bootscore' ),
-                'next_text' => __( 'Successivo', 'bootscore' ),
+                'prev_text' => __( 'Previous', 'bootscore' ),
+                'next_text' => __( 'Next', 'bootscore' ),
             ) );
             ?>
 
@@ -93,11 +93,11 @@ get_header(); ?>
 
             <section class="no-results not-found">
                 <header class="page-header">
-                    <h1 class="page-title"><?php esc_html_e( 'Nessun deck trovato', 'bootscore' ); ?></h1>
+                    <h1 class="page-title"><?php esc_html_e( 'No decks found', 'bootscore' ); ?></h1>
                 </header>
 
                 <div class="page-content">
-                    <p><?php esc_html_e( 'Sembra che non ci siano deck da visualizzare.', 'bootscore' ); ?></p>
+                    <p><?php esc_html_e( 'It seems there are no decks to display.', 'bootscore' ); ?></p>
                 </div>
             </section>
 

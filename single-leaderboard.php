@@ -26,7 +26,7 @@ get_header(); ?>
                                 $year = get_field('field_leaderboard_year');
                                 if (get_the_modified_date()) : ?>
                                     <div class="text-muted small mt-2">
-                                        <i class="fas fa-clock me-1"></i> Ultimo aggiornamento: <?php the_modified_date('d/m/Y H:i'); ?>
+                                        <i class="fas fa-clock me-1"></i> Last updated: <?php the_modified_date('d/m/Y H:i'); ?>
                                     </div>
                                 <?php endif; ?>
                             </header>
@@ -105,7 +105,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">Punteggio</div>
+                                                <div class="small text-muted text-uppercase mb-1">Score</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_points); ?></div>
                                                 <div class="h4 mb-0 text-primary"><?php echo $best_points['points']; ?></div>
                                             </div>
@@ -115,7 +115,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">🥇 Vittorie</div>
+                                                <div class="small text-muted text-uppercase mb-1">🥇 Wins</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_first); ?></div>
                                                 <div class="h4 mb-0 text-warning"><?php echo $best_first['first']; ?></div>
                                             </div>
@@ -125,7 +125,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">Presenze</div>
+                                                <div class="small text-muted text-uppercase mb-1">Attendance</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_attendance); ?></div>
                                                 <div class="h4 mb-0 text-info"><?php echo $best_attendance['count']; ?></div>
                                             </div>
@@ -135,7 +135,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">🤡 Ultimi</div>
+                                                <div class="small text-muted text-uppercase mb-1">🤡 Last Places</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_last); ?></div>
                                                 <div class="h4 mb-0 text-danger"><?php echo $best_last['last']; ?></div>
                                             </div>
@@ -152,7 +152,7 @@ get_header(); ?>
                                     <div class="col-12">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">Miglior Torneo</div>
+                                                <div class="small text-muted text-uppercase mb-1">Best Tournament</div>
                                                 <div class="mb-1 fw-bold"><a href="<?php echo get_permalink($best_event->ID); ?>" class="text-decoration-none"><?php echo esc_html($best_event->post_title); ?></a></div>
                                                 <div class="small text-muted"><?php echo date_i18n('d/m/Y', strtotime($date)); ?></div>
                                                 <div class="small text-muted"><?php echo $place ? esc_html($place->post_title) : '-'; ?></div>
@@ -169,15 +169,15 @@ get_header(); ?>
                                             <thead class="table-light">
                                                 <tr>
                                                     <th scope="col" class="text-center" style="width: 60px;">#</th>
-                                                    <th scope="col" class="sortable" style="cursor: pointer;">Giocatore <i class="fas fa-sort small text-muted ms-1"></i></th>
-                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">Punti <i class="fas fa-sort small text-muted ms-1"></i></th>
+                                                    <th scope="col" class="sortable" style="cursor: pointer;">Player <i class="fas fa-sort small text-muted ms-1"></i></th>
+                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">Points <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">ELO <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">W <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">D <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">L <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">🥇 <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">🤡 <i class="fas fa-sort small text-muted ms-1"></i></th>
-                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">Presenze <i class="fas fa-sort small text-muted ms-1"></i></th>
+                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">Attendance <i class="fas fa-sort small text-muted ms-1"></i></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -232,9 +232,9 @@ get_header(); ?>
                                                     if ($trend === 'new') {
                                                         $trend_icon = '<span class="badge bg-info text-dark ms-2" style="font-size: 0.6em;">NEW</span>';
                                                     } elseif ($trend > 0) {
-                                                        $trend_icon = '<span class="text-success ms-2 small" title="Salito di ' . $trend . ' posizioni"><i class="fas fa-arrow-up"></i> ' . $trend . '</span>';
+                                                        $trend_icon = '<span class="text-success ms-2 small" title="Up by ' . $trend . ' positions"><i class="fas fa-arrow-up"></i> ' . $trend . '</span>';
                                                     } elseif ($trend < 0) {
-                                                        $trend_icon = '<span class="text-danger ms-2 small" title="Sceso di ' . abs($trend) . ' posizioni"><i class="fas fa-arrow-down"></i> ' . abs($trend) . '</span>';
+                                                        $trend_icon = '<span class="text-danger ms-2 small" title="Down by ' . abs($trend) . ' positions"><i class="fas fa-arrow-down"></i> ' . abs($trend) . '</span>';
                                                     }
                                                 ?>
                                                     <tr class="<?php echo esc_attr($row_class); ?>">

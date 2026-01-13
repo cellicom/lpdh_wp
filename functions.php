@@ -40,20 +40,20 @@ function register_leaderboard_cpt() {
         'singular_name'         => _x( 'Leaderboard', 'Post Type Singular Name', 'text_domain' ),
         'menu_name'             => __( 'Leaderboards', 'text_domain' ),
         'name_admin_bar'        => __( 'Leaderboard', 'text_domain' ),
-        'archives'              => __( 'Archivio Leaderboard', 'text_domain' ),
-        'attributes'            => __( 'Attributi Leaderboard', 'text_domain' ),
-        'parent_item_colon'     => __( 'Leaderboard Genitore:', 'text_domain' ),
-        'all_items'             => __( 'Tutte le Leaderboards', 'text_domain' ),
-        'add_new_item'          => __( 'Aggiungi Nuova Leaderboard', 'text_domain' ),
-        'add_new'               => __( 'Aggiungi Nuova', 'text_domain' ),
-        'new_item'              => __( 'Nuova Leaderboard', 'text_domain' ),
-        'edit_item'             => __( 'Modifica Leaderboard', 'text_domain' ),
-        'update_item'           => __( 'Aggiorna Leaderboard', 'text_domain' ),
-        'view_item'             => __( 'Visualizza Leaderboard', 'text_domain' ),
-        'view_items'            => __( 'Visualizza Leaderboards', 'text_domain' ),
-        'search_items'          => __( 'Cerca Leaderboard', 'text_domain' ),
-        'not_found'             => __( 'Non trovata', 'text_domain' ),
-        'not_found_in_trash'    => __( 'Non trovata nel cestino', 'text_domain' ),
+        'archives'              => __( 'Leaderboard Archive', 'text_domain' ),
+        'attributes'            => __( 'Leaderboard Attributes', 'text_domain' ),
+        'parent_item_colon'     => __( 'Parent Leaderboard:', 'text_domain' ),
+        'all_items'             => __( 'All Leaderboards', 'text_domain' ),
+        'add_new_item'          => __( 'Add New Leaderboard', 'text_domain' ),
+        'add_new'               => __( 'Add New', 'text_domain' ),
+        'new_item'              => __( 'New Leaderboard', 'text_domain' ),
+        'edit_item'             => __( 'Edit Leaderboard', 'text_domain' ),
+        'update_item'           => __( 'Update Leaderboard', 'text_domain' ),
+        'view_item'             => __( 'View Leaderboard', 'text_domain' ),
+        'view_items'            => __( 'View Leaderboards', 'text_domain' ),
+        'search_items'          => __( 'Search Leaderboard', 'text_domain' ),
+        'not_found'             => __( 'Not found', 'text_domain' ),
+        'not_found_in_trash'    => __( 'Not found in Trash', 'text_domain' ),
     );
 
     $args = array(
@@ -127,14 +127,14 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_leaderboard_fields',
-        'title' => 'Dettagli Leaderboard',
+        'title' => 'Leaderboard Details',
         'fields' => array(
             array(
                 'key' => 'field_leaderboard_year',
                 'label' => 'Year',
                 'name' => 'year',
                 'type' => 'select',
-                'instructions' => 'Seleziona l\'anno di riferimento.',
+                'instructions' => 'Select the reference year.',
                 'required' => 1,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -156,7 +156,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Rankings JSON',
                 'name' => 'rankings_json',
                 'type' => 'textarea',
-                'instructions' => 'Inserisci qui i dati della classifica in formato JSON.',
+                'instructions' => 'Enter ranking data in JSON format here.',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -202,34 +202,34 @@ function register_deck_post_type() {
         'singular_name'         => 'Deck',
         'menu_name'             => 'Decks',
         'name_admin_bar'        => 'Deck',
-        'archives'              => 'Archivio Decks',
-        'attributes'            => 'Attributi Deck',
-        'parent_item_colon'     => 'Deck genitore:',
-        'all_items'             => 'Tutti i Decks',
-        'add_new_item'          => 'Aggiungi nuovo Deck',
-        'add_new'               => 'Aggiungi nuovo',
-        'new_item'              => 'Nuovo Deck',
-        'edit_item'             => 'Modifica Deck',
-        'update_item'           => 'Aggiorna Deck',
-        'view_item'             => 'Visualizza Deck',
-        'view_items'            => 'Visualizza Decks',
-        'search_items'          => 'Cerca Deck',
-        'not_found'             => 'Nessun deck trovato',
-        'not_found_in_trash'    => 'Nessun deck nel cestino',
-        'featured_image'        => 'Immagine in evidenza',
-        'set_featured_image'    => 'Imposta immagine in evidenza',
-        'remove_featured_image' => 'Rimuovi immagine in evidenza',
-        'use_featured_image'    => 'Usa come immagine in evidenza',
-        'insert_into_item'      => 'Inserisci in deck',
-        'uploaded_to_this_item' => 'Caricato in questo deck',
-        'items_list'            => 'Lista dec',
-        'items_list_navigation' => 'Navigazione lista dec',
-        'filter_items_list'     => 'Filtra lista dec',
+        'archives'              => 'Deck Archive',
+        'attributes'            => 'Deck Attributes',
+        'parent_item_colon'     => 'Parent Deck:',
+        'all_items'             => 'All Decks',
+        'add_new_item'          => 'Add New Deck',
+        'add_new'               => 'Add New',
+        'new_item'              => 'New Deck',
+        'edit_item'             => 'Edit Deck',
+        'update_item'           => 'Update Deck',
+        'view_item'             => 'View Deck',
+        'view_items'            => 'View Decks',
+        'search_items'          => 'Search Deck',
+        'not_found'             => 'No decks found',
+        'not_found_in_trash'    => 'No decks in Trash',
+        'featured_image'        => 'Featured Image',
+        'set_featured_image'    => 'Set featured image',
+        'remove_featured_image' => 'Remove featured image',
+        'use_featured_image'    => 'Use as featured image',
+        'insert_into_item'      => 'Insert into deck',
+        'uploaded_to_this_item' => 'Uploaded to this deck',
+        'items_list'            => 'Deck list',
+        'items_list_navigation' => 'Deck list navigation',
+        'filter_items_list'     => 'Filter deck list',
     );
 
     $args = array(
         'label'                 => 'Deck',
-        'description'           => 'Custom Post Type per gestire i deck',
+        'description'           => 'Custom Post Type to manage decks',
         'labels'                => $labels,
         'supports'              => array('title', 'thumbnail', 'author'),
         'hierarchical'          => false,
@@ -293,7 +293,7 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_deck_custom_fields',
-        'title' => 'Campi Deck',
+        'title' => 'Deck Fields',
         'fields' => array(
             array(
                 'key' => 'field_commander',
@@ -329,10 +329,10 @@ if( function_exists('acf_add_local_field_group') ):
             ),
             array(
                 'key' => 'field_decklist',
-                'label' => 'Decklist (Link Esterno)',
+                'label' => 'Decklist (External Link)',
                 'name' => 'decklist',
                 'type' => 'url',
-                'instructions' => 'Inserisci l\'URL esterno della decklist',
+                'instructions' => 'Enter external decklist URL',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -345,7 +345,7 @@ if( function_exists('acf_add_local_field_group') ):
             ),
             array(
                 'key' => 'field_decklist_text',
-                'label' => 'Decklist (Lista testuale)',
+                'label' => 'Decklist (Text List)',
                 'name' => 'decklist_text',
                 'type' => 'textarea',
                 'instructions' => '',
@@ -384,11 +384,11 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_deck_partner_image',
-        'title' => 'Immagine in evidenza_partner',
+        'title' => 'Featured Image Partner',
         'fields' => array(
             array(
                 'key' => 'field_featured_image_partner',
-                'label' => 'Immagine in evidenza_partner',
+                'label' => 'Featured Image Partner',
                 'name' => 'featured_image_partner',
                 'type' => 'image',
                 'instructions' => '',
@@ -433,7 +433,7 @@ function deck_custom_columns($columns) {
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
     $new_columns['decklist'] = 'Decklist';
-    $new_columns['author'] = 'Autore';
+    $new_columns['author'] = 'Author';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -447,7 +447,7 @@ function deck_custom_columns_data($column, $post_id) {
         case 'decklist':
             $decklist = get_field('field_decklist', $post_id);
             if ($decklist) {
-                echo '<a href="' . esc_url($decklist) . '" target="_blank" rel="noopener">Link Esterno</a>';
+                echo '<a href="' . esc_url($decklist) . '" target="_blank" rel="noopener">External Link</a>';
             } else {
                 echo '-';
             }
@@ -650,34 +650,34 @@ function register_banned_card_post_type() {
         'singular_name'         => 'Banned Card',
         'menu_name'             => 'Banned Cards',
         'name_admin_bar'        => 'Banned Card',
-        'archives'              => 'Archivio Banned Cards',
-        'attributes'            => 'Attributi Banned Card',
-        'parent_item_colon'     => 'Banned Card genitore:',
-        'all_items'             => 'Tutti i Banned Cards',
-        'add_new_item'          => 'Aggiungi nuovo Banned Card',
-        'add_new'               => 'Aggiungi nuovo',
-        'new_item'              => 'Nuovo Banned Card',
-        'edit_item'             => 'Modifica Banned Card',
-        'update_item'           => 'Aggiorna Banned Card',
-        'view_item'             => 'Visualizza Banned Card',
-        'view_items'            => 'Visualizza Banned Cards',
-        'search_items'          => 'Cerca Banned Card',
-        'not_found'             => 'Nessun banned card trovato',
-        'not_found_in_trash'    => 'Nessun banned card nel cestino',
-        'featured_image'        => 'Immagine in evidenza',
-        'set_featured_image'    => 'Imposta immagine in evidenza',
-        'remove_featured_image' => 'Rimuovi immagine in evidenza',
-        'use_featured_image'    => 'Usa come immagine in evidenza',
-        'insert_into_item'      => 'Inserisci in banned card',
-        'uploaded_to_this_item' => 'Caricato in questo banned card',
-        'items_list'            => 'Lista banned cards',
-        'items_list_navigation' => 'Navigazione lista banned cards',
-        'filter_items_list'     => 'Filtra lista banned cards',
+        'archives'              => 'Banned Cards Archive',
+        'attributes'            => 'Banned Card Attributes',
+        'parent_item_colon'     => 'Parent Banned Card:',
+        'all_items'             => 'All Banned Cards',
+        'add_new_item'          => 'Add New Banned Card',
+        'add_new'               => 'Add New',
+        'new_item'              => 'New Banned Card',
+        'edit_item'             => 'Edit Banned Card',
+        'update_item'           => 'Update Banned Card',
+        'view_item'             => 'View Banned Card',
+        'view_items'            => 'View Banned Cards',
+        'search_items'          => 'Search Banned Card',
+        'not_found'             => 'No banned cards found',
+        'not_found_in_trash'    => 'No banned cards in Trash',
+        'featured_image'        => 'Featured Image',
+        'set_featured_image'    => 'Set featured image',
+        'remove_featured_image' => 'Remove featured image',
+        'use_featured_image'    => 'Use as featured image',
+        'insert_into_item'      => 'Insert into banned card',
+        'uploaded_to_this_item' => 'Uploaded to this banned card',
+        'items_list'            => 'Banned cards list',
+        'items_list_navigation' => 'Banned cards list navigation',
+        'filter_items_list'     => 'Filter banned cards list',
     );
 
     $args = array(
         'label'                 => 'Banned Card',
-        'description'           => 'Custom Post Type per gestire le carte bannate',
+        'description'           => 'Custom Post Type to manage banned cards',
         'labels'                => $labels,
         'supports'              => array('title', 'editor', 'thumbnail'),
         'hierarchical'          => false,
@@ -709,14 +709,14 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_banned_card_custom_fields',
-        'title' => 'Campi Banned Card',
+        'title' => 'Banned Card Fields',
         'fields' => array(
             array(
                 'key' => 'field_scryfall_link',
                 'label' => 'Scryfall Link',
                 'name' => 'scryfall_link',
                 'type' => 'url',
-                'instructions' => 'Inserisci il link alla carta su Scryfall',
+                'instructions' => 'Enter card link on Scryfall',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -770,7 +770,7 @@ function banned_card_custom_columns_data($column, $post_id) {
         case 'scryfall_link':
             $scryfall_link = get_field('field_scryfall_link', $post_id);
             if ($scryfall_link) {
-                echo '<a href="' . esc_url($scryfall_link) . '" target="_blank" rel="noopener">Link Scryfall</a>';
+                echo '<a href="' . esc_url($scryfall_link) . '" target="_blank" rel="noopener">Scryfall Link</a>';
             } else {
                 echo '-';
             }
@@ -889,7 +889,7 @@ function hide_deck_views_for_players() {
             font-weight: 600;
         }
         .subsubsub li.mine::before {
-            content: "Visualizzazione: ";
+            content: "View: ";
             color: #646970;
         }
     </style>
@@ -957,34 +957,34 @@ function register_place_post_type() {
         'singular_name'         => 'Place',
         'menu_name'             => 'Places',
         'name_admin_bar'        => 'Place',
-        'archives'              => 'Archivio Places',
-        'attributes'            => 'Attributi Place',
-        'parent_item_colon'     => 'Place genitore:',
-        'all_items'             => 'Tutti i Places',
-        'add_new_item'          => 'Aggiungi nuovo Place',
-        'add_new'               => 'Aggiungi nuovo',
-        'new_item'              => 'Nuovo Place',
-        'edit_item'             => 'Modifica Place',
-        'update_item'           => 'Aggiorna Place',
-        'view_item'             => 'Visualizza Place',
-        'view_items'            => 'Visualizza Places',
-        'search_items'          => 'Cerca Place',
-        'not_found'             => 'Nessun place trovato',
-        'not_found_in_trash'    => 'Nessun place nel cestino',
-        'featured_image'        => 'Immagine in evidenza',
-        'set_featured_image'    => 'Imposta immagine in evidenza',
-        'remove_featured_image' => 'Rimuovi immagine in evidenza',
-        'use_featured_image'    => 'Usa come immagine in evidenza',
-        'insert_into_item'      => 'Inserisci in place',
-        'uploaded_to_this_item' => 'Caricato in questo place',
-        'items_list'            => 'Lista places',
-        'items_list_navigation' => 'Navigazione lista places',
-        'filter_items_list'     => 'Filtra lista places',
+        'archives'              => 'Places Archive',
+        'attributes'            => 'Place Attributes',
+        'parent_item_colon'     => 'Parent Place:',
+        'all_items'             => 'All Places',
+        'add_new_item'          => 'Add New Place',
+        'add_new'               => 'Add New',
+        'new_item'              => 'New Place',
+        'edit_item'             => 'Edit Place',
+        'update_item'           => 'Update Place',
+        'view_item'             => 'View Place',
+        'view_items'            => 'View Places',
+        'search_items'          => 'Search Place',
+        'not_found'             => 'No places found',
+        'not_found_in_trash'    => 'No places in Trash',
+        'featured_image'        => 'Featured Image',
+        'set_featured_image'    => 'Set featured image',
+        'remove_featured_image' => 'Remove featured image',
+        'use_featured_image'    => 'Use as featured image',
+        'insert_into_item'      => 'Insert into place',
+        'uploaded_to_this_item' => 'Uploaded to this place',
+        'items_list'            => 'Places list',
+        'items_list_navigation' => 'Places list navigation',
+        'filter_items_list'     => 'Filter places list',
     );
 
     $args = array(
         'label'                 => 'Place',
-        'description'           => 'Custom Post Type per gestire i luoghi',
+        'description'           => 'Custom Post Type to manage places',
         'labels'                => $labels,
         'supports'              => array('title', 'editor', 'thumbnail', 'author'),
         'hierarchical'          => false,
@@ -1016,14 +1016,14 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_place_custom_fields',
-        'title' => 'Campi Place',
+        'title' => 'Place Fields',
         'fields' => array(
             array(
                 'key' => 'field_place_address',
-                'label' => 'Indirizzo',
+                'label' => 'Address',
                 'name' => 'place_address',
                 'type' => 'text',
-                'instructions' => 'Inserisci l\'indirizzo del luogo',
+                'instructions' => 'Enter place address',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1032,14 +1032,14 @@ if( function_exists('acf_add_local_field_group') ):
                     'id' => '',
                 ),
                 'default_value' => '',
-                'placeholder' => 'Via example 123, Città',
+                'placeholder' => '123 Example St, City',
             ),
             array(
                 'key' => 'field_place_homepage',
-                'label' => 'Sito Web',
+                'label' => 'Website',
                 'name' => 'place_homepage',
                 'type' => 'url',
-                'instructions' => 'Inserisci il link al sito web del luogo',
+                'instructions' => 'Enter place website link',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1079,9 +1079,9 @@ function place_custom_columns($columns) {
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
-    $new_columns['place_address'] = 'Indirizzo';
-    $new_columns['place_homepage'] = 'Sito Web';
-    $new_columns['author'] = 'Autore';
+    $new_columns['place_address'] = 'Address';
+    $new_columns['place_homepage'] = 'Website';
+    $new_columns['author'] = 'Author';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -1205,34 +1205,34 @@ function register_faq_post_type() {
         'singular_name'         => 'FAQ',
         'menu_name'             => 'FAQ',
         'name_admin_bar'        => 'FAQ',
-        'archives'              => 'Archivio FAQ',
-        'attributes'            => 'Attributi FAQ',
-        'parent_item_colon'     => 'FAQ genitore:',
-        'all_items'             => 'Tutte le FAQ',
-        'add_new_item'          => 'Aggiungi nuova FAQ',
-        'add_new'               => 'Aggiungi nuovo',
-        'new_item'              => 'Nuova FAQ',
-        'edit_item'             => 'Modifica FAQ',
-        'update_item'           => 'Aggiorna FAQ',
-        'view_item'             => 'Visualizza FAQ',
-        'view_items'            => 'Visualizza FAQ',
-        'search_items'          => 'Cerca FAQ',
-        'not_found'             => 'Nessuna FAQ trovata',
-        'not_found_in_trash'    => 'Nessuna FAQ nel cestino',
-        'featured_image'        => 'Immagine in evidenza',
-        'set_featured_image'    => 'Imposta immagine in evidenza',
-        'remove_featured_image' => 'Rimuovi immagine in evidenza',
-        'use_featured_image'    => 'Usa come immagine in evidenza',
-        'insert_into_item'      => 'Inserisci in FAQ',
-        'uploaded_to_this_item' => 'Caricato in questa FAQ',
-        'items_list'            => 'Lista FAQ',
-        'items_list_navigation' => 'Navigazione lista FAQ',
-        'filter_items_list'     => 'Filtra lista FAQ',
+        'archives'              => 'FAQ Archive',
+        'attributes'            => 'FAQ Attributes',
+        'parent_item_colon'     => 'Parent FAQ:',
+        'all_items'             => 'All FAQs',
+        'add_new_item'          => 'Add New FAQ',
+        'add_new'               => 'Add New',
+        'new_item'              => 'New FAQ',
+        'edit_item'             => 'Edit FAQ',
+        'update_item'           => 'Update FAQ',
+        'view_item'             => 'View FAQ',
+        'view_items'            => 'View FAQs',
+        'search_items'          => 'Search FAQ',
+        'not_found'             => 'No FAQs found',
+        'not_found_in_trash'    => 'No FAQs in Trash',
+        'featured_image'        => 'Featured Image',
+        'set_featured_image'    => 'Set featured image',
+        'remove_featured_image' => 'Remove featured image',
+        'use_featured_image'    => 'Use as featured image',
+        'insert_into_item'      => 'Insert into FAQ',
+        'uploaded_to_this_item' => 'Uploaded to this FAQ',
+        'items_list'            => 'FAQ list',
+        'items_list_navigation' => 'FAQ list navigation',
+        'filter_items_list'     => 'Filter FAQ list',
     );
 
     $args = array(
         'label'                 => 'FAQ',
-        'description'           => 'Custom Post Type per gestire le FAQ',
+        'description'           => 'Custom Post Type to manage FAQs',
         'labels'                => $labels,
         'supports'              => array('title', 'editor'),
         'hierarchical'          => false,
@@ -1317,34 +1317,34 @@ function register_event_post_type() {
         'singular_name'         => 'Event',
         'menu_name'             => 'Events',
         'name_admin_bar'        => 'Event',
-        'archives'              => 'Archivio Events',
-        'attributes'            => 'Attributi Event',
-        'parent_item_colon'     => 'Event genitore:',
-        'all_items'             => 'Tutti gli Events',
-        'add_new_item'          => 'Aggiungi nuovo Event',
-        'add_new'               => 'Aggiungi nuovo',
-        'new_item'              => 'Nuovo Event',
-        'edit_item'             => 'Modifica Event',
-        'update_item'           => 'Aggiorna Event',
-        'view_item'             => 'Visualizza Event',
-        'view_items'            => 'Visualizza Events',
-        'search_items'          => 'Cerca Event',
-        'not_found'             => 'Nessun event trovato',
-        'not_found_in_trash'    => 'Nessun event nel cestino',
-        'featured_image'        => 'Immagine in evidenza',
-        'set_featured_image'    => 'Imposta immagine in evidenza',
-        'remove_featured_image' => 'Rimuovi immagine in evidenza',
-        'use_featured_image'    => 'Usa come immagine in evidenza',
-        'insert_into_item'      => 'Inserisci in event',
-        'uploaded_to_this_item' => 'Caricato in questo event',
-        'items_list'            => 'Lista events',
-        'items_list_navigation' => 'Navigazione lista events',
-        'filter_items_list'     => 'Filtra lista events',
+        'archives'              => 'Events Archive',
+        'attributes'            => 'Event Attributes',
+        'parent_item_colon'     => 'Parent Event:',
+        'all_items'             => 'All Events',
+        'add_new_item'          => 'Add New Event',
+        'add_new'               => 'Add New',
+        'new_item'              => 'New Event',
+        'edit_item'             => 'Edit Event',
+        'update_item'           => 'Update Event',
+        'view_item'             => 'View Event',
+        'view_items'            => 'View Events',
+        'search_items'          => 'Search Event',
+        'not_found'             => 'No events found',
+        'not_found_in_trash'    => 'No events in Trash',
+        'featured_image'        => 'Featured Image',
+        'set_featured_image'    => 'Set featured image',
+        'remove_featured_image' => 'Remove featured image',
+        'use_featured_image'    => 'Use as featured image',
+        'insert_into_item'      => 'Insert into event',
+        'uploaded_to_this_item' => 'Uploaded to this event',
+        'items_list'            => 'Events list',
+        'items_list_navigation' => 'Events list navigation',
+        'filter_items_list'     => 'Filter events list',
     );
 
     $args = array(
         'label'                 => 'Event',
-        'description'           => 'Custom Post Type per gestire gli eventi',
+        'description'           => 'Custom Post Type to manage events',
         'labels'                => $labels,
         'supports'              => array('title', 'editor', 'thumbnail'),
         'hierarchical'          => false,
@@ -1376,14 +1376,14 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_event_custom_fields',
-        'title' => 'Campi Event',
+        'title' => 'Event Fields',
         'fields' => array(
             array(
                 'key' => 'field_event_place',
                 'label' => 'Place',
                 'name' => 'event_place',
                 'type' => 'post_object',
-                'instructions' => 'Seleziona il luogo dell\'evento',
+                'instructions' => 'Select event place',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1405,7 +1405,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Date',
                 'name' => 'event_date',
                 'type' => 'date_time_picker',
-                'instructions' => 'Seleziona la data e l\'ora dell\'evento',
+                'instructions' => 'Select event date and time',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1422,7 +1422,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Link Facebook Event',
                 'name' => 'event_fb_link',
                 'type' => 'url',
-                'instructions' => 'Inserisci il link all\'evento Facebook',
+                'instructions' => 'Enter Facebook event link',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1438,7 +1438,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Rankings JSON',
                 'name' => 'event_rankings_json',
                 'type' => 'textarea',
-                'instructions' => 'Inserisci i ranking in formato JSON',
+                'instructions' => 'Enter rankings in JSON format',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1457,7 +1457,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'label' => 'Ranking',
                 'name' => 'event_ranking',
                 'type' => 'repeater',
-                'instructions' => 'Aggiungi i ranking dei giocatori. Compila i campi manualmente o importali dal JSON sopra.',
+                'instructions' => 'Add player rankings. Fill fields manually or import from JSON above.',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1469,7 +1469,7 @@ if( function_exists('acf_add_local_field_group') ):
                 'min' => 0,
                 'max' => 0,
                 'layout' => 'table',
-                'button_label' => 'Aggiungi Ranking',
+                'button_label' => 'Add Ranking',
                 'sub_fields' => array(
                     array(
                         'key' => 'field_ranking_pos',
@@ -1523,7 +1523,7 @@ if( function_exists('acf_add_local_field_group') ):
                             'id' => '',
                         ),
                         'default_value' => '',
-                        'placeholder' => 'Nome giocatore',
+                        'placeholder' => 'Player name',
                         'maxlength' => '',
                     ),
                     array(
@@ -1656,10 +1656,10 @@ if( function_exists('acf_add_local_field_group') ):
             ),
             array(
                 'key' => 'field_event_survey',
-                'label' => 'Survey (Partecipanti)',
+                'label' => 'Survey (Participants)',
                 'name' => 'survey',
                 'type' => 'repeater',
-                'instructions' => 'Lista utenti che hanno partecipato',
+                'instructions' => 'List of users who participated',
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
@@ -1671,11 +1671,11 @@ if( function_exists('acf_add_local_field_group') ):
                 'min' => 0,
                 'max' => 0,
                 'layout' => 'table',
-                'button_label' => 'Aggiungi Utente',
+                'button_label' => 'Add User',
                 'sub_fields' => array(
                     array(
                         'key' => 'field_survey_user',
-                        'label' => 'Utente',
+                        'label' => 'User',
                         'name' => 'user',
                         'type' => 'user',
                         'required' => 1,
@@ -1923,7 +1923,7 @@ function event_ranking_auto_fill_name() {
             $msg.hide().css('color', '');
             
             if (!$rows.length) {
-                $msg.text('Nessuna riga trovata nella classifica.').css('color', '#d63638').show();
+                $msg.text('No rows found in rankings.').css('color', '#d63638').show();
                 setTimeout(function() { $msg.fadeOut(); }, 5000);
                 return;
             }
@@ -1972,13 +1972,13 @@ function event_ranking_auto_fill_name() {
                                 matchCount++;
                             }
                         });
-                        $msg.text('Sincronizzazione completata: ' + matchCount + ' giocatori abbinati.').css('color', '#46b450').show();
+                        $msg.text('Sync completed: ' + matchCount + ' players matched.').css('color', '#46b450').show();
                     } else {
-                        $msg.text('Nessun giocatore trovato.').css('color', '#d63638').show();
+                        $msg.text('No players found.').css('color', '#d63638').show();
                     }
                 },
                 error: function() {
-                    $msg.text('Errore durante la sincronizzazione.').css('color', '#d63638').show();
+                    $msg.text('Error during synchronization.').css('color', '#d63638').show();
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text('Sync Player');
@@ -2178,7 +2178,7 @@ function ajax_get_user_decks() {
             wp_send_json_success(array());
         }
     } else {
-        wp_send_json_error(array('message' => 'User ID non valido'));
+        wp_send_json_error(array('message' => 'Invalid User ID'));
     }
 }
 add_action('wp_ajax_get_user_decks', 'ajax_get_user_decks');
@@ -2212,9 +2212,9 @@ function event_ranking_populate_player_deck() {
             // Create temporary select element with Select2
             var $selector = $(
                 '<div class="temp-deck-selector" style="margin-top:8px;">' +
-                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Seleziona deck:</label>' +
+                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Select deck:</label>' +
                     '<select class="deck-quick-select" style="width:100%;">' +
-                        '<option value="">-- Cerca deck --</option>' +
+                        '<option value="">-- Search deck --</option>' +
                     '</select>' +
                 '</div>'
             );
@@ -2238,7 +2238,7 @@ function event_ranking_populate_player_deck() {
             
             // Initialize Select2 on the new select
             $selector.find('select').select2({
-                placeholder: '-- Cerca deck --',
+                placeholder: '-- Search deck --',
                 allowClear: true,
                 width: '100%'
             });
@@ -2253,11 +2253,11 @@ function event_ranking_populate_player_deck() {
                     nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
                 },
                 beforeSend: function() {
-                    $selector.find('select').html('<option value="">Caricamento...</option>');
+                    $selector.find('select').html('<option value="">Loading...</option>');
                 },
                 success: function(response) {
                     var $select = $selector.find('select');
-                    $select.html('<option value="">-- Cerca deck --</option>');
+                    $select.html('<option value="">-- Search deck --</option>');
                     
                     if (response.success && response.data && response.data.length > 0) {
                         $.each(response.data, function(index, deck) {
@@ -2268,14 +2268,14 @@ function event_ranking_populate_player_deck() {
                             );
                         });
                     } else {
-                        $select.html('<option value="">Nessun deck disponibile</option>');
+                        $select.html('<option value="">No decks available</option>');
                     }
                     
                     // Refresh Select2
                     $select.trigger('change.select2');
                 },
                 error: function() {
-                    $selector.find('select').html('<option value="">Errore caricamento</option>');
+                    $selector.find('select').html('<option value="">Loading error</option>');
                     $selector.find('select').trigger('change.select2');
                 }
             });
@@ -2323,24 +2323,24 @@ function ajax_check_username_availability() {
     $user_login = isset($_POST['user_login']) ? sanitize_user($_POST['user_login']) : '';
     
     if ( empty($user_login) ) {
-        wp_send_json_error(array('message' => __('Il nome utente è richiesto.', 'bootscore')));
+        wp_send_json_error(array('message' => __('Username is required.', 'bootscore')));
     }
     
     if ( !validate_username($user_login) ) {
-        wp_send_json_error(array('message' => __('Il nome utente non è valido.', 'bootscore')));
+        wp_send_json_error(array('message' => __('Username is invalid.', 'bootscore')));
     }
     
     if ( username_exists($user_login) ) {
-        wp_send_json_error(array('message' => __('Questo nome utente è già in uso.', 'bootscore')));
+        wp_send_json_error(array('message' => __('This username is already taken.', 'bootscore')));
     }
     
     // Check if username is reserved
     $reserved_usernames = array('admin', 'administrator', 'root', 'superuser', 'guest', 'test', 'testing');
     if ( in_array(strtolower($user_login), $reserved_usernames) ) {
-        wp_send_json_error(array('message' => __('Questo nome utente è riservato.', 'bootscore')));
+        wp_send_json_error(array('message' => __('This username is reserved.', 'bootscore')));
     }
     
-    wp_send_json_success(array('available' => true, 'message' => __('Il nome utente è disponibile!', 'bootscore')));
+    wp_send_json_success(array('available' => true, 'message' => __('Username is available!', 'bootscore')));
 }
 add_action('wp_ajax_bootscore_check_username', 'ajax_check_username_availability');
 add_action('wp_ajax_nopriv_bootscore_check_username', 'ajax_check_username_availability');
@@ -2354,18 +2354,18 @@ function ajax_check_email_availability() {
     $user_email = isset($_POST['user_email']) ? sanitize_email($_POST['user_email']) : '';
     
     if ( empty($user_email) ) {
-        wp_send_json_error(array('message' => __('L\'indirizzo email è richiesto.', 'bootscore')));
+        wp_send_json_error(array('message' => __('Email address is required.', 'bootscore')));
     }
     
     if ( !is_email($user_email) ) {
-        wp_send_json_error(array('message' => __('L\'indirizzo email non è valido.', 'bootscore')));
+        wp_send_json_error(array('message' => __('Email address is invalid.', 'bootscore')));
     }
     
     if ( email_exists($user_email) ) {
-        wp_send_json_error(array('message' => __('Questo indirizzo email è già registrato.', 'bootscore')));
+        wp_send_json_error(array('message' => __('This email address is already registered.', 'bootscore')));
     }
     
-    wp_send_json_success(array('available' => true, 'message' => __('L\'indirizzo email è disponibile!', 'bootscore')));
+    wp_send_json_success(array('available' => true, 'message' => __('Email address is available!', 'bootscore')));
 }
 add_action('wp_ajax_bootscore_check_email', 'ajax_check_email_availability');
 add_action('wp_ajax_nopriv_bootscore_check_email', 'ajax_check_email_availability');
@@ -2452,14 +2452,14 @@ function ajax_toggle_event_participation() {
     check_ajax_referer('event_participation_nonce', 'nonce');
 
     if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Devi essere loggato.']);
+        wp_send_json_error(['message' => 'You must be logged in.']);
     }
 
     $event_id = isset($_POST['event_id']) ? intval($_POST['event_id']) : 0;
     $user_id = get_current_user_id();
 
     if (!$event_id) {
-        wp_send_json_error(['message' => 'ID evento non valido.']);
+        wp_send_json_error(['message' => 'Invalid event ID.']);
     }
 
     // Get current survey data
@@ -2516,7 +2516,7 @@ function add_update_survey_button_script() {
                     '<div class="update-survey-controls" style="margin-top: 10px;">' +
                         '<button type="button" id="update-survey-btn" class="button button-primary">Update Survey</button>' +
                         '<span id="update-survey-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>' +
-                        '<p class="description" style="margin-top: 5px;">Aggiunge automaticamente i giocatori presenti nella classifica al campo survey se non sono già presenti.</p>' +
+                        '<p class="description" style="margin-top: 5px;">Automatically adds players from rankings to the survey field if they are not already present.</p>' +
                     '</div>'
                 );
             }
@@ -2599,7 +2599,7 @@ function add_update_survey_button_script() {
             newPlayers = uniquePlayers;
             
             if (newPlayers.length === 0) {
-                $msg.text('Tutti i giocatori sono già presenti.').css('color', '#d63638').show();
+                $msg.text('All players are already present.').css('color', '#d63638').show();
                 return;
             }
             
@@ -2611,7 +2611,7 @@ function add_update_survey_button_script() {
                 
                 function addNextUser(index) {
                     if (index >= newPlayers.length) {
-                        $msg.text('Aggiunti ' + addedCount + ' utenti con successo!').css('color', '#46b450').show();
+                        $msg.text('Successfully added ' + addedCount + ' users!').css('color', '#46b450').show();
                         setTimeout(function() { $msg.fadeOut(); }, 5000);
                         return;
                     }
@@ -2643,7 +2643,7 @@ function add_update_survey_button_script() {
                 
                 addNextUser(0);
             } else {
-                alert('Errore: Impossibile trovare il pulsante "Aggiungi riga".');
+                alert('Error: Cannot find "Add Row" button.');
             }
         });
         
@@ -2972,31 +2972,31 @@ function render_player_stats_page() {
     // Render HTML
     ?>
     <div class="wrap">
-        <h1>Statistiche Giocatore: <?php echo esc_html($target_user ? $target_user->display_name : 'Utente sconosciuto'); ?></h1>
+        <h1>Player Stats: <?php echo esc_html($target_user ? $target_user->display_name : 'Unknown User'); ?></h1>
         
         <form method="get" action="" style="margin: 20px 0;">
             <input type="hidden" name="page" value="player-stats">
             
             <?php if (current_user_can('administrator')) : ?>
                 <div style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block;">
-                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px;">Seleziona Giocatore (Admin):</label>
+                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px;">Select Player (Admin):</label>
                     <?php
                     wp_dropdown_users(array(
                         'name' => 'stats_user_id',
                         'selected' => $user_id,
-                        'show_option_none' => 'Seleziona Utente',
+                        'show_option_none' => 'Select User',
                         'show' => 'display_name_with_login',
                         'class' => '',
                     ));
                     ?>
-                    <input type="submit" class="button" value="Visualizza">
+                    <input type="submit" class="button" value="View">
                 </div>
                 <br>
             <?php endif; ?>
             
-            <label for="stats_year" style="font-weight: bold; margin-right: 10px;">Filtra per anno:</label>
+            <label for="stats_year" style="font-weight: bold; margin-right: 10px;">Filter by year:</label>
             <select name="stats_year" id="stats_year" onchange="this.form.submit()">
-                <option value="global" <?php selected($selected_year, 'global'); ?>>Globale</option>
+                <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
                 <?php foreach ($available_years as $y) : ?>
                     <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>><?php echo esc_html($y); ?></option>
                 <?php endforeach; ?>
@@ -3006,24 +3006,24 @@ function render_player_stats_page() {
         <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
             <!-- Box 1: Riepilogo -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                <h2 class="title">Riepilogo</h2>
+                <h2 class="title">Summary</h2>
                 <div style="margin-top: 15px;">
                     <table class="form-table" role="presentation">
                         <tbody>
                             <tr>
-                                <th scope="row">Numero di presenze ai tornei</th>
+                                <th scope="row">Tournament Attendance</th>
                                 <td><?php echo $total_attendance; ?> 🙋</td>
                             </tr>
                             <tr>
-                                <th scope="row">Numero di vittorie (1° posto)</th>
+                                <th scope="row">Wins (1st place)</th>
                                 <td><?php echo $total_wins; ?> 🏆</td>
                             </tr>
                             <tr>
-                                <th scope="row">Ultimi posti</th>
+                                <th scope="row">Last Places</th>
                                 <td><?php echo $total_last_places; ?> 🤡</td>
                             </tr>
                             <tr>
-                                <th scope="row">Mazzo più usato</th>
+                                <th scope="row">Most Used Deck</th>
                                 <td>
                                     <?php if ($most_used_deck_id) : ?>
                                         <a href="<?php echo get_edit_post_link($most_used_deck_id); ?>"><?php echo esc_html($most_used_deck_name); ?></a>
@@ -3039,19 +3039,19 @@ function render_player_stats_page() {
 
             <!-- Box 2: Mazzi più usati -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                <h2 class="title">Mazzi più usati</h2>
+                <h2 class="title">Most Used Decks</h2>
                 <canvas id="deckUsageChart" style="max-height: 300px;"></canvas>
             </div>
 
             <!-- Box 3: Andamento Win Rate -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                <h2 class="title">Andamento Win Rate</h2>
+                <h2 class="title">Win Rate Trend</h2>
                 <canvas id="winRateChart" style="max-height: 300px;"></canvas>
             </div>
 
             <!-- Box 4: Andamento ELO -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                <h2 class="title">Andamento ELO</h2>
+                <h2 class="title">ELO Trend</h2>
                 <canvas id="eloChart" style="max-height: 300px;"></canvas>
             </div>
         </div>
@@ -3166,17 +3166,17 @@ function render_player_stats_page() {
 
         <hr style="margin: 30px 0;">
 
-        <h2>I Miei Mazzi</h2>
+        <h2>My Decks</h2>
         <table class="wp-list-table widefat fixed striped table-view-list">
             <thead>
                 <tr>
-                    <th>Mazzo</th>
-                    <th>Vittorie Tornei</th>
-                    <th>Match Vinti</th>
-                    <th>Match Pareggiati</th>
-                    <th>Match Persi</th>
+                    <th>Deck</th>
+                    <th>Tournament Wins</th>
+                    <th>Match Wins</th>
+                    <th>Match Draws</th>
+                    <th>Match Losses</th>
                     <th>Win Rate</th>
-                    <th>Presenze</th>
+                    <th>Attendance</th>
                 </tr>
             </thead>
             <tbody>
@@ -3205,7 +3205,7 @@ function render_player_stats_page() {
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
-                    <tr><td colspan="7">Nessun mazzo trovato.</td></tr>
+                    <tr><td colspan="7">No decks found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -3230,15 +3230,15 @@ function render_player_stats_page() {
 
         <hr style="margin: 30px 0;">
 
-        <h2>Storico Eventi</h2>
+        <h2>Event History</h2>
         <table class="wp-list-table widefat fixed striped table-view-list">
             <thead>
                 <tr>
-                    <th>Evento</th>
-                    <th>Data e Luogo</th>
-                    <th>Posizione</th>
-                    <th>Partecipanti</th>
-                    <th>Mazzo Usato</th>
+                    <th>Event</th>
+                    <th>Date and Place</th>
+                    <th>Position</th>
+                    <th>Participants</th>
+                    <th>Deck Used</th>
                 </tr>
             </thead>
             <tbody>
@@ -3293,7 +3293,7 @@ function render_player_stats_page() {
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
-                    <tr><td colspan="5">Nessun evento trovato.</td></tr>
+                    <tr><td colspan="5">No events found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -3331,7 +3331,7 @@ function add_stats_link_to_user_row($actions, $user) {
             ),
             admin_url('admin.php')
         );
-        $actions['view_stats'] = '<a href="' . esc_url($url) . '">Visualizza Statistiche</a>';
+        $actions['view_stats'] = '<a href="' . esc_url($url) . '">View Stats</a>';
     }
     return $actions;
 }
@@ -3375,7 +3375,7 @@ function add_update_leaderboard_button() {
             var year = $yearField.val();
             
             if (!year) {
-                alert('Seleziona un anno prima di aggiornare.');
+                alert('Select a year before updating.');
                 return;
             }
 
@@ -3395,13 +3395,13 @@ function add_update_leaderboard_button() {
                     if (response.success) {
                         var $textarea = $('.acf-field[data-key="field_leaderboard_rankings_json"] textarea');
                         $textarea.val(JSON.stringify(response.data, null, 2));
-                        $msg.text('Leaderboard aggiornata!').css('color', '#46b450').show();
+                        $msg.text('Leaderboard updated!').css('color', '#46b450').show();
                     } else {
-                        $msg.text('Errore: ' + (response.data || 'Sconosciuto')).css('color', '#d63638').show();
+                        $msg.text('Error: ' + (response.data || 'Unknown')).css('color', '#d63638').show();
                     }
                 },
                 error: function() {
-                    $msg.text('Errore di connessione.').css('color', '#d63638').show();
+                    $msg.text('Connection error.').css('color', '#d63638').show();
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text('Update Leaderboard');
@@ -3559,7 +3559,7 @@ function ajax_update_leaderboard_rankings() {
     $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
     
     if (!$year) {
-        wp_send_json_error('Anno non valido');
+        wp_send_json_error('Invalid year');
     }
 
     $args = array(

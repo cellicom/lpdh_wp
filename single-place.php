@@ -61,7 +61,7 @@ get_header(); ?>
 
                     <!-- Future Events Section -->
                     <div class="place-events mt-5 pt-5 border-top">
-                        <h2 class="text-center mb-4"><?php esc_html_e('Eventi Futuri', 'bootscore'); ?></h2>
+                        <h2 class="text-center mb-4"><?php esc_html_e('Upcoming Events', 'bootscore'); ?></h2>
                         
                         <?php
                         $today = date('Y-m-d H:i:s');
@@ -97,7 +97,7 @@ get_header(); ?>
                             </div>
                         <?php else : ?>
                             <div class="alert alert-info text-center">
-                                <?php esc_html_e( 'Nessun evento futuro programmato in questo luogo.', 'bootscore' ); ?>
+                                <?php esc_html_e( 'No upcoming events scheduled at this place.', 'bootscore' ); ?>
                             </div>
                         <?php endif; ?>
                     </div>

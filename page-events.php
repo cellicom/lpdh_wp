@@ -45,13 +45,13 @@ get_header(); ?>
                 </div>
             <?php else : ?>
                 <div class="alert alert-info">
-                    <?php esc_html_e( 'Nessun evento futuro trovato.', 'bootscore' ); ?>
+                    <?php esc_html_e( 'No upcoming events found.', 'bootscore' ); ?>
                 </div>
             <?php endif; ?>
 
             <div class="text-center mt-5">
                 <a href="<?php echo get_post_type_archive_link('event'); ?>" class="btn btn-primary btn-lg">
-                    <?php esc_html_e( 'See all event', 'bootscore' ); ?>
+                    <?php esc_html_e( 'See all events', 'bootscore' ); ?>
                 </a>
             </div>
 

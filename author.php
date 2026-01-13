@@ -139,7 +139,7 @@ $author_id = $author->ID;
                     <div class="card h-100 text-center border-0 shadow-sm bg-body-tertiary">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <h3 class="display-4 fw-bold text-primary mb-0"><?php echo $wins; ?></h3>
-                            <p class="text-muted mb-0">Vittorie</p>
+                            <p class="text-muted mb-0">Wins</p>
                         </div>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ $author_id = $author->ID;
                     <div class="card h-100 text-center border-0 shadow-sm bg-body-tertiary">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <h3 class="display-4 fw-bold text-danger mb-0"><?php echo $last_places; ?> 🤡</h3>
-                            <p class="text-muted mb-0">Ultimi posti</p>
+                            <p class="text-muted mb-0">Last Places</p>
                         </div>
                     </div>
                 </div>
@@ -155,7 +155,7 @@ $author_id = $author->ID;
                     <div class="card h-100 text-center border-0 shadow-sm bg-body-tertiary">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <h3 class="display-4 fw-bold text-success mb-0"><?php echo $attendances; ?></h3>
-                            <p class="text-muted mb-0">Presenze Eventi</p>
+                            <p class="text-muted mb-0">Event Attendance</p>
                         </div>
                     </div>
                 </div>

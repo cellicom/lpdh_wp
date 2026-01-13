@@ -70,15 +70,15 @@ get_header(); ?>
                             $rankings = get_field('field_event_ranking');
                             if ( is_array($rankings) && !empty($rankings) ) : ?>
                                 <div class="event-rankings mb-5">
-                                    <h3 class="mb-3 border-bottom pb-2">Classifica Giocatori</h3>
+                                    <h3 class="mb-3 border-bottom pb-2">Player Rankings</h3>
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th scope="col" class="text-center" style="width: 60px;">#</th>
-                                                    <th scope="col">Giocatore</th>
+                                                    <th scope="col">Player</th>
                                                     <th scope="col">Deck</th>
-                                                    <th scope="col" class="text-center">Punti</th>
+                                                    <th scope="col" class="text-center">Points</th>
                                                     <th scope="col" class="text-center d-none d-sm-table-cell">W-D-L</th>
                                                     <th scope="col" class="text-center d-none d-md-table-cell">Via %</th>
                                                 </tr>
@@ -251,21 +251,21 @@ get_header(); ?>
                                 }
                                 ?>
                                 <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
-                                    <h4><?php esc_html_e('Partecipi a questo evento?', 'bootscore'); ?></h4>
-                                    <p class="text-muted mb-3 survey-count-text"><?php printf(esc_html__('Attualmente ci sono %d partecipanti confermati.', 'bootscore'), $participant_count); ?></p>
+                                    <h4><?php esc_html_e('Are you participating in this event?', 'bootscore'); ?></h4>
+                                    <p class="text-muted mb-3 survey-count-text"><?php printf(esc_html__('Currently there are %d confirmed participants.', 'bootscore'), $participant_count); ?></p>
                                     
                                     <?php if ( ! $is_event_closed ) : ?>
                                         <button id="btn-event-participation" class="btn <?php echo $participated ? 'btn-danger' : 'btn-success'; ?>" data-event-id="<?php echo get_the_ID(); ?>" data-participated="<?php echo $participated ? '1' : '0'; ?>">
-                                            <?php echo $participated ? esc_html__('Annulla partecipazione', 'bootscore') : esc_html__('Sì, partecipo', 'bootscore'); ?>
+                                            <?php echo $participated ? esc_html__('Cancel participation', 'bootscore') : esc_html__('Yes, I\'m participating', 'bootscore'); ?>
                                         </button>
                                         <div id="participation-message" class="mt-2 fw-bold"></div>
                                     <?php else : ?>
                                         <div class="alert alert-secondary d-inline-block">
                                             <?php 
                                             if ($participated) {
-                                                esc_html_e('Hai partecipato a questo evento.', 'bootscore');
+                                                esc_html_e('You participated in this event.', 'bootscore');
                                             } else {
-                                                esc_html_e('Le iscrizioni per questo evento sono chiuse.', 'bootscore');
+                                                esc_html_e('Registration for this event is closed.', 'bootscore');
                                             }
                                             ?>
                                         </div>
@@ -313,13 +313,13 @@ get_header(); ?>
                                                     if (response.data.action === 'added') {
                                                         $btn.data('participated', 1);
                                                         $btn.removeClass('btn-success').addClass('btn-danger');
-                                                        $btn.text('<?php esc_html_e('Annulla partecipazione', 'bootscore'); ?>');
-                                                        $('#participation-message').html('<span class="text-success"><?php esc_html_e('Partecipazione confermata!', 'bootscore'); ?></span>');
+                                                        $btn.text('<?php esc_html_e('Cancel participation', 'bootscore'); ?>');
+                                                        $('#participation-message').html('<span class="text-success"><?php esc_html_e('Participation confirmed!', 'bootscore'); ?></span>');
                                                     } else {
                                                         $btn.data('participated', 0);
                                                         $btn.removeClass('btn-danger').addClass('btn-success');
-                                                        $btn.text('<?php esc_html_e('Sì, partecipo', 'bootscore'); ?>');
-                                                        $('#participation-message').html('<span class="text-warning"><?php esc_html_e('Partecipazione annullata.', 'bootscore'); ?></span>');
+                                                        $btn.text('<?php esc_html_e('Yes, I\'m participating', 'bootscore'); ?>');
+                                                        $('#participation-message').html('<span class="text-warning"><?php esc_html_e('Participation cancelled.', 'bootscore'); ?></span>');
                                                     }
                                                     $('.survey-count-text').text('Attualmente ci sono ' + response.data.count + ' partecipanti confermati.');
                                                 } else {
@@ -335,13 +335,13 @@ get_header(); ?>
                                 </script>
                             <?php else : ?>
                                 <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
-                                    <h4><?php esc_html_e('Partecipazione Evento', 'bootscore'); ?></h4>
-                                    <p class="text-muted"><?php printf(esc_html__('Attualmente ci sono %d partecipanti confermati.', 'bootscore'), $participant_count); ?></p>
+                                    <h4><?php esc_html_e('Event Participation', 'bootscore'); ?></h4>
+                                    <p class="text-muted"><?php printf(esc_html__('Currently there are %d confirmed participants.', 'bootscore'), $participant_count); ?></p>
                                     
                                     <?php if ( ! $is_event_closed ) : ?>
-                                        <p class="small mb-0"><?php esc_html_e('Effettua il login per confermare la tua partecipazione.', 'bootscore'); ?></p>
+                                        <p class="small mb-0"><?php esc_html_e('Log in to confirm your participation.', 'bootscore'); ?></p>
                                     <?php else : ?>
-                                        <p class="small mb-0 text-danger"><?php esc_html_e('Le iscrizioni sono chiuse.', 'bootscore'); ?></p>
+                                        <p class="small mb-0 text-danger"><?php esc_html_e('Registrations are closed.', 'bootscore'); ?></p>
                                     <?php endif; ?>
                                     
                                     <?php if ( $participant_count > 0 ) : ?>
