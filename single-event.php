@@ -182,6 +182,16 @@ get_header(); ?>
                                                             }
                                                         }
                                                     }
+                                                    
+                                                    // Edit/Add Deck Button for Logged-in User
+                                                    $action_btn = '';
+                                                    if ( is_user_logged_in() && $user_id == get_current_user_id() ) {
+                                                        if ( $player_deck_id ) {
+                                                            $action_btn = '<a href="#" class="ms-auto text-muted open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
+                                                        } else {
+                                                            $action_btn = '<a href="#" class="btn btn-sm btn-outline-primary open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id=""><i class="fas fa-plus me-1"></i>Add Deck</a>';
+                                                        }
+                                                    }
                                                 ?>
                                                     <tr class="<?php echo esc_attr($row_class); ?>">
                                                         <td class="text-center fw-bold"><?php echo $display_pos; ?></td>
@@ -196,7 +206,12 @@ get_header(); ?>
                                                             }
                                                             ?>
                                                         </td>
-                                                        <td class="fst-italic"><div class="d-flex align-items-center"><?php echo $icon_html; ?><div><?php echo $deck_display; ?></div></div></td>
+                                                        <td class="fst-italic">
+                                                            <div class="d-flex align-items-center justify-content-between">
+                                                                <div class="d-flex align-items-center"><?php echo $icon_html; ?><div><?php echo $deck_display; ?></div></div>
+                                                                <?php echo $action_btn; ?>
+                                                            </div>
+                                                        </td>
                                                         <td class="text-center fw-bold"><?php echo esc_html($points); ?></td>
                                                         <td class="text-center d-none d-sm-table-cell">
                                                             <span class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
@@ -222,6 +237,87 @@ get_header(); ?>
                                 })
                             });
                             </script>
+
+                            <?php if ( is_user_logged_in() ) : 
+                                $current_user_decks = get_posts([
+                                    'post_type' => 'deck',
+                                    'author' => get_current_user_id(),
+                                    'posts_per_page' => -1,
+                                    'post_status' => 'publish',
+                                    'orderby' => 'title',
+                                    'order' => 'ASC'
+                                ]);
+                            ?>
+                            <!-- Deck Selection Modal -->
+                            <div class="modal fade" id="deckSelectionModal" tabindex="-1" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title"><?php esc_html_e('Select Your Deck', 'bootscore'); ?></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <form id="deck-selection-form">
+                                        <input type="hidden" id="modal-row-index" name="row_index" value="">
+                                        <input type="hidden" id="modal-event-id" name="event_id" value="<?php echo get_the_ID(); ?>">
+                                        <div class="mb-3">
+                                            <label for="deck-select" class="form-label"><?php esc_html_e('Choose Deck', 'bootscore'); ?></label>
+                                            <select class="form-select" id="deck-select" name="deck_id">
+                                                <option value=""><?php esc_html_e('-- Select Deck --', 'bootscore'); ?></option>
+                                                <?php foreach ($current_user_decks as $deck) : ?>
+                                                    <option value="<?php echo esc_attr($deck->ID); ?>"><?php echo esc_html($deck->post_title); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </form>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'bootscore'); ?></button>
+                                    <button type="button" class="btn btn-primary" id="save-deck-btn"><?php esc_html_e('Add', 'bootscore'); ?></button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <script>
+                            jQuery(document).ready(function($) {
+                                var deckModal = new bootstrap.Modal(document.getElementById('deckSelectionModal'));
+                                
+                                $('.open-deck-modal').on('click', function(e) {
+                                    e.preventDefault();
+                                    var rowIndex = $(this).data('row-index');
+                                    var currentDeckId = $(this).data('deck-id');
+                                    
+                                    $('#modal-row-index').val(rowIndex);
+                                    $('#deck-select').val(currentDeckId);
+                                    
+                                    deckModal.show();
+                                });
+                                
+                                $('#save-deck-btn').on('click', function() {
+                                    var $btn = $(this);
+                                    var data = {
+                                        action: 'update_player_deck_ranking',
+                                        nonce: '<?php echo wp_create_nonce('update_player_deck_nonce'); ?>',
+                                        event_id: $('#modal-event-id').val(),
+                                        row_index: $('#modal-row-index').val(),
+                                        deck_id: $('#deck-select').val()
+                                    };
+                                    
+                                    $btn.prop('disabled', true).text('Saving...');
+                                    
+                                    $.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
+                                        if (response.success) {
+                                            location.reload();
+                                        } else {
+                                            alert('Error: ' + (response.data || 'Unknown error'));
+                                            $btn.prop('disabled', false).text('<?php esc_html_e('Add', 'bootscore'); ?>');
+                                        }
+                                    });
+                                });
+                            });
+                            </script>
+                            <?php endif; ?>
 
                             <?php
                             // Survey Section
