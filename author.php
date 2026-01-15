@@ -15,7 +15,7 @@ $author_id = $author->ID;
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
         <div class="container py-5">
-            
+
             <!-- User Header -->
             <div class="row justify-content-center mb-5">
                 <div class="col-md-8 text-center">
@@ -24,9 +24,9 @@ $author_id = $author->ID;
                     </div>
                     <h1 class="author-title mb-1"><?php echo esc_html($author->display_name); ?></h1>
                     <p class="text-muted mb-3">@<?php echo esc_html($author->user_login); ?></p>
-                    
-                    <?php if (get_the_author_meta('description', $author_id)) : ?>
-                        <div class="author-description mx-auto" style="max-width: 600px;">
+
+                    <?php if (get_the_author_meta('description', $author_id)): ?>
+                        <div class="author-description mx-auto author-description-wrapper">
                             <?php echo wp_kses_post(get_the_author_meta('description', $author_id)); ?>
                         </div>
                     <?php endif; ?>
@@ -35,16 +35,16 @@ $author_id = $author->ID;
                     <div class="author-social mt-3">
                         <?php
                         $socials = array(
-                            'user_url'  => 'fas fa-globe',
-                            'facebook'  => 'fab fa-facebook',
-                            'twitter'   => 'fab fa-twitter',
+                            'user_url' => 'fas fa-globe',
+                            'facebook' => 'fab fa-facebook',
+                            'twitter' => 'fab fa-twitter',
                             'instagram' => 'fab fa-instagram',
-                            'linkedin'  => 'fab fa-linkedin',
-                            'github'    => 'fab fa-github',
-                            'youtube'   => 'fab fa-youtube',
-                            'discord'   => 'fab fa-discord',
+                            'linkedin' => 'fab fa-linkedin',
+                            'github' => 'fab fa-github',
+                            'youtube' => 'fab fa-youtube',
+                            'discord' => 'fab fa-discord',
                         );
-                        
+
                         foreach ($socials as $key => $icon) {
                             $url = get_the_author_meta($key, $author_id);
                             if ($url) {
@@ -73,7 +73,7 @@ $author_id = $author->ID;
 
             if ($events_query->have_posts()) {
                 foreach ($events_query->posts as $event_id) {
-                    
+
                     // Check Rankings
                     $rankings = get_field('event_ranking', $event_id);
                     if (is_array($rankings) && !empty($rankings)) {
@@ -89,7 +89,7 @@ $author_id = $author->ID;
                                     $player_id = $rank['player_id'];
                                 }
                             }
-                            
+
                             if ($player_id == $author_id) {
                                 $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
                                 if ($pos === 1) {
@@ -112,7 +112,7 @@ $author_id = $author->ID;
                                 $u_data = $row['user'];
                                 $u_id = is_array($u_data) ? $u_data['ID'] : (is_object($u_data) ? $u_data->ID : $u_data);
                             }
-                            
+
                             if ($u_id == $author_id) {
                                 $attendances++;
                                 break; // Count once per event
@@ -169,37 +169,32 @@ $author_id = $author->ID;
                 </div>
             </div>
 
-            <?php if (is_user_logged_in() && get_current_user_id() == $author_id) : ?>
+            <?php if (is_user_logged_in() && get_current_user_id() == $author_id): ?>
                 <div class="row justify-content-center mb-5">
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg"><i class="fas fa-chart-bar me-2"></i> View my stats</a>
+                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg"><i
+                                class="fas fa-chart-bar me-2"></i> View my stats</a>
                     </div>
                 </div>
             <?php endif; ?>
 
             <!-- Decks List -->
-            <?php if ($decks_query->have_posts()) : ?>
+            <?php if ($decks_query->have_posts()): ?>
                 <div class="decks-section pt-4 border-top">
                     <h2 class="mb-4 text-center">Decks</h2>
                     <div class="row g-4">
-                        <?php while ($decks_query->have_posts()) : $decks_query->the_post(); ?>
+                        <?php while ($decks_query->have_posts()):
+                            $decks_query->the_post(); ?>
                             <?php get_template_part('template-parts/card', 'deck', ['show_author' => false]); ?>
                         <?php endwhile; ?>
                     </div>
                 </div>
-            <?php endif; wp_reset_postdata(); ?>
+            <?php endif;
+            wp_reset_postdata(); ?>
 
         </div>
     </main>
 </div>
 
-<style>
-.transition-transform {
-    transition: transform 0.3s ease;
-}
-.deck-card:hover .transition-transform {
-    transform: scale(1.05);
-}
-</style>
 
 <?php get_footer(); ?>

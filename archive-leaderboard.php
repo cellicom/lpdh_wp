@@ -17,13 +17,14 @@ get_header();
                 <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
             </header>
 
-            <?php if ( have_posts() ) : ?>
+            <?php if (have_posts()): ?>
                 <div class="row g-4 justify-content-center">
-                    <?php while ( have_posts() ) : the_post(); 
+                    <?php while (have_posts()):
+                        the_post();
                         $year = get_field('year');
                         // Se il campo anno è compilato usa quello, altrimenti il titolo del post
                         $display_text = $year ? $year : get_the_title();
-                    ?>
+                        ?>
                         <div class="col-md-6 col-lg-4 col-xl-3">
                             <a href="<?php the_permalink(); ?>" class="text-decoration-none">
                                 <div class="card h-100 shadow-sm border-0 hover-lift text-center transition-base bg-light">
@@ -31,7 +32,7 @@ get_header();
                                         <div class="display-1 fw-bold text-primary mb-0">
                                             <?php echo esc_html($display_text); ?>
                                         </div>
-                                        <?php if ($year && get_the_title() != $year) : ?>
+                                        <?php if ($year && get_the_title() != $year): ?>
                                             <div class="text-muted mt-2"><?php the_title(); ?></div>
                                         <?php endif; ?>
                                     </div>
@@ -43,17 +44,17 @@ get_header();
 
                 <div class="mt-5">
                     <?php
-                    the_posts_pagination( array(
-                        'mid_size'  => 2,
-                        'prev_text' => __( 'Previous', 'bootscore' ),
-                        'next_text' => __( 'Next', 'bootscore' ),
-                    ) );
+                    the_posts_pagination(array(
+                        'mid_size' => 2,
+                        'prev_text' => __('Previous', 'bootscore'),
+                        'next_text' => __('Next', 'bootscore'),
+                    ));
                     ?>
                 </div>
 
-            <?php else : ?>
+            <?php else: ?>
                 <div class="alert alert-info text-center">
-                    <?php esc_html_e( 'No leaderboards found.', 'bootscore' ); ?>
+                    <?php esc_html_e('No leaderboards found.', 'bootscore'); ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -61,14 +62,7 @@ get_header();
     </main>
 </div>
 
-<style>
-.hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
-</style>
+</main>
+</div>
 
 <?php get_footer(); ?>

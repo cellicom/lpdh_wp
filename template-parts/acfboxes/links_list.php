@@ -21,7 +21,7 @@ $links = $args['links'];
                                     <div class="d-flex align-items-start">
                                         <?php if($icon) { ?>
                                             <div class="flex-shrink-0 me-3">
-                                                <img src="<?php echo esc_url($icon); ?>" alt="" style="width: 48px; height: 48px; object-fit: contain;">
+                                                <img src="<?php echo esc_url($icon); ?>" alt="" class="links-list-icon">
                                             </div>
                                         <?php } ?>
                                         <div>
