@@ -10,102 +10,30 @@
     font-family: 'Plantin MT Pro', serif;
 }
 
-// Global Vaporwave Styles
-body {
-    background-color: $vapor-bg;
-    background-image:
-        linear-gradient(rgba($vapor-bg, 0.9), rgba($vapor-bg, 0.9)),
-        repeating-linear-gradient(0deg, transparent 0, transparent 1px, rgba($neon-blue, 0.1) 1px, rgba($neon-blue, 0.1) 2px),
-        repeating-linear-gradient(90deg, transparent 0, transparent 1px, rgba($vapor-magenta, 0.1) 1px, rgba($vapor-magenta, 0.1) 2px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
-    background-attachment: fixed;
-    color: $body-color;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: $neon-blue;
-    text-shadow: 0 0 5px rgba($neon-blue, 0.7), 0 0 10px rgba($neon-blue, 0.5);
-    font-weight: 700;
-}
-
-a {
-    color: $neon-blue;
-    transition: all 0.3s ease;
-
-    &:hover {
-        color: $vapor-magenta;
-        text-shadow: 0 0 8px $vapor-magenta;
-        text-decoration: none;
-    }
-}
-
 .navbar-brand {
     img {
         max-height: 50px;
-        filter: drop-shadow(0 0 5px $neon-blue);
     }
 }
 
 /* =========================================
-   Global Utilities & Effects
+   Global Utilities
    ========================================= */
 .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0 15px rgba($neon-blue, 0.6) !important;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
     }
 }
 
 .text-lpdh-blue {
-    color: $neon-blue !important;
+    color: $lpdh-blue;
 }
 
 .text-lpdh-gold {
-    color: $vapor-yellow !important;
-    text-shadow: 0 0 5px $vapor-yellow;
-}
-
-.btn-primary {
-    background: linear-gradient(45deg, $vapor-magenta, $vapor-violet);
-    border: none;
-    box-shadow: 0 0 10px rgba($vapor-magenta, 0.4);
-
-    &:hover {
-        background: linear-gradient(45deg, $vapor-red, $vapor-magenta);
-        box-shadow: 0 0 20px $vapor-red;
-        transform: scale(1.02);
-    }
-}
-
-/* =========================================
-   Cards - Glassmorphism & Neon Borders
-   ========================================= */
-.card,
-.event-card-inner,
-.deck-custom-fields {
-    background: $vapor-card-bg !important;
-    border: 1px solid rgba($neon-blue, 0.3);
-    box-shadow: 0 0 10px rgba($vapor-violet, 0.2);
-    backdrop-filter: blur(5px);
-    color: #fff;
-
-    &:hover {
-        border-color: $neon-blue;
-        box-shadow: 0 0 15px rgba($neon-blue, 0.5);
-    }
-}
-
-.card-header {
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba($neon-blue, 0.3);
-    color: $neon-blue;
+    color: $lpdh-gold;
 }
 
 /* =========================================
@@ -114,32 +42,41 @@ a {
 .event-archive-grid {
     display: grid;
     grid-template-columns: 1fr;
+    /* Mobile: 1 card per riga */
     gap: 20px;
 
+    /* Tablet: 2 card per riga */
     @media (min-width: 768px) {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    /* Desktop: 4 card per riga */
     @media (min-width: 1200px) {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
 .event-card-inner {
+    background: #fff;
+    border: 1px solid $gray-200;
     border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
 
     &:hover {
-        box-shadow: 0 0 25px rgba($vapor-magenta, 0.6);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         transform: translateY(-5px);
-        border: 1px solid $vapor-magenta;
     }
 }
 
-.event-thumbnail,
-.placeholder-image {
-    background-color: rgba(0, 0, 0, 0.5);
-    border-bottom: 1px solid rgba($neon-blue, 0.2);
+.event-thumbnail {
+    overflow: hidden;
+    background-color: $gray-100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     img {
         width: 100%;
@@ -148,65 +85,282 @@ a {
     }
 }
 
-.placeholder-image img {
-    object-fit: contain;
-    max-height: 100px;
-    width: auto;
-    filter: drop-shadow(0 0 5px $neon-blue);
+.placeholder-image {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+        object-fit: contain;
+        max-height: 100px;
+        width: auto;
+    }
 }
 
 .event-title {
     font-weight: 700;
     line-height: 1.3;
     min-height: 2.6em;
-    color: #fff;
+    /* Circa 2 righe */
 }
 
 .event-divider {
     margin: 10px 0 15px;
-    opacity: 0.3;
-    border-top: 1px solid $vapor-violet;
+    opacity: 0.1;
 }
 
 /* =========================================
    Page Templates: Register
    ========================================= */
+/* Registration Form Styling */
 .page-template-page-register {
     .card {
-        border: 1px solid rgba($vapor-magenta, 0.4);
+        border: none;
+        border-radius: 12px;
+        transition: box-shadow 0.3s ease;
+
+        &:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        padding: 1.25rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+
+        @media (max-width: 768px) {
+            padding: 1.5rem;
+        }
     }
 
     .form-control,
-    .form-control:focus,
+    .form-control:focus {
+        border-radius: 8px;
+    }
+
     .input-group-text {
-        background-color: rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba($neon-blue, 0.3);
-        color: #fff;
+        border-radius: 8px 0 0 8px;
+        background-color: $gray-100;
+        border-right: none;
+
+        @media (max-width: 768px) {
+            padding: 0.375rem 0.75rem;
+        }
     }
 
     .form-control:focus {
-        box-shadow: 0 0 10px rgba($neon-blue, 0.5);
-        border-color: $neon-blue;
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        outline: none;
     }
 
-    .input-group-text {
-        background-color: rgba($vapor-violet, 0.3);
-        border-right: none;
-        color: $neon-blue;
+    .btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
     }
 
-    .form-text,
-    .username-feedback.loading,
-    .email-feedback.loading {
-        color: #adb5bd;
+    .input-group .form-control {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .btn-primary {
+        border-radius: 8px;
+
+        &:hover {
+            background-color: #0b5ed7;
+            border-color: $primary-dark;
+        }
+    }
+
+    .alert {
+        border-radius: 8px;
+    }
+
+    /* Validation states */
+    .was-validated .form-control:invalid,
+    .form-control.is-invalid {
+        border-color: $danger;
+    }
+
+    .was-validated .input-group-text:invalid,
+    .input-group-text.is-invalid {
+        border-color: $danger;
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: $gray-600;
+    }
+
+    /* Real-time validation feedback */
+    .username-feedback,
+    .email-feedback {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &.valid {
+            color: #198754;
+        }
+
+        &.invalid {
+            color: $danger;
+        }
+
+        &.loading {
+            color: $gray-600;
+        }
+    }
+
+    /* Loading spinner */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 2px;
+    }
+
+    /* Validation icon sizing */
+    .validation-icon {
+        font-size: 0.9rem;
+    }
+
+    /* Input group validation feedback */
+    .input-group-append .validation-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0 8px 8px 0;
+
+        &.valid {
+            background-color: #d1e7dd;
+            color: #0a3622;
+            border: 1px solid #badbcc;
+            border-left: none;
+        }
+
+        &.invalid {
+            background-color: $danger-bg-subtle;
+            color: #58151c;
+            border: 1px solid $danger-border-subtle;
+            border-left: none;
+        }
+
+        &.loading {
+            background-color: #e2e3e5;
+            color: #41464b;
+            border: 1px solid #d3d6d8;
+            border-left: none;
+        }
     }
 }
 
 /* =========================================
+   Template Parts
+   ========================================= */
+
+// Card Banned Card
+.banned-card-img {
+    max-height: 140px;
+    width: auto;
+    object-fit: contain;
+}
+
+// Card Deck
+.deck-card-img-container {
+    height: 220px;
+}
+
+.deck-card-img {
+    height: 100%;
+    object-position: top;
+}
+
+.deck-card-single-img {
+    height: 220px;
+    object-position: top;
+}
+
+// Card Place
+.place-card-img {
+    max-height: 300px;
+    width: auto;
+    object-fit: contain;
+}
+
+.place-card-placeholder {
+    min-height: 250px;
+}
+
+/* =========================================
+   ACF Boxes
+   ========================================= */
+
+// About List
+.about-list-img {
+    height: 80px;
+    width: 80px;
+    object-fit: cover;
+}
+
+// Action Button
+.action-btn-icon {
+    height: 24px;
+    width: auto;
+    vertical-align: middle;
+}
+
+.action-btn-text {
+    vertical-align: middle;
+}
+
+// Banlist Card
+.banlist-card-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+// Box Rules
+.rules-icon-bg {
+    width: 80px;
+    height: 80px;
+}
+
+.rules-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+// Links List
+.links-list-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+// Title and 3 Cards
+/* =========================================
    Global Components
    ========================================= */
 
-// Pagination - Neon Style
+// Pagination
+.navigation.pagination .nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
 .navigation.pagination .page-numbers {
     display: flex;
     align-items: center;
@@ -214,103 +368,75 @@ a {
     min-width: 40px;
     height: 40px;
     padding: 0 12px;
-    border-radius: 5px;
-    background-color: transparent;
-    border: 1px solid $neon-blue;
-    color: $neon-blue;
-    font-family: 'Courier New', monospace;
-    /* Retro terminal feel */
-    font-weight: bold;
-    text-shadow: 0 0 5px $neon-blue;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px solid $gray-300;
+    color: $primary; // Bootstrap primary
+    text-decoration: none;
+    font-weight: 600;
     transition: all 0.2s ease;
-    margin: 0 4px;
+    line-height: 1;
 
     &:hover {
-        background-color: rgba($neon-blue, 0.2);
-        color: #fff;
-        box-shadow: 0 0 15px $neon-blue;
+        background-color: $gray-200;
+        color: $primary-dark;
+        border-color: $gray-300;
     }
 
     &.current {
-        background-color: $neon-blue;
-        color: $vapor-bg;
-        border-color: $neon-blue;
-        box-shadow: 0 0 20px $neon-blue;
+        background-color: $primary;
+        color: #fff;
+        border-color: $primary;
+        pointer-events: none;
     }
 
     &.dots {
         border: none;
-        color: $vapor-magenta;
+        background: transparent;
+        color: $gray-600;
     }
 }
 
 // Banned Card Archive Specifics (Overrides)
 .post-type-archive-banned_card .navigation.pagination .page-numbers {
-    color: $vapor-red;
-    border-color: $vapor-red;
-    text-shadow: 0 0 5px $vapor-red;
+    color: $danger; // Danger color
 
     &:hover {
-        background-color: rgba($vapor-red, 0.2);
-        box-shadow: 0 0 15px $vapor-red;
-        color: #fff;
+        background-color: $danger-bg-subtle;
+        color: #b02a37;
+        border-color: $danger-border-subtle;
     }
 
     &.current {
-        background-color: $vapor-red;
-        border-color: $vapor-red;
-        color: #fff;
-        box-shadow: 0 0 20px $vapor-red;
+        background-color: $danger;
+        border-color: $danger;
     }
 }
 
-// Rankings - Tron Grid Style
-.table-rankings {
-    border-collapse: separate;
-    border-spacing: 0 5px; // Space between rows
-
-    thead th {
-        border-bottom: 2px solid $neon-blue;
-        color: $neon-blue;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        background: transparent;
-    }
-
-    tbody tr {
-        background: rgba(0, 0, 0, 0.3);
-        transition: all 0.3s;
-
-        &:hover {
-            transform: scale(1.01);
-            background: rgba($neon-blue, 0.1);
-            box-shadow: 0 0 15px rgba($neon-blue, 0.2) inset;
-        }
-    }
-
-    td {
-        border-top: 1px solid rgba($neon-blue, 0.1);
-        border-bottom: 1px solid rgba($neon-blue, 0.1);
-        color: #fff;
-    }
-}
-
+// Rankings (Shared between Single Event and Single Leaderboard)
 .rank-gold,
 .rank-gold td {
-    color: $vapor-yellow !important;
-    text-shadow: 0 0 10px $vapor-yellow;
+    color: #d4af37;
+    font-weight: bold;
 }
 
 .rank-silver,
 .rank-silver td {
-    color: #c0c0c0 !important;
-    text-shadow: 0 0 10px #c0c0c0;
+    color: #8a8a8a;
+    font-weight: bold;
 }
 
 .rank-bronze,
 .rank-bronze td {
-    color: $vapor-orange !important;
-    text-shadow: 0 0 10px $vapor-orange;
+    color: #cd7f32;
+    font-weight: bold;
+}
+
+.table-rankings {
+    a:hover {
+        cursor: pointer;
+        text-decoration: underline !important;
+    }
 }
 
 // Event Archive Grid (Shared)
@@ -322,11 +448,13 @@ a {
 
     >.event-card,
     >div {
+        // Supports both strict card structure and generic divs
         width: 100%;
     }
 
+    /* Tablet: 2 card per riga */
     @media (min-width: 768px) {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr); // For grid layouts
 
         >.event-card,
         >div {
@@ -334,8 +462,9 @@ a {
         }
     }
 
+    /* Desktop: 4 card per riga */
     @media (min-width: 992px) {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, 1fr); // For grid layouts
 
         >.event-card,
         >div {
@@ -343,6 +472,7 @@ a {
         }
     }
 
+    // Specific override for Place Single which uses 3 cols on desktop
     &.place-events-grid {
         @media (min-width: 1200px) {
             grid-template-columns: repeat(3, 1fr);
@@ -365,7 +495,6 @@ a {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    color: #aaa;
 }
 
 // Archive Deck
@@ -381,7 +510,7 @@ a {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    border-bottom: 2px solid $vapor-magenta;
+    transition: transform 0.3s ease;
 }
 
 .deck-content {
@@ -389,67 +518,69 @@ a {
 }
 
 .archive-description {
-    color: #bbb;
+    color: $gray-600;
     font-size: 1.1rem;
-    border-left: 3px solid $vapor-violet;
-    padding-left: 15px;
-    background: rgba(0, 0, 0, 0.2);
 }
 
 // Archive FAQ
 .accordion-faq-archive {
     max-width: 800px;
     margin: 0 auto;
+}
 
-    .accordion-item {
-        background: transparent;
-        border: 1px solid rgba($neon-blue, 0.3);
-        margin-bottom: 10px;
+// Single Deck
+.deck-custom-fields {
+    background-color: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 30px 0;
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #495057;
     }
 
-    .accordion-button {
-        background: rgba($vapor-violet, 0.2);
-        color: #fff;
-
-        &:not(.collapsed) {
-            background: rgba($vapor-magenta, 0.3);
-            color: #fff;
-            box-shadow: 0 0 10px rgba($vapor-magenta, 0.4);
-        }
-
-        &::after {
-            filter: invert(1); // Make arrow white (basic fix)
-        }
-    }
-
-    .accordion-body {
-        color: #ddd;
+    @media (max-width: 768px) {
+        padding: 15px;
     }
 }
 
-// Single Deck field overrides
-.deck-custom-fields {
-    h3 {
-        color: $vapor-yellow;
-        text-transform: uppercase;
-        border-bottom: 1px dashed $vapor-yellow;
-        padding-bottom: 10px;
-    }
+.deck-image-wrapper {
+    max-width: 300px;
+    width: 100%;
 }
 
 .decklist-field,
 .author-field {
+    margin-bottom: 15px;
+
     strong {
-        color: $neon-blue;
+        display: inline-block;
+        width: 100px;
+        color: $gray-600;
+
+        @media (max-width: 768px) {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+
+    a {
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 }
 
-// Single Event Split Icon
+// Single Event
 .split-icon-container {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    box-shadow: 0 0 5px $neon-blue;
 }
 
 .split-icon-half {
@@ -469,12 +600,6 @@ a {
     clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
 }
 
-/* =========================================
-   Component: Images / Placeholders Helpers
-   ========================================= */
-.banned-card-img,
-.place-card-img,
-.banlist-card-icon,
-.links-list-icon {
-    filter: drop-shadow(0 0 5px rgba($neon-blue, 0.5));
+.deck-popover {
+    max-width: 500px;
 }

@@ -4,34 +4,13 @@
 $lpdh-blue: #003366;
 $lpdh-gold: #ffc107;
 
-// =========================================
-// VAPORWAVE / SYNTHWAVE PALETTE
-// =========================================
-$vapor-yellow: #ffd319;
-$vapor-orange: #ff901f;
-$vapor-red: #ff2975; // Neon Pink base
-$vapor-magenta: #f222ff; // Neon Purple base
-$vapor-violet: #8c1eff;
-$neon-blue: #00f3ff; // Electric Blue
-$vapor-bg: #0b0c2a; // Deep dark blue/purple background
-$vapor-card-bg: rgba(13, 20, 60, 0.8); // Glassmorphism
-
-// Bootstrap Overrides for Theme
-$body-bg: $vapor-bg;
-$body-color: #e0e0e0;
-$primary: $vapor-magenta;
-$secondary: $vapor-violet;
-$danger: $vapor-red;
-$info: $neon-blue;
-$warning: $vapor-yellow;
-$light: #f8f9fa;
-$dark: #212529;
-
 // Extracted from custom CSS
 $gray-100: #f8f9fa;
 $gray-200: #e9ecef;
 $gray-300: #dee2e6;
 $gray-600: #6c757d;
-$primary-dark: #0a58ca; // Fallback or re-calculated
+$primary: #0d6efd;
+$primary-dark: #0a58ca;
+$danger: #dc3545;
 $danger-bg-subtle: #f8d7da;
 $danger-border-subtle: #f5c2c7;
