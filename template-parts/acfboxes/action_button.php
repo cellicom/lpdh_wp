@@ -4,7 +4,7 @@ if ($args['visible']) {
     $icon = $args['icon'];
     $label = $args['label'];
     $link = $args['link'];
-
+    
     // No title field in this layout, so hashtag might be generic based on index
     ?>
 
@@ -13,12 +13,12 @@ if ($args['visible']) {
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12 text-center">
-                    <?php if ($link) { ?>
+                    <?php if($link) { ?>
                         <a href="<?php echo esc_url($link); ?>" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm">
-                            <?php if ($icon) { ?>
-                                <img src="<?php echo esc_url($icon); ?>" alt="" class="me-2 action-btn-icon">
+                            <?php if($icon) { ?>
+                                <img src="<?php echo esc_url($icon); ?>" alt="" class="me-2" style="height:24px; width:auto; vertical-align: middle;"> 
                             <?php } ?>
-                            <span class="action-btn-text"><?php echo esc_html($label); ?></span>
+                            <span style="vertical-align: middle;"><?php echo esc_html($label); ?></span>
                         </a>
                     <?php } ?>
                 </div>
