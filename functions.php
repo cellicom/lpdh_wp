@@ -30,6 +30,10 @@ function bootscore_child_enqueue_styles()
     // Get modification time. Enqueue file with modification date to prevent browser from loading cached scripts when file content changes. 
     $modificated_CustomJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/custom.js'));
     wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), $modificated_CustomJS, false);
+
+    // Select2
+    wp_enqueue_style('select2-css', get_stylesheet_directory_uri() . '/assets/css/select2.min.css', array(), '4.1.0-rc.0');
+    wp_enqueue_script('select2-js', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
 }
 
 /**
@@ -3620,7 +3624,7 @@ function lpdh_calculate_rankings_data($events)
                     $actual_score = $wins + ($draws * 0.5);
                     $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
                     $expected_score = $expected_score_rate * $games_played;
-                    $k_factor = 32; // K-factor standard
+                    $k_factor = 32 / $games_played; // K-factor standard / Game Played
 
                     $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score);
 
@@ -3682,14 +3686,11 @@ function ajax_update_leaderboard_rankings()
     // 1. Calcolo Classifica Attuale
     $result = lpdh_calculate_rankings_data($events);
 
-    // 2. Calcolo Classifica Settimana Precedente (per il trend)
-    $cutoff_date = date('Y-m-d H:i:s', strtotime('-1 week'));
-    $previous_events = array();
-    foreach ($events as $event) {
-        $ed = get_field('event_date', $event->ID);
-        if ($ed < $cutoff_date) {
-            $previous_events[] = $event;
-        }
+    // 2. Calcolo Classifica Precedente (per il trend)
+    // Escludiamo l'ultimo torneo per vedere come è cambiata la classifica dopo l'ultimo evento
+    $previous_events = $events;
+    if (count($previous_events) > 0) {
+        array_pop($previous_events);
     }
     $previous_result = lpdh_calculate_rankings_data($previous_events);
 
@@ -4158,3 +4159,10 @@ function ajax_update_player_deck_ranking()
     }
 }
 add_action('wp_ajax_update_player_deck_ranking', 'ajax_update_player_deck_ranking');
+
+/**
+ * Add !f-plantin to article excerpts and read-more in archives
+ */
+add_filter('bootscore/class/loop/card-text/excerpt', function ($class) {
+    return $class . ' !f-plantin';
+});

@@ -7,11 +7,26 @@
 // Some examples can be found here: https://bootscore.me/documentation/bootstrap-css-sass
 
 * {
-    font-family: 'Plantin MT Pro', serif;
+    font-family: 'Beleren Bold', serif;
 }
 
-.navbar-brand  {
+.navbar-brand {
     img {
-     max-height: 50px;
- }
+        max-height: 50px;
+    }
+}
+
+// Centering H1 page titles and 70px vertical padding
+.entry-header,
+.page-header {
+    text-align: center;
+    padding-top: 70px !important;
+    padding-bottom: 70px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+
+    h1 {
+        margin-bottom: 0;
+        font-size: 60px;
+    }
 }

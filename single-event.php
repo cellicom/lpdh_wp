@@ -193,7 +193,7 @@ get_header(); ?>
                                                         if ($player_deck_id) {
                                                             $action_btn = '<a href="#" class="ms-auto text-muted open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
                                                         } else {
-                                                            $action_btn = '<a href="#" class="btn btn-sm btn-outline-primary open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id=""><i class="fas fa-plus me-1"></i>Add Deck</a>';
+                                                            $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id=""><i class="fas fa-plus me-1"></i>Add Deck</a>';
                                                         }
                                                     }
                                                     ?>
@@ -259,6 +259,44 @@ get_header(); ?>
                                     'order' => 'ASC'
                                 ]);
                                 ?>
+                                <!-- Select2 Local Assets Enqueued in functions.php -->
+                                <style>
+                                    /* Custom Select2 Styling */
+                                    .select2-container .select2-selection--single {
+                                        height: auto !important;
+                                        padding: 8px;
+                                    }
+
+                                    .select2-container--default .select2-selection--single .select2-selection__rendered {
+                                        line-height: normal;
+                                    }
+
+                                    .select2-container--default .select2-selection--single .select2-selection__arrow {
+                                        height: 100%;
+                                    }
+
+                                    .deck-option-img-split {
+                                        width: 40px;
+                                        height: 40px;
+                                        position: relative;
+                                        overflow: hidden;
+                                        border-radius: 50%;
+                                        display: inline-block;
+                                        vertical-align: middle;
+                                        margin-right: 10px;
+                                    }
+
+                                    .deck-option-img-single {
+                                        width: 40px;
+                                        height: 40px;
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                        display: inline-block;
+                                        vertical-align: middle;
+                                        margin-right: 10px;
+                                    }
+                                </style>
+
                                 <!-- Deck Selection Modal -->
                                 <div class="modal fade" id="deckSelectionModal" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
@@ -277,12 +315,25 @@ get_header(); ?>
                                                     <div class="mb-3">
                                                         <label for="deck-select"
                                                             class="form-label"><?php esc_html_e('Choose Deck', 'bootscore'); ?></label>
-                                                        <select class="form-select" id="deck-select" name="deck_id">
+                                                        <select class="form-select" id="deck-select" name="deck_id"
+                                                            style="width: 100%;">
                                                             <option value="">
                                                                 <?php esc_html_e('-- Select Deck --', 'bootscore'); ?>
                                                             </option>
-                                                            <?php foreach ($current_user_decks as $deck): ?>
-                                                                <option value="<?php echo esc_attr($deck->ID); ?>">
+                                                            <?php foreach ($current_user_decks as $deck):
+                                                                $cmdr = get_field('commander', $deck->ID);
+                                                                $partner = get_field('partner', $deck->ID);
+                                                                $cmdr_img = get_commander_image($deck->ID);
+                                                                $partner_img = get_partner_image($deck->ID);
+
+                                                                $cmdr_text = $cmdr ? esc_attr($cmdr) : '';
+                                                                if ($partner)
+                                                                    $cmdr_text .= ' + ' . esc_attr($partner);
+                                                                ?>
+                                                                <option value="<?php echo esc_attr($deck->ID); ?>"
+                                                                    data-cmdr="<?php echo $cmdr_text; ?>"
+                                                                    data-cmdr-img="<?php echo esc_url($cmdr_img); ?>"
+                                                                    data-partner-img="<?php echo esc_url($partner_img); ?>">
                                                                     <?php echo esc_html($deck->post_title); ?>
                                                                 </option>
                                                             <?php endforeach; ?>
@@ -302,6 +353,45 @@ get_header(); ?>
 
                                 <script>
                                     jQuery(document).ready(function ($) {
+                                        // Initialize Select2 with custom template
+                                        function formatState(state) {
+                                            if (!state.id) {
+                                                return state.text;
+                                            }
+
+                                            var $option = $(state.element);
+                                            var cmdr = $option.data('cmdr');
+                                            var cmdrImg = $option.data('cmdr-img');
+                                            var partnerImg = $option.data('partner-img');
+
+                                            var $imgHtml = '';
+                                            if (cmdrImg && partnerImg) {
+                                                $imgHtml = '<div class="deck-option-img-split">' +
+                                                    '<img src="' + cmdrImg + '" style="width: 100%; height: 100%; object-fit: cover; position: absolute; left: 0; top: 0; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">' +
+                                                    '<img src="' + partnerImg + '" style="width: 100%; height: 100%; object-fit: cover; position: absolute; left: 0; top: 0; clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);">' +
+                                                    '</div>';
+                                            } else if (cmdrImg) {
+                                                $imgHtml = '<img src="' + cmdrImg + '" class="deck-option-img-single" />';
+                                            } else {
+                                                // Fallback or placeholder if needed
+                                                $imgHtml = '<div class="deck-option-img-single bg-secondary"></div>';
+                                            }
+
+                                            var $state = $(
+                                                '<div class="d-flex align-items-center">' + $imgHtml +
+                                                '<div><div class="fw-bold">' + state.text + '</div>' +
+                                                '<div class="small text-muted">(' + cmdr + ')</div></div></div>'
+                                            );
+                                            return $state;
+                                        };
+
+                                        $('#deck-select').select2({
+                                            dropdownParent: $('#deckSelectionModal'),
+                                            templateResult: formatState,
+                                            templateSelection: formatState,
+                                            width: '100%'
+                                        });
+
                                         var deckModal = new bootstrap.Modal(document.getElementById('deckSelectionModal'));
 
                                         $('.open-deck-modal').on('click', function (e) {

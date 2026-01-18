@@ -34,7 +34,7 @@ if ($args['visible']) {
                                         <h4 class="card-title mb-3 h5"><?php echo esc_html($card['title']); ?></h4>
                                     <?php } ?>
                                     <?php if(!empty($card['text'])) { ?>
-                                        <div class="card-text text-muted small"><?php echo wp_kses_post($card['text']); ?></div>
+                                        <div class="card-text text-muted small !f-plantin"><?php echo wp_kses_post($card['text']); ?></div>
                                     <?php } ?>
                                 </div>
                             </div>
