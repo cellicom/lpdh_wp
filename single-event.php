@@ -260,42 +260,7 @@ get_header(); ?>
                                 ]);
                                 ?>
                                 <!-- Select2 Local Assets Enqueued in functions.php -->
-                                <style>
-                                    /* Custom Select2 Styling */
-                                    .select2-container .select2-selection--single {
-                                        height: auto !important;
-                                        padding: 8px;
-                                    }
 
-                                    .select2-container--default .select2-selection--single .select2-selection__rendered {
-                                        line-height: normal;
-                                    }
-
-                                    .select2-container--default .select2-selection--single .select2-selection__arrow {
-                                        height: 100%;
-                                    }
-
-                                    .deck-option-img-split {
-                                        width: 40px;
-                                        height: 40px;
-                                        position: relative;
-                                        overflow: hidden;
-                                        border-radius: 50%;
-                                        display: inline-block;
-                                        vertical-align: middle;
-                                        margin-right: 10px;
-                                    }
-
-                                    .deck-option-img-single {
-                                        width: 40px;
-                                        height: 40px;
-                                        object-fit: cover;
-                                        border-radius: 50%;
-                                        display: inline-block;
-                                        vertical-align: middle;
-                                        margin-right: 10px;
-                                    }
-                                </style>
 
                                 <!-- Deck Selection Modal -->
                                 <div class="modal fade" id="deckSelectionModal" tabindex="-1" aria-hidden="true">
@@ -599,50 +564,6 @@ get_header(); ?>
     </main>
 </div>
 
-<style>
-    .rank-gold td {
-        color: #d4af37;
-        font-weight: bold;
-    }
 
-    .rank-silver td {
-        color: #8a8a8a;
-        font-weight: bold;
-    }
-
-    .rank-bronze td {
-        color: #cd7f32;
-        font-weight: bold;
-    }
-
-    .event-rankings a:hover {
-        cursor: pointer;
-        text-decoration: underline !important;
-    }
-
-    .deck-popover {
-        max-width: 500px;
-    }
-
-    .cmdr-popover-img {
-        width: 120px !important;
-        height: auto !important;
-    }
-
-    .cmdr-popover-img-large {
-        width: 180px !important;
-        height: auto !important;
-    }
-
-    @media (min-width: 992px) {
-        .cmdr-popover-img {
-            width: 190px !important;
-        }
-
-        .cmdr-popover-img-large {
-            width: 280px !important;
-        }
-    }
-</style>
 
 <?php get_footer(); ?>

@@ -62,29 +62,29 @@ $people = $args['people'] ?? [];
                                             <span
                                                 class="badge bg-light text-dark border !f-plantin">@<?php echo esc_html($nickname); ?></span>
                                         <?php endif; ?>
-                                        </div>
-
-                                        <?php if ($subtitle): ?>
-                                            <div class="item-subtitle">
-                                                <p class="text-primary mb-0 fw-medium"><?php echo esc_html($subtitle); ?></p>
-                                            </div>
-                                        <?php endif; ?>
-
-                                        <?php if ($text): ?>
-                                            <div class="item-text">
-                                                <p class="text-muted mb-0 !f-plantin"><?php echo nl2br(esc_html($text)); ?></p>
-                                            </div>
-                                        <?php endif; ?>
-
-                                        <?php if ($has_link): ?>
-                                            <div class="item-arrow text-primary">
-                                                <i class="fas fa-chevron-right fa-lg"></i>
-                                            </div>
-                                        <?php endif; ?>
                                     </div>
+
+                                    <?php if ($subtitle): ?>
+                                        <div class="item-subtitle">
+                                            <p class="text-primary mb-0 fw-medium"><?php echo esc_html($subtitle); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($text): ?>
+                                        <div class="item-text">
+                                            <p class="text-muted mb-0 !f-plantin"><?php echo nl2br(esc_html($text)); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($has_link): ?>
+                                        <div class="item-arrow text-primary">
+                                            <i class="fas fa-chevron-right fa-lg"></i>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <?php if ($has_link): ?>
+                        </div>
+                        <?php if ($has_link): ?>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -92,82 +92,3 @@ $people = $args['people'] ?? [];
         </div>
     <?php endif; ?>
 </div>
-
-<style>
-    .about-card-grid {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 0.5rem 1.5rem;
-        align-items: center;
-    }
-
-    .item-image {
-        grid-area: img;
-    }
-
-    .item-header {
-        grid-area: hdr;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .item-subtitle {
-        grid-area: sub;
-    }
-
-    .item-text {
-        grid-area: txt;
-    }
-
-    .item-arrow {
-        grid-area: arr;
-    }
-
-    /* Desktop */
-    @media (min-width: 992px) {
-        .about-card-grid {
-            grid-template-areas:
-                "img hdr arr"
-                "img sub arr"
-                "img txt arr";
-            align-items: start;
-            gap: 0.25rem 1.5rem;
-        }
-
-        .item-arrow {
-            align-self: center;
-        }
-    }
-
-    /* Mobile & Tablet */
-    @media (max-width: 991.98px) {
-        .about-card-grid {
-            grid-template-areas:
-                "img hdr arr"
-                "sub sub sub"
-                "txt txt txt";
-            gap: 0.75rem 1rem;
-        }
-
-        .item-header {
-            flex-direction: column;
-            align-items: start;
-            gap: 0.25rem;
-        }
-
-        .item-image img {
-            height: 60px !important;
-            width: 60px !important;
-        }
-    }
-
-    .hover-lift {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
-    }
-</style>

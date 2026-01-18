@@ -906,21 +906,7 @@ function hide_deck_views_for_players()
 
     // If user is player, hide all views except "Mine"
     ?>
-    <style>
-        .subsubsub li:not(.mine) {
-            display: none !important;
-        }
 
-        .subsubsub li.mine a {
-            color: #000;
-            font-weight: 600;
-        }
-
-        .subsubsub li.mine::before {
-            content: "View: ";
-            color: #646970;
-        }
-    </style>
     <?php
 }
 add_action('admin_head', 'hide_deck_views_for_players', 20);
@@ -2250,11 +2236,7 @@ require_once get_stylesheet_directory() . '/function-schema-color.php';
 function event_ranking_populate_player_deck()
 {
     ?>
-    <style>
-        .acf-field-ranking-player-deck-id {
-            display: none !important;
-        }
-    </style>
+
     <script type="text/javascript">
         (function ($) {
             // Function to add temporary select with search below deck field
@@ -3212,41 +3194,6 @@ function render_player_stats_page()
             });
         </script>
 
-        <style>
-            /* Custom Pagination Styles */
-            .tablenav-pages .page-numbers {
-                display: inline-block;
-                padding: 6px 12px;
-                margin: 0 3px;
-                border: 1px solid #c3c4c7;
-                background: #fff;
-                color: #2271b1;
-                text-decoration: none;
-                border-radius: 4px;
-                font-size: 14px;
-                line-height: 1;
-                transition: all 0.2s ease;
-            }
-
-            .tablenav-pages .page-numbers.current {
-                background: #2271b1;
-                color: #fff;
-                border-color: #2271b1;
-                font-weight: 600;
-            }
-
-            .tablenav-pages .page-numbers:hover:not(.current):not(.dots) {
-                background: #f0f0f1;
-                border-color: #8c8f94;
-                color: #135e96;
-            }
-
-            .tablenav-pages .page-numbers.dots {
-                border: none;
-                background: transparent;
-                color: #646970;
-            }
-        </style>
 
         <hr style="margin: 30px 0;">
 
@@ -3754,16 +3701,7 @@ function lpdh_add_login_logout_menu($items, $args)
             $items .= '</ul>';
 
             // CSS per gestire l'hover (solo desktop)
-            $items .= '<style>
-                @media (min-width: 992px) {
-                    .user-menu-item:hover .dropdown-menu {
-                        display: block;
-                        margin-top: 0;
-                        right: 0;
-                        left: auto;
-                    }
-                }
-            </style>';
+
 
             $items .= '</li>';
 

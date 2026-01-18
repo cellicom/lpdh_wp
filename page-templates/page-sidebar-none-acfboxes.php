@@ -26,7 +26,10 @@ get_header();
       <div class="entry-header">
         <?php the_post(); ?>
         <?php do_action('bootscore_before_title', 'page-sidebar-none'); ?>
-        <?php the_title('<h1 class="entry-title ' . esc_attr(apply_filters('bootscore/class/entry/title', '', 'page-sidebar-none')) . '">', '</h1>'); ?>
+        <?php
+        $hero_class = is_front_page() ? 'home-title-hero' : '';
+        the_title('<h1 class="entry-title ' . $hero_class . ' ' . esc_attr(apply_filters('bootscore/class/entry/title', '', 'page-sidebar-none')) . '">', '</h1>');
+        ?>
         <?php do_action('bootscore_after_title', 'page-sidebar-none'); ?>
         <?php bootscore_post_thumbnail(); ?>
       </div>

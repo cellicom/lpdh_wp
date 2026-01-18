@@ -367,26 +367,6 @@ get_header(); ?>
     </main>
 </div>
 
-<style>
-    .rank-gold td {
-        color: #d4af37;
-        font-weight: bold;
-    }
 
-    .rank-silver td {
-        color: #8a8a8a;
-        font-weight: bold;
-    }
-
-    .rank-bronze td {
-        color: #cd7f32;
-        font-weight: bold;
-    }
-
-    .leaderboard-rankings a:hover {
-        cursor: pointer;
-        text-decoration: underline !important;
-    }
-</style>
 
 <?php get_footer(); ?>
