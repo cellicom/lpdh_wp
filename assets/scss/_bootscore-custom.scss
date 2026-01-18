@@ -431,13 +431,81 @@ body {
         .author-field strong {
             display: block !important;
             width: 100% !important;
-            margin-bottom: 5px !important;
         }
     }
 }
 
-/* Single Leaderboard */
-.single-leaderboard {}
+/* --- Component Styles --- */
+
+/* About List Grid */
+.about-card-grid {
+    display: grid;
+    // Mobile/Tablet Layout (Default)
+    grid-template-columns: 80px 1fr auto;
+    grid-template-areas:
+        "image header arrow"
+        "subtitle subtitle subtitle"
+        "text text text";
+    gap: 1rem;
+    align-items: start;
+    text-align: left;
+}
+
+.item-image {
+    grid-area: image;
+}
+
+.item-header {
+    grid-area: header;
+    display: flex;
+    flex-direction: column; // "Nome, a capo nickname" on mobile
+    align-items: start;
+    gap: 0.25rem;
+}
+
+.item-subtitle {
+    grid-area: subtitle;
+    margin-top: 0.5rem;
+}
+
+.item-text {
+    grid-area: text;
+}
+
+.item-arrow {
+    grid-area: arrow;
+    display: flex;
+    align-items: center;
+    height: 100%; // Helps with vertical centering if needed, but here it's aligned with header on mobile
+}
+
+@media (min-width: 992px) {
+    .about-card-grid {
+        grid-template-columns: 80px 1fr auto;
+        grid-template-areas:
+            "image header arrow"
+            "image subtitle arrow"
+            "image text arrow";
+        gap: 0 1.5rem;
+        align-items: start;
+    }
+
+    .item-header {
+        flex-direction: row; // "Nome, nickname" inline on desktop
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .item-subtitle {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .item-arrow {
+        align-self: center; // "freccia allineata al centro"
+        height: auto;
+    }
+}
 
 /* Profile / Author */
 .author {
@@ -555,6 +623,7 @@ body {
 }
 
 /* --- Admin / Functions --- */
+
 /* Hide deck views in admin for players */
 .wp-admin.post-type-deck {
     .subsubsub li:not(.mine) {
