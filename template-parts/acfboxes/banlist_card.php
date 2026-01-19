@@ -43,7 +43,7 @@ if ($args['visible']) {
                 <?php wp_reset_postdata(); ?>
             <?php else: ?>
                 <div class="text-center">
-                    <p class="text-muted mb-0"><?php esc_html_e('Nessuna carta in questa lista al momento.', 'bootscore'); ?>
+                    <p class="mb-0"><?php esc_html_e('Nessuna carta in questa lista al momento.', 'bootscore'); ?>
                     </p>
                 </div>
             <?php endif; ?>

@@ -4,7 +4,7 @@ if ($args['visible']) {
     $title = $args['title'];
     $subtitle = $args['subtitle'];
     $text = $args['text'];
-    
+
     // Prepare args for helper function which expects 'titolo'
     $args_for_hash = array_merge($args, ['titolo' => $title]);
     ?>
@@ -14,13 +14,13 @@ if ($args['visible']) {
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-10 text-center">
-                    <?php if($title) { ?>
+                    <?php if ($title) { ?>
                         <h2 class="section-title mb-3"><?php echo esc_html($title); ?></h2>
                     <?php } ?>
-                    <?php if($subtitle) { ?>
-                        <h3 class="section-subtitle mb-4 text-muted h5"><?php echo esc_html($subtitle); ?></h3>
+                    <?php if ($subtitle) { ?>
+                        <h3 class="section-subtitle mb-4 h5"><?php echo esc_html($subtitle); ?></h3>
                     <?php } ?>
-                    <?php if($text) { ?>
+                    <?php if ($text) { ?>
                         <div class="section-text"><?php echo wp_kses_post($text); ?></div>
                     <?php } ?>
                 </div>

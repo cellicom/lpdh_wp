@@ -139,7 +139,7 @@ $author_id = $author->ID;
                     <div class="card h-100 text-center border-0 shadow-sm bg-body-tertiary">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <h3 class="display-4 fw-bold text-primary mb-0"><?php echo $wins; ?></h3>
-                            <p class="text-muted mb-0">Wins</p>
+                            <p class="text-muted mb-0">Events Win</p>
                         </div>
                     </div>
                 </div>
@@ -170,10 +170,22 @@ $author_id = $author->ID;
             </div>
 
             <?php if (is_user_logged_in() && get_current_user_id() == $author_id): ?>
-                <div class="row justify-content-center mb-5">
+                <div class="row justify-content-center mb-5 g-2">
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg"><i
-                                class="fas fa-chart-bar me-2"></i> View my stats</a>
+                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg">
+                            <i class="fas fa-chart-bar me-2"></i> View my Stats
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <a href="<?php echo admin_url('profile.php'); ?>" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-edit me-2"></i> Edit my Profile
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <a href="<?php echo admin_url('edit.php?post_type=deck'); ?>"
+                            class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-layer-group me-2"></i> Edit my Decks
+                        </a>
                     </div>
                 </div>
             <?php endif; ?>

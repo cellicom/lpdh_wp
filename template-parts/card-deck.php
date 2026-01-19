@@ -14,18 +14,21 @@ $show_author = $args['show_author'] ?? true;
 ?>
 <div class="col-md-6 col-lg-4">
     <div class="card h-100 shadow-sm border-0 deck-card">
-        <?php 
+        <?php
         $commander_img = get_commander_image(get_the_ID());
         $partner_img = get_partner_image(get_the_ID());
-        
-        if ($partner_img) : ?>
+
+        if ($partner_img): ?>
             <a href="<?php the_permalink(); ?>" class="d-flex overflow-hidden rounded-top" style="height: 220px;">
-                <img src="<?php echo esc_url($commander_img); ?>" class="w-50 object-fit-cover transition-transform" style="height: 100%; object-position: top;" alt="Commander">
-                <img src="<?php echo esc_url($partner_img); ?>" class="w-50 object-fit-cover transition-transform" style="height: 100%; object-position: top;" alt="Partner">
+                <img src="<?php echo esc_url($commander_img); ?>" class="w-50 object-fit-cover transition-transform"
+                    style="height: 100%; object-position: top;" alt="Commander">
+                <img src="<?php echo esc_url($partner_img); ?>" class="w-50 object-fit-cover transition-transform"
+                    style="height: 100%; object-position: top;" alt="Partner">
             </a>
-        <?php else : ?>
+        <?php else: ?>
             <a href="<?php the_permalink(); ?>" class="d-block overflow-hidden rounded-top">
-                <img src="<?php echo esc_url($commander_img); ?>" class="card-img-top object-fit-cover transition-transform" style="height: 220px; object-position: top;" alt="Commander">
+                <img src="<?php echo esc_url($commander_img); ?>" class="card-img-top object-fit-cover transition-transform"
+                    style="height: 220px; object-position: top;" alt="Commander">
             </a>
         <?php endif; ?>
         <div class="card-body">
@@ -34,21 +37,21 @@ $show_author = $args['show_author'] ?? true;
                     <?php the_title(); ?>
                 </a>
             </h5>
-            <?php 
+            <?php
             $commander = get_field('commander');
             $partner = get_field('partner');
-            if ($commander) : ?>
-                <p class="card-text small text-muted mb-0">
+            if ($commander): ?>
+                <p class="card-text small mb-0">
                     <i class="fas fa-user-shield me-1"></i> <?php echo esc_html($commander); ?>
-                    <?php if ($partner) : ?>
+                    <?php if ($partner): ?>
                         <span class="mx-1">+</span> <?php echo esc_html($partner); ?>
                     <?php endif; ?>
                 </p>
             <?php endif; ?>
         </div>
-        <?php if ($show_author) : ?>
+        <?php if ($show_author): ?>
             <div class="card-footer bg-white border-top-0">
-                <small class="text-muted">By <?php the_author_posts_link(); ?></small>
+                <small>By <?php the_author_posts_link(); ?></small>
             </div>
         <?php endif; ?>
     </div>

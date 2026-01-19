@@ -31,7 +31,7 @@ $links = $args['links'];
                                                 <h5 class="card-title fw-bold mb-2"><?php echo esc_html($title); ?></h5>
                                             <?php } ?>
                                             <?php if ($subtitle) { ?>
-                                                <div class="card-text text-muted small !f-plantin">
+                                                <div class="card-text small !f-plantin">
                                                     <?php echo nl2br(esc_html($subtitle)); ?></div>
                                             <?php } ?>
                                         </div>

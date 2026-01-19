@@ -3689,19 +3689,21 @@ function lpdh_add_login_logout_menu($items, $args)
 
             // Voce utente con Avatar e Nome
             $items .= '<li class="menu-item menu-item-has-children dropdown user-menu-item">';
-            // Rimuoviamo data-bs-toggle per permettere il click sul link, gestiamo il dropdown via CSS hover
             $items .= '<a href="' . esc_url($profile_url) . '" class="nav-link d-flex align-items-center">';
             $items .= $avatar . esc_html($current_user->display_name);
             $items .= '</a>';
 
-            // Dropdown menu
-            $items .= '<ul class="dropdown-menu dropdown-menu-end">';
-            $items .= '<li class="menu-item"><a href="' . esc_url($my_decks_url) . '" class="dropdown-item"><i class="fas fa-layer-group me-2"></i>I miei mazzi</a></li>';
+            // Desktop Dropdown
+            $items .= '<ul class="dropdown-menu dropdown-menu-end d-none d-lg-block">';
+            $items .= '<li class="menu-item"><a href="' . esc_url($my_decks_url) . '" class="dropdown-item"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
             $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
             $items .= '</ul>';
 
-            // CSS per gestire l'hover (solo desktop)
-
+            // Mobile Flat List (visible on small screens)
+            $items .= '<ul class="d-lg-none list-unstyled ms-3 mt-2">';
+            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($my_decks_url) . '" class="nav-link p-0 text-white-50"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
+            $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="nav-link p-0 text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
+            $items .= '</ul>';
 
             $items .= '</li>';
 
@@ -4104,3 +4106,156 @@ add_action('wp_ajax_update_player_deck_ranking', 'ajax_update_player_deck_rankin
 add_filter('bootscore/class/loop/card-text/excerpt', function ($class) {
     return $class . ' !f-plantin';
 });
+/**
+ * Override bootscore_date to show only published date
+ * and remove the "Last Updated" information.
+ */
+if (!function_exists('bootscore_date')):
+    function bootscore_date()
+    {
+        $time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time>';
+        $time_string = sprintf(
+            $time_string,
+            esc_attr(get_the_date('c')),
+            esc_html(get_the_date())
+        );
+        echo '<span class="posted-on"><i class="fas fa-calendar-alt me-1"></i>' . $time_string . '</span>';
+    }
+endif;
+
+/**
+ * Register Top Nav Search Sidebar
+ */
+add_action('widgets_init', 'bootscore_child_widgets_init');
+function bootscore_child_widgets_init()
+{
+    register_sidebar(array(
+        'name' => esc_html__('Top Nav Search', 'bootscore'),
+        'id' => 'top-nav-search',
+        'description' => esc_html__('Add widgets here. To show the search toggler, add a "Search" widget here.', 'bootscore'),
+        'before_widget' => '<div class="widget %2$s">',
+        'after_widget' => '</div>',
+        'before_title' => '<h2 class="widget-title">',
+        'after_title' => '</h2>',
+    ));
+}
+
+/**
+ * Shortcode [banned_card] to display a card exactly like in the banlist
+ */
+function lpdh_banned_card_shortcode($atts)
+{
+    $atts = shortcode_atts(array(
+        'name' => '',
+        'id' => '',
+        'align' => 'left',
+    ), $atts, 'banned_card');
+
+    $args = array(
+        'post_type' => 'banned_card',
+        'posts_per_page' => 1,
+        'post_status' => 'publish',
+    );
+
+    if (!empty($atts['id'])) {
+        $args['p'] = intval($atts['id']);
+    } elseif (!empty($atts['name'])) {
+        $args['title'] = sanitize_text_field($atts['name']);
+    } else {
+        return '';
+    }
+
+    $query = new WP_Query($args);
+
+    if ($query->have_posts()) {
+        $query->the_post();
+
+        ob_start();
+        ?>
+        <div class="banned-cards-list mx-auto" style="max-width: 900px;">
+            <?php get_template_part('template-parts/shortcode-banned-card', null, array('align' => $atts['align'])); ?>
+        </div>
+        <?php
+        $output = ob_get_clean();
+
+        wp_reset_postdata();
+        return $output;
+    }
+
+    return '';
+}
+add_shortcode('banned_card', 'lpdh_banned_card_shortcode');
+
+/**
+ * Theme Settings Page for Admin
+ */
+function lpdh_register_theme_settings()
+{
+    add_theme_page(
+        'LPDH Theme Settings',
+        'Theme Settings',
+        'manage_options',
+        'lpdh-theme-settings',
+        'lpdh_theme_settings_render'
+    );
+}
+add_action('admin_menu', 'lpdh_register_theme_settings');
+
+function lpdh_theme_settings_render()
+{
+    if (!current_user_can('manage_options'))
+        return;
+
+    // Save Settings
+    if (isset($_POST['lpdh_theme_action']) && $_POST['lpdh_theme_action'] == 'save') {
+        check_admin_referer('lpdh_theme_settings_save');
+        update_option('lpdh_active_theme', sanitize_text_field($_POST['lpdh_active_theme']));
+        echo '<div class="updated"><p>Theme settings saved!</p></div>';
+    }
+
+    $active_theme = get_option('lpdh_active_theme', 'default');
+    ?>
+    <div class="wrap">
+        <h1>LPDH Theme Settings</h1>
+        <form method="post">
+            <?php wp_nonce_field('lpdh_theme_settings_save'); ?>
+            <input type="hidden" name="lpdh_theme_action" value="save">
+
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Active Theme</th>
+                    <td>
+                        <select name="lpdh_active_theme">
+                            <option value="default" <?php selected($active_theme, 'default'); ?>>Bootscore Default</option>
+                            <option value="vaporwave" <?php selected($active_theme, 'vaporwave'); ?>>Vaporwave (80s Neon)
+                            </option>
+                            <option value="platinum-gold" <?php selected($active_theme, 'platinum-gold'); ?>>Platinum & Gold
+                                (Epic)</option>
+                            <option value="mana-flow" <?php selected($active_theme, 'mana-flow'); ?>>Mana Flow (MTG Colors)
+                            </option>
+                            <option value="urban" <?php selected($active_theme, 'urban'); ?>>Urban Underground (Gritty)
+                            </option>
+                        </select>
+                        <p class="description">Select the aesthetic for the entire platform.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+/**
+ * Apply Theme Body Class
+ */
+function lpdh_apply_theme_body_class($classes)
+{
+    $active_theme = get_option('lpdh_active_theme', 'default');
+    if ($active_theme !== 'default') {
+        $classes[] = 'theme-' . $active_theme;
+    }
+    return $classes;
+}
+add_filter('body_class', 'lpdh_apply_theme_body_class');

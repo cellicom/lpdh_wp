@@ -31,7 +31,7 @@
             <div class="col-8 col-sm-9">
                 <div class="card-body h-100 d-flex flex-column justify-content-center">
                     <h5 class="card-title text-danger mb-1"><strong><?php the_title(); ?></strong></h5>
-                    <div class="card-text small text-muted card-text-ellipsis !f-plantin">
+                    <div class="card-text small card-text-ellipsis !f-plantin">
                         <?php echo wp_trim_words(get_the_content(), 20, '...'); ?>
                     </div>
                 </div>

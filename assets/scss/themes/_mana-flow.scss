@@ -1,0 +1,37 @@
+/* --- Mana Flow Theme Variables --- */
+body.theme-mana-flow {
+    --lpdh-bg: #1c1c1c;
+    --lpdh-text: #f0f0f0;
+    --lpdh-card-bg: #2a2a2a;
+
+    background-color: var(--lpdh-bg) !important;
+    color: var(--lpdh-text);
+
+    /* MTG Color Accents used in different places */
+    .card {
+        background: var(--lpdh-card-bg) !important;
+        border-left: 5px solid #6c757d !important;
+        /* Default grey for common */
+
+        &.banned-card-item {
+            border-left-color: #d32f2f !important;
+        }
+    }
+
+    .text-danger {
+        color: #ff5252 !important;
+    }
+
+    .text-primary {
+        color: #40c4ff !important;
+    }
+
+    .text-success {
+        color: #69f0ae !important;
+    }
+
+    .btn-primary {
+        background-color: #455a64 !important;
+        border-color: #455a64 !important;
+    }
+}

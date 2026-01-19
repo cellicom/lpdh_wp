@@ -2,6 +2,12 @@
  * Bootscore custom styles
  */
 
+// Themes
+@import "themes/vaporwave";
+@import "themes/platinum-gold";
+@import "themes/mana-flow";
+@import "themes/urban";
+
 // Add your own code here!
 // Because this file is compiled after Bootstrap, you're also able to use Bootstrap mixins for better code.
 // Some examples can be found here: https://bootscore.me/documentation/bootstrap-css-sass
@@ -49,6 +55,21 @@ body {
         transform: translateY(-5px) !important;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
     }
+}
+
+.hover-underline {
+    text-decoration: none !important;
+
+    &:hover {
+        text-decoration: underline !important;
+    }
+}
+
+.icon-circle {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    padding: 5px;
+    box-sizing: content-box;
 }
 
 /* Pagination Base */
@@ -695,4 +716,81 @@ body {
 .leaderboard-rankings a:hover {
     cursor: pointer !important;
     text-decoration: underline !important;
+}
+
+/* Full-Screen Search Overlay */
+.search-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    z-index: 99999 !important;
+    display: none;
+    align-items: flex-start !important; // Changed from center to flex-start
+    justify-content: center !important;
+    backdrop-filter: blur(10px) !important;
+    transition: all 0.3s ease !important;
+    padding-top: 15vh !important; // Add padding to move content towards the top
+}
+
+.search-overlay.active {
+    display: flex !important;
+}
+
+.search-overlay .search-overlay-close {
+    position: absolute !important;
+    top: 30px !important;
+    right: 30px !important;
+    font-size: 3rem !important; // Slightly larger for clarity
+    cursor: pointer !important;
+    background: transparent !important;
+    border: none !important;
+    color: #000 !important;
+    opacity: 0.6 !important;
+    transition: all 0.2s !important;
+    z-index: 100000 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+
+    &:hover {
+        opacity: 1 !important;
+        transform: scale(1.1) !important;
+    }
+}
+
+.search-overlay .search-overlay-close:hover {
+    opacity: 1 !important;
+}
+
+.search-overlay .search-overlay-content {
+    width: 100% !important;
+    max-width: 800px !important;
+    padding: 0 20px !important;
+}
+
+.search-overlay .search-overlay-content .form-control {
+    font-size: 3rem !important;
+    color: #000 !important; // Changed from white to black
+    padding: 20px 0 !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important; // Changed to dark border
+    border-radius: 0 !important;
+}
+
+.search-overlay .search-overlay-content .form-control::placeholder {
+    color: rgba(0, 0, 0, 0.3) !important; // Changed to dark placeholder
+}
+
+.search-overlay .search-overlay-content .form-control:focus {
+    box-shadow: none !important;
+    border-color: #000 !important; // Changed to black border on focus
+}
+
+@media (max-width: 768px) {
+    .search-overlay .search-overlay-content .form-control {
+        font-size: 1.5rem !important;
+    }
 }

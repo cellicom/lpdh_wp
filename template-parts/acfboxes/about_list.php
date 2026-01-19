@@ -72,7 +72,7 @@ $people = $args['people'] ?? [];
 
                                     <?php if ($text): ?>
                                         <div class="item-text">
-                                            <p class="text-muted mb-0 !f-plantin"><?php echo nl2br(esc_html($text)); ?></p>
+                                            <p class="mb-0 !f-plantin"><?php echo nl2br(esc_html($text)); ?></p>
                                         </div>
                                     <?php endif; ?>
 
