@@ -4235,6 +4235,8 @@ function lpdh_theme_settings_render()
                             </option>
                             <option value="urban" <?php selected($active_theme, 'urban'); ?>>Urban Underground (Gritty)
                             </option>
+                            <option value="lost-wood" <?php selected($active_theme, 'lost-wood'); ?>>Lost Wood (Forest)
+                            </option>
                         </select>
                         <p class="description">Select the aesthetic for the entire platform.</p>
                     </td>

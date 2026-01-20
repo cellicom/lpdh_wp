@@ -1,0 +1,291 @@
+/* --- Lost Wood Theme Variables --- */
+body.theme-lost-wood {
+    --lpdh-bg: #07241B;
+    --lpdh-primary: #B1C672;
+    --lpdh-primary-rgb: 177, 198, 114;
+    --lpdh-secondary: #3D694A;
+    --lpdh-secondary-rgb: 61, 105, 74;
+    --lpdh-accent: #B1C672;
+    --lpdh-accent-rgb: 177, 198, 114;
+    --lpdh-text: #E8F5E9;
+    --lpdh-card-bg: rgba(10, 45, 35, 0.85);
+    --lpdh-card-border: #3D694A;
+    --lpdh-shadow: 0 0 15px rgba(177, 198, 114, 0.2);
+
+    --bs-primary: var(--lpdh-primary);
+    --bs-primary-rgb: var(--lpdh-primary-rgb);
+    --bs-secondary: var(--lpdh-secondary);
+    --bs-secondary-rgb: var(--lpdh-secondary-rgb);
+    --bs-accent: var(--lpdh-accent);
+    --bs-accent-rgb: var(--lpdh-accent-rgb);
+
+    // Override Bootscore alert colors with natural forest colors
+    --lpdh-success: #21BA45;
+    --lpdh-success-rgb: 33, 186, 69;
+    --lpdh-danger: #C10015;
+    --lpdh-danger-rgb: 193, 0, 21;
+    --lpdh-info: #31CCEC;
+    --lpdh-info-rgb: 49, 204, 236;
+    --lpdh-warning: #F2C037;
+    --lpdh-warning-rgb: 242, 192, 55;
+
+    --bs-success: var(--lpdh-success);
+    --bs-success-rgb: var(--lpdh-success-rgb);
+    --bs-danger: var(--lpdh-danger);
+    --bs-danger-rgb: var(--lpdh-danger-rgb);
+    --bs-info: var(--lpdh-info);
+    --bs-info-rgb: var(--lpdh-info-rgb);
+    --bs-warning: var(--lpdh-warning);
+    --bs-warning-rgb: var(--lpdh-warning-rgb);
+
+    background-color: var(--lpdh-bg) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(61, 105, 74, 0.1) 0%, transparent 80%);
+    color: var(--lpdh-text);
+
+    a {
+        color: var(--lpdh-primary);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+            filter: brightness(1.2);
+        }
+    }
+
+    .btn-link {
+        color: var(--lpdh-primary) !important;
+        text-decoration: none !important;
+
+        &:hover {
+            color: var(--lpdh-primary) !important;
+            text-decoration: underline !important;
+            filter: brightness(1.2);
+        }
+    }
+
+    .card {
+        background: var(--lpdh-card-bg) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--lpdh-card-border) !important;
+        box-shadow: var(--lpdh-shadow) !important;
+        color: var(--lpdh-text);
+
+        .card-header,
+        .card-footer {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: var(--lpdh-text);
+            border-color: var(--lpdh-card-border);
+        }
+
+        .card-text {
+
+            a:not(.read-more),
+            .text-body:not(.read-more),
+            .text-secondary:not(.read-more) {
+                color: #fff !important;
+            }
+        }
+
+        .text-primary {
+            color: var(--lpdh-primary) !important;
+        }
+
+        .text-muted {
+            color: rgba(232, 245, 233, 0.6) !important;
+        }
+
+        &.bg-primary {
+            background-color: var(--lpdh-primary) !important;
+            color: var(--lpdh-bg) !important;
+            border-color: var(--lpdh-primary) !important;
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            .card-title,
+            .card-text,
+            .small {
+                color: var(--lpdh-bg) !important;
+            }
+        }
+    }
+
+    .btn-primary {
+        background-color: var(--lpdh-primary) !important;
+        border-color: var(--lpdh-primary) !important;
+        color: var(--lpdh-bg) !important;
+        font-weight: 700;
+
+        &:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 0 10px rgba(177, 198, 114, 0.5);
+        }
+    }
+
+    .btn-outline-primary {
+        color: var(--lpdh-primary) !important;
+        border-color: var(--lpdh-primary) !important;
+
+        &:hover {
+            background-color: var(--lpdh-primary) !important;
+            color: var(--lpdh-bg) !important;
+        }
+    }
+
+    .btn-secondary {
+        background-color: var(--lpdh-secondary) !important;
+        border-color: var(--lpdh-secondary) !important;
+        color: #fff !important;
+
+        &:hover {
+            filter: brightness(1.2);
+        }
+    }
+
+    .btn-danger {
+        background-color: var(--lpdh-danger) !important;
+        border-color: var(--lpdh-danger) !important;
+        color: white !important;
+    }
+
+    .btn-success {
+        background-color: var(--lpdh-success) !important;
+        border-color: var(--lpdh-success) !important;
+        color: white !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+        color: var(--lpdh-primary);
+    }
+
+    .bg-light {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(5px);
+    }
+
+    header {
+        background-color: transparent !important;
+    }
+
+    #nav-main {
+        background-color: rgba(7, 36, 27, 0.8) !important;
+        backdrop-filter: blur(10px);
+
+        .navbar-brand,
+        .nav-link,
+        a {
+            color: #fff !important;
+        }
+
+        .nav-link:hover,
+        a:hover {
+            color: var(--lpdh-primary) !important;
+        }
+
+        .dropdown-menu {
+            background-color: #0a2d23 !important;
+            border: 1px solid var(--lpdh-secondary);
+
+            .dropdown-item {
+                color: #fff !important;
+
+                &:hover {
+                    background-color: rgba(177, 198, 114, 0.1) !important;
+                    color: var(--lpdh-primary) !important;
+                }
+            }
+        }
+    }
+
+    #footer {
+        background-color: rgba(7, 36, 27, 0.9) !important;
+        border-top: 1px solid var(--lpdh-secondary);
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        span,
+        div,
+        .widget-title,
+        a {
+            color: #fff !important;
+        }
+
+        a:hover {
+            color: var(--lpdh-primary) !important;
+        }
+    }
+
+    // Event Cards
+    .event-card-inner {
+        background: var(--lpdh-card-bg) !important;
+        border: 1px solid var(--lpdh-card-border) !important;
+        box-shadow: var(--lpdh-shadow) !important;
+    }
+
+    .event-title,
+    .event-title a {
+        color: var(--lpdh-primary) !important;
+    }
+
+    // Rankings Tables
+    &.single-event .event-rankings,
+    &.single-leaderboard .leaderboard-rankings {
+        .table {
+            --bs-table-bg: transparent;
+            color: var(--lpdh-text) !important;
+
+            thead th {
+                background-color: rgba(0, 0, 0, 0.3) !important;
+                color: var(--lpdh-primary) !important;
+                border-bottom: 2px solid var(--lpdh-secondary);
+            }
+
+            tbody td {
+                background-color: rgba(255, 255, 255, 0.02) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        }
+    }
+
+    // Modal
+    #deckSelectionModal {
+        .modal-content {
+            background-color: #0a2d23;
+            border: 1px solid var(--lpdh-secondary);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header,
+        .modal-footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-color: var(--lpdh-secondary);
+        }
+    }
+
+    // Search Overlay
+    .search-overlay {
+        background-color: rgba(7, 36, 27, 0.98) !important;
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--lpdh-secondary) !important;
+            color: #fff !important;
+
+            &:focus {
+                border-color: var(--lpdh-primary) !important;
+                box-shadow: 0 0 15px rgba(177, 198, 114, 0.3) !important;
+            }
+        }
+    }
+}
