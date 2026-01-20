@@ -10,6 +10,7 @@ body.theme-vaporwave {
     --lpdh-shadow: 0 0 15px rgba(255, 113, 206, 0.5);
 
     background-color: var(--lpdh-bg) !important;
+    @extend .bg-retro;
     color: var(--lpdh-text);
 
     .card {
@@ -74,4 +75,198 @@ body.theme-vaporwave {
         background-color: rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(5px);
     }
+
+    // Home title hero animation
+    .home-title-hero {
+        animation: lights 5s 750ms linear infinite;
+        display: block;
+    }
+
+    @keyframes lights {
+        0% {
+            color: hsl(230, 40%, 80%);
+            text-shadow:
+                0 0 1em hsla(320, 100%, 50%, 0.2),
+                0 0 0.125em hsla(320, 100%, 60%, 0.3),
+                -1em -0.125em 0.5em hsla(40, 100%, 60%, 0),
+                1em 0.125em 0.5em hsla(200, 100%, 60%, 0);
+        }
+
+        30% {
+            color: hsl(230, 80%, 90%);
+            text-shadow:
+                0 0 1em hsla(320, 100%, 50%, 0.5),
+                0 0 0.125em hsla(320, 100%, 60%, 0.5),
+                -0.5em -0.125em 0.25em hsla(40, 100%, 60%, 0.2),
+                0.5em 0.125em 0.25em hsla(200, 100%, 60%, 0.4);
+        }
+
+        40% {
+            color: hsl(230, 100%, 95%);
+            text-shadow:
+                0 0 1em hsla(320, 100%, 50%, 0.5),
+                0 0 0.125em hsla(320, 100%, 90%, 0.5),
+                -0.25em -0.125em 0.125em hsla(40, 100%, 60%, 0.2),
+                0.25em 0.125em 0.125em hsla(200, 100%, 60%, 0.4);
+        }
+
+        70% {
+            color: hsl(230, 80%, 90%);
+            text-shadow:
+                0 0 1em hsla(320, 100%, 50%, 0.5),
+                0 0 0.125em hsla(320, 100%, 60%, 0.5),
+                0.5em -0.125em 0.25em hsla(40, 100%, 60%, 0.2),
+                -0.5em 0.125em 0.25em hsla(200, 100%, 60%, 0.4);
+        }
+
+        100% {
+            color: hsl(230, 40%, 80%);
+            text-shadow:
+                0 0 1em hsla(320, 100%, 50%, 0.2),
+                0 0 0.125em hsla(320, 100%, 60%, 0.3),
+                1em -0.125em 0.5em hsla(40, 100%, 60%, 0),
+                -1em 0.125em 0.5em hsla(200, 100%, 60%, 0);
+        }
+    }
+
+    // Remove header background
+    header {
+        background-color: transparent !important;
+    }
+
+    // Header styling
+    #nav-main {
+        background-color: rgba(5, 0, 30, 0.3) !important;
+        backdrop-filter: blur(10px);
+
+        .navbar-brand,
+        .nav-link,
+        .navbar-text,
+        a {
+            color: #fff !important;
+        }
+
+        .nav-link:hover,
+        a:hover {
+            color: var(--lpdh-primary) !important;
+        }
+
+        // Dropdown menu styling
+        .dropdown-menu {
+            background-color: var(--lpdh-bg) !important;
+            border: 1px solid var(--lpdh-primary);
+
+            .dropdown-item {
+                color: #fff !important;
+
+                &:hover,
+                &:focus {
+                    background-color: rgba(255, 113, 206, 0.2) !important;
+                    color: var(--lpdh-primary) !important;
+                }
+            }
+        }
+    }
+
+    // Footer styling
+    #footer {
+        background-color: rgba(5, 0, 30, 0.3) !important;
+        backdrop-filter: blur(10px);
+
+        .bootscore-footer-top,
+        .bootscore-footer-columns,
+        .bootscore-footer-info {
+            background-color: transparent !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        span,
+        div,
+        .widget-title {
+            color: #fff !important;
+        }
+
+        a {
+            color: #fff !important;
+
+            &:hover {
+                color: var(--lpdh-primary) !important;
+            }
+        }
+
+        .text-body-secondary {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+    }
+}
+
+/* Fix Mobile Menu for Vaporwave Theme */
+body.theme-vaporwave {
+    .offcanvas {
+        background-color: #2b1055;
+        /* Dark Purple Background */
+        color: #fff;
+
+        .btn-close {
+            filter: invert(1);
+            /* White close button */
+        }
+
+        .nav-link {
+            color: #fff;
+        }
+    }
+}
+
+
+/* Background Image Classes */
+.bg-grid {
+    background-image: url('../img/bg/grid.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.bg-grid2 {
+    background-image: url('../img/bg/grid2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.bg-purple {
+    background-image: url('../img/bg/purple.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.bg-retro {
+    background-image: url('../img/bg/retro.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.bg-sunset {
+    background-image: url('../img/bg/sunset.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
 }

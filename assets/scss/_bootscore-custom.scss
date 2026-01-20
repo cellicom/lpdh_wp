@@ -2,6 +2,7 @@
  * Bootscore custom styles
  */
 
+
 // Themes
 @import "themes/vaporwave";
 @import "themes/platinum-gold";
@@ -70,6 +71,27 @@ body {
     border-radius: 50%;
     padding: 5px;
     box-sizing: content-box;
+}
+
+/* Dropdown Hover Behavior */
+#nav-main {
+
+    // Show dropdown on hover
+    .dropdown:hover .dropdown-menu {
+        display: block !important;
+    }
+
+    // Override any d-lg-block or similar classes on dropdown menus
+    @media (min-width: 992px) {
+        .dropdown-menu:not(.show) {
+            display: none !important;
+        }
+
+        // But allow hover to work
+        .dropdown:hover .dropdown-menu {
+            display: block !important;
+        }
+    }
 }
 
 /* Pagination Base */

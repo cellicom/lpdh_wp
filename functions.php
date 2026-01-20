@@ -3701,7 +3701,7 @@ function lpdh_add_login_logout_menu($items, $args)
 
             // Mobile Flat List (visible on small screens)
             $items .= '<ul class="d-lg-none list-unstyled ms-3 mt-2">';
-            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($my_decks_url) . '" class="nav-link p-0 text-white-50"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
+            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($my_decks_url) . '" class="nav-link p-0"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
             $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="nav-link p-0 text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
             $items .= '</ul>';
 
@@ -4259,3 +4259,24 @@ function lpdh_apply_theme_body_class($classes)
     return $classes;
 }
 add_filter('body_class', 'lpdh_apply_theme_body_class');
+
+/**
+ * Get Extra Attributions
+ */
+function lpdh_get_extra_attributions()
+{
+    $attributions = [
+        '<div class="col-12 q-px-md q-py-md f-beleren justify-end flex" style="gap: 5px;"> Made with <span style="color: red !important; cursor: pointer;">♥</span> by <a class="text-bold text-accent" href="https://linktr.ee/cellicom" target="_blank">cellicom</a></div>',
+        '<a href="https://www.vecteezy.com/free-vector/vaporwave-grid" target="_blank" rel="noopener">Vaporwave Grid Vectors by Vecteezy</a>'
+    ];
+
+    if (empty($attributions)) {
+        return '';
+    }
+
+    $output = '<div class="extra-attributions small d-block d-md-inline-block me-md-2 mb-1 mb-md-0">';
+    $output .= implode(' | ', $attributions) . ' | ';
+    $output .= '</div>';
+
+    return $output;
+}
