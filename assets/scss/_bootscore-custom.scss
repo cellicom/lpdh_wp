@@ -48,6 +48,12 @@ body {
     }
 }
 
+/*
+#page {
+    min-width: 100vw;
+}
+*/
+
 /* --- Global Utilities --- */
 .hover-lift {
     transition: transform 0.22s ease, box-shadow 0.22s ease !important;
@@ -356,7 +362,7 @@ body {
             grid-template-columns: repeat(2, 1fr) !important;
         }
 
-        @media (min-width: 1200px) {
+        @media (min-width: 992px) {
             grid-template-columns: repeat(3, 1fr) !important;
         }
     }

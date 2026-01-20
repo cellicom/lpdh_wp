@@ -139,6 +139,14 @@ body.theme-vaporwave {
         background-color: rgba(5, 0, 30, 0.3) !important;
         backdrop-filter: blur(10px);
 
+        @media (min-width: 768px) {
+            backdrop-filter: unset;
+        }
+
+        @media (min-width: 992px) {
+            backdrop-filter: unset;
+        }
+
         .navbar-brand,
         .nav-link,
         .navbar-text,
@@ -206,23 +214,6 @@ body.theme-vaporwave {
     }
 }
 
-/* Fix Mobile Menu for Vaporwave Theme */
-body.theme-vaporwave {
-    .offcanvas {
-        background-color: #2b1055;
-        /* Dark Purple Background */
-        color: #fff;
-
-        .btn-close {
-            filter: invert(1);
-            /* White close button */
-        }
-
-        .nav-link {
-            color: #fff;
-        }
-    }
-}
 
 
 /* Background Image Classes */
