@@ -17,7 +17,7 @@ $links = $args['links'];
                     <div class="col-12 col-lg-6">
                         <?php if ($url) { ?><a href="<?php echo esc_url($url); ?>" class="text-decoration-none text-reset"
                                 target="_blank" rel="noopener noreferrer"><?php } ?>
-                            <div class="card h-100 shadow-sm border-0 bg-light transition-hover">
+                            <div class="card h-100 shadow-sm border-0 bg-light transition-hover hover-lift">
                                 <div class="card-body p-4">
                                     <div class="d-flex align-items-start">
                                         <?php if ($icon) { ?>

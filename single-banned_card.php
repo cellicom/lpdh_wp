@@ -53,7 +53,7 @@ get_header(); ?>
                                     <?php if ($scryfall_link): ?>
                                         <div class="mt-4">
                                             <a href="<?php echo esc_url($scryfall_link); ?>" target="_blank" rel="noopener"
-                                                class="btn btn-outline-primary">
+                                                class="btn btn-primary">
                                                 View on Scryfall <i class="fas fa-external-link-alt fa-xs ms-1"></i>
                                             </a>
                                         </div>

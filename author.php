@@ -23,7 +23,7 @@ $author_id = $author->ID;
                         <?php echo get_avatar($author_id, 150, '', '', array('class' => 'rounded-circle shadow border')); ?>
                     </div>
                     <h1 class="author-title mb-1"><?php echo esc_html($author->display_name); ?></h1>
-                    <p class="text-muted mb-3">@<?php echo esc_html($author->user_login); ?></p>
+                    <p class="mb-3">@<?php echo esc_html($author->user_login); ?></p>
 
                     <?php if (get_the_author_meta('description', $author_id)): ?>
                         <div class="author-description mx-auto" style="max-width: 600px;">
@@ -48,7 +48,7 @@ $author_id = $author->ID;
                         foreach ($socials as $key => $icon) {
                             $url = get_the_author_meta($key, $author_id);
                             if ($url) {
-                                echo '<a href="' . esc_url($url) . '" class="text-decoration-none text-muted mx-2" target="_blank" rel="noopener"><i class="' . esc_attr($icon) . ' fa-lg"></i></a>';
+                                echo '<a href="' . esc_url($url) . '" class="text-decoration-none text-primary mx-2" target="_blank" rel="noopener"><i class="' . esc_attr($icon) . ' fa-lg"></i></a>';
                             }
                         }
                         ?>
@@ -177,13 +177,12 @@ $author_id = $author->ID;
                         </a>
                     </div>
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('profile.php'); ?>" class="btn btn-outline-primary btn-lg">
+                        <a href="<?php echo admin_url('profile.php'); ?>" class="btn btn-primary btn-lg">
                             <i class="fas fa-user-edit me-2"></i> Edit my Profile
                         </a>
                     </div>
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('edit.php?post_type=deck'); ?>"
-                            class="btn btn-outline-primary btn-lg">
+                        <a href="<?php echo admin_url('edit.php?post_type=deck'); ?>" class="btn btn-primary btn-lg">
                             <i class="fas fa-layer-group me-2"></i> Edit my Decks
                         </a>
                     </div>

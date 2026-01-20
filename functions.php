@@ -3835,7 +3835,7 @@ function get_commander_image($post_id)
     }
 
     // 3. Fallback
-    return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.png';
+    return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.jpg';
 }
 
 /**
@@ -3860,7 +3860,7 @@ function get_partner_image($post_id)
 
     // 3. Fallback (only if partner exists)
     if ($partner_img || $partner_name) {
-        return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.png';
+        return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.jpg';
     }
 
     return false;
@@ -4266,7 +4266,7 @@ add_filter('body_class', 'lpdh_apply_theme_body_class');
 function lpdh_get_extra_attributions()
 {
     $attributions = [
-        '<div class="col-12 q-px-md q-py-md f-beleren justify-end flex" style="gap: 5px;"> Made with <span style="color: red !important; cursor: pointer;">♥</span> by <a class="text-bold text-accent" href="https://linktr.ee/cellicom" target="_blank">cellicom</a></div>',
+        'Made with <span style="color: red !important; cursor: pointer;">&hearts;</span> by <a class="fw-bold" href="https://linktr.ee/cellicom" target="_blank">cellicom</a>',
         '<a href="https://www.vecteezy.com/free-vector/vaporwave-grid" target="_blank" rel="noopener">Vaporwave Grid Vectors by Vecteezy</a>'
     ];
 
@@ -4274,8 +4274,15 @@ function lpdh_get_extra_attributions()
         return '';
     }
 
-    $output = '<div class="extra-attributions small d-block d-md-inline-block me-md-2 mb-1 mb-md-0">';
-    $output .= implode(' | ', $attributions) . ' | ';
+    $output = '<div class="extra-attributions d-flex flex-column flex-md-row flex-wrap align-items-center justify-content-center gap-2 small mt-2 mt-md-0">';
+
+    foreach ($attributions as $index => $attr) {
+        $output .= '<span class="attribution-item">' . $attr . '</span>';
+        if ($index < count($attributions) - 1) {
+            $output .= '<span class="d-none d-md-inline opacity-50">|</span>';
+        }
+    }
+
     $output .= '</div>';
 
     return $output;

@@ -18,10 +18,10 @@ if ($args['visible']) {
                         <h2 class="section-title mb-3"><?php echo esc_html($title); ?></h2>
                     <?php } ?>
                     <?php if ($subtitle) { ?>
-                        <h3 class="section-subtitle mb-4 h5"><?php echo esc_html($subtitle); ?></h3>
+                        <h3 class="section-subtitle text-white mb-4 h5"><?php echo esc_html($subtitle); ?></h3>
                     <?php } ?>
                     <?php if ($text) { ?>
-                        <div class="section-text"><?php echo wp_kses_post($text); ?></div>
+                        <div class="section-text text-white"><?php echo wp_kses_post($text); ?></div>
                     <?php } ?>
                 </div>
             </div>

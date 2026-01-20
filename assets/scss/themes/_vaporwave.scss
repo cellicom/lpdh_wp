@@ -2,16 +2,51 @@
 body.theme-vaporwave {
     --lpdh-bg: #05001e;
     --lpdh-primary: #ff71ce;
+    --lpdh-primary-rgb: 255, 113, 206;
     --lpdh-secondary: #01cdfe;
+    --lpdh-secondary-rgb: 1, 205, 254;
     --lpdh-accent: #b967ff;
+    --lpdh-accent-rgb: 185, 103, 255;
     --lpdh-text: #fff;
     --lpdh-card-bg: rgba(20, 14, 61, 0.8);
     --lpdh-card-border: #ff71ce;
     --lpdh-shadow: 0 0 15px rgba(255, 113, 206, 0.5);
 
+    --bs-primary: var(--lpdh-primary);
+    --bs-primary-rgb: var(--lpdh-primary-rgb);
+    --bs-secondary: var(--lpdh-secondary);
+    --bs-secondary-rgb: var(--lpdh-secondary-rgb);
+    --bs-accent: var(--lpdh-accent);
+    --bs-accent-rgb: var(--lpdh-accent-rgb);
+
+    // Override Bootscore alert colors with vibrant neon colors
+    --lpdh-success: #00ff00;
+    --lpdh-success-rgb: 0, 255, 0;
+    --lpdh-danger: #ff0033;
+    --lpdh-danger-rgb: 255, 0, 51;
+    --lpdh-info: #00ffff;
+    --lpdh-info-rgb: 0, 255, 255;
+
+    --bs-success: var(--lpdh-success);
+    --bs-success-rgb: var(--lpdh-success-rgb);
+    --bs-danger: var(--lpdh-danger);
+    --bs-danger-rgb: var(--lpdh-danger-rgb);
+    --bs-info: var(--lpdh-info);
+    --bs-info-rgb: var(--lpdh-info-rgb);
+
     background-color: var(--lpdh-bg) !important;
     @extend .bg-retro;
     color: var(--lpdh-text);
+
+    a {
+        color: rgba(var(--lpdh-secondary-rgb), 1);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
 
     .card {
         background: var(--lpdh-card-bg) !important;
@@ -26,7 +61,6 @@ body.theme-vaporwave {
             color: var(--lpdh-text);
         }
 
-        .text-danger,
         .text-primary {
             color: var(--lpdh-primary) !important;
         }
@@ -57,10 +91,57 @@ body.theme-vaporwave {
         background-color: var(--lpdh-primary) !important;
         border-color: var(--lpdh-primary) !important;
         box-shadow: 0 0 10px var(--lpdh-primary);
+        color: #fff !important;
 
         &:hover {
             filter: brightness(1.2);
+            color: #fff !important;
         }
+    }
+
+    .btn-danger {
+        background-color: var(--lpdh-danger) !important;
+        border-color: var(--lpdh-danger) !important;
+        box-shadow: 0 0 10px var(--lpdh-danger);
+        color: white !important;
+    }
+
+    .btn-success {
+        background-color: var(--lpdh-success) !important;
+        border-color: var(--lpdh-success) !important;
+        box-shadow: 0 0 10px var(--lpdh-success);
+        color: black !important;
+    }
+
+    .btn-info {
+        background-color: var(--lpdh-info) !important;
+        border-color: var(--lpdh-info) !important;
+        box-shadow: 0 0 10px var(--lpdh-info);
+        color: black !important;
+    }
+
+    .text-danger {
+        color: var(--lpdh-danger) !important;
+    }
+
+    .text-success {
+        color: var(--lpdh-success) !important;
+    }
+
+    .text-info {
+        color: var(--lpdh-info) !important;
+    }
+
+    .bg-danger {
+        background-color: rgba(var(--lpdh-danger-rgb), var(--bs-bg-opacity, 1)) !important;
+    }
+
+    .bg-success {
+        background-color: rgba(var(--lpdh-success-rgb), var(--bs-bg-opacity, 1)) !important;
+    }
+
+    .bg-info {
+        background-color: rgba(var(--lpdh-info-rgb), var(--bs-bg-opacity, 1)) !important;
     }
 
     h1,
@@ -137,18 +218,18 @@ body.theme-vaporwave {
     // Header styling
     #nav-main {
         background-color: rgba(5, 0, 30, 0.3) !important;
-        
+
         @media (min-width: 992px) {
             backdrop-filter: blur(10px);
         }
 
         // Offcanvas mobile menu
         .offcanvas {
-             background-color: rgba(5, 0, 30, 0.9) !important;
+            background-color: rgba(5, 0, 30, 0.9) !important;
 
-             @media (min-width: 992px) {
+            @media (min-width: 992px) {
                 background-color: transparent !important;
-             }
+            }
         }
 
         // Close button styling
@@ -221,8 +302,154 @@ body.theme-vaporwave {
             color: rgba(255, 255, 255, 0.7) !important;
         }
     }
+
+    // Event Cards
+    .event-card-inner {
+        background: var(--lpdh-card-bg) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--lpdh-card-border) !important;
+        box-shadow: var(--lpdh-shadow) !important;
+        color: var(--lpdh-text);
+    }
+
+    .event-thumbnail {
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--lpdh-card-border) !important;
+    }
+
+    .event-title,
+    .event-title a {
+        color: var(--lpdh-primary) !important;
+    }
+
+    .entry-title:not(.home-title-hero) {
+        color: var(--lpdh-primary) !important;
+    }
 }
 
+
+/* --- Windows 95 Preloader --- */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #008080;
+    /* Win95 Teal Background */
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'MS Sans Serif', sans-serif;
+}
+
+
+.w95-window {
+    background-color: #c0c0c0;
+    border-top: 2px solid #dfdfdf;
+    border-left: 2px solid #dfdfdf;
+    border-right: 2px solid #000000;
+    border-bottom: 2px solid #000000;
+    padding: 2px;
+    width: 300px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.w95-title-bar {
+    background: #000080;
+    color: white;
+    padding: 2px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.w95-title-text {
+    display: flex;
+    align-items: center;
+}
+
+.w95-title-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.w95-btn-control {
+    background: #c0c0c0;
+    border-top: 1px solid #dfdfdf;
+    border-left: 1px solid #dfdfdf;
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    width: 16px;
+    height: 14px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    cursor: default;
+    line-height: 1;
+}
+
+.w95-window-body {
+    padding: 10px;
+    color: black;
+    font-size: 12px;
+}
+
+.w95-progress-track {
+    background: white;
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #dfdfdf;
+    border-bottom: 1px solid #dfdfdf;
+    height: 20px;
+    position: relative;
+    padding: 2px;
+}
+
+.w95-progress-fill {
+    height: 100%;
+    background-color: transparent;
+    width: 15%;
+    /* Size of the moving block */
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    background: #000080;
+    animation: w95-indeterminate 2s linear infinite;
+}
+
+@keyframes w95-indeterminate {
+    0% {
+        left: 0;
+        width: 0;
+    }
+
+    10% {
+        width: 15%;
+    }
+
+    50% {
+        left: 50%;
+        width: 15%;
+    }
+
+    90% {
+        width: 15%;
+    }
+
+    100% {
+        left: 100%;
+        width: 0;
+    }
+}
 
 
 /* Background Image Classes */

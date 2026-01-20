@@ -29,8 +29,7 @@ get_header(); ?>
                                 $fb_link = get_field('field_event_fb_link');
                                 ?>
 
-                                <div
-                                    class="event-details text-muted d-flex justify-content-center gap-4 mt-2 align-items-center">
+                                <div class="event-details d-flex justify-content-center gap-4 mt-2 align-items-center">
                                     <?php if ($event_date): ?>
                                         <div class="event-date">
                                             <i class="fas fa-calendar-alt me-1" style="color: #003366;"></i>
@@ -41,8 +40,7 @@ get_header(); ?>
                                     <?php if ($place_obj): ?>
                                         <div class="event-place">
                                             <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                            <a href="<?php echo get_permalink($place_obj->ID); ?>"
-                                                class="text-decoration-none text-muted">
+                                            <a href="<?php echo get_permalink($place_obj->ID); ?>" class="text-decoration-none">
                                                 <?php echo esc_html($place_obj->post_title); ?>
                                             </a>
                                         </div>
@@ -52,7 +50,7 @@ get_header(); ?>
                                         <div class="event-fb">
                                             <a href="<?php echo esc_url($fb_link); ?>" target="_blank"
                                                 class="text-decoration-none" title="Evento Facebook">
-                                                <i class="fab fa-facebook fa-lg text-primary"></i>
+                                                <i class="fab fa-facebook fa-lg" style="color: #1877F2;"></i> Event
                                             </a>
                                         </div>
                                     <?php endif; ?>
@@ -77,7 +75,7 @@ get_header(); ?>
                                     <h3 class="mb-3 border-bottom pb-2">Player Rankings</h3>
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle">
-                                            <thead class="table-light">
+                                            <thead class="table-dark">
                                                 <tr>
                                                     <th scope="col" class="text-center" style="width: 60px;">#</th>
                                                     <th scope="col">Player</th>
@@ -182,7 +180,7 @@ get_header(); ?>
 
                                                             $deck_display = '<div>' . $deck_title_html . '</div>';
                                                             if ($commander) {
-                                                                $deck_display .= '<div class="small text-muted">(' . esc_html($commander) . ($partner ? ' + ' . esc_html($partner) : '') . ')</div>';
+                                                                $deck_display .= '<div class="small">(' . esc_html($commander) . ($partner ? ' + ' . esc_html($partner) : '') . ')</div>';
                                                             }
                                                         }
                                                     }
@@ -191,7 +189,7 @@ get_header(); ?>
                                                     $action_btn = '';
                                                     if (is_user_logged_in() && $user_id == get_current_user_id()) {
                                                         if ($player_deck_id) {
-                                                            $action_btn = '<a href="#" class="ms-auto text-muted open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
+                                                            $action_btn = '<a href="#" class="ms-auto open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
                                                         } else {
                                                             $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id=""><i class="fas fa-plus me-1"></i>Add Deck</a>';
                                                         }
@@ -222,10 +220,10 @@ get_header(); ?>
                                                         <td class="text-center d-none d-sm-table-cell">
                                                             <span
                                                                 class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
-                                                            <span class="text-muted">-</span>
+                                                            <span class="">-</span>
                                                             <span
                                                                 class="badge bg-secondary bg-opacity-10 text-secondary"><?php echo esc_html($draw); ?></span>
-                                                            <span class="text-muted">-</span>
+                                                            <span class="">-</span>
                                                             <span
                                                                 class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
                                                         </td>
@@ -345,7 +343,7 @@ get_header(); ?>
                                             var $state = $(
                                                 '<div class="d-flex align-items-center">' + $imgHtml +
                                                 '<div><div class="fw-bold">' + state.text + '</div>' +
-                                                '<div class="small text-muted">(' + cmdr + ')</div></div></div>'
+                                                '<div class="small ">(' + cmdr + ')</div></div></div>'
                                             );
                                             return $state;
                                         };
@@ -423,7 +421,7 @@ get_header(); ?>
                                 ?>
                                 <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
                                     <h4><?php esc_html_e('Are you participating in this event?', 'bootscore'); ?></h4>
-                                    <p class="text-muted mb-3 survey-count-text">
+                                    <p class=" mb-3 survey-count-text">
                                         <?php printf(esc_html__('Currently there are %d confirmed participants.', 'bootscore'), $participant_count); ?>
                                     </p>
 
@@ -512,7 +510,7 @@ get_header(); ?>
                             <?php else: ?>
                                 <div class="event-survey mb-5 p-4 bg-light rounded border text-center">
                                     <h4><?php esc_html_e('Event Participation', 'bootscore'); ?></h4>
-                                    <p class="text-muted">
+                                    <p class="">
                                         <?php printf(esc_html__('Currently there are %d confirmed participants.', 'bootscore'), $participant_count); ?>
                                     </p>
 
@@ -546,7 +544,7 @@ get_header(); ?>
                             <footer class="entry-footer mt-5 pt-4 border-top">
                                 <div class="text-center">
                                     <a href="<?php echo esc_url(get_post_type_archive_link('event')); ?>"
-                                        class="btn btn-outline-primary">
+                                        class="btn btn-primary">
                                         <i
                                             class="fas fa-arrow-left me-2"></i><?php esc_html_e('Back to Events', 'bootscore'); ?>
                                     </a>

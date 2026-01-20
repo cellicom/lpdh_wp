@@ -33,10 +33,18 @@ if (is_array($rankings)) {
         }
     }
 }
+
+$is_past = false;
+if ($event_date) {
+    if (strtotime($event_date) < current_time('timestamp')) {
+        $is_past = true;
+    }
+}
+$card_classes = 'event-card' . ($is_past ? ' event-past' : '');
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class('event-card'); ?>>
-    <div class="event-card-inner d-flex flex-column h-100">
+<article id="post-<?php the_ID(); ?>" <?php post_class($card_classes); ?>>
+    <div class="event-card-inner hover-lift d-flex flex-column h-100">
         <div class="event-thumbnail">
             <?php if (has_post_thumbnail()): ?>
                 <?php the_post_thumbnail('medium', array('class' => 'img-fluid w-100')); ?>
@@ -80,7 +88,8 @@ if (is_array($rankings)) {
                         <div class="winner-name fw-bold text-truncate"><?php echo esc_html($winner_name); ?></div>
                         <?php if ($winner_deck): ?>
                             <div class="winner-deck fst-italic text-truncate" style="font-size: 0.9em;">
-                                <?php echo esc_html($winner_deck); ?></div>
+                                <?php echo esc_html($winner_deck); ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

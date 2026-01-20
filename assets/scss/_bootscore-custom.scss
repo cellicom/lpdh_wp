@@ -211,6 +211,7 @@ body {
         }
     }
 
+
     .event-card-inner {
         background: #fff;
         border: 1px solid #e9ecef;
@@ -218,7 +219,16 @@ body {
         overflow: hidden;
         height: 100%;
         position: relative;
-        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    // Past event grayscale
+    .event-past .event-thumbnail img {
+        filter: grayscale(100%);
+        transition: filter 0.3s ease;
+    }
+
+    .event-past:hover .event-thumbnail img {
+        filter: grayscale(0%);
     }
 
     .event-thumbnail {
@@ -821,4 +831,66 @@ body {
     .search-overlay .search-overlay-content .form-control {
         font-size: 1.5rem !important;
     }
+}
+
+/* --- Select2 Deck Selection Styles --- */
+.deck-option-img-single {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    margin-right: 10px !important;
+}
+
+.deck-option-img-split {
+    width: 50px !important;
+    height: 50px !important;
+    position: relative !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    margin-right: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Fix for Select2 in Bootscore/Bootstrap 5 Modal */
+.select2-container--default .select2-selection--single {
+    height: auto !important;
+    padding: 5px !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 0 !important;
+    color: #212529 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100% !important;
+    top: 0 !important;
+    right: 10px !important;
+}
+
+.select2-dropdown {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    z-index: 9999 !important;
+    /* Ensure it's above modal */
+}
+
+.select2-results__option {
+    padding: 8px 10px !important;
+}
+
+.select2-container {
+    z-index: 99999 !important;
+    /* High z-index for modal usage */
+    width: 100% !important;
+    /* Ensure full width */
 }

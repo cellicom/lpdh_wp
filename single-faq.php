@@ -31,7 +31,7 @@ get_header(); ?>
                             <footer class="entry-footer">
                                 <div class="text-center mb-5">
                                     <a href="<?php echo esc_url(get_post_type_archive_link('faq')); ?>"
-                                        class="btn btn-outline-primary">
+                                        class="btn btn-primary">
                                         <i
                                             class="fas fa-arrow-left me-2"></i><?php esc_html_e('Torna alle FAQ', 'bootscore'); ?>
                                     </a>
