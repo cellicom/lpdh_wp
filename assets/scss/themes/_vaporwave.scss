@@ -137,14 +137,23 @@ body.theme-vaporwave {
     // Header styling
     #nav-main {
         background-color: rgba(5, 0, 30, 0.3) !important;
-        backdrop-filter: blur(10px);
-
-        @media (min-width: 768px) {
-            backdrop-filter: unset;
+        
+        @media (min-width: 992px) {
+            backdrop-filter: blur(10px);
         }
 
-        @media (min-width: 992px) {
-            backdrop-filter: unset;
+        // Offcanvas mobile menu
+        .offcanvas {
+             background-color: rgba(5, 0, 30, 0.9) !important;
+
+             @media (min-width: 992px) {
+                background-color: transparent !important;
+             }
+        }
+
+        // Close button styling
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
 
         .navbar-brand,
