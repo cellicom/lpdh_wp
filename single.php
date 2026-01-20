@@ -29,7 +29,7 @@ get_header(); ?>
                                 <?php bootscore_category_badge(); ?>
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
 
-                                <div class="entry-meta text-muted">
+                                <div class="entry-meta ">
                                     <span class="posted-on">
                                         <i class="fas fa-calendar-alt me-1"></i>
                                         <time class="entry-date published"
@@ -39,8 +39,7 @@ get_header(); ?>
                                     </span>
                                     <span class="posted-by ms-3">
                                         <i class="fas fa-user me-1"></i>
-                                        <a
-                                            href="<?php echo esc_url(get_author_posts_url(get_the_author_meta('ID'))); ?>">
+                                        <a href="<?php echo esc_url(get_author_posts_url(get_the_author_meta('ID'))); ?>">
                                             <?php echo esc_html(get_the_author()); ?>
                                         </a>
                                     </span>
@@ -110,7 +109,7 @@ get_header(); ?>
                                                                         <?php the_title(); ?>
                                                                     </a>
                                                                 </h5>
-                                                                <small class="text-muted"><?php echo get_the_date(); ?></small>
+                                                                <small class=""><?php echo get_the_date(); ?></small>
                                                             </div>
                                                         </div>
                                                     </div>

@@ -56,11 +56,11 @@ $people = $args['people'] ?? [];
 
                                     <div class="item-header">
                                         <?php if ($title): ?>
-                                            <h3 class="h5 mb-0 text-dark fw-bold"><?php echo esc_html($title); ?></h3>
+                                            <h3 class="h5 mb-0 text-white fw-bold"><?php echo esc_html($title); ?></h3>
                                         <?php endif; ?>
                                         <?php if ($nickname): ?>
                                             <span
-                                                class="badge bg-light text-dark border !f-plantin">@<?php echo esc_html($nickname); ?></span>
+                                                class="badge bg-dark text-white border !f-plantin">@<?php echo esc_html($nickname); ?></span>
                                         <?php endif; ?>
                                     </div>
 
