@@ -51,8 +51,9 @@ get_header(); ?>
                                             alt="<?php echo esc_attr($commander ? $commander : get_the_title()); ?>">
 
                                         <?php if ($commander): ?>
-                                            <div class="mt-2 fw-bold text-muted small text-uppercase">
-                                                <?php esc_html_e('Commander', 'bootscore'); ?></div>
+                                            <div class="mt-2 fw-bold  small text-uppercase">
+                                                <?php esc_html_e('Commander', 'bootscore'); ?>
+                                            </div>
                                             <div class="fw-bold"><?php echo esc_html($commander); ?></div>
                                         <?php endif; ?>
                                     </div>
@@ -68,8 +69,9 @@ get_header(); ?>
                                             alt="<?php echo esc_attr($partner ? $partner : 'Partner'); ?>">
 
                                         <?php if ($partner): ?>
-                                            <div class="mt-2 fw-bold text-muted small text-uppercase">
-                                                <?php esc_html_e('Partner / Background', 'bootscore'); ?></div>
+                                            <div class="mt-2 fw-bold small text-uppercase">
+                                                <?php esc_html_e('Partner / Background', 'bootscore'); ?>
+                                            </div>
                                             <div class="fw-bold"><?php echo esc_html($partner); ?></div>
                                         <?php endif; ?>
                                     </div>

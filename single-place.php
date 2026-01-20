@@ -27,7 +27,7 @@ get_header(); ?>
                             <header class="entry-header text-center mb-4 mt-4">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
 
-                                <div class="place-details text-muted d-flex justify-content-center gap-4 mt-2 flex-wrap">
+                                <div class="place-details d-flex justify-content-center gap-4 mt-2 flex-wrap">
                                     <?php if ($address): ?>
                                         <div class="place-address">
                                             <i class="fas fa-map-marker-alt text-primary me-1"></i>

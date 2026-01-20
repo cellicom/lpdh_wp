@@ -176,7 +176,7 @@ get_header(); ?>
 
                                                             // Link to deck
                                                             $deck_link = get_permalink($player_deck_id);
-                                                            $deck_title_html = '<a href="' . esc_url($deck_link) . '" class="text-decoration-none text-reset">' . esc_html($deck_post->post_title) . '</a>';
+                                                            $deck_title_html = '<a href="' . esc_url($deck_link) . '" class="text-decoration-none">' . esc_html($deck_post->post_title) . '</a>';
 
                                                             $deck_display = '<div>' . $deck_title_html . '</div>';
                                                             if ($commander) {

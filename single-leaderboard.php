@@ -26,7 +26,7 @@ get_header(); ?>
                                 <?php
                                 $year = get_field('field_leaderboard_year');
                                 if (get_the_modified_date()): ?>
-                                    <div class="text-muted small mt-2">
+                                    <div class=" small mt-2">
                                         <i class="fas fa-clock me-1"></i> Last updated: <?php the_modified_date('d/m/Y H:i'); ?>
                                     </div>
                                 <?php endif; ?>
@@ -112,7 +112,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">Score</div>
+                                                <div class="small  text-uppercase mb-1">Score</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_points); ?></div>
                                                 <div class="h4 mb-0 text-primary"><?php echo $best_points['points']; ?></div>
                                             </div>
@@ -122,7 +122,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">🥇 Wins</div>
+                                                <div class="small  text-uppercase mb-1">🥇 Wins</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_first); ?></div>
                                                 <div class="h4 mb-0 text-warning"><?php echo $best_first['first']; ?></div>
                                             </div>
@@ -132,7 +132,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">Attendance</div>
+                                                <div class="small  text-uppercase mb-1">Attendance</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_attendance); ?></div>
                                                 <div class="h4 mb-0 text-info"><?php echo $best_attendance['count']; ?></div>
                                             </div>
@@ -142,7 +142,7 @@ get_header(); ?>
                                     <div class="col">
                                         <div class="card h-100 shadow-sm border-0 bg-light">
                                             <div class="card-body">
-                                                <div class="small text-muted text-uppercase mb-1">🤡 Last Places</div>
+                                                <div class="small  text-uppercase mb-1">🤡 Last Places</div>
                                                 <div class="mb-1"><?php echo get_player_link_html($best_last); ?></div>
                                                 <div class="h4 mb-0 text-danger"><?php echo $best_last['last']; ?></div>
                                             </div>
@@ -159,15 +159,15 @@ get_header(); ?>
                                         <div class="col-12">
                                             <div class="card h-100 shadow-sm border-0 bg-light">
                                                 <div class="card-body">
-                                                    <div class="small text-muted text-uppercase mb-1">Best Tournament</div>
+                                                    <div class="small  text-uppercase mb-1">Best Tournament</div>
                                                     <div class="mb-1 fw-bold"><a
                                                             href="<?php echo get_permalink($best_event->ID); ?>"
                                                             class="text-decoration-none"><?php echo esc_html($best_event->post_title); ?></a>
                                                     </div>
-                                                    <div class="small text-muted">
+                                                    <div class="small ">
                                                         <?php echo date_i18n('d/m/Y', strtotime($date)); ?>
                                                     </div>
-                                                    <div class="small text-muted">
+                                                    <div class="small ">
                                                         <?php echo $place ? esc_html($place->post_title) : '-'; ?>
                                                     </div>
                                                     <div class="fw-bold mt-1"><?php echo $max_event_players; ?> Players</div>
@@ -180,28 +180,28 @@ get_header(); ?>
                                 <div class="leaderboard-rankings mb-5">
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle" id="leaderboardTable">
-                                            <thead class="table-light">
+                                            <thead class="table-dark">
                                                 <tr>
                                                     <th scope="col" class="text-center" style="width: 60px;">#</th>
                                                     <th scope="col" class="sortable" style="cursor: pointer;">Player <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">Points
-                                                        <i class="fas fa-sort small text-muted ms-1"></i>
+                                                        <i class="fas fa-sort small  ms-1"></i>
                                                     </th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">ELO <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">W <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">D <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">L <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">🥇 <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">🤡 <i
-                                                            class="fas fa-sort small text-muted ms-1"></i></th>
+                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">
-                                                        Attendance <i class="fas fa-sort small text-muted ms-1"></i></th>
+                                                        Attendance <i class="fas fa-sort small  ms-1"></i></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -319,12 +319,12 @@ get_header(); ?>
 
                                                 headers.forEach(h => {
                                                     h.classList.remove('asc', 'desc');
-                                                    h.querySelector('i').className = 'fas fa-sort small text-muted ms-1';
+                                                    h.querySelector('i').className = 'fas fa-sort small  ms-1';
                                                 });
 
                                                 header.classList.toggle('asc', !isAsc);
                                                 header.classList.toggle('desc', isAsc);
-                                                header.querySelector('i').className = isAsc ? 'fas fa-sort-down small text-muted ms-1' : 'fas fa-sort-up small text-muted ms-1';
+                                                header.querySelector('i').className = isAsc ? 'fas fa-sort-down small  ms-1' : 'fas fa-sort-up small  ms-1';
 
                                                 rows.sort((a, b) => {
                                                     let aVal = a.children[colIndex].dataset.value;

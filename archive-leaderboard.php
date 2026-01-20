@@ -24,10 +24,13 @@ get_header();
                         $year = get_field('year');
                         // Se il campo anno è compilato usa quello, altrimenti il titolo del post
                         $display_text = $year ? $year : get_the_title();
+                        $current_year = date('Y');
+                        $card_class = ($year == $current_year) ? 'current-year-card' : '';
                         ?>
                         <div class="col-md-6 col-lg-4 col-xl-3">
                             <a href="<?php the_permalink(); ?>" class="text-decoration-none">
-                                <div class="card h-100 shadow-sm border-0 hover-lift text-center transition-base bg-light">
+                                <div
+                                    class="card h-100 shadow-sm border-0 hover-lift text-center transition-base bg-light <?php echo esc_attr($card_class); ?>">
                                     <div class="card-body d-flex flex-column justify-content-center align-items-center py-5">
                                         <div class="display-1 fw-bold text-primary mb-0">
                                             <?php echo esc_html($display_text); ?>

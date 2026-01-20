@@ -33,7 +33,7 @@ $show_author = $args['show_author'] ?? true;
         <?php endif; ?>
         <div class="card-body">
             <h5 class="card-title mb-2">
-                <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark stretched-link">
+                <a href="<?php the_permalink(); ?>" class="text-decoration-none stretched-link">
                     <?php the_title(); ?>
                 </a>
             </h5>

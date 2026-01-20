@@ -12,8 +12,8 @@ if ($active_theme === 'vaporwave'): ?>
         <div class="w95-window">
             <div class="w95-title-bar">
                 <div class="w95-title-text">
-                    <img src="<?= get_stylesheet_directory_uri(); ?>/assets/img/logo/logo-lpdh-ext-transparent.png"
-                        alt="Icon" width="16" height="16" style="margin-right: 5px; filter: invert(1);">
+                    <img src="<?= get_stylesheet_directory_uri(); ?>/assets/img/logo/logo-lpdh-transparent.png" alt="Icon"
+                        width="16" height="16" style="margin-right: 5px;">
                     System Loading...
                 </div>
                 <div class="w95-title-controls">

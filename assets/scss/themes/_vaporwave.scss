@@ -47,6 +47,16 @@ body.theme-vaporwave {
         }
     }
 
+    .btn-link {
+        color: rgba(var(--lpdh-secondary-rgb), 1) !important;
+        text-decoration: none !important;
+
+        &:hover {
+            color: rgba(var(--lpdh-secondary-rgb), 1) !important;
+            text-decoration: underline !important;
+        }
+    }
+
 
     .card {
         background: var(--lpdh-card-bg) !important;
@@ -371,6 +381,12 @@ body.theme-vaporwave {
         color: var(--lpdh-primary) !important;
     }
 
+    .event-time {
+        i {
+            color: var(--lpdh-secondary) !important;
+        }
+    }
+
     .entry-title:not(.home-title-hero) {
         color: var(--lpdh-primary) !important;
     }
@@ -413,30 +429,279 @@ body.theme-vaporwave {
         .breadcrumb {
             --bs-breadcrumb-item-active-color: var(--lpdh-primary);
         }
+
+        .entry-meta {
+            color: var(--lpdh-text) !important;
+        }
     }
 
-    // Pagination Styling
-    .pagination {
-        --bs-pagination-bg: rgba(255, 255, 255, 0.9);
-        --bs-pagination-color: var(--lpdh-primary);
-        --bs-pagination-border-width: 0;
-        --bs-pagination-border-radius: 4px; // Rectangular with smoothed edges
-        --bs-pagination-active-bg: var(--lpdh-primary);
-        --bs-pagination-active-border-color: var(--lpdh-primary);
-        --bs-pagination-active-color: #fff;
-        --bs-pagination-hover-bg: #fff;
-        --bs-pagination-hover-color: var(--lpdh-primary);
-        --bs-pagination-hover-border-color: transparent;
 
-        .page-item {
-            margin: 0 2px;
+    // Pagination - Migrated from _bootscore-custom.scss and adapted
+    .navigation.pagination {
+        .nav-links {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            flex-wrap: wrap !important;
+            margin-top: 2rem !important;
 
-            .page-link {
-                border-radius: var(--bs-pagination-border-radius);
+            .page-numbers {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-width: 40px !important;
+                height: 40px !important;
+                padding: 0 12px !important;
+                border-radius: 4px !important; // Rectangular with smoothed edges
+                background-color: #fff !important;
+                border: 1px solid #dee2e6 !important;
+                color: var(--lpdh-primary) !important;
+                text-decoration: none !important;
+                font-weight: 600 !important;
+                transition: all 0.2s ease !important;
+                line-height: 1 !important;
                 backdrop-filter: blur(5px);
+
+                &:hover {
+                    background-color: #e9ecef !important;
+                    color: var(--lpdh-primary) !important;
+                    border-color: #dee2e6 !important;
+                }
+
+                &.current {
+                    background-color: var(--lpdh-primary) !important;
+                    color: #fff !important;
+                    border-color: var(--lpdh-primary) !important;
+                    pointer-events: none !important;
+                }
+
+                &.dots {
+                    border: none !important;
+                    background: transparent !important;
+                    color: rgba(255, 255, 255, 0.6) !important; // Adapted for dark theme
+                }
             }
         }
     }
+
+    // Single Deck Custom Fields
+    &.single-deck {
+        .deck-custom-fields {
+            background: var(--lpdh-card-bg) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--lpdh-card-border) !important;
+            box-shadow: var(--lpdh-shadow) !important;
+            color: var(--lpdh-text);
+            padding: 2rem !important;
+            border-radius: var(--bs-card-border-radius);
+            margin-bottom: 2rem;
+
+            h3,
+            h4 {
+                color: var(--lpdh-primary) !important;
+            }
+
+            .decklist-content {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid var(--lpdh-card-border) !important;
+                color: var(--lpdh-text) !important;
+            }
+        }
+
+        .decklist-field strong,
+        .author-field strong {
+            color: #fff !important;
+        }
+    }
+
+    // Rankings Tables (Single Event & Single Leaderboard)
+    &.single-event .event-rankings,
+    &.single-leaderboard .leaderboard-rankings {
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--lpdh-text);
+            color: var(--lpdh-text) !important;
+
+            thead {
+                th {
+                    background-color: rgba(0, 0, 0, 0.5) !important;
+                    color: var(--lpdh-primary) !important;
+                    border-bottom: 2px solid var(--lpdh-primary);
+
+                    // Specific to leaderboard sortable icons
+                    &.sortable i {
+                        color: rgba(255, 255, 255, 0.5) !important;
+                    }
+                }
+            }
+
+            tbody {
+                td {
+                    background-color: rgba(0, 0, 0, 0.3) !important;
+                    color: #fff !important;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                // Maintain rank colors
+                tr.rank-gold td {
+                    color: #d4af37 !important;
+                }
+
+                tr.rank-silver td {
+                    color: #c0c0c0 !important;
+                }
+
+                tr.rank-bronze td {
+                    color: #cd7f32 !important;
+                }
+
+                // Maintain badge colors
+                .badge {
+                    &.bg-success {
+                        background-color: rgba(25, 135, 84, var(--bs-bg-opacity, 1)) !important;
+                    }
+
+                    &.bg-secondary {
+                        background-color: rgba(108, 117, 125, var(--bs-bg-opacity, 1)) !important;
+                    }
+
+                    &.bg-danger {
+                        background-color: rgba(220, 53, 69, var(--bs-bg-opacity, 1)) !important;
+                    }
+
+                    &.bg-info {
+                        background-color: rgba(13, 202, 240, var(--bs-bg-opacity, 1)) !important;
+                    }
+                }
+
+                a {
+                    color: #fff !important;
+
+                    &:hover {
+                        color: var(--lpdh-primary) !important;
+                    }
+                }
+            }
+        }
+    }
+
+    // Deck Selection Modal (in Single Event)
+    #deckSelectionModal {
+        .modal-content {
+            background-color: var(--lpdh-card-bg);
+            border: 1px solid var(--lpdh-card-border);
+            box-shadow: 0 0 15px var(--lpdh-primary);
+            backdrop-filter: blur(10px);
+            color: var(--lpdh-text);
+        }
+
+        .modal-header {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--lpdh-primary);
+
+            .btn-close {
+                filter: invert(1); // Make close button white-ish
+            }
+        }
+
+        .modal-footer {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid var(--lpdh-primary);
+        }
+
+        // Select2 Styling within Modal
+        .select2-container--default {
+            .select2-selection--single {
+                background-color: rgba(0, 0, 0, 0.4) !important;
+                border: 1px solid var(--lpdh-card-border) !important;
+                color: #fff !important;
+                height: auto !important;
+                padding: 5px !important;
+
+                .select2-selection__rendered {
+                    color: #fff !important;
+                    line-height: 24px !important;
+                }
+
+                .select2-selection__arrow {
+                    height: 100% !important;
+                }
+            }
+
+            .select2-results__option {
+                background-color: #2b213a !important;
+                color: #fff !important;
+
+                &--highlighted[aria-selected] {
+                    background-color: var(--lpdh-primary) !important;
+                    color: #fff !important;
+                }
+
+                &[aria-selected="true"] {
+                    background-color: var(--lpdh-secondary) !important;
+                }
+            }
+
+            .select2-dropdown {
+                background-color: #2b213a !important;
+                border: 1px solid var(--lpdh-card-border) !important;
+            }
+
+            .select2-search--dropdown {
+                background-color: #2b213a !important;
+
+                .select2-search__field {
+                    background-color: rgba(0, 0, 0, 0.4) !important;
+                    color: #fff !important;
+                    border: 1px solid var(--lpdh-card-border) !important;
+                }
+            }
+        }
+    }
+
+
+    // Leaderboard Year/Stats Cards
+    &.post-type-archive-leaderboard,
+    &.single-leaderboard {
+        .card.bg-light {
+            background: var(--lpdh-card-bg) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--lpdh-card-border) !important;
+            box-shadow: var(--lpdh-shadow) !important;
+            color: var(--lpdh-text);
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0 20px var(--lpdh-primary) !important;
+                border-color: var(--lpdh-primary) !important;
+            }
+
+            .display-1,
+            .h4,
+            .h5 {
+                color: var(--lpdh-primary) !important;
+            }
+
+            .text-muted {
+                color: rgba(255, 255, 255, 0.6) !important;
+            }
+
+            &.current-year-card {
+                background: var(--lpdh-primary) !important;
+                border-color: var(--lpdh-primary) !important;
+                box-shadow: 0 0 15px var(--lpdh-primary) !important;
+
+                .display-1,
+                .h4,
+                .h5,
+                .text-muted {
+                    color: #fff !important;
+                }
+            }
+        }
+    }
+
 
     // Accordion Styling (matching card aesthetics)
     .accordion {
@@ -477,6 +742,43 @@ body.theme-vaporwave {
 
         .accordion-body {
             color: var(--lpdh-text);
+        }
+    }
+
+    // Search Overlay
+    .search-overlay {
+        background-color: rgba(5, 0, 30, 0.95) !important;
+        backdrop-filter: blur(15px);
+
+        .search-overlay-close {
+            color: #fff !important;
+            filter: drop-shadow(0 0 5px var(--lpdh-primary));
+
+            &:hover {
+                color: var(--lpdh-primary) !important;
+                filter: drop-shadow(0 0 10px var(--lpdh-primary));
+            }
+        }
+
+        .search-overlay-content {
+            .form-control {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid var(--lpdh-card-border) !important;
+                color: #fff !important;
+                box-shadow: var(--lpdh-shadow) !important;
+                font-size: 2rem !important;
+                padding: 1.5rem !important;
+
+                &::placeholder {
+                    color: rgba(255, 255, 255, 0.4) !important;
+                }
+
+                &:focus {
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                    border-color: var(--lpdh-primary) !important;
+                    box-shadow: 0 0 20px var(--lpdh-primary) !important;
+                }
+            }
         }
     }
 }
