@@ -260,7 +260,7 @@ get_header(); ?>
                                                     } elseif ($trend < 0) {
                                                         $trend_icon = '<span class="text-danger ms-2 small" title="Down by ' . abs($trend) . ' positions"><i class="fas fa-arrow-down"></i> ' . abs($trend) . '</span>';
                                                     } else {
-                                                        $trend_icon = '<span class="text-dark ms-2 small" title="Unchanged"><i class="fas fa-minus"></i></span>';
+                                                        $trend_icon = '<span class="text-primary ms-2 small" title="Unchanged"><i class="fas fa-minus"></i></span>';
                                                     }
                                                     ?>
                                                     <tr class="<?php echo esc_attr($row_class); ?>">
@@ -287,8 +287,8 @@ get_header(); ?>
                                                                 class="text-success"><?php echo esc_html($win); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($lose); ?>"><span
                                                                 class="text-danger"><?php echo esc_html($lose); ?></span></td>
-                                                                    <td class=" text-center" data-value="<?php echo esc_attr($draw); ?>"><span
-                                                                    class="text-info"><?php echo esc_html($draw); ?></span></td>
+                                                        <td class=" text-center" data-value="<?php echo esc_attr($draw); ?>"><span
+                                                                class="text-info"><?php echo esc_html($draw); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($first); ?>">
                                                             <?php echo esc_html($first); ?>
                                                         </td>
