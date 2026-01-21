@@ -222,7 +222,7 @@ get_header(); ?>
                                                                 class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
                                                             <span class="">-</span>
                                                             <span
-                                                                class="badge bg-secondary bg-opacity-10 text-secondary"><?php echo esc_html($draw); ?></span>
+                                                                class="badge bg-info bg-opacity-10 text-info"><?php echo esc_html($draw); ?></span>
                                                             <span class="">-</span>
                                                             <span
                                                                 class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>

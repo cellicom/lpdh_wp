@@ -5,10 +5,8 @@
 
 // Themes
 @import "themes/vaporwave";
-@import "themes/platinum-gold";
-@import "themes/mana-flow";
-@import "themes/urban";
 @import "themes/lost-wood";
+@import "themes/vaporwave-green";
 
 // Add your own code here!
 // Because this file is compiled after Bootstrap, you're also able to use Bootstrap mixins for better code.
@@ -62,6 +60,14 @@ body {
     &:hover {
         transform: translateY(-5px) !important;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+}
+
+.card {
+    transform: rotate(-0.5deg);
+
+    &:nth-child(even) {
+        transform: rotate(0.5deg);
     }
 }
 

@@ -6,7 +6,7 @@
 <?php
 $active_theme = get_option('lpdh_active_theme', 'default');
 
-if ($active_theme === 'vaporwave'): ?>
+if ($active_theme === 'vaporwave' || $active_theme === 'vaporwave-green'): ?>
     <!-- Preloader Windows 95 -->
     <div id="preloader" class="w95-preloader-wrapper">
         <div class="w95-window">

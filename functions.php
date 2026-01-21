@@ -776,6 +776,7 @@ function banned_card_custom_columns($columns)
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
     $new_columns['scryfall_link'] = 'Scryfall Link';
+    $new_columns['shortcode'] = 'Shortcode';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -794,6 +795,9 @@ function banned_card_custom_columns_data($column, $post_id)
             } else {
                 echo '-';
             }
+            break;
+        case 'shortcode':
+            echo '<code style="cursor: pointer; background: #f0f0f1; padding: 3px 5px; border-radius: 3px; border: 1px solid #ccd0d4;" onclick="navigator.clipboard.writeText(this.innerText); alert(\'Shortcode copied!\');">[banned_card id="' . $post_id . '" align="left"]</code>';
             break;
     }
 }
@@ -4229,11 +4233,8 @@ function lpdh_theme_settings_render()
                             <option value="default" <?php selected($active_theme, 'default'); ?>>Bootscore Default</option>
                             <option value="vaporwave" <?php selected($active_theme, 'vaporwave'); ?>>Vaporwave (80s Neon)
                             </option>
-                            <option value="platinum-gold" <?php selected($active_theme, 'platinum-gold'); ?>>Platinum & Gold
-                                (Epic)</option>
-                            <option value="mana-flow" <?php selected($active_theme, 'mana-flow'); ?>>Mana Flow (MTG Colors)
-                            </option>
-                            <option value="urban" <?php selected($active_theme, 'urban'); ?>>Urban Underground (Gritty)
+                            <option value="vaporwave-green" <?php selected($active_theme, 'vaporwave-green'); ?>>Vaporwave
+                                Green (Neon Forest)
                             </option>
                             <option value="lost-wood" <?php selected($active_theme, 'lost-wood'); ?>>Lost Wood (Forest)
                             </option>
@@ -4288,4 +4289,317 @@ function lpdh_get_extra_attributions()
     $output .= '</div>';
 
     return $output;
+}
+
+/**
+ * Add Shortcode Metabox to Banned Card CPT
+ */
+function lpdh_add_banned_card_metabox()
+{
+    add_meta_box(
+        'lpdh_banned_card_shortcode',
+        'Banned Card Shortcode',
+        'lpdh_render_banned_card_shortcode_metabox',
+        'banned_card',
+        'side',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'lpdh_add_banned_card_metabox');
+
+/**
+ * Render Shortcode Metabox
+ */
+function lpdh_render_banned_card_shortcode_metabox($post)
+{
+    ?>
+    <div class="lpdh-metabox-content" style="padding: 10px 0;">
+        <div style="margin-bottom: 15px;">
+            <label for="lpdh_shortcode_align"
+                style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
+            <select id="lpdh_shortcode_align" style="width: 100%;">
+                <option value="right" selected>Right</option>
+                <option value="left">Left</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="lpdh_banned_card_shortcode_input"
+                    value='[banned_card id="<?php echo $post->ID; ?>" align="right"]' readonly
+                    style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
+                    onclick="this.select();">
+                <button type="button" class="button button-secondary" id="lpdh_copy_shortcode" title="Copy Shortcode"
+                    style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const select = document.getElementById('lpdh_shortcode_align');
+            const input = document.getElementById('lpdh_banned_card_shortcode_input');
+            const btn = document.getElementById('lpdh_copy_shortcode');
+            const postId = '<?php echo $post->ID; ?>';
+
+            if (!select || !input || !btn) return;
+
+            select.addEventListener('change', function () {
+                input.value = '[banned_card id="' + postId + '" align="' + this.value + '"]';
+            });
+
+            btn.addEventListener('click', function () {
+                input.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        const icon = btn.querySelector('.dashicons');
+                        icon.classList.remove('dashicons-clipboard');
+                        icon.classList.add('dashicons-yes');
+                        btn.style.borderColor = '#46b450';
+                        btn.style.color = '#46b450';
+
+                        setTimeout(() => {
+                            icon.classList.remove('dashicons-yes');
+                            icon.classList.add('dashicons-clipboard');
+                            btn.style.borderColor = '';
+                            btn.style.color = '';
+                        }, 2000);
+                    }
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+            });
+
+            // Auto-select on focus
+            input.addEventListener('focus', function () {
+                this.select();
+            });
+        })();
+    </script>
+    <?php
+}
+
+/**
+ * AJAX handler for searching banned_card posts
+ */
+function lpdh_ajax_search_banned_cards()
+{
+    check_ajax_referer('lpdh_banned_card_search', 'nonce');
+
+    $search = isset($_GET['term']) ? sanitize_text_field($_GET['term']) : '';
+
+    $args = array(
+        'post_type' => 'banned_card',
+        'post_status' => 'publish',
+        'posts_per_page' => 10,
+        's' => $search
+    );
+
+    $query = new WP_Query($args);
+    $results = array();
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $results[] = array(
+                'id' => get_the_ID(),
+                'label' => get_the_title(),
+                'value' => get_the_title()
+            );
+        }
+    }
+    wp_reset_postdata();
+
+    wp_send_json($results);
+}
+add_action('wp_ajax_lpdh_search_banned_cards', 'lpdh_ajax_search_banned_cards');
+
+/**
+ * Add Shortcode Generator Metabox to Posts
+ */
+function lpdh_add_post_shortcode_metabox()
+{
+    add_meta_box(
+        'lpdh_post_banned_card_generator',
+        'Banned Card Shortcode Generator',
+        'lpdh_render_post_shortcode_metabox',
+        'post',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'lpdh_add_post_shortcode_metabox');
+
+/**
+ * Render Post Shortcode Generator Metabox
+ */
+function lpdh_render_post_shortcode_metabox($post)
+{
+    // Standard WP styles for autocomplete
+    wp_enqueue_script('jquery-ui-autocomplete');
+    ?>
+    <div class="lpdh-generator-content" style="padding: 10px 0;">
+        <div style="margin-bottom: 12px;">
+            <label for="lpdh_card_search" style="display: block; margin-bottom: 5px; font-weight: 600;">Search Card:</label>
+            <input type="text" id="lpdh_card_search" placeholder="Type card name..." style="width: 100%;">
+            <input type="hidden" id="lpdh_selected_card_id" value="">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label for="lpdh_gen_align" style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
+            <select id="lpdh_gen_align" style="width: 100%;">
+                <option value="right">Right</option>
+                <option value="left" selected>Left</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="lpdh_gen_shortcode_input" value="" readonly placeholder="Select a card..."
+                    style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
+                    onclick="this.select();">
+                <button type="button" class="button button-secondary" id="lpdh_copy_gen_shortcode" title="Copy"
+                    style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                </button>
+            </div>
+        </div>
+
+        <button type="button" class="button button-primary" id="lpdh_add_to_editor"
+            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;">
+            <span class="dashicons dashicons-plus-alt"
+                style="font-size: 18px; width: 18px; height: 18px; margin-top: 2px;"></span>
+            Add to Content
+        </button>
+    </div>
+
+    <script>
+        jQuery(document).ready(function ($) {
+            const $search = $('#lpdh_card_search');
+            const $cardId = $('#lpdh_selected_card_id');
+            const $align = $('#lpdh_gen_align');
+            const $input = $('#lpdh_gen_shortcode_input');
+            const $copyBtn = $('#lpdh_copy_gen_shortcode');
+            const $addBtn = $('#lpdh_add_to_editor');
+
+            function updateShortcode() {
+                const id = $cardId.val();
+                if (id) {
+                    $input.val('[banned_card id="' + id + '" align="' + $align.val() + '"]');
+                } else {
+                    $input.val('');
+                }
+            }
+
+            $search.autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: ajaxurl,
+                        dataType: "json",
+                        data: {
+                            action: 'lpdh_search_banned_cards',
+                            term: request.term,
+                            nonce: '<?php echo wp_create_nonce("lpdh_banned_card_search"); ?>'
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $cardId.val(ui.item.id);
+                    updateShortcode();
+                }
+            });
+
+            $align.on('change', updateShortcode);
+
+            $copyBtn.on('click', function () {
+                if (!$input.val()) return;
+                $input.select();
+                document.execCommand('copy');
+
+                const $icon = $(this).find('.dashicons');
+                $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes');
+                $(this).css({ borderColor: '#46b450', color: '#46b450' });
+
+                setTimeout(() => {
+                    $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
+                    $(this).css({ borderColor: '', color: '' });
+                }, 2000);
+            });
+
+            $addBtn.on('click', function (e) {
+                e.preventDefault();
+                const shortcode = $input.val();
+                if (!shortcode) {
+                    alert('Please select a card first.');
+                    return;
+                }
+
+                // 1. Try Classic Editor (TinyMCE) first - most common fallback if Gutenberg is disabled
+                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden()) {
+                    tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);
+                    return;
+                }
+
+                // 2. Try Gutenberg (Block Editor)
+                if (typeof wp !== 'undefined' && wp.data && wp.blocks) {
+                    // Check if block editor is actually enqueued and available
+                    const blockEditor = (wp.data.select('core/block-editor') || wp.data.select('core/editor'));
+                    if (blockEditor) {
+                        const dispatcher = (wp.data.dispatch('core/block-editor') || wp.data.dispatch('core/editor'));
+                        if (dispatcher && dispatcher.insertBlocks) {
+                            try {
+                                const block = wp.blocks.createBlock('core/shortcode', { text: shortcode });
+                                if (block) {
+                                    dispatcher.insertBlocks([block]);
+                                    return;
+                                }
+                            } catch (err) {
+                                // Only log if it's not a common "no editor" scenario
+                            }
+                        }
+                    }
+                }
+
+                // 3. Fallback to textarea (code editor or simple content area)
+                const $content = $('#content');
+                if ($content.length) {
+                    const cursorPos = $content.prop('selectionStart') || 0;
+                    const text = $content.val();
+                    $content.val(text.substring(0, cursorPos) + shortcode + text.substring(cursorPos));
+                } else {
+                    alert('Could not find editor content area.');
+                }
+            });
+        });
+    </script>
+    <style>
+        .ui-autocomplete {
+            z-index: 100000 !important;
+            background: #fff;
+            border: 1px solid #ccd0d4;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .ui-menu-item-wrapper {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .ui-state-active,
+        .ui-state-focus {
+            background-color: #2271b1 !important;
+            color: #fff !important;
+            margin: 0 !important;
+        }
+    </style>
+    <?php
 }

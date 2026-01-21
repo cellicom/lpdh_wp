@@ -23,7 +23,7 @@ defined('ABSPATH') || exit;
 
     <?php if (is_active_sidebar('footer-top')): ?>
         <div
-            class="<?= esc_attr(apply_filters('bootscore/class/footer/top', 'bg-body-tertiary border-bottom py-5')); ?> bootscore-footer-top">
+            class="<?= esc_attr(apply_filters('bootscore/class/footer/top', 'border-bottom py-5')); ?> bootscore-footer-top">
             <div class="<?= esc_attr(apply_filters('bootscore/class/container', 'container', 'footer-top')); ?>">
                 <?php dynamic_sidebar('footer-top'); ?>
             </div>
@@ -31,7 +31,7 @@ defined('ABSPATH') || exit;
     <?php endif; ?>
 
     <div
-        class="<?= esc_attr(apply_filters('bootscore/class/footer/columns', 'bg-body-tertiary pt-5 pb-4')); ?> bootscore-footer-columns">
+        class="<?= esc_attr(apply_filters('bootscore/class/footer/columns', 'pt-5 pb-4')); ?> bootscore-footer-columns">
 
         <?php do_action('bootscore_footer_columns_before_container'); ?>
 
@@ -85,7 +85,7 @@ defined('ABSPATH') || exit;
     </div>
 
     <div
-        class="<?= esc_attr(apply_filters('bootscore/class/footer/info', 'bg-body-tertiary text-body-secondary border-top py-2 text-center')); ?> bootscore-footer-info">
+        class="<?= esc_attr(apply_filters('bootscore/class/footer/info', 'text-body-secondary border-top py-2 text-center')); ?> bootscore-footer-info">
         <div class="<?= esc_attr(apply_filters('bootscore/class/container', 'container', 'footer-info')); ?>">
 
             <?php do_action('bootscore_footer_info_after_container_open'); ?>
