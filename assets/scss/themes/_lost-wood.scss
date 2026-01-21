@@ -251,9 +251,37 @@ body.theme-lost-wood {
                 border-bottom: 2px solid var(--lpdh-secondary);
             }
 
-            tbody td {
-                background-color: rgba(255, 255, 255, 0.02) !important;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            tbody {
+
+                td,
+                a {
+                    color: #fff !important;
+                }
+
+                tr.rank-gold td,
+                tr.rank-gold a {
+                    color: #d4af37 !important;
+                }
+
+                tr.rank-silver td,
+                tr.rank-silver a {
+                    color: #c0c0c0 !important;
+                }
+
+                tr.rank-bronze td,
+                tr.rank-bronze a {
+                    color: #cd7f32 !important;
+                }
+
+                a:hover {
+                    color: var(--lpdh-primary) !important;
+                    text-decoration: underline !important;
+                }
+
+                td {
+                    background-color: rgba(255, 255, 255, 0.02) !important;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                }
             }
         }
     }

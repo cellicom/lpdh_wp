@@ -1626,9 +1626,9 @@ if (function_exists('acf_add_local_field_group')):
                         'step' => 1,
                     ),
                     array(
-                        'key' => 'field_ranking_draw',
-                        'label' => 'Draws',
-                        'name' => 'draw',
+                        'key' => 'field_ranking_lose',
+                        'label' => 'Loses',
+                        'name' => 'lose',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
@@ -1646,9 +1646,9 @@ if (function_exists('acf_add_local_field_group')):
                         'step' => 1,
                     ),
                     array(
-                        'key' => 'field_ranking_lose',
-                        'label' => 'Loses',
-                        'name' => 'lose',
+                        'key' => 'field_ranking_draw',
+                        'label' => 'Draws',
+                        'name' => 'draw',
                         'type' => 'number',
                         'required' => 0,
                         'conditional_logic' => 0,
@@ -4722,7 +4722,7 @@ function lpdh_render_event_ocr_metabox($post)
                             <th style="width: 40px;">Pos</th>
                             <th>Player Name</th>
                             <th style="width: 40px;">Pts</th>
-                            <th style="width: 80px;">W-D-L</th>
+                            <th style="width: 80px;">W-L-D</th>
                             <th style="width: 60px;">Via%</th>
                             <th style="width: 40px;"></th>
                         </tr>
@@ -4961,8 +4961,8 @@ function lpdh_render_event_ocr_metabox($post)
                             const recordMatch = token.match(/^(\d+)[\-\.\/](\d+)[\-\.\/](\d+)$/);
                             if (!foundRecord && recordMatch) {
                                 win = recordMatch[1];
-                                draw = recordMatch[2];
-                                lose = recordMatch[3];
+                                lose = recordMatch[2];
+                                draw = recordMatch[3];
                                 foundRecord = true;
                                 return;
                             }
@@ -4989,7 +4989,7 @@ function lpdh_render_event_ocr_metabox($post)
 
                             // 4. Predictive Record Split (iPhone 3-digit merge)
                             if (!foundRecord && /^\d{3}$/.test(token) && device === 'iphone' && !foundPoints) {
-                                win = token[0]; draw = token[1]; lose = token[2];
+                                win = token[0]; lose = token[1]; draw = token[2];
                                 foundRecord = true;
                             }
                         });
@@ -5011,8 +5011,8 @@ function lpdh_render_event_ocr_metabox($post)
                             <td><input type="text" class="ocr-points" value="${item.points}" style="width:100%;"></td>
                             <td>
                                 <input type="text" class="ocr-win" value="${item.win}" style="width:20px;">-
-                                <input type="text" class="ocr-draw" value="${item.draw}" style="width:20px;">-
-                                <input type="text" class="ocr-lose" value="${item.lose}" style="width:20px;">
+                                <input type="text" class="ocr-lose" value="${item.lose}" style="width:20px;">-
+                                <input type="text" class="ocr-draw" value="${item.draw}" style="width:20px;">
                             </td>
                             <td><input type="text" class="ocr-via" value="${item.via}" style="width:100%;"></td>
                             <td><button type="button" class="ocr-del" style="background:none; border:none; color:red; cursor:pointer;">&times;</button></td>

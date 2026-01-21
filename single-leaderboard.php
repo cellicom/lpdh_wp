@@ -192,9 +192,9 @@ get_header(); ?>
                                                             class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">W <i
                                                             class="fas fa-sort small  ms-1"></i></th>
-                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">D <i
-                                                            class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">L <i
+                                                            class="fas fa-sort small  ms-1"></i></th>
+                                                    <th scope="col" class="text-center sortable" style="cursor: pointer;">D <i
                                                             class="fas fa-sort small  ms-1"></i></th>
                                                     <th scope="col" class="text-center sortable" style="cursor: pointer;">🥇 <i
                                                             class="fas fa-sort small  ms-1"></i></th>
@@ -285,10 +285,10 @@ get_header(); ?>
                                                         </td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($win); ?>"><span
                                                                 class="text-success"><?php echo esc_html($win); ?></span></td>
-                                                        <td class="text-center" data-value="<?php echo esc_attr($draw); ?>"><span
-                                                                class="text-secondary"><?php echo esc_html($draw); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($lose); ?>"><span
                                                                 class="text-danger"><?php echo esc_html($lose); ?></span></td>
+                                                                    <td class=" text-center" data-value="<?php echo esc_attr($draw); ?>"><span
+                                                                    class="text-info"><?php echo esc_html($draw); ?></span></td>
                                                         <td class="text-center" data-value="<?php echo esc_attr($first); ?>">
                                                             <?php echo esc_html($first); ?>
                                                         </td>

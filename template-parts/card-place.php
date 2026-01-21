@@ -59,7 +59,7 @@ $has_future_events = $events_check_query->have_posts();
         <div class="col-md-8">
             <div class="card-body p-4">
                 <h3 class="card-title h4 mb-3">
-                    <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark">
+                    <a href="<?php the_permalink(); ?>" class="text-decoration-none">
                         <?php the_title(); ?>
                     </a>
                 </h3>

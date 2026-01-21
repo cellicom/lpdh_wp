@@ -81,7 +81,7 @@ get_header(); ?>
                                                     <th scope="col">Player</th>
                                                     <th scope="col">Deck</th>
                                                     <th scope="col" class="text-center">Points</th>
-                                                    <th scope="col" class="text-center d-none d-sm-table-cell">W-D-L</th>
+                                                    <th scope="col" class="text-center d-none d-sm-table-cell">W-L-D</th>
                                                     <th scope="col" class="text-center d-none d-md-table-cell">Via %</th>
                                                 </tr>
                                             </thead>
@@ -221,11 +221,11 @@ get_header(); ?>
                                                             <span
                                                                 class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
                                                             <span class="">-</span>
-                                                            <span
-                                                                class="badge bg-info bg-opacity-10 text-info"><?php echo esc_html($draw); ?></span>
-                                                            <span class="">-</span>
-                                                            <span
-                                                                class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
+                                                            <span class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
+                                                                        <span class="">-</span>
+                                                                        <span
+                                                                            class=" badge bg-info bg-opacity-10
+                                                    text-info"><?php echo esc_html($draw); ?></span>
                                                         </td>
                                                         <td class="text-center d-none d-md-table-cell small">
                                                             <?php echo esc_html($via); ?>
