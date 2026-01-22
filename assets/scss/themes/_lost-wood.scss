@@ -119,7 +119,10 @@ body.theme-lost-wood {
         font-weight: 700;
 
         &:hover {
+            background-color: var(--lpdh-primary) !important;
+            border-color: var(--lpdh-primary) !important;
             filter: brightness(1.1);
+
             box-shadow: 0 0 10px rgba(177, 198, 114, 0.5);
         }
     }

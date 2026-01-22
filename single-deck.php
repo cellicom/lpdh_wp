@@ -38,8 +38,7 @@ get_header(); ?>
                                     <?php the_title('<h1 class="entry-title mb-0">', '</h1>'); ?>
                                     <?php
                                     if (is_user_logged_in() && (get_the_author_meta('ID') == get_current_user_id() || current_user_can('administrator'))):
-                                        $deck_editor_page_id = get_option('lpdh_deck_editor_page_id');
-                                        $deck_editor_url = $deck_editor_page_id ? get_permalink($deck_editor_page_id) : home_url('/deck-editor/');
+                                        $deck_editor_url = lpdh_get_deck_editor_url();
                                         ?>
                                         <div class="deck-actions d-flex gap-2">
                                             <a href="<?php echo esc_url(add_query_arg('edit', get_the_ID(), $deck_editor_url)); ?>"

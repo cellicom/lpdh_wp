@@ -113,7 +113,10 @@ body.theme-vaporwave {
         color: #fff !important;
 
         &:hover {
+            background-color: var(--lpdh-primary) !important;
+            border-color: var(--lpdh-primary) !important;
             filter: brightness(1.2);
+
             color: #fff !important;
         }
     }
@@ -137,7 +140,10 @@ body.theme-vaporwave {
         color: #fff !important;
 
         &:hover {
+            background-color: var(--lpdh-secondary) !important;
+            border-color: var(--lpdh-secondary) !important;
             filter: brightness(1.2);
+
             color: #fff !important;
         }
     }

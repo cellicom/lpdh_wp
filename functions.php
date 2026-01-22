@@ -3731,9 +3731,10 @@ function lpdh_add_login_logout_menu($items, $args)
 
         if (is_user_logged_in()) {
             $current_user = wp_get_current_user();
-            $profile_url = get_author_posts_url($current_user->ID);
+            $profile_url = lpdh_get_user_profile_url($current_user->ID);
+            $add_deck_url = lpdh_get_deck_editor_url();
+            $stats_url = lpdh_get_stats_url();
             $logout_url = wp_logout_url(home_url());
-            $my_decks_url = admin_url('edit.php?post_type=deck');
             $avatar = get_avatar($current_user->ID, 24, '', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
 
             // Voce utente con Avatar e Nome
@@ -3744,21 +3745,23 @@ function lpdh_add_login_logout_menu($items, $args)
 
             // Desktop Dropdown
             $items .= '<ul class="dropdown-menu dropdown-menu-end d-none d-lg-block">';
-            $items .= '<li class="menu-item"><a href="' . esc_url($my_decks_url) . '" class="dropdown-item"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
+            $items .= '<li class="menu-item"><a href="' . esc_url($add_deck_url) . '" class="dropdown-item"><i class="fas fa-plus-circle me-2"></i>Add Deck</a></li>';
+            $items .= '<li class="menu-item"><a href="' . esc_url($stats_url) . '" class="dropdown-item"><i class="fas fa-chart-bar me-2"></i>View Stats</a></li>';
             $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
             $items .= '</ul>';
 
             // Mobile Flat List (visible on small screens)
             $items .= '<ul class="d-lg-none list-unstyled ms-3 mt-2">';
-            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($my_decks_url) . '" class="nav-link p-0"><i class="fas fa-layer-group me-2"></i>My Decks</a></li>';
+            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($add_deck_url) . '" class="nav-link p-0"><i class="fas fa-plus-circle me-2"></i>Add Deck</a></li>';
+            $items .= '<li class="menu-item mb-2"><a href="' . esc_url($stats_url) . '" class="nav-link p-0"><i class="fas fa-chart-bar me-2"></i>View Stats</a></li>';
             $items .= '<li class="menu-item"><a href="' . esc_url($logout_url) . '" class="nav-link p-0 text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>';
             $items .= '</ul>';
 
             $items .= '</li>';
 
         } else {
-            // Voce Login (porta a pagina login personalizzata)
-            $login_url = home_url('/login');
+            // Voce Login (porta a pagina login personalizzata nella sezione login)
+            $login_url = lpdh_get_login_register_url('login');
             $items .= '<li class="menu-item">';
             $items .= '<a href="' . esc_url($login_url) . '" class="nav-link"><i class="fas fa-user me-1"></i> Login</a>';
             $items .= '</li>';
@@ -4262,6 +4265,7 @@ function lpdh_theme_settings_render()
         update_option('lpdh_deck_editor_page_id', intval($_POST['lpdh_deck_editor_page_id']));
         update_option('lpdh_profile_editor_page_id', intval($_POST['lpdh_profile_editor_page_id']));
         update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
+        update_option('lpdh_login_register_page_id', intval($_POST['lpdh_login_register_page_id']));
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
@@ -4335,12 +4339,82 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "User Statistics" template.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Select Login/Register Page</th>
+                    <td>
+                        <?php
+                        $login_register_page_id = get_option('lpdh_login_register_page_id', 0);
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_login_register_page_id',
+                            'selected' => $login_register_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Registration Page" template.</p>
+                    </td>
+                </tr>
             </table>
 
             <?php submit_button(); ?>
         </form>
     </div>
     <?php
+}
+
+/**
+ * LPDH Theme Setting Helpers
+ */
+
+function lpdh_get_active_theme()
+{
+    return get_option('lpdh_active_theme', 'default');
+}
+
+function lpdh_get_deck_editor_url()
+{
+    $page_id = get_option('lpdh_deck_editor_page_id');
+    return $page_id ? get_permalink($page_id) : home_url('/deck-editor/');
+}
+
+function lpdh_get_profile_editor_url()
+{
+    $page_id = get_option('lpdh_profile_editor_page_id');
+    return $page_id ? get_permalink($page_id) : admin_url('profile.php');
+}
+
+function lpdh_get_user_profile_url($user_id)
+{
+    if (!$user_id) {
+        $user_id = get_current_user_id();
+    }
+    return $user_id ? get_author_posts_url($user_id) : home_url();
+}
+
+function lpdh_get_stats_url($user_id = null)
+{
+    $page_id = get_option('lpdh_stats_page_id');
+    $url = $page_id ? get_permalink($page_id) : admin_url('admin.php?page=player-stats');
+
+    if ($user_id) {
+        $url = add_query_arg('user_id', $user_id, $url);
+    }
+
+    return $url;
+}
+
+function lpdh_get_login_register_url($section = '')
+{
+    $page_id = get_option('lpdh_login_register_page_id');
+    $url = $page_id ? get_permalink($page_id) : wp_login_url();
+
+    if ($page_id && $section === 'login') {
+        $url = add_query_arg('login', 'true', $url);
+    } elseif ($page_id && $section === 'lostpassword') {
+        $url = add_query_arg('action', 'lostpassword', $url);
+    }
+
+    return $url;
 }
 
 /**
@@ -5133,4 +5207,21 @@ function lpdh_render_event_ocr_metabox($post)
         }
     </style>
     <?php
+}
+
+/**
+ * Hide Admin Bar for Players, show for Administrators.
+ */
+add_filter('show_admin_bar', 'lpdh_manage_admin_bar');
+function lpdh_manage_admin_bar($show)
+{
+    if (current_user_can('administrator')) {
+        return true;
+    }
+
+    if (current_user_can('player')) {
+        return false;
+    }
+
+    return $show;
 }

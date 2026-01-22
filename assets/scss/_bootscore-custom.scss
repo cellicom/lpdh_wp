@@ -598,11 +598,20 @@ body {
     .form-control,
     .form-control:focus {
         border-radius: 8px !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
     }
 
     .input-group-text {
         border-radius: 8px 0 0 8px !important;
-        background-color: #f8f9fa !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-right: none !important;
     }
 
@@ -619,8 +628,7 @@ body {
         border-radius: 8px !important;
 
         &:hover {
-            background-color: #0b5ed7 !important;
-            border-color: #0a58ca !important;
+            filter: brightness(1.1);
         }
     }
 
@@ -966,5 +974,79 @@ input[type="file"]::file-selector-button {
         border-radius: 0.5rem;
         font-weight: 600;
         padding: 0.5rem 1.25rem;
+    }
+}
+
+/* Statistics Page Tables - Transparency and Header styling */
+.deck-performance,
+.event-history {
+    .table {
+        background-color: transparent !important;
+        --bs-table-bg: transparent !important;
+
+        thead th {
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            border-bottom: 2px solid var(--bs-primary) !important;
+            color: var(--bs-primary) !important;
+        }
+
+        tbody td {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: inherit !important;
+        }
+
+        // Match ranking colors if they exist
+        tr.rank-gold td {
+            color: #d4af37 !important;
+        }
+
+        tr.rank-silver td {
+            color: #c0c0c0 !important;
+        }
+
+        tr.rank-bronze td {
+            color: #cd7f32 !important;
+        }
+
+        tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+    }
+
+    .pagination {
+        gap: 0.25rem;
+
+        .page-item {
+            .page-link {
+                background-color: rgba(0, 0, 0, 0.4) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: rgba(255, 255, 255, 0.7) !important;
+                border-radius: 0.25rem !important;
+                padding: 0.4rem 0.8rem;
+                transition: all 0.3s ease;
+                box-shadow: none;
+
+                &:hover {
+                    background-color: var(--bs-primary) !important;
+                    color: #000 !important;
+                    border-color: var(--bs-primary) !important;
+                    box-shadow: 0 0 15px var(--bs-primary);
+                }
+            }
+
+            &.active .page-link {
+                background-color: var(--bs-primary) !important;
+                border-color: var(--bs-primary) !important;
+                color: #000 !important;
+                box-shadow: 0 0 15px var(--bs-primary);
+            }
+
+            &.disabled .page-link {
+                background-color: rgba(0, 0, 0, 0.2) !important;
+                color: rgba(255, 255, 255, 0.2) !important;
+                border-color: rgba(255, 255, 255, 0.05) !important;
+            }
+        }
     }
 }

@@ -178,19 +178,23 @@ if ($events_query->have_posts()) {
 
                     $total_attendance++;
                     $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                    if ($pos === 1) $total_wins++;
-                    if ($index === $total_players - 1) $total_last_places++;
+                    if ($pos === 1)
+                        $total_wins++;
+                    if ($index === $total_players - 1)
+                        $total_last_places++;
 
                     $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
                     if ($deck_id) {
-                        if (!isset($deck_usage_counts[$deck_id])) $deck_usage_counts[$deck_id] = 0;
+                        if (!isset($deck_usage_counts[$deck_id]))
+                            $deck_usage_counts[$deck_id] = 0;
                         $deck_usage_counts[$deck_id]++;
 
                         if (!isset($deck_performance[$deck_id])) {
                             $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
                         }
                         $deck_performance[$deck_id]['attendance']++;
-                        if ($pos === 1) $deck_performance[$deck_id]['wins']++;
+                        if ($pos === 1)
+                            $deck_performance[$deck_id]['wins']++;
                         $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
                         $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
                         $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
@@ -217,7 +221,8 @@ if ($events_query->have_posts()) {
 $player_events = array_reverse($player_events);
 
 // Chart Data
-$chart_labels = array(); $chart_data = array();
+$chart_labels = array();
+$chart_data = array();
 if (!empty($deck_usage_counts)) {
     arsort($deck_usage_counts);
     foreach ($deck_usage_counts as $d_id => $count) {
@@ -236,12 +241,36 @@ if (!empty($deck_usage_counts)) {
 
 // Win Rate Trend Data
 ksort($yearly_stats);
-$line_labels = array(); $line_data = array();
+$line_labels = array();
+$line_data = array();
 foreach ($yearly_stats as $y => $data) {
     $line_labels[] = $y;
     $rate = $data['total'] > 0 ? round(($data['wins'] / $data['total']) * 100, 1) : 0;
     $line_data[] = $rate;
 }
+
+// --- Pagination Logic ---
+$items_per_page = 5;
+
+// Decks Pagination
+$paged_decks = isset($_GET['p_decks']) ? max(1, intval($_GET['p_decks'])) : 1;
+$args_decks = array(
+    'post_type' => 'deck',
+    'author' => $user_id,
+    'posts_per_page' => $items_per_page,
+    'paged' => $paged_decks,
+    'orderby' => 'date',
+    'order' => 'DESC'
+);
+$decks_query = new WP_Query($args_decks);
+$user_decks = $decks_query->posts;
+$total_deck_pages = $decks_query->max_num_pages;
+
+// Events Pagination
+$paged_events = isset($_GET['p_events']) ? max(1, intval($_GET['p_events'])) : 1;
+$total_player_events = count($player_events);
+$total_event_pages = ceil($total_player_events / $items_per_page);
+$paged_player_events = array_slice($player_events, ($paged_events - 1) * $items_per_page, $items_per_page);
 
 get_header(); ?>
 
@@ -250,23 +279,30 @@ get_header(); ?>
         <div class="container py-5">
             <header class="stats-header mb-5 text-center">
                 <h1 class="display-6 fw-bold text-primary">
-                    <i class="fas fa-chart-line me-2"></i>Player Stats: <?php echo esc_html($target_user->display_name); ?>
+                    <i class="fas fa-chart-line me-2"></i>Player Stats:
+                    <?php echo esc_html($target_user->display_name); ?>
                 </h1>
-                <p class="text-muted">Analyze your performance and deck history.</p>
+                <p class="">Analyze your performance and deck history.</p>
             </header>
 
             <!-- Filters -->
             <div class="row justify-content-center mb-5">
                 <div class="col-md-4">
-                    <form method="get" action="" class="d-flex align-items-center bg-dark p-3 rounded shadow-sm border border-secondary">
+                    <form method="get" action="<?php echo esc_url(home_url('/')); ?>"
+                        class="d-flex align-items-center mb-0">
+                        <?php if (isset($_GET['page_id'])): ?>
+                            <input type="hidden" name="page_id" value="<?php echo intval($_GET['page_id']); ?>">
+                        <?php endif; ?>
                         <?php if (isset($_GET['user_id'])): ?>
                             <input type="hidden" name="user_id" value="<?php echo intval($_GET['user_id']); ?>">
                         <?php endif; ?>
                         <label for="stats_year" class="me-3 fw-bold text-nowrap">Year:</label>
-                        <select name="stats_year" id="stats_year" class="form-select bg-black text-white border-secondary" onchange="this.form.submit()">
+                        <select name="stats_year" id="stats_year" class="form-select" onchange="this.form.submit()">
                             <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
                             <?php foreach ($available_years as $y): ?>
-                                <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>><?php echo esc_html($y); ?></option>
+                                <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
+                                    <?php echo esc_html($y); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </form>
@@ -276,53 +312,54 @@ get_header(); ?>
             <!-- Summary Cards -->
             <div class="row g-4 mb-5">
                 <div class="col-md-3">
-                    <div class="card h-100 bg-dark text-white border-primary shadow-sm">
+                    <div class="card h-100 bg-transparent text-white border-primary shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-primary small fw-bold mb-3">Attendance</h6>
                             <div class="display-4 fw-bold"><?php echo $total_attendance; ?></div>
-                            <div class="small text-muted mt-2">Tournaments Joined</div>
+                            <div class="small  mt-2">Tournaments Joined</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card h-100 bg-dark text-white border-success shadow-sm">
+                    <div class="card h-100 bg-transparent text-white border-success shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-success small fw-bold mb-3">Wins</h6>
-                            <div class="display-4 fw-bold"><?php echo $total_wins; ?></div>
-                            <div class="small text-muted mt-2">1st Place Finishes</div>
+                            <div class="display-4 fw-bold"><?php echo $total_wins; ?> 🏆</div>
+                            <div class="small  mt-2">1st Place Finishes</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card h-100 bg-dark text-white border-danger shadow-sm">
+                    <div class="card h-100 bg-transparent text-white border-danger shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-danger small fw-bold mb-3">Last Places</h6>
-                            <div class="display-4 fw-bold"><?php echo $total_last_places; ?></div>
-                            <div class="small text-muted mt-2">Wooden Spoon Awards</div>
+                            <div class="display-4 fw-bold"><?php echo $total_last_places; ?> 🤡</div>
+                            <div class="small mt-2">Clown Addicted Awards</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card h-100 bg-dark text-white border-info shadow-sm">
+                    <div class="card h-100 bg-transparent text-white border-info shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-info small fw-bold mb-3">Most Used Deck</h6>
                             <div class="h3 fw-bold mb-0">
                                 <?php if ($most_used_deck_id): ?>
-                                    <a href="<?php echo get_permalink($most_used_deck_id); ?>" class="text-info text-decoration-none">
+                                    <a href="<?php echo get_permalink($most_used_deck_id); ?>"
+                                        class="text-info text-decoration-none">
                                         <?php echo esc_html($most_used_deck_name); ?>
                                     </a>
                                 <?php else: ?>
                                     <?php echo esc_html($most_used_deck_name); ?>
                                 <?php endif; ?>
                             </div>
-                            <div class="small text-muted mt-2">Favorite Strategy</div>
+                            <div class="small  mt-2">Favorite Strategy</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Charts Container -->
-            <div class="stats-charts-container bg-dark-subtle p-4 rounded shadow mb-5">
+            <div class="stats-charts-container bg-white bg-opacity-25 p-4 rounded-4 shadow-sm mb-5">
                 <div class="row g-4">
                     <div class="col-lg-4">
                         <h4 class="mb-4 text-center"><i class="fas fa-pie-chart me-2"></i>Deck Usage</h4>
@@ -349,38 +386,34 @@ get_header(); ?>
             <div class="row g-4">
                 <!-- Decks Table -->
                 <div class="col-12">
-                    <div class="card bg-dark text-white border-secondary shadow">
-                        <div class="card-header bg-black border-secondary d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Deck Performance</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle">
-                                    <thead class="table-black">
-                                        <tr>
-                                            <th>Deck</th>
-                                            <th class="text-center">Wins (1st)</th>
-                                            <th class="text-center">M. Wins</th>
-                                            <th class="text-center">M. Draws</th>
-                                            <th class="text-center">M. Losses</th>
-                                            <th class="text-center">Win Rate</th>
-                                            <th class="text-center">Attendance</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        $args_decks = array('post_type' => 'deck', 'author' => $user_id, 'posts_per_page' => -1);
-                                        $user_decks = get_posts($args_decks);
-                                        if ($user_decks):
-                                            foreach ($user_decks as $deck):
-                                                $d_id = $deck->ID;
-                                                $stats = isset($deck_performance[$d_id]) ? $deck_performance[$d_id] : array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
-                                                $total_matches = $stats['match_wins'] + $stats['match_draws'] + $stats['match_losses'];
-                                                $win_rate = $total_matches > 0 ? round(($stats['match_wins'] / $total_matches) * 100, 1) : 0;
-                                        ?>
+                    <div id="decks-partial" class="deck-performance-ajax deck-performance mb-5">
+                        <h3 class="mb-3 border-bottom pb-2"><i class="fas fa-layer-group me-2"></i>Deck Performance</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle bg-transparent">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Deck</th>
+                                        <th class="text-center">Wins (1st)</th>
+                                        <th class="text-center">M. Wins</th>
+                                        <th class="text-center">M. Draws</th>
+                                        <th class="text-center">M. Losses</th>
+                                        <th class="text-center">Win Rate</th>
+                                        <th class="text-center">Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($user_decks):
+                                        foreach ($user_decks as $deck):
+                                            $d_id = $deck->ID;
+                                            $stats = isset($deck_performance[$d_id]) ? $deck_performance[$d_id] : array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                                            $total_matches = $stats['match_wins'] + $stats['match_draws'] + $stats['match_losses'];
+                                            $win_rate = $total_matches > 0 ? round(($stats['match_wins'] / $total_matches) * 100, 1) : 0;
+                                            ?>
                                             <tr>
                                                 <td>
-                                                    <a href="<?php echo get_permalink($d_id); ?>" class="text-info fw-bold text-decoration-none">
+                                                    <a href="<?php echo get_permalink($d_id); ?>"
+                                                        class="text-info fw-bold text-decoration-none">
                                                         <?php echo esc_html($deck->post_title); ?>
                                                     </a>
                                                 </td>
@@ -389,81 +422,156 @@ get_header(); ?>
                                                 <td class="text-center"><?php echo $stats['match_draws']; ?></td>
                                                 <td class="text-center"><?php echo $stats['match_losses']; ?></td>
                                                 <td class="text-center">
-                                                    <span class="badge <?php echo $win_rate >= 50 ? 'bg-success' : 'bg-secondary'; ?>">
+                                                    <span
+                                                        class="fw-bold <?php echo $win_rate >= 50 ? 'text-success' : 'text-white-50'; ?>">
                                                         <?php echo $win_rate; ?>%
                                                     </span>
                                                 </td>
                                                 <td class="text-center"><?php echo $stats['attendance']; ?></td>
                                             </tr>
                                         <?php endforeach; else: ?>
-                                            <tr><td colspan="7" class="text-center py-4">No decks found.</td></tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        <tr>
+                                            <td colspan="7" class="text-center py-4">No decks found.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
+
+                        <!-- Decks Pagination -->
+                        <?php if ($total_deck_pages > 1): ?>
+                            <div class="mt-3 d-flex justify-content-center">
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <?php
+                                        $deck_links = paginate_links(array(
+                                            'base' => add_query_arg('p_decks', '%#%'),
+                                            'format' => '',
+                                            'current' => $paged_decks,
+                                            'total' => $total_deck_pages,
+                                            'type' => 'array',
+                                            'prev_text' => '<i class="fas fa-chevron-left"></i>',
+                                            'next_text' => '<i class="fas fa-chevron-right"></i>',
+                                        ));
+                                        if ($deck_links) {
+                                            foreach ($deck_links as $link) {
+                                                $active = strpos($link, 'current') !== false ? 'active' : '';
+                                                echo '<li class="page-item ' . $active . '">' . str_replace('page-numbers', 'page-link', $link) . '</li>';
+                                            }
+                                        }
+                                        ?>
+                                    </ul>
+                                </nav>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Event History Table -->
                 <div class="col-12">
-                    <div class="card bg-dark text-white border-secondary shadow">
-                        <div class="card-header bg-black border-secondary">
-                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Event History</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle">
-                                    <thead class="table-black">
-                                        <tr>
-                                            <th>Event</th>
-                                            <th>Date & Place</th>
-                                            <th class="text-center">Position</th>
-                                            <th class="text-center">Total Players</th>
-                                            <th>Deck Used</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if ($player_events): 
-                                            foreach ($player_events as $event_data):
-                                                $event_id = $event_data['event_id'];
-                                                $rank = $event_data['ranking'];
-                                                $place_obj = get_field('field_event_place', $event_id);
-                                        ?>
-                                            <tr>
-                                                <td><a href="<?php echo get_permalink($event_id); ?>" class="text-primary text-decoration-none fw-bold"><?php echo get_the_title($event_id); ?></a></td>
+                    <div id="events-partial" class="event-history-ajax event-history mb-5">
+                        <h3 class="mb-3 border-bottom pb-2"><i class="fas fa-history me-2"></i>Event History</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle bg-transparent">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date & Place</th>
+                                        <th class="text-center">Position</th>
+                                        <th class="text-center">Total Players</th>
+                                        <th>Deck Used</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if ($paged_player_events):
+                                        foreach ($paged_player_events as $event_data):
+                                            $event_id = $event_data['event_id'];
+                                            $rank = $event_data['ranking'];
+                                            $place_obj = get_field('field_event_place', $event_id);
+                                            ?>
+                                            <?php
+                                            $pos = $rank['pos'];
+                                            $total_p = $event_data['total_players'];
+                                            $row_class = '';
+                                            if ($pos == 1)
+                                                $row_class = 'rank-gold';
+                                            elseif ($pos == 2)
+                                                $row_class = 'rank-silver';
+                                            elseif ($pos == 3)
+                                                $row_class = 'rank-bronze';
+
+                                            $display_pos = ($pos == $total_p && $total_p > 1) ? '🤡' : $pos . '°';
+                                            ?>
+                                            <tr class="<?php echo $row_class; ?>">
+                                                <td><a href="<?php echo get_permalink($event_id); ?>"
+                                                        class="text-primary text-decoration-none fw-bold"><?php echo get_the_title($event_id); ?></a>
+                                                </td>
                                                 <td>
-                                                    <div class="small fw-bold"><?php echo date_i18n('d M Y', strtotime($event_data['event_date'])); ?></div>
-                                                    <div class="small text-muted"><?php echo $place_obj ? esc_html($place_obj->post_title) : '-'; ?></div>
+                                                    <div class="small fw-bold">
+                                                        <?php echo date_i18n('d M Y', strtotime($event_data['event_date'])); ?>
+                                                    </div>
+                                                    <div class="small opacity-75">
+                                                        <?php echo $place_obj ? esc_html($place_obj->post_title) : '-'; ?>
+                                                    </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <?php 
-                                                    $pos = $rank['pos'];
-                                                    $badge_class = 'bg-secondary';
-                                                    if ($pos == 1) $badge_class = 'bg-warning text-dark';
-                                                    elseif ($pos == 2) $badge_class = 'bg-light text-dark';
-                                                    elseif ($pos == 3) $badge_class = 'bg-bronze text-white'; // Custom css needed or use bg-orange
-                                                    ?>
-                                                    <span class="badge rounded-pill <?php echo $badge_class; ?> fs-6 px-3">
-                                                        <?php echo $pos; ?>°
-                                                    </span>
+                                                    <?php if ($pos >= 1 && $pos <= 3):
+                                                        $badge_class = ($pos == 1) ? 'bg-gold' : (($pos == 2) ? 'bg-silver' : 'bg-bronze');
+                                                        ?>
+                                                        <span class="badge <?php echo $badge_class; ?> text-dark px-2">
+                                                            <?php echo $display_pos; ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="fw-bold opacity-75"><?php echo $display_pos; ?></span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="text-center"><?php echo $event_data['total_players']; ?></td>
                                                 <td>
-                                                    <?php 
+                                                    <?php
                                                     $d_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : 0;
                                                     if ($d_id): ?>
-                                                        <a href="<?php echo get_permalink($d_id); ?>" class="text-info text-decoration-none small"><?php echo get_the_title($d_id); ?></a>
-                                                    <?php else: echo '<span class="text-muted italic small">' . (isset($rank['deck']) ? esc_html($rank['deck']) : '-') . '</span>'; endif; ?>
+                                                        <a href="<?php echo get_permalink($d_id); ?>"
+                                                            class="text-info text-decoration-none small"><?php echo get_the_title($d_id); ?></a>
+                                                    <?php else:
+                                                        echo '<span class=" italic small">' . (isset($rank['deck']) ? esc_html($rank['deck']) : '-') . '</span>';
+                                                    endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; else: ?>
-                                            <tr><td colspan="5" class="text-center py-4">No event history found.</td></tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">No event history found.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
+
+                        <!-- Events Pagination -->
+                        <?php if ($total_event_pages > 1): ?>
+                            <div class="mt-3 d-flex justify-content-center">
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <?php
+                                        $event_links = paginate_links(array(
+                                            'base' => add_query_arg('p_events', '%#%'),
+                                            'format' => '',
+                                            'current' => $paged_events,
+                                            'total' => $total_event_pages,
+                                            'type' => 'array',
+                                            'prev_text' => '<i class="fas fa-chevron-left"></i>',
+                                            'next_text' => '<i class="fas fa-chevron-right"></i>',
+                                        ));
+                                        if ($event_links) {
+                                            foreach ($event_links as $link) {
+                                                $active = strpos($link, 'current') !== false ? 'active' : '';
+                                                echo '<li class="page-item ' . $active . '">' . str_replace('page-numbers', 'page-link', $link) . '</li>';
+                                            }
+                                        }
+                                        ?>
+                                    </ul>
+                                </nav>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -474,96 +582,151 @@ get_header(); ?>
 <!-- Chart JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { color: '#888' }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#888' }
-            }
-        }
-    };
-
-    // Deck Usage (Pie)
-    new Chart(document.getElementById('deckUsageChart'), {
-        type: 'pie',
-        data: {
-            labels: <?php echo json_encode($chart_labels); ?>,
-            datasets: [{
-                data: <?php echo json_encode($chart_data); ?>,
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#007bff', '#28a745', '#dc3545', '#ffc107'],
-                borderWidth: 0
-            }]
-        },
-        options: {
+    document.addEventListener('DOMContentLoaded', function () {
+        const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: true, position: 'bottom', labels: { color: '#888', usePointStyle: true } }
-            }
-        }
-    });
-
-    // Win Rate (Line)
-    new Chart(document.getElementById('winRateChart'), {
-        type: 'line',
-        data: {
-            labels: <?php echo json_encode($line_labels); ?>,
-            datasets: [{
-                label: 'Win Rate %',
-                data: <?php echo json_encode($line_data); ?>,
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#28a745'
-            }]
-        },
-        options: {
-            ...commonOptions,
+                legend: { display: false }
+            },
             scales: {
-                ...commonOptions.scales,
-                y: { ...commonOptions.scales.y, beginAtZero: true, max: 100 }
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)' }
+                }
             }
-        }
+        };
+
+        // Deck Usage (Pie)
+        new Chart(document.getElementById('deckUsageChart'), {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($chart_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($chart_data); ?>,
+                    backgroundColor: ['#ff71ce', '#01cdfe', '#b967ff', '#05ffa1', '#fffb96', '#00ffff', '#ff0033', '#00ff00', '#74ee15', '#f5d300'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { color: 'rgba(255, 255, 255, 0.8)', usePointStyle: true } }
+                }
+            }
+        });
+
+        // Win Rate (Line)
+        new Chart(document.getElementById('winRateChart'), {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($line_labels); ?>,
+                datasets: [{
+                    label: 'Win Rate %',
+                    data: <?php echo json_encode($line_data); ?>,
+                    borderColor: '#05ffa1',
+                    backgroundColor: 'rgba(5, 255, 161, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#05ffa1'
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    ...commonOptions.scales,
+                    y: { ...commonOptions.scales.y, beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // ELO Trend (Line)
+        new Chart(document.getElementById('eloChart'), {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($elo_history_labels); ?>,
+                datasets: [{
+                    label: 'ELO Ranking',
+                    data: <?php echo json_encode($elo_history_data); ?>,
+                    borderColor: '#ff71ce',
+                    backgroundColor: 'rgba(255, 113, 206, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ff71ce'
+                }]
+            },
+            options: commonOptions
+        });
     });
 
-    // ELO Trend (Line)
-    new Chart(document.getElementById('eloChart'), {
-        type: 'line',
-        data: {
-            labels: <?php echo json_encode($elo_history_labels); ?>,
-            datasets: [{
-                label: 'ELO Ranking',
-                data: <?php echo json_encode($elo_history_data); ?>,
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#007bff'
-            }]
-        },
-        options: commonOptions
+    // --- AJAX Pagination Logic ---
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('.pagination a');
+        if (!link) return;
+
+        // Determine which section we are in
+        const section = link.closest('#decks-partial') ? '#decks-partial' : (link.closest('#events-partial') ? '#events-partial' : null);
+        if (!section) return;
+
+        e.preventDefault();
+        const url = link.href;
+
+        // Visual feedback
+        const container = document.querySelector(section);
+        container.style.opacity = '0.5';
+        container.style.transition = 'opacity 0.2s ease-in-out';
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector(section);
+
+                if (newContent) {
+                    container.innerHTML = newContent.innerHTML;
+                    container.style.opacity = '1';
+
+                    // Update URL without reload
+                    history.pushState(null, '', url);
+                }
+            })
+            .catch(err => {
+                console.error('AJAX pagination error:', err);
+                window.location.href = url; // Fallback to normal navigation
+            });
     });
-});
+
+    // Handle back/forward buttons
+    window.onpopstate = function () {
+        window.location.reload();
+    };
 </script>
 
 <style>
-.bg-dark-subtle { background-color: rgba(255, 255, 255, 0.02) !important; }
-.bg-black { background-color: rgba(0, 0, 0, 0.3) !important; }
-.card { border-radius: 1rem; overflow: hidden; }
-.table-black { background-color: #000; color: #fff; }
-.bg-bronze { background-color: #CD7F32; }
-.stats-charts-container canvas { filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+    .bg-gold {
+        background-color: #ffd700 !important;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .bg-silver {
+        background-color: #c0c0c0 !important;
+        box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+    }
+
+    .bg-bronze {
+        background-color: #cd7f32 !important;
+        box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+    }
+
+    .stats-charts-container canvas {
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
 </style>
 
 <?php get_footer(); ?>
