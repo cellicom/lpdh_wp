@@ -67,6 +67,8 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                 'posts_per_page' => -1,
                 'author' => $author_id,
                 'post_status' => 'publish',
+                'orderby' => 'title',
+                'order' => 'ASC',
             );
             $decks_query = new WP_Query($decks_args);
             ?>

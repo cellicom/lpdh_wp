@@ -252,15 +252,48 @@ foreach ($yearly_stats as $y => $data) {
 // --- Pagination Logic ---
 $items_per_page = 5;
 
-// Decks Pagination
+// Decks Pagination: Custom sorting by attendance
 $paged_decks = isset($_GET['p_decks']) ? max(1, intval($_GET['p_decks'])) : 1;
-$args_decks = array(
+
+// 1. Get all user decks to sort them
+$all_user_decks = get_posts(array(
     'post_type' => 'deck',
     'author' => $user_id,
+    'posts_per_page' => -1,
+    'fields' => 'ids',
+    'post_status' => 'publish'
+));
+
+// 2. Sort IDs based on attendance (DESC), then Win Rate (DESC)
+usort($all_user_decks, function ($a, $b) use ($deck_performance) {
+    $att_a = isset($deck_performance[$a]['attendance']) ? $deck_performance[$a]['attendance'] : 0;
+    $att_b = isset($deck_performance[$b]['attendance']) ? $deck_performance[$b]['attendance'] : 0;
+
+    if ($att_a !== $att_b) {
+        return ($att_a > $att_b) ? -1 : 1;
+    }
+
+    // Secondary sort: Win Rate (DESC)
+    $stats_a = isset($deck_performance[$a]) ? $deck_performance[$a] : array('match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0);
+    $stats_b = isset($deck_performance[$b]) ? $deck_performance[$b] : array('match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0);
+
+    $total_a = $stats_a['match_wins'] + $stats_a['match_draws'] + $stats_a['match_losses'];
+    $total_b = $stats_b['match_wins'] + $stats_b['match_draws'] + $stats_b['match_losses'];
+
+    $wr_a = $total_a > 0 ? ($stats_a['match_wins'] / $total_a) : 0;
+    $wr_b = $total_b > 0 ? ($stats_b['match_wins'] / $total_b) : 0;
+
+    if ($wr_a === $wr_b)
+        return 0;
+    return ($wr_a > $wr_b) ? -1 : 1;
+});
+
+$args_decks = array(
+    'post_type' => 'deck',
+    'post__in' => !empty($all_user_decks) ? $all_user_decks : array(0),
     'posts_per_page' => $items_per_page,
     'paged' => $paged_decks,
-    'orderby' => 'date',
-    'order' => 'DESC'
+    'orderby' => 'post__in',
 );
 $decks_query = new WP_Query($args_decks);
 $user_decks = $decks_query->posts;

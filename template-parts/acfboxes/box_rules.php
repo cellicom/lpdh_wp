@@ -23,7 +23,7 @@ $cards = $args['cards'];
                             class="card h-100 shadow-sm <?php echo esc_attr($card_border . ' ' . $card_bg); ?> overflow-visible hover-lift">
                             <?php if ($icon) { ?>
                                 <div class="position-absolute top-0 start-50 translate-middle z-1">
-                                    <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                    <div class="bg-secondary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                                         style="width: 80px; height: 80px;">
                                         <img src="<?php echo esc_url($icon); ?>" alt=""
                                             style="width: 40px; height: 40px; object-fit: contain;">

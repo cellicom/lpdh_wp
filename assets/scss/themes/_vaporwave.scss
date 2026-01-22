@@ -787,6 +787,18 @@ body.theme-vaporwave {
             }
         }
     }
+
+    // Banlist Card Layout Glow
+    .banlist_card {
+        .section-title {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        img {
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        }
+    }
 }
 
 
