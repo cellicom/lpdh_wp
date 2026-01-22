@@ -10,6 +10,16 @@ get_header();
 
 $author = get_queried_object();
 $author_id = $author->ID;
+
+// Get Editor Page URLs from settings
+$deck_editor_page_id = get_option('lpdh_deck_editor_page_id');
+$deck_editor_url = $deck_editor_page_id ? get_permalink($deck_editor_page_id) : home_url('/deck-editor/');
+
+$profile_editor_page_id = get_option('lpdh_profile_editor_page_id');
+$profile_editor_url = $profile_editor_page_id ? get_permalink($profile_editor_page_id) : admin_url('profile.php');
+
+$stats_page_id = get_option('lpdh_stats_page_id');
+$stats_url = $stats_page_id ? get_permalink($stats_page_id) : admin_url('admin.php?page=player-stats');
 ?>
 
 <div id="primary" class="content-area">
@@ -172,18 +182,19 @@ $author_id = $author->ID;
             <?php if (is_user_logged_in() && get_current_user_id() == $author_id): ?>
                 <div class="row justify-content-center mb-5 g-2">
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('admin.php?page=player-stats'); ?>" class="btn btn-primary btn-lg">
+                        <a href="<?php echo esc_url(add_query_arg('user_id', $author_id, $stats_url)); ?>"
+                            class="btn btn-primary btn-lg">
                             <i class="fas fa-chart-bar me-2"></i> View my Stats
                         </a>
                     </div>
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('profile.php'); ?>" class="btn btn-primary btn-lg">
+                        <a href="<?php echo esc_url($profile_editor_url); ?>" class="btn btn-primary btn-lg">
                             <i class="fas fa-user-edit me-2"></i> Edit my Profile
                         </a>
                     </div>
                     <div class="col-auto">
-                        <a href="<?php echo admin_url('edit.php?post_type=deck'); ?>" class="btn btn-primary btn-lg">
-                            <i class="fas fa-layer-group me-2"></i> Edit my Decks
+                        <a href="<?php echo esc_url($deck_editor_url); ?>" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i> Add Deck
                         </a>
                     </div>
                 </div>
@@ -192,7 +203,14 @@ $author_id = $author->ID;
             <!-- Decks List -->
             <?php if ($decks_query->have_posts()): ?>
                 <div class="decks-section pt-4 border-top">
-                    <h2 class="mb-4 text-center">Decks</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">Decks</h2>
+                        <?php if (is_user_logged_in() && (current_user_can('player') || current_user_can('administrator'))): ?>
+                            <a href="<?php echo esc_url($deck_editor_url); ?>" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i> Add Deck
+                            </a>
+                        <?php endif; ?>
+                    </div>
                     <div class="row g-4">
                         <?php while ($decks_query->have_posts()):
                             $decks_query->the_post(); ?>

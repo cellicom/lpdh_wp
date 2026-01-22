@@ -4259,10 +4259,16 @@ function lpdh_theme_settings_render()
     if (isset($_POST['lpdh_theme_action']) && $_POST['lpdh_theme_action'] == 'save') {
         check_admin_referer('lpdh_theme_settings_save');
         update_option('lpdh_active_theme', sanitize_text_field($_POST['lpdh_active_theme']));
+        update_option('lpdh_deck_editor_page_id', intval($_POST['lpdh_deck_editor_page_id']));
+        update_option('lpdh_profile_editor_page_id', intval($_POST['lpdh_profile_editor_page_id']));
+        update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
     $active_theme = get_option('lpdh_active_theme', 'default');
+    $deck_editor_page_id = get_option('lpdh_deck_editor_page_id', 0);
+    $profile_editor_page_id = get_option('lpdh_profile_editor_page_id', 0);
+    $stats_page_id = get_option('lpdh_stats_page_id', 0);
     ?>
     <div class="wrap">
         <h1>LPDH Theme Settings</h1>
@@ -4285,6 +4291,48 @@ function lpdh_theme_settings_render()
                             </option>
                         </select>
                         <p class="description">Select the aesthetic for the entire platform.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Deck Editor Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_deck_editor_page_id',
+                            'selected' => $deck_editor_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Deck Editor" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Profile Editor Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_profile_editor_page_id',
+                            'selected' => $profile_editor_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "User Profile Editor" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Statistics Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_stats_page_id',
+                            'selected' => $stats_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "User Statistics" template.</p>
                     </td>
                 </tr>
             </table>
@@ -4383,7 +4431,7 @@ function lpdh_render_banned_card_shortcode_metabox($post)
     </div>
     <script>
         (function () {
-            const select = document.getElementById('lpdh_shortcode_align');
+            const select = document.getElem        entById('lpdh_shortcode_align');
             const input = document.getElementById('lpdh_banned_card_shortcode_input');
             const btn = document.getElementById('lpdh_copy_shortcode');
             const postId = '<?php echo $post->ID; ?>';
