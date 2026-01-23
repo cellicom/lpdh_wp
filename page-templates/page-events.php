@@ -63,7 +63,7 @@ get_header(); ?>
                 $places_args = array(
                     'post_type' => 'place',
                     'posts_per_page' => -1,
-                    'orderby' => 'title',
+                    'orderby' => 'date',
                     'order' => 'ASC',
                 );
                 $places_query = new WP_Query($places_args);

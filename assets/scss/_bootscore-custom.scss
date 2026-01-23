@@ -1050,3 +1050,112 @@ input[type="file"]::file-selector-button {
         }
     }
 }
+
+/* --- Migrated from functions.php (lpdh_custom_layout_styles) --- */
+
+/* Single Post: Featured Image Left with Text Wrap */
+.single-post .single-post-featured-image {
+    float: left;
+    margin-right: 2rem;
+    max-width: 50%;
+}
+
+@media (max-width: 768px) {
+    .single-post .single-post-featured-image {
+        float: none;
+        margin-right: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* Article List: Image Height & Fit */
+.blog .card-img-top,
+.archive .card-img-top,
+.search .card-img-top {
+    height: 350px;
+    object-fit: cover;
+}
+
+/* Related Posts Image Height */
+.related-posts .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Footer Social Icons */
+.footer-socials {
+    display: flex;
+    gap: 1.5rem;
+
+    a {
+        font-size: 1.5rem;
+        color: inherit;
+        transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        opacity: 0.8;
+
+        &:hover {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        &.social-instagram:hover {
+            color: #fd5949;
+        }
+
+        &.social-discord:hover {
+            color: #5865F2;
+        }
+
+        &.social-facebook:hover {
+            color: #1877F2;
+        }
+
+        &.social-x:hover {
+            color: #000000;
+        }
+    }
+}
+
+/* Author Social Icons */
+.author-social-link {
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+    display: inline-block;
+    color: #6c757d;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+
+    &.website:hover {
+        color: #007bff;
+    }
+
+    &.facebook:hover {
+        color: #1877F2;
+    }
+
+    &.twitter:hover {
+        color: #000000;
+    }
+
+    &.instagram:hover {
+        color: #E1306C;
+    }
+
+    &.linkedin:hover {
+        color: #0077b5;
+    }
+
+    &.github:hover {
+        color: #333;
+    }
+
+    &.youtube:hover {
+        color: #FF0000;
+    }
+
+    &.discord:hover {
+        color: #5865F2;
+    }
+}

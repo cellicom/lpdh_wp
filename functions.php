@@ -3918,45 +3918,6 @@ function get_partner_image($post_id)
     return false;
 }
 
-/**
- * Custom CSS for Single Post Layout and Archive Images
- */
-function lpdh_custom_layout_styles()
-{
-    $custom_css = "
-        /* Single Post: Featured Image Left with Text Wrap */
-        .single-post .single-post-featured-image {
-            float: left;
-            margin-right: 2rem;
-            max-width: 50%;
-        }
-        
-        @media (max-width: 768px) {
-            .single-post .single-post-featured-image {
-                float: none;
-                margin-right: 0;
-                max-width: 100%;
-                width: 100%;
-            }
-        }
-
-        /* Article List: Image Height & Fit */
-        .blog .card-img-top,
-        .archive .card-img-top,
-        .search .card-img-top {
-            height: 350px;
-            object-fit: cover;
-        }
-
-        /* Related Posts Image Height */
-        .related-posts .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
-    ";
-    wp_add_inline_style('main', $custom_css);
-}
-add_action('wp_enqueue_scripts', 'lpdh_custom_layout_styles', 20);
 
 /**
  * Ordina archivio Banned Card per data decrescente
@@ -4266,6 +4227,13 @@ function lpdh_theme_settings_render()
         update_option('lpdh_profile_editor_page_id', intval($_POST['lpdh_profile_editor_page_id']));
         update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
         update_option('lpdh_login_register_page_id', intval($_POST['lpdh_login_register_page_id']));
+
+        // Save Social Links
+        update_option('lpdh_instagram_link', esc_url_raw($_POST['lpdh_instagram_link']));
+        update_option('lpdh_discord_link', esc_url_raw($_POST['lpdh_discord_link']));
+        update_option('lpdh_facebook_link', esc_url_raw($_POST['lpdh_facebook_link']));
+        update_option('lpdh_x_link', esc_url_raw($_POST['lpdh_x_link']));
+
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
@@ -4352,6 +4320,39 @@ function lpdh_theme_settings_render()
                         ));
                         ?>
                         <p class="description">Select the page that uses the "Registration Page" template.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <hr>
+            <h2>Socials</h2>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Instagram URL</th>
+                    <td>
+                        <input type="url" name="lpdh_instagram_link"
+                            value="<?php echo esc_url(get_option('lpdh_instagram_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Discord URL</th>
+                    <td>
+                        <input type="url" name="lpdh_discord_link"
+                            value="<?php echo esc_url(get_option('lpdh_discord_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Facebook URL</th>
+                    <td>
+                        <input type="url" name="lpdh_facebook_link"
+                            value="<?php echo esc_url(get_option('lpdh_facebook_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">X (Twitter) URL</th>
+                    <td>
+                        <input type="url" name="lpdh_x_link" value="<?php echo esc_url(get_option('lpdh_x_link')); ?>"
+                            class="regular-text">
                     </td>
                 </tr>
             </table>
@@ -4459,6 +4460,65 @@ function lpdh_get_extra_attributions()
 }
 
 /**
+ * Get Social Links HTML for Footer
+ */
+function lpdh_get_social_links()
+{
+    $socials = [
+        'instagram' => [
+            'link' => get_option('lpdh_instagram_link'),
+            'icon' => 'fa-brands fa-instagram',
+            'label' => 'Instagram'
+        ],
+        'discord' => [
+            'link' => get_option('lpdh_discord_link'),
+            'icon' => 'fa-brands fa-discord',
+            'label' => 'Discord'
+        ],
+        'facebook' => [
+            'link' => get_option('lpdh_facebook_link'),
+            'icon' => 'fa-brands fa-facebook',
+            'label' => 'Facebook'
+        ],
+        'x' => [
+            'link' => get_option('lpdh_x_link'),
+            'icon' => 'fa-brands fa-x-twitter',
+            'label' => 'X'
+        ],
+    ];
+
+    $output = '';
+    $has_links = false;
+
+    foreach ($socials as $key => $social) {
+        if (!empty($social['link'])) {
+            $has_links = true;
+            break;
+        }
+    }
+
+    if (!$has_links) {
+        return '';
+    }
+
+    $output .= '<div class="footer-socials">';
+    foreach ($socials as $key => $social) {
+        if (!empty($social['link'])) {
+            $output .= sprintf(
+                '<a href="%s" target="_blank" rel="noopener" class="social-%s" aria-label="%s"><i class="%s"></i></a>',
+                esc_url($social['link']),
+                esc_attr($key),
+                esc_attr($social['label']),
+                esc_attr($social['icon'])
+            );
+        }
+    }
+    $output .= '</div>';
+
+    return $output;
+}
+
+/**
  * Add Shortcode Metabox to Banned Card CPT
  */
 function lpdh_add_banned_card_metabox()
@@ -4504,48 +4564,48 @@ function lpdh_render_banned_card_shortcode_metabox($post)
         </div>
     </div>
     <script>
-        (function () {
-            const select = document.getElem        entById('lpdh_shortcode_align');
-            const input = document.getElementById('lpdh_banned_card_shortcode_input');
-            const btn = document.getElementById('lpdh_copy_shortcode');
-            const postId = '<?php echo $post->ID; ?>';
+            (function () {
+                const select = document.getElem  entById('lpdh_shortcode_align');
+                const input = document.getElementById('lpdh_banned_card_shortcode_input');
+                const btn = document.getElementById('lpdh_copy_shortcode');
+                const postId = '<?php echo $post->ID; ?>';
 
-            if (!select || !input || !btn) return;
+                if (!select || !input || !btn) return;
 
-            select.addEventListener('change', function () {
-                input.value = '[banned_card id="' + postId + '" align="' + this.value + '"]';
-            });
+                select.addEventListener('change', function () {
+                    input.value = '[banned_card id="' + postId + '" align="' + this.value + '"]';
+                });
 
-            btn.addEventListener('click', function () {
-                input.select();
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        const icon = btn.querySelector('.dashicons');
-                        icon.classList.remove('dashicons-clipboard');
-                        icon.classList.add('dashicons-yes');
-                        btn.style.borderColor = '#46b450';
-                        btn.style.color = '#46b450';
+                btn.addEventListener('click', function () {
+                    input.select();
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            const icon = btn.querySelector('.dashicons');
+                            icon.classList.remove('dashicons-clipboard');
+                            icon.classList.add('dashicons-yes');
+                            btn.style.borderColor = '#46b450';
+                            btn.style.color = '#46b450';
 
-                        setTimeout(() => {
-                            icon.classList.remove('dashicons-yes');
-                            icon.classList.add('dashicons-clipboard');
-                            btn.style.borderColor = '';
-                            btn.style.color = '';
-                        }, 2000);
+                            setTimeout(() => {
+                                icon.classList.remove('dashicons-yes');
+                                icon.classList.add('dashicons-clipboard');
+                                btn.style.borderColor = '';
+                                btn.style.color = '';
+                            }, 2000);
+                        }
+                    } catch (err) {
+                        console.error('Copy failed', err);
                     }
-                } catch (err) {
-                    console.error('Copy failed', err);
-                }
-            });
+                });
 
-            // Auto-select on focus
-            input.addEventListener('focus', function () {
-                this.select();
-            });
-        })();
-    </script>
-    <?php
+                // Auto-select on focus
+                input.addEventListener('focus', function () {
+                    this.select();
+                });
+            })();
+        </script>
+        <?php
 }
 
 /**
@@ -4607,168 +4667,168 @@ function lpdh_render_post_shortcode_metabox($post)
     // Standard WP styles for autocomplete
     wp_enqueue_script('jquery-ui-autocomplete');
     ?>
-    <div class="lpdh-generator-content" style="padding: 10px 0;">
-        <div style="margin-bottom: 12px;">
-            <label for="lpdh_card_search" style="display: block; margin-bottom: 5px; font-weight: 600;">Search Card:</label>
-            <input type="text" id="lpdh_card_search" placeholder="Type card name..." style="width: 100%;">
-            <input type="hidden" id="lpdh_selected_card_id" value="">
-        </div>
-
-        <div style="margin-bottom: 12px;">
-            <label for="lpdh_gen_align" style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
-            <select id="lpdh_gen_align" style="width: 100%;">
-                <option value="right">Right</option>
-                <option value="left" selected>Left</option>
-            </select>
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
-            <div style="display: flex; gap: 5px; align-items: center;">
-                <input type="text" id="lpdh_gen_shortcode_input" value="" readonly placeholder="Select a card..."
-                    style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
-                    onclick="this.select();">
-                <button type="button" class="button button-secondary" id="lpdh_copy_gen_shortcode" title="Copy"
-                    style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                    <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
-                </button>
+        <div class="lpdh-generator-content" style="padding: 10px 0;">
+            <div style="margin-bottom: 12px;">
+                <label for="lpdh_card_search" style="display: block; margin-bottom: 5px; font-weight: 600;">Search Card:</label>
+                <input type="text" id="lpdh_card_search" placeholder="Type card name..." style="width: 100%;">
+                <input type="hidden" id="lpdh_selected_card_id" value="">
             </div>
+
+            <div style="margin-bottom: 12px;">
+                <label for="lpdh_gen_align" style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
+                <select id="lpdh_gen_align" style="width: 100%;">
+                    <option value="right">Right</option>
+                    <option value="left" selected>Left</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <input type="text" id="lpdh_gen_shortcode_input" value="" readonly placeholder="Select a card..."
+                        style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
+                        onclick="this.select();">
+                    <button type="button" class="button button-secondary" id="lpdh_copy_gen_shortcode" title="Copy"
+                        style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" class="button button-primary" id="lpdh_add_to_editor"
+                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span class="dashicons dashicons-plus-alt"
+                    style="font-size: 18px; width: 18px; height: 18px; margin-top: 2px;"></span>
+                Add to Content
+            </button>
         </div>
 
-        <button type="button" class="button button-primary" id="lpdh_add_to_editor"
-            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;">
-            <span class="dashicons dashicons-plus-alt"
-                style="font-size: 18px; width: 18px; height: 18px; margin-top: 2px;"></span>
-            Add to Content
-        </button>
-    </div>
+        <script>
+            jQuery(document).ready(function ($) {
+                const $search = $('#lpdh_card_search');
+                const $cardId = $('#lpdh_selected_card_id');
+                const $align = $('#lpdh_gen_align');
+                const $input = $('#lpdh_gen_shortcode_input');
+                const $copyBtn = $('#lpdh_copy_gen_shortcode');
+                const $addBtn = $('#lpdh_add_to_editor');
 
-    <script>
-        jQuery(document).ready(function ($) {
-            const $search = $('#lpdh_card_search');
-            const $cardId = $('#lpdh_selected_card_id');
-            const $align = $('#lpdh_gen_align');
-            const $input = $('#lpdh_gen_shortcode_input');
-            const $copyBtn = $('#lpdh_copy_gen_shortcode');
-            const $addBtn = $('#lpdh_add_to_editor');
-
-            function updateShortcode() {
-                const id = $cardId.val();
-                if (id) {
-                    $input.val('[banned_card id="' + id + '" align="' + $align.val() + '"]');
-                } else {
-                    $input.val('');
-                }
-            }
-
-            $search.autocomplete({
-                source: function (request, response) {
-                    $.ajax({
-                        url: ajaxurl,
-                        dataType: "json",
-                        data: {
-                            action: 'lpdh_search_banned_cards',
-                            term: request.term,
-                            nonce: '<?php echo wp_create_nonce("lpdh_banned_card_search"); ?>'
-                        },
-                        success: function (data) {
-                            response(data);
-                        }
-                    });
-                },
-                minLength: 2,
-                select: function (event, ui) {
-                    $cardId.val(ui.item.id);
-                    updateShortcode();
-                }
-            });
-
-            $align.on('change', updateShortcode);
-
-            $copyBtn.on('click', function () {
-                if (!$input.val()) return;
-                $input.select();
-                document.execCommand('copy');
-
-                const $icon = $(this).find('.dashicons');
-                $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes');
-                $(this).css({ borderColor: '#46b450', color: '#46b450' });
-
-                setTimeout(() => {
-                    $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
-                    $(this).css({ borderColor: '', color: '' });
-                }, 2000);
-            });
-
-            $addBtn.on('click', function (e) {
-                e.preventDefault();
-                const shortcode = $input.val();
-                if (!shortcode) {
-                    alert('Please select a card first.');
-                    return;
-                }
-
-                // 1. Try Classic Editor (TinyMCE) first - most common fallback if Gutenberg is disabled
-                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden()) {
-                    tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);
-                    return;
-                }
-
-                // 2. Try Gutenberg (Block Editor)
-                if (typeof wp !== 'undefined' && wp.data && wp.blocks) {
-                    // Check if block editor is actually enqueued and available
-                    const blockEditor = (wp.data.select('core/block-editor') || wp.data.select('core/editor'));
-                    if (blockEditor) {
-                        const dispatcher = (wp.data.dispatch('core/block-editor') || wp.data.dispatch('core/editor'));
-                        if (dispatcher && dispatcher.insertBlocks) {
-                            try {
-                                const block = wp.blocks.createBlock('core/shortcode', { text: shortcode });
-                                if (block) {
-                                    dispatcher.insertBlocks([block]);
-                                    return;
-                                }
-                            } catch (err) {
-                                // Only log if it's not a common "no editor" scenario
-                            }
-                        }
+                function updateShortcode() {
+                    const id = $cardId.val();
+                    if (id) {
+                        $input.val('[banned_card id="' + id + '" align="' + $align.val() + '"]');
+                    } else {
+                        $input.val('');
                     }
                 }
 
-                // 3. Fallback to textarea (code editor or simple content area)
-                const $content = $('#content');
-                if ($content.length) {
-                    const cursorPos = $content.prop('selectionStart') || 0;
-                    const text = $content.val();
-                    $content.val(text.substring(0, cursorPos) + shortcode + text.substring(cursorPos));
-                } else {
-                    alert('Could not find editor content area.');
-                }
+                $search.autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: ajaxurl,
+                            dataType: "json",
+                            data: {
+                                action: 'lpdh_search_banned_cards',
+                                term: request.term,
+                                nonce: '<?php echo wp_create_nonce("lpdh_banned_card_search"); ?>'
+                            },
+                            success: function (data) {
+                                response(data);
+                            }
+                        });
+                    },
+                    minLength: 2,
+                    select: function (event, ui) {
+                        $cardId.val(ui.item.id);
+                        updateShortcode();
+                    }
+                });
+
+                $align.on('change', updateShortcode);
+
+                $copyBtn.on('click', function () {
+                    if (!$input.val()) return;
+                    $input.select();
+                    document.execCommand('copy');
+
+                    const $icon = $(this).find('.dashicons');
+                    $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes');
+                    $(this).css({ borderColor: '#46b450', color: '#46b450' });
+
+                    setTimeout(() => {
+                        $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
+                        $(this).css({ borderColor: '', color: '' });
+                    }, 2000);
+                });
+
+                $addBtn.on('click', function (e) {
+                    e.preventDefault();
+                    const shortcode = $input.val();
+                    if (!shortcode) {
+                        alert('Please select a card first.');
+                        return;
+                    }
+
+                    // 1. Try Classic Editor (TinyMCE) first - most common fallback if Gutenberg is disabled
+                    if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden()) {
+                        tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);
+                        return;
+                    }
+
+                    // 2. Try Gutenberg (Block Editor)
+                    if (typeof wp !== 'undefined' && wp.data && wp.blocks) {
+                        // Check if block editor is actually enqueued and available
+                        const blockEditor = (wp.data.select('core/block-editor') || wp.data.select('core/editor'));
+                        if (blockEditor) {
+                            const dispatcher = (wp.data.dispatch('core/block-editor') || wp.data.dispatch('core/editor'));
+                            if (dispatcher && dispatcher.insertBlocks) {
+                                try {
+                                    const block = wp.blocks.createBlock('core/shortcode', { text: shortcode });
+                                    if (block) {
+                                        dispatcher.insertBlocks([block]);
+                                        return;
+                                    }
+                                } catch (err) {
+                                    // Only log if it's not a common "no editor" scenario
+                                }
+                            }
+                        }
+                    }
+
+                    // 3. Fallback to textarea (code editor or simple content area)
+                    const $content = $('#content');
+                    if ($content.length) {
+                        const cursorPos = $content.prop('selectionStart') || 0;
+                        const text = $content.val();
+                        $content.val(text.substring(0, cursorPos) + shortcode + text.substring(cursorPos));
+                    } else {
+                        alert('Could not find editor content area.');
+                    }
+                });
             });
-        });
-    </script>
-    <style>
-        .ui-autocomplete {
-            z-index: 100000 !important;
-            background: #fff;
-            border: 1px solid #ccd0d4;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        </script>
+        <style>
+            .ui-autocomplete {
+                z-index: 100000 !important;
+                background: #fff;
+                border: 1px solid #ccd0d4;
+                max-height: 200px;
+                overflow-y: auto;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
 
-        .ui-menu-item-wrapper {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
+            .ui-menu-item-wrapper {
+                padding: 8px 12px;
+                cursor: pointer;
+            }
 
-        .ui-state-active,
-        .ui-state-focus {
-            background-color: #2271b1 !important;
-            color: #fff !important;
-            margin: 0 !important;
-        }
-    </style>
-    <?php
+            .ui-state-active,
+            .ui-state-focus {
+                background-color: #2271b1 !important;
+                color: #fff !important;
+                margin: 0 !important;
+            }
+        </style>
+        <?php
 }
 
 /**
@@ -4795,338 +4855,338 @@ function lpdh_render_event_ocr_metabox($post)
     // Enqueue Tesseract.js (v5)
     wp_enqueue_script('tesseract-js', get_stylesheet_directory_uri() . '/assets/js/tesseract.min.js', array(), '5.0.2', true);
     ?>
-    <div style="padding: 15px;">
-        <div
-            style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
-            <strong><span class="dashicons dashicons-warning" style="vertical-align: text-top; margin-right: 5px;"></span>
-                Warning:</strong> The OCR recognition system may not be 100% accurate. Please carefully verify the generated
-            data in the table below before applying it to the ranking JSON.
-        </div>
-        <div
-            style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
-            <span style="font-weight: 600;">Device Type:</span>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <input type="radio" name="lpdh_ocr_device" value="automatic" checked> Automatic
-            </label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <input type="radio" name="lpdh_ocr_device" value="android"> Android
-            </label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <input type="radio" name="lpdh_ocr_device" value="iphone"> iPhone
-            </label>
-        </div>
-
-        <div id="lpdh-ocr-container"
-            style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; background: #f9f9f9; cursor: pointer; border-radius: 4px;">
-            <span class="dashicons dashicons-upload"
-                style="font-size: 40px; width: 40px; height: 40px; color: #2271b1;"></span>
-            <p style="margin: 10px 0; font-size: 14px;"><strong>Drag & Drop</strong> ranking screenshot here or <a href="#"
-                    id="lpdh-ocr-browse">browse files</a></p>
-            <input type="file" id="lpdh-ocr-file-input" style="display: none;" accept="image/*">
-        </div>
-
-        <div id="lpdh-ocr-progress-container" style="display: none; margin-top: 15px;">
-            <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 5px;">
-                <div id="lpdh-ocr-progress-bar"
-                    style="width: 0%; height: 100%; background: #2271b1; transition: width 0.2s ease;"></div>
+        <div style="padding: 15px;">
+            <div
+                style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
+                <strong><span class="dashicons dashicons-warning" style="vertical-align: text-top; margin-right: 5px;"></span>
+                    Warning:</strong> The OCR recognition system may not be 100% accurate. Please carefully verify the generated
+                data in the table below before applying it to the ranking JSON.
             </div>
-            <p id="lpdh-ocr-status" style="font-size: 11px; color: #666; font-style: italic;">Initializing Tesseract...</p>
+            <div
+                style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
+                <span style="font-weight: 600;">Device Type:</span>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="lpdh_ocr_device" value="automatic" checked> Automatic
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="lpdh_ocr_device" value="android"> Android
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="lpdh_ocr_device" value="iphone"> iPhone
+                </label>
+            </div>
+
+            <div id="lpdh-ocr-container"
+                style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; background: #f9f9f9; cursor: pointer; border-radius: 4px;">
+                <span class="dashicons dashicons-upload"
+                    style="font-size: 40px; width: 40px; height: 40px; color: #2271b1;"></span>
+                <p style="margin: 10px 0; font-size: 14px;"><strong>Drag & Drop</strong> ranking screenshot here or <a href="#"
+                        id="lpdh-ocr-browse">browse files</a></p>
+                <input type="file" id="lpdh-ocr-file-input" style="display: none;" accept="image/*">
+            </div>
+
+            <div id="lpdh-ocr-progress-container" style="display: none; margin-top: 15px;">
+                <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 5px;">
+                    <div id="lpdh-ocr-progress-bar"
+                        style="width: 0%; height: 100%; background: #2271b1; transition: width 0.2s ease;"></div>
+                </div>
+                <p id="lpdh-ocr-status" style="font-size: 11px; color: #666; font-style: italic;">Initializing Tesseract...</p>
+            </div>
+
+            <div id="lpdh-ocr-results" style="display: none; margin-top: 20px; text-align: left;">
+                <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
+                    Candidates</h4>
+                <div class="table-responsive"
+                    style="max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ddd;">
+                    <table class="wp-list-table widefat fixed striped" style="border: none;">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">Pos</th>
+                                <th>Player Name</th>
+                                <th style="width: 40px;">Pts</th>
+                                <th style="width: 80px;">W-L-D</th>
+                                <th style="width: 60px;">Via%</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="lpdh-ocr-tbody">
+                            <!-- Rows populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button type="button" id="lpdh-ocr-apply" class="button button-primary">Apply to Ranking JSON</button>
+                    <button type="button" id="lpdh-ocr-reset" class="button button-secondary">Clear and Restart</button>
+                </div>
+            </div>
         </div>
 
-        <div id="lpdh-ocr-results" style="display: none; margin-top: 20px; text-align: left;">
-            <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
-                Candidates</h4>
-            <div class="table-responsive"
-                style="max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ddd;">
-                <table class="wp-list-table widefat fixed striped" style="border: none;">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;">Pos</th>
-                            <th>Player Name</th>
-                            <th style="width: 40px;">Pts</th>
-                            <th style="width: 80px;">W-L-D</th>
-                            <th style="width: 60px;">Via%</th>
-                            <th style="width: 40px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="lpdh-ocr-tbody">
-                        <!-- Rows populated via JS -->
-                    </tbody>
-                </table>
-            </div>
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <button type="button" id="lpdh-ocr-apply" class="button button-primary">Apply to Ranking JSON</button>
-                <button type="button" id="lpdh-ocr-reset" class="button button-secondary">Clear and Restart</button>
-            </div>
-        </div>
-    </div>
+        <script>
+            jQuery(document).ready(function ($) {
+                const $container = $('#lpdh-ocr-container');
+                const $input = $('#lpdh-ocr-file-input');
+                const $browse = $('#lpdh-ocr-browse');
+                const $progress = $('#lpdh-ocr-progress-container');
+                const $bar = $('#lpdh-ocr-progress-bar');
+                const $status = $('#lpdh-ocr-status');
+                const $results = $('#lpdh-ocr-results');
+                const $tbody = $('#lpdh-ocr-tbody');
+                const $apply = $('#lpdh-ocr-apply');
+                const $reset = $('#lpdh-ocr-reset');
+                const $jsonField = $('#acf-field_event_rankings_json');
 
-    <script>
-        jQuery(document).ready(function ($) {
-            const $container = $('#lpdh-ocr-container');
-            const $input = $('#lpdh-ocr-file-input');
-            const $browse = $('#lpdh-ocr-browse');
-            const $progress = $('#lpdh-ocr-progress-container');
-            const $bar = $('#lpdh-ocr-progress-bar');
-            const $status = $('#lpdh-ocr-status');
-            const $results = $('#lpdh-ocr-results');
-            const $tbody = $('#lpdh-ocr-tbody');
-            const $apply = $('#lpdh-ocr-apply');
-            const $reset = $('#lpdh-ocr-reset');
-            const $jsonField = $('#acf-field_event_rankings_json');
-
-            // Drag & Drop Handlers
-            $container.on('dragover dragenter', function (e) {
-                e.preventDefault();
-                $(this).css({ background: '#f0f6fb', borderColor: '#2271b1' });
-            }).on('dragleave dragend drop', function (e) {
-                if (e.type === 'drop') {
+                // Drag & Drop Handlers
+                $container.on('dragover dragenter', function (e) {
                     e.preventDefault();
-                    const files = e.originalEvent.dataTransfer.files;
-                    if (files.length) processFile(files[0]);
-                }
-                $(this).css({ background: '#f9f9f9', borderColor: '#ccd0d4' });
-            });
-
-            $browse.click(e => { e.preventDefault(); $input.click(); });
-            $input.change(e => { if (e.target.files.length) processFile(e.target.files[0]); });
-
-            async function processFile(file) {
-                $progress.show();
-                $results.hide();
-                $tbody.empty();
-
-                try {
-                    // Pre-process image using Canvas to improve OCR (Grayscale + Contrast)
-                    const img = new Image();
-                    img.src = URL.createObjectURL(file);
-                    await new Promise(resolve => img.onload = resolve);
-
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-
-                    // Specific pre-processing based on device selection
-                    let device = $('input[name="lpdh_ocr_device"]:checked').val();
-
-                    // Automatic Detection: iPhone vs Android heuristic
-                    if (device === 'automatic') {
-                        const ratio = img.height / img.width;
-
-                        // Range for modern tall iPhones (X to 15) is very specific: ~2.16-2.17
-                        // Androids vary more, often 2.22 (Sony/tall) or 2.0 (standard).
-                        device = (ratio > 2.14 && ratio < 2.18) ? 'iphone' : 'android';
-
-                        // Refinement: Scan for characterist selection colors
-                        // iPhone uses Orange highlight, Android uses Purple highlight
-                        const scanCanvas = document.createElement('canvas');
-                        scanCanvas.width = 1; scanCanvas.height = img.height;
-                        const scanCtx = scanCanvas.getContext('2d');
-                        scanCtx.drawImage(img, Math.floor(img.width * 0.5), 0, 1, img.height, 0, 0, 1, img.height);
-                        const data = scanCtx.getImageData(0, 0, 1, img.height).data;
-
-                        let seenOrange = false; let seenPurple = false;
-                        for (let i = 0; i < data.length; i += 4) {
-                            const r = data[i], g = data[i + 1], b = data[i + 2];
-                            // Orange detection (iPhone): R>180, G~100, B<100
-                            if (r > 180 && g > 80 && g < 150 && b < 100) seenOrange = true;
-                            // Purple detection (Android): R~100, G~100, B>200
-                            if (r > 80 && r < 150 && g > 80 && g < 150 && b > 200) seenPurple = true;
-                        }
-
-                        if (seenOrange && !seenPurple) device = 'iphone';
-                        if (seenPurple && !seenOrange) device = 'android';
-
-                        console.log('LPDH OCR: Auto-detect (Ratio:', ratio.toFixed(3), 'Orange:', seenOrange, 'Purple:', seenPurple, ') ->', device);
+                    $(this).css({ background: '#f0f6fb', borderColor: '#2271b1' });
+                }).on('dragleave dragend drop', function (e) {
+                    if (e.type === 'drop') {
+                        e.preventDefault();
+                        const files = e.originalEvent.dataTransfer.files;
+                        if (files.length) processFile(files[0]);
                     }
+                    $(this).css({ background: '#f9f9f9', borderColor: '#ccd0d4' });
+                });
 
-                    // Update UI title with device type
-                    const deviceLabel = device === 'iphone' ? 'iPhone' : 'Android';
-                    $('#lpdh-ocr-title').text('OCR Candidates (' + deviceLabel + ')');
+                $browse.click(e => { e.preventDefault(); $input.click(); });
+                $input.change(e => { if (e.target.files.length) processFile(e.target.files[0]); });
 
-                    if (device === 'iphone') {
-                        // Balanced boost for dark mode: too much contrast/brightness "washes out" character details
-                        ctx.filter = 'grayscale(1) contrast(2.5) brightness(1.1)';
-                    } else {
-                        // Original stable value for Android
-                        ctx.filter = 'grayscale(1) contrast(1.5)';
-                    }
-                    ctx.drawImage(img, 0, 0);
-
-                    const processedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                    const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
-
-                    const worker = await Tesseract.createWorker('eng+ita', 1, {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                $bar.css('width', (m.progress * 100) + '%');
-                                $status.text('Recognizing... ' + Math.round(m.progress * 100) + '%');
-                            } else {
-                                $status.text(m.status);
-                            }
-                        }
-                    });
-
-                    // Use the processed image
-                    const { data: { text, lines } } = await worker.recognize(processedFile);
-                    await worker.terminate();
-                    URL.revokeObjectURL(img.src);
-
-                    console.log('--- OCR FULL TEXT START ---');
-                    console.log(text);
-                    console.log('--- OCR FULL TEXT END ---');
-
-                    parseLines(lines);
-                    $progress.hide();
-                    $results.show();
-                } catch (err) {
-                    console.error(err);
-                    alert('OCR failed: ' + err.message);
-                    $progress.hide();
-                }
-            }
-
-            function parseLines(lines) {
-                const parsed = [];
-                let lastPos = 0;
-                const device = $('input[name="lpdh_ocr_device"]:checked').val();
-
-                lines.forEach(lineObj => {
-                    let text = lineObj.text.trim();
-                    if (!text || text.length < 3) return;
-
-                    console.log('--- Evaluating line:', text);
-
-                    // Skip headers and known junk
-                    const skipKeywords = ['DOPO', 'TURNO', 'RANKING', 'EVENTO', 'ROUND', 'TABLE', 'V-S-P', '%VIA', '%VP', 'INCONTRO', 'GIOCATORE', 'CLASSIFICA', 'PUNTI', 'POS '];
-                    const upperText = text.toUpperCase();
-
-                    // clock filter (e.g. ":31") - check for colon followed by digits at start
-                    if (/^[:;]\d+/.test(text.trim())) {
-                        console.log('Line skipped (clock/time noise)');
-                        return;
-                    }
-
-                    if (skipKeywords.some(kw => upperText.includes(kw))) {
-                        console.log('Line skipped (header/junk match)');
-                        return;
-                    }
-
-                    // Pre-cleaning: remove artifacts at start and normalize spaces
-                    text = text.replace(/^[^\w\(]+/, '').replace(/[\|｜\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
-
-                    // Specific trailing noise cleanup (important for iPhone)
-                    // Remove random characters at the end that aren't part of a percentage or record
-                    text = text.replace(/[^0-9%.\-]+$/, '').trim();
+                async function processFile(file) {
+                    $progress.show();
+                    $results.hide();
+                    $tbody.empty();
 
                     try {
-                        let pos = '', name = '', points = '0', win = '0', draw = '0', lose = '0', via = '0%';
+                        // Pre-process image using Canvas to improve OCR (Grayscale + Contrast)
+                        const img = new Image();
+                        img.src = URL.createObjectURL(file);
+                        await new Promise(resolve => img.onload = resolve);
 
-                        // A. Get Position (Forward Search)
-                        const posMatch = text.match(/^(\d+)/);
-                        if (posMatch) {
-                            pos = posMatch[1];
-                            text = text.substring(posMatch[0].length).trim();
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+
+                        // Specific pre-processing based on device selection
+                        let device = $('input[name="lpdh_ocr_device"]:checked').val();
+
+                        // Automatic Detection: iPhone vs Android heuristic
+                        if (device === 'automatic') {
+                            const ratio = img.height / img.width;
+
+                            // Range for modern tall iPhones (X to 15) is very specific: ~2.16-2.17
+                            // Androids vary more, often 2.22 (Sony/tall) or 2.0 (standard).
+                            device = (ratio > 2.14 && ratio < 2.18) ? 'iphone' : 'android';
+
+                            // Refinement: Scan for characterist selection colors
+                            // iPhone uses Orange highlight, Android uses Purple highlight
+                            const scanCanvas = document.createElement('canvas');
+                            scanCanvas.width = 1; scanCanvas.height = img.height;
+                            const scanCtx = scanCanvas.getContext('2d');
+                            scanCtx.drawImage(img, Math.floor(img.width * 0.5), 0, 1, img.height, 0, 0, 1, img.height);
+                            const data = scanCtx.getImageData(0, 0, 1, img.height).data;
+
+                            let seenOrange = false; let seenPurple = false;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const r = data[i], g = data[i + 1], b = data[i + 2];
+                                // Orange detection (iPhone): R>180, G~100, B<100
+                                if (r > 180 && g > 80 && g < 150 && b < 100) seenOrange = true;
+                                // Purple detection (Android): R~100, G~100, B>200
+                                if (r > 80 && r < 150 && g > 80 && g < 150 && b > 200) seenPurple = true;
+                            }
+
+                            if (seenOrange && !seenPurple) device = 'iphone';
+                            if (seenPurple && !seenOrange) device = 'android';
+
+                            console.log('LPDH OCR: Auto-detect (Ratio:', ratio.toFixed(3), 'Orange:', seenOrange, 'Purple:', seenPurple, ') ->', device);
+                        }
+
+                        // Update UI title with device type
+                        const deviceLabel = device === 'iphone' ? 'iPhone' : 'Android';
+                        $('#lpdh-ocr-title').text('OCR Candidates (' + deviceLabel + ')');
+
+                        if (device === 'iphone') {
+                            // Balanced boost for dark mode: too much contrast/brightness "washes out" character details
+                            ctx.filter = 'grayscale(1) contrast(2.5) brightness(1.1)';
                         } else {
-                            const lazyPosMatch = text.match(/^\D*(\d+)/);
-                            if (lazyPosMatch) {
-                                pos = lazyPosMatch[1];
-                                text = text.substring(text.indexOf(pos) + pos.length).trim();
-                            }
+                            // Original stable value for Android
+                            ctx.filter = 'grayscale(1) contrast(1.5)';
                         }
-                        if ((!pos || isNaN(pos)) && device === 'iphone') {
-                            pos = (lastPos + 1).toString();
-                        }
-                        lastPos = parseInt(pos) || lastPos;
+                        ctx.drawImage(img, 0, 0);
 
-                        // B. Find the start of data tokens (Numbers/Records/Percentages)
-                        // We look for where the name ends and the numeric data begins.
-                        const dataStartMatch = text.match(/(\s\d+[\s\-\.\–\—]|\s\d+$)/);
-                        let nameRaw = text;
-                        let tail = '';
+                        const processedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                        const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
 
-                        if (dataStartMatch) {
-                            const idx = text.indexOf(dataStartMatch[1]);
-                            nameRaw = text.substring(0, idx).trim();
-                            tail = text.substring(idx).trim();
-                        }
-
-                        // C. Name Cleanup
-                        nameRaw = nameRaw.replace(/^[\s\.\,\)\-]+/, '').replace(/(\.\.\.|\.\s+).*$/, '').replace(/[^a-zA-Z\s\'].*$/, '').replace(/\.*$/, '').trim();
-                        const nameParts = nameRaw.split(/\s+/);
-                        if (nameParts.length >= 2) {
-                            const firstName = nameParts[0];
-                            const rest = nameRaw.substring(nameRaw.indexOf(firstName) + firstName.length).trim();
-                            let formattedSurname = '';
-                            let letterCount = 0;
-                            for (let i = 0; i < rest.length; i++) {
-                                const char = rest[i];
-                                formattedSurname += char;
-                                if (/[a-zA-Z]/.test(char)) letterCount++;
-                                if (letterCount === 3) break;
-                            }
-                            name = firstName + ' ' + formattedSurname + '.';
-                        } else {
-                            name = nameRaw;
-                        }
-
-                        // D. Tokenization of Tail (Points, Record, Via)
-                        // Split tail into tokens: dashed records, percentages, or numbers
-                        const tokens = tail.split(/[\s\–\—]+/).filter(t => t.length > 0);
-                        let foundPoints = false;
-                        let foundRecord = false;
-                        let foundVia = false;
-
-                        tokens.forEach(token => {
-                            // 1. Check for Record (W-D-L) e.g. "2-1-1" or "2.1.1"
-                            const recordMatch = token.match(/^(\d+)[\-\.\/](\d+)[\-\.\/](\d+)$/);
-                            if (!foundRecord && recordMatch) {
-                                win = recordMatch[1];
-                                lose = recordMatch[2];
-                                draw = recordMatch[3];
-                                foundRecord = true;
-                                return;
-                            }
-
-                            // 2. Check for Percentage (Via)
-                            // We pick the FIRST percentage token we find after the record (or in general)
-                            if (!foundVia && (token.includes('%') || token.includes('.') || token.includes(','))) {
-                                const numVal = token.replace(',', '.').replace('%', '');
-                                if (!isNaN(parseFloat(numVal)) && (token.includes('%') || (numVal.includes('.') && numVal.length >= 3))) {
-                                    let v = parseFloat(numVal);
-                                    if (device === 'iphone' && v > 100) v = v / 10;
-                                    via = (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%';
-                                    foundVia = true;
-                                    return;
+                        const worker = await Tesseract.createWorker('eng+ita', 1, {
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    $bar.css('width', (m.progress * 100) + '%');
+                                    $status.text('Recognizing... ' + Math.round(m.progress * 100) + '%');
+                                } else {
+                                    $status.text(m.status);
                                 }
-                            }
-
-                            // 3. Check for Points (First plain number that isn't position)
-                            if (!foundPoints && /^\d+$/.test(token)) {
-                                points = token;
-                                foundPoints = true;
-                                return;
-                            }
-
-                            // 4. Predictive Record Split (iPhone 3-digit merge)
-                            if (!foundRecord && /^\d{3}$/.test(token) && device === 'iphone' && !foundPoints) {
-                                win = token[0]; lose = token[1]; draw = token[2];
-                                foundRecord = true;
                             }
                         });
 
-                        if (name && name.length >= 3 && pos) {
-                            parsed.push({ pos, name, points, win, draw, lose, via });
-                        }
-                    } catch (e) {
-                        console.error('Line parse error:', e, text);
-                    }
-                });
+                        // Use the processed image
+                        const { data: { text, lines } } = await worker.recognize(processedFile);
+                        await worker.terminate();
+                        URL.revokeObjectURL(img.src);
 
-                if (parsed.length) {
-                    parsed.forEach((item, i) => {
-                        const row = `
+                        console.log('--- OCR FULL TEXT START ---');
+                        console.log(text);
+                        console.log('--- OCR FULL TEXT END ---');
+
+                        parseLines(lines);
+                        $progress.hide();
+                        $results.show();
+                    } catch (err) {
+                        console.error(err);
+                        alert('OCR failed: ' + err.message);
+                        $progress.hide();
+                    }
+                }
+
+                function parseLines(lines) {
+                    const parsed = [];
+                    let lastPos = 0;
+                    const device = $('input[name="lpdh_ocr_device"]:checked').val();
+
+                    lines.forEach(lineObj => {
+                        let text = lineObj.text.trim();
+                        if (!text || text.length < 3) return;
+
+                        console.log('--- Evaluating line:', text);
+
+                        // Skip headers and known junk
+                        const skipKeywords = ['DOPO', 'TURNO', 'RANKING', 'EVENTO', 'ROUND', 'TABLE', 'V-S-P', '%VIA', '%VP', 'INCONTRO', 'GIOCATORE', 'CLASSIFICA', 'PUNTI', 'POS '];
+                        const upperText = text.toUpperCase();
+
+                        // clock filter (e.g. ":31") - check for colon followed by digits at start
+                        if (/^[:;]\d+/.test(text.trim())) {
+                            console.log('Line skipped (clock/time noise)');
+                            return;
+                        }
+
+                        if (skipKeywords.some(kw => upperText.includes(kw))) {
+                            console.log('Line skipped (header/junk match)');
+                            return;
+                        }
+
+                        // Pre-cleaning: remove artifacts at start and normalize spaces
+                        text = text.replace(/^[^\w\(]+/, '').replace(/[\|｜\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+
+                        // Specific trailing noise cleanup (important for iPhone)
+                        // Remove random characters at the end that aren't part of a percentage or record
+                        text = text.replace(/[^0-9%.\-]+$/, '').trim();
+
+                        try {
+                            let pos = '', name = '', points = '0', win = '0', draw = '0', lose = '0', via = '0%';
+
+                            // A. Get Position (Forward Search)
+                            const posMatch = text.match(/^(\d+)/);
+                            if (posMatch) {
+                                pos = posMatch[1];
+                                text = text.substring(posMatch[0].length).trim();
+                            } else {
+                                const lazyPosMatch = text.match(/^\D*(\d+)/);
+                                if (lazyPosMatch) {
+                                    pos = lazyPosMatch[1];
+                                    text = text.substring(text.indexOf(pos) + pos.length).trim();
+                                }
+                            }
+                            if ((!pos || isNaN(pos)) && device === 'iphone') {
+                                pos = (lastPos + 1).toString();
+                            }
+                            lastPos = parseInt(pos) || lastPos;
+
+                            // B. Find the start of data tokens (Numbers/Records/Percentages)
+                            // We look for where the name ends and the numeric data begins.
+                            const dataStartMatch = text.match(/(\s\d+[\s\-\.\–\—]|\s\d+$)/);
+                            let nameRaw = text;
+                            let tail = '';
+
+                            if (dataStartMatch) {
+                                const idx = text.indexOf(dataStartMatch[1]);
+                                nameRaw = text.substring(0, idx).trim();
+                                tail = text.substring(idx).trim();
+                            }
+
+                            // C. Name Cleanup
+                            nameRaw = nameRaw.replace(/^[\s\.\,\)\-]+/, '').replace(/(\.\.\.|\.\s+).*$/, '').replace(/[^a-zA-Z\s\'].*$/, '').replace(/\.*$/, '').trim();
+                            const nameParts = nameRaw.split(/\s+/);
+                            if (nameParts.length >= 2) {
+                                const firstName = nameParts[0];
+                                const rest = nameRaw.substring(nameRaw.indexOf(firstName) + firstName.length).trim();
+                                let formattedSurname = '';
+                                let letterCount = 0;
+                                for (let i = 0; i < rest.length; i++) {
+                                    const char = rest[i];
+                                    formattedSurname += char;
+                                    if (/[a-zA-Z]/.test(char)) letterCount++;
+                                    if (letterCount === 3) break;
+                                }
+                                name = firstName + ' ' + formattedSurname + '.';
+                            } else {
+                                name = nameRaw;
+                            }
+
+                            // D. Tokenization of Tail (Points, Record, Via)
+                            // Split tail into tokens: dashed records, percentages, or numbers
+                            const tokens = tail.split(/[\s\–\—]+/).filter(t => t.length > 0);
+                            let foundPoints = false;
+                            let foundRecord = false;
+                            let foundVia = false;
+
+                            tokens.forEach(token => {
+                                // 1. Check for Record (W-D-L) e.g. "2-1-1" or "2.1.1"
+                                const recordMatch = token.match(/^(\d+)[\-\.\/](\d+)[\-\.\/](\d+)$/);
+                                if (!foundRecord && recordMatch) {
+                                    win = recordMatch[1];
+                                    lose = recordMatch[2];
+                                    draw = recordMatch[3];
+                                    foundRecord = true;
+                                    return;
+                                }
+
+                                // 2. Check for Percentage (Via)
+                                // We pick the FIRST percentage token we find after the record (or in general)
+                                if (!foundVia && (token.includes('%') || token.includes('.') || token.includes(','))) {
+                                    const numVal = token.replace(',', '.').replace('%', '');
+                                    if (!isNaN(parseFloat(numVal)) && (token.includes('%') || (numVal.includes('.') && numVal.length >= 3))) {
+                                        let v = parseFloat(numVal);
+                                        if (device === 'iphone' && v > 100) v = v / 10;
+                                        via = (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%';
+                                        foundVia = true;
+                                        return;
+                                    }
+                                }
+
+                                // 3. Check for Points (First plain number that isn't position)
+                                if (!foundPoints && /^\d+$/.test(token)) {
+                                    points = token;
+                                    foundPoints = true;
+                                    return;
+                                }
+
+                                // 4. Predictive Record Split (iPhone 3-digit merge)
+                                if (!foundRecord && /^\d{3}$/.test(token) && device === 'iphone' && !foundPoints) {
+                                    win = token[0]; lose = token[1]; draw = token[2];
+                                    foundRecord = true;
+                                }
+                            });
+
+                            if (name && name.length >= 3 && pos) {
+                                parsed.push({ pos, name, points, win, draw, lose, via });
+                            }
+                        } catch (e) {
+                            console.error('Line parse error:', e, text);
+                        }
+                    });
+
+                    if (parsed.length) {
+                        parsed.forEach((item, i) => {
+                            const row = `
                         <tr>
                             <td><input type="text" class="ocr-pos" value="${item.pos}" style="width:100%;"></td>
                             <td><input type="text" class="ocr-name" value="${item.name}" style="width:100%;"></td>
@@ -5140,73 +5200,73 @@ function lpdh_render_event_ocr_metabox($post)
                             <td><button type="button" class="ocr-del" style="background:none; border:none; color:red; cursor:pointer;">&times;</button></td>
                         </tr>
                     `;
-                        $tbody.append(row);
-                    });
-                } else {
-                    $tbody.append('<tr><td colspan="6" style="text-align:center;">Could not parse any clear ranking rows. Please verify image quality.</td></tr>');
-                }
-            }
-
-            $tbody.on('click', '.ocr-del', function () { $(this).closest('tr').remove(); });
-
-            $reset.click(() => {
-                $input.val('');
-                $tbody.empty();
-                $results.hide();
-                $progress.hide();
-            });
-
-            $apply.click(() => {
-                const data = [];
-                $tbody.find('tr').each(function () {
-                    const $row = $(this);
-                    if ($row.find('.ocr-name').length) {
-                        data.push({
-                            field_ranking_pos: $row.find('.ocr-pos').val(),
-                            field_ranking_name: $row.find('.ocr-name').val(),
-                            field_ranking_points: $row.find('.ocr-points').val(),
-                            field_ranking_win: $row.find('.ocr-win').val(),
-                            field_ranking_draw: $row.find('.ocr-draw').val(),
-                            field_ranking_lose: $row.find('.ocr-lose').val(),
-                            field_ranking_via: $row.find('.ocr-via').val()
+                            $tbody.append(row);
                         });
+                    } else {
+                        $tbody.append('<tr><td colspan="6" style="text-align:center;">Could not parse any clear ranking rows. Please verify image quality.</td></tr>');
                     }
+                }
+
+                $tbody.on('click', '.ocr-del', function () { $(this).closest('tr').remove(); });
+
+                $reset.click(() => {
+                    $input.val('');
+                    $tbody.empty();
+                    $results.hide();
+                    $progress.hide();
                 });
 
-                if (data.length) {
-                    $jsonField.val(JSON.stringify(data, null, 2)).trigger('change');
+                $apply.click(() => {
+                    const data = [];
+                    $tbody.find('tr').each(function () {
+                        const $row = $(this);
+                        if ($row.find('.ocr-name').length) {
+                            data.push({
+                                field_ranking_pos: $row.find('.ocr-pos').val(),
+                                field_ranking_name: $row.find('.ocr-name').val(),
+                                field_ranking_points: $row.find('.ocr-points').val(),
+                                field_ranking_win: $row.find('.ocr-win').val(),
+                                field_ranking_draw: $row.find('.ocr-draw').val(),
+                                field_ranking_lose: $row.find('.ocr-lose').val(),
+                                field_ranking_via: $row.find('.ocr-via').val()
+                            });
+                        }
+                    });
 
-                    // Show success feedback
-                    const $icon = $apply.prev().length ? $apply.prev() : $('<span class="dashicons dashicons-yes" style="color:#46b450; margin-right:5px;"></span>').insertBefore($apply);
-                    $apply.text('Done!');
-                    setTimeout(() => {
-                        $apply.text('Apply to Ranking JSON');
-                        $icon.remove();
-                    }, 2000);
+                    if (data.length) {
+                        $jsonField.val(JSON.stringify(data, null, 2)).trigger('change');
 
-                    // Scroll to the JSON field and highlight it
-                    $('html, body').animate({
-                        scrollTop: $jsonField.offset().top - 100
-                    }, 500);
-                    $jsonField.css('border-color', '#46b450');
-                    setTimeout(() => $jsonField.css('border-color', ''), 3000);
-                }
+                        // Show success feedback
+                        const $icon = $apply.prev().length ? $apply.prev() : $('<span class="dashicons dashicons-yes" style="color:#46b450; margin-right:5px;"></span>').insertBefore($apply);
+                        $apply.text('Done!');
+                        setTimeout(() => {
+                            $apply.text('Apply to Ranking JSON');
+                            $icon.remove();
+                        }, 2000);
+
+                        // Scroll to the JSON field and highlight it
+                        $('html, body').animate({
+                            scrollTop: $jsonField.offset().top - 100
+                        }, 500);
+                        $jsonField.css('border-color', '#46b450');
+                        setTimeout(() => $jsonField.css('border-color', ''), 3000);
+                    }
+                });
             });
-        });
-    </script>
-    <style>
-        #lpdh-ocr-results input {
-            padding: 2px 5px;
-            height: 26px;
-            font-size: 12px;
-        }
+        </script>
+        <style>
+            #lpdh-ocr-results input {
+                padding: 2px 5px;
+                height: 26px;
+                font-size: 12px;
+            }
 
-        #lpdh-ocr-results td {
-            padding: 4px;
-            vertical-align: middle;
-        }
-    </style>
-    <?php
+            #lpdh-ocr-results td {
+                padding: 4px;
+                vertical-align: middle;
+            }
+        </style>
+        <?php
 }
 
 /**

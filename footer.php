@@ -74,7 +74,12 @@ defined('ABSPATH') || exit;
             <?php do_action('bootscore_footer_columns_before_footer_menu'); ?>
 
             <!-- Bootstrap 5 Nav Walker Footer Menu -->
-            <?php get_template_part('template-parts/footer/footer-menu'); ?>
+            <div
+                class="footer-menu-socials-wrapper d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+                <?php get_template_part('template-parts/footer/footer-menu'); ?>
+                <?php if (function_exists('lpdh_get_social_links'))
+                    echo lpdh_get_social_links(); ?>
+            </div>
 
             <?php do_action('bootscore_footer_columns_before_container_close'); ?>
 
@@ -93,6 +98,7 @@ defined('ABSPATH') || exit;
             <?php if (is_active_sidebar('footer-info')): ?>
                 <?php dynamic_sidebar('footer-info'); ?>
             <?php endif; ?>
+
             <div class="footer-bottom-links">
                 <?php if (function_exists('lpdh_get_extra_attributions'))
                     echo lpdh_get_extra_attributions(); ?>

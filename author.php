@@ -39,20 +39,26 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                     <div class="author-social mt-3">
                         <?php
                         $socials = array(
-                            'user_url' => 'fas fa-globe',
-                            'facebook' => 'fab fa-facebook',
-                            'twitter' => 'fab fa-twitter',
-                            'instagram' => 'fab fa-instagram',
-                            'linkedin' => 'fab fa-linkedin',
-                            'github' => 'fab fa-github',
-                            'youtube' => 'fab fa-youtube',
-                            'discord' => 'fab fa-discord',
+                            'user_url' => ['icon' => 'fas fa-globe', 'label' => 'Website', 'class' => 'website'],
+                            'facebook' => ['icon' => 'fab fa-facebook', 'label' => 'Facebook', 'class' => 'facebook'],
+                            'twitter' => ['icon' => 'fab fa-x-twitter', 'label' => 'X (Twitter)', 'class' => 'twitter'],
+                            'instagram' => ['icon' => 'fab fa-instagram', 'label' => 'Instagram', 'class' => 'instagram'],
+                            'linkedin' => ['icon' => 'fab fa-linkedin', 'label' => 'LinkedIn', 'class' => 'linkedin'],
+                            'github' => ['icon' => 'fab fa-github', 'label' => 'GitHub', 'class' => 'github'],
+                            'youtube' => ['icon' => 'fab fa-youtube', 'label' => 'YouTube', 'class' => 'youtube'],
+                            'discord' => ['icon' => 'fab fa-discord', 'label' => 'Discord', 'class' => 'discord'],
                         );
 
-                        foreach ($socials as $key => $icon) {
+                        foreach ($socials as $key => $data) {
                             $url = get_the_author_meta($key, $author_id);
                             if ($url) {
-                                echo '<a href="' . esc_url($url) . '" class="text-decoration-none text-primary mx-2" target="_blank" rel="noopener"><i class="' . esc_attr($icon) . ' fa-lg"></i></a>';
+                                printf(
+                                    '<a href="%s" class="author-social-link %s mx-2" target="_blank" rel="noopener" aria-label="%s"><i class="%s fa-lg"></i></a>',
+                                    esc_url($url),
+                                    esc_attr($data['class']),
+                                    esc_attr($data['label']),
+                                    esc_attr($data['icon'])
+                                );
                             }
                         }
                         ?>
