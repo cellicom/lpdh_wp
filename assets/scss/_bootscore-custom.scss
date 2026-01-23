@@ -1159,3 +1159,22 @@ input[type="file"]::file-selector-button {
         color: #5865F2;
     }
 }
+@media (max-width: 768px) {
+    .single-deck .entry-header {
+        .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-direction: column-reverse;
+            align-items: center !important;
+            text-align: center;
+            
+            .entry-title {
+                margin-top: 1rem;
+            }
+            
+            .deck-actions {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+        }
+    }
+}

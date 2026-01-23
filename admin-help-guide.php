@@ -52,7 +52,8 @@ function render_help_guide_page()
 
             <nav class="help-guide-nav" style="margin-bottom: 50px;">
                 <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                    <?php _e('Quick Navigation', 'text_domain'); ?></h3>
+                    <?php _e('Quick Navigation', 'text_domain'); ?>
+                </h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
                     <a href="#events">1. Events & Rankings</a>
                     <a href="#decks">2. Decks Management</a>
@@ -63,6 +64,7 @@ function render_help_guide_page()
                     <a href="#stats">7. Statistics & ELO</a>
                     <a href="#roles">8. Roles & Security</a>
                     <a href="#settings">9. Theme Settings</a>
+                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">10. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -304,19 +306,19 @@ function render_help_guide_page()
                     style="background: #2d333b; padding: 20px; border-radius: 8px; border: 1px solid #444c56; margin-top: 15px;">
                     <pre
                         style="margin: 0; color: #adbac7; font-size: 13px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; overflow-x: auto;">
-    // Core Calculation Snippet
-    $actual_score = $wins + ($draws * 0.5);
-    $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
-    $expected_score = $expected_score_rate * $games_played;
-    $k_factor = 32 / ($games_played);
+            // Core Calculation Snippet
+            $actual_score = $wins + ($draws * 0.5);
+            $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+            $expected_score = $expected_score_rate * $games_played;
+            $k_factor = 32 / ($games_played);
 
-    // Position Adjustment
-    $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-    $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
-    $position_adjustment = 20 * ($rank_score - 0.5);
+            // Position Adjustment
+            $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+            $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+            $position_adjustment = 20 * ($rank_score - 0.5);
 
-    // New ELO Result
-    $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
+            // New ELO Result
+            $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
                 </div>
             </section>
 
@@ -372,9 +374,64 @@ function render_help_guide_page()
                 </table>
             </section>
 
+            <!-- SECTION: EASTER EGGS -->
+            <section id="easter-eggs" style="margin-bottom: 40px;">
+                <h2
+                    style="color: #d63638; background: #fff5f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-admin-appearance"></span> 10. Easter Eggs & Hidden Features
+                </h2>
+                <p>Curated secret animations and interactions for the LPDH community.</p>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <!-- Point 1 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
+                        <p class="small">Searching for <strong>"counterspell"</strong> or <strong>"contromagia"</strong> in
+                            the site search bar triggers a blue burst visual effect.</p>
+                    </div>
+
+                    <!-- Point 2 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #7c2d12;">2. Daybound / Nightbound</h5>
+                        <p class="small">Pressing the keys <strong>"D"</strong> then <strong>"N"</strong> in sequence
+                            toggles the site theme with a sun/moon rising animation.</p>
+                    </div>
+
+                    <!-- Point 3 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #d63638;">3. Forbidden Cards</h5>
+                        <p class="small">Searching for "expensive" cards (like <strong>Black Lotus</strong>) triggers a
+                            rejection screen and a random redirect.</p>
+                    </div>
+
+                    <!-- Point 4 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #111827;">4. Console Lives</h5>
+                        <p class="small">Opening the browser's <strong>Inspect Console</strong> reveals a greeting for the
+                            LPDH gods Gut and Balmor.</p>
+                    </div>
+
+                    <!-- Point 5 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #b45309;">5. Commander Tax</h5>
+                        <p class="small">In profile pages, clicking the <strong>User Avatar</strong> adds +2 "Commander Tax"
+                            to a
+                            floating badge.</p>
+                    </div>
+
+                    <!-- Point 6 -->
+                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                        <h5 style="margin-top: 0; color: #2563eb;">6. Countered Commander</h5>
+                        <p class="small">Clicking the <strong>Commander Image</strong> on a deck page reveals one of 79
+                            different Counterspell artworks at random.</p>
+                    </div>
+                </div>
+            </section>
+
             <footer
                 style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #f0f0f1; text-align: center; font-style: italic; color: #646970;">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 1.7.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 1.8.0</p>
             </footer>
         </div>
     </div>
