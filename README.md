@@ -60,3 +60,8 @@ npx sass assets/scss/main.scss assets/css/main.css
 ---
 
 *Developed for the LPDH Community. Based on the Bootscore Child Theme template.*
+
+---
+
+> [!IMPORTANT]
+> LPDH - Legendary Pauper Commander is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
