@@ -2896,7 +2896,7 @@ function render_player_stats_page()
                             $actual_score = $wins + ($draws * 0.5);
                             $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
                             $expected_score = $expected_score_rate * $games_played;
-                            $k_factor = 32;
+                            $k_factor = 32 / ($games_played);
 
                             $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
                             $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
@@ -5225,3 +5225,8 @@ function lpdh_manage_admin_bar($show)
 
     return $show;
 }
+
+/**
+ * Include Admin Help Guide
+ */
+require_once get_stylesheet_directory() . '/admin-help-guide.php';
