@@ -199,7 +199,7 @@ get_header(); ?>
                                                         <td class="text-center fw-bold"><?php echo $display_pos; ?></td>
                                                         <td>
                                                             <?php
-                                                            $avatar = get_avatar($user_id ? $user_id : 0, 24, 'mp', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
+                                                            $avatar = get_avatar($user_id ? $user_id : 0, 24, '', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
 
                                                             if ($player_profile_url) {
                                                                 echo '<a href="' . esc_url($player_profile_url) . '" class="text-decoration-none text-reset d-flex align-items-center">' . $avatar . esc_html($display_name) . '</a>';
@@ -221,10 +221,10 @@ get_header(); ?>
                                                             <span
                                                                 class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
                                                             <span class="">-</span>
-                                                            <span class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
-                                                                        <span class="">-</span>
-                                                                        <span
-                                                                            class=" badge bg-info bg-opacity-10
+                                                            <span
+                                                                class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
+                                                            <span class="">-</span>
+                                                            <span class=" badge bg-info bg-opacity-10
                                                     text-info"><?php echo esc_html($draw); ?></span>
                                                         </td>
                                                         <td class="text-center d-none d-md-table-cell small">

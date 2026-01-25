@@ -267,7 +267,7 @@ get_header(); ?>
                                                         <td class="text-center fw-bold"><?php echo $pos; ?></td>
                                                         <td data-value="<?php echo esc_attr($name); ?>">
                                                             <?php
-                                                            $avatar = get_avatar($user_id ? $user_id : 0, 24, 'mp', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
+                                                            $avatar = get_avatar($user_id ? $user_id : 0, 24, '', '', array('class' => 'rounded-circle me-2', 'style' => 'width: 24px; height: 24px;'));
 
                                                             if ($player_profile_url) {
                                                                 echo '<a href="' . esc_url($player_profile_url) . '" class="text-decoration-none text-reset d-flex align-items-center fw-bold">' . $avatar . esc_html($name) . $trend_icon . '</a>';
