@@ -268,7 +268,6 @@ jQuery(function ($) {
         "https://cards.scryfall.io/normal/front/7/0/703dc932-3f90-47e9-8d13-aad1b65f1651.jpg?1562915791", // Pro Tour Collector Set
         "https://cards.scryfall.io/normal/front/1/4/14b62ca7-2147-422e-97dd-573b474ef97f.jpg?1562898925", // Pro Tour Collector Set
         "https://cards.scryfall.io/normal/front/a/e/aedbcbaa-40f0-485f-8427-778edc2d2ec0.jpg?1562927522", // Ice Age
-        "https://cards.scryfall.io/normal/front/7/9/79976df3-e989-4f99-8534-dca962f85e3d.jpg?1557431195", // Fourth Edition Foreign Black Border
         "https://cards.scryfall.io/normal/front/e/8/e8493631-6c9c-40a8-b7de-ecf26ba6bf7d.jpg?1559601564", // Fourth Edition
         "https://cards.scryfall.io/normal/front/8/8/885b5ca4-b8e4-4a66-9508-a12396959253.jpg?1559593080", // Summer Magic / Edgar
         "https://cards.scryfall.io/normal/front/a/7/a7b5b4b1-1df0-46c4-97ff-f0ca2d1c91fb.jpg?1539998257", // Foreign Black Border
@@ -277,7 +276,14 @@ jQuery(function ($) {
         "https://cards.scryfall.io/normal/front/9/0/901efc0f-b444-41bf-ab55-2a2860aa4a52.jpg?1559591591", // Collectors' Edition
         "https://cards.scryfall.io/normal/front/7/c/7c3271da-cc20-48c2-ac61-b64a8e47f9e5.jpg?1559592109", // Unlimited Edition
         "https://cards.scryfall.io/normal/front/9/e/9e11bf7c-f439-4529-b29a-d711359807ef.jpg?1559591924", // Limited Edition Beta
-        "https://cards.scryfall.io/normal/front/0/d/0df55e3f-14de-46ef-b6b1-616618724d9e.jpg?1559591713" // Limited Edition Alpha
+        "https://cards.scryfall.io/normal/front/0/d/0df55e3f-14de-46ef-b6b1-616618724d9e.jpg?1559591713", // Limited Edition Alpha
+        "https://cards.scryfall.io/normal/front/8/9/89aafeb7-31e3-4389-9c4e-4903c342a021.jpg", // Mana Tithe (STA Japanese)
+        "https://cards.scryfall.io/normal/front/e/7/e7f32354-893d-4f0b-b555-e0757fb5443b.jpg", // Mana Tithe (STA English)
+        "https://cards.scryfall.io/normal/front/9/a/9ae707d5-d81d-4320-b947-6016dc188898.jpg", // Mana Tithe (TSR)
+        "https://cards.scryfall.io/normal/front/a/b/ab03b4e2-91ee-449b-bb8a-ac340ecdd582.jpg", // Mana Tithe (The List)
+        "https://cards.scryfall.io/normal/front/c/1/c114301d-0ee7-4a70-bbbb-c5b8bb9fcd90.jpg", // Mana Tithe (MTGO)
+        "https://cards.scryfall.io/normal/front/6/5/652b0ce3-293d-4599-8a04-9df01b9bc678.jpg", // Mana Tithe (Player Rewards)
+        "https://cards.scryfall.io/normal/front/7/d/7d48d622-f397-4f31-b1a5-0c23f60aa71c.jpg"  // Mana Tithe (Planar Chaos)
     ];
 
     /**
