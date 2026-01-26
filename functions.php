@@ -63,12 +63,47 @@ function bootscore_child_enqueue_styles()
     wp_enqueue_style('select2-css', get_stylesheet_directory_uri() . '/assets/css/select2.min.css', array(), '4.1.0-rc.0');
     wp_enqueue_script('select2-js', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
 
+    // Scryfall Common Utility
+    $modified_ScryfallJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/scryfall-autocomplete.js'));
+    wp_register_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
+
     // Deck Editor JS (Conditional)
     if (is_page_template('page-templates/page-deck-editor.php')) {
+        wp_enqueue_script('scryfall-autocomplete-core');
         $modified_DeckEditorJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/deck-editor.js'));
-        wp_enqueue_script('deck-editor-js', get_stylesheet_directory_uri() . '/assets/js/deck-editor.js', array('jquery', 'select2-js'), $modified_DeckEditorJS, true);
+        wp_enqueue_script('deck-editor-js', get_stylesheet_directory_uri() . '/assets/js/deck-editor.js', array('jquery', 'select2-js', 'scryfall-autocomplete-core'), $modified_DeckEditorJS, true);
     }
 }
+
+/**
+ * Enqueue scripts and styles for WordPress Admin
+ */
+function lpdh_admin_enqueue_scripts($hook)
+{
+    global $post_type;
+
+    if (in_array($hook, array('post.php', 'post-new.php')) && $post_type === 'deck') {
+        wp_enqueue_style('select2-css', get_stylesheet_directory_uri() . '/assets/css/select2.min.css', array(), '4.1.0-rc.0');
+        wp_enqueue_script('select2-js', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
+
+        // Enqueue our common Scryfall utility if it exists (it should, as registered above in frontend but needs to be accessible here too)
+        $modified_ScryfallJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/scryfall-autocomplete.js'));
+        wp_enqueue_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
+
+        // Enqueue our admin-specific autocomplete helper script
+        $modified_AdminJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/admin-deck-editor.js'));
+        wp_enqueue_script('admin-deck-editor-js', get_stylesheet_directory_uri() . '/assets/js/admin-deck-editor.js', array('jquery', 'select2-js', 'scryfall-autocomplete-core'), $modified_AdminJS, true);
+
+        // Minimal styles for admin results (scoped to our classes)
+        wp_add_inline_style('select2-css', "
+            .scryfall-helper-container { margin-bottom: 8px; }
+            .scryfall-result { display: flex; align-items: center; gap: 10px; padding: 5px; }
+            .scryfall-image { width: 30px; height: auto; border-radius: 2px; }
+            .scryfall-name { font-weight: 600; }
+        ");
+    }
+}
+add_action('admin_enqueue_scripts', 'lpdh_admin_enqueue_scripts');
 
 /**
  * AJAX handler for checking search results existence (Easter Egg)
@@ -373,11 +408,11 @@ if (function_exists('acf_add_local_field_group')):
                 'name' => 'commander',
                 'type' => 'text',
                 'instructions' => '',
-                'required' => 0,
+                'required' => 1,
                 'conditional_logic' => 0,
                 'wrapper' => array(
                     'width' => '50',
-                    'class' => '',
+                    'class' => 'scryfall-autocomplete',
                     'id' => '',
                 ),
                 'default_value' => '',
@@ -393,7 +428,7 @@ if (function_exists('acf_add_local_field_group')):
                 'conditional_logic' => 0,
                 'wrapper' => array(
                     'width' => '50',
-                    'class' => '',
+                    'class' => 'scryfall-autocomplete',
                     'id' => '',
                 ),
                 'default_value' => '',
@@ -460,7 +495,7 @@ if (function_exists('acf_add_local_field_group')):
         'fields' => array(
             array(
                 'key' => 'field_featured_image_partner',
-                'label' => 'Featured Image Partner',
+                'label' => '',
                 'name' => 'featured_image_partner',
                 'type' => 'image',
                 'instructions' => '',
@@ -494,6 +529,36 @@ if (function_exists('acf_add_local_field_group')):
         'active' => true,
         'description' => '',
     ));
+
+
+
+
+    /**
+     * Admin JS to force Title for Decks
+     */
+    function lpdh_admin_deck_validation_js()
+    {
+        $screen = get_current_screen();
+        if (!$screen || $screen->post_type !== 'deck')
+            return;
+        ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $('#publish, #save-post').on('click', function (e) {
+                    var title = $('#title').val();
+                    if (!title || title.trim().length === 0) {
+                        alert('Il titolo del mazzo è obbligatorio!');
+                        $('#title').focus();
+                        $('#major-publishing-actions .spinner').removeClass('is-active');
+                        $('#publish, #save-post').removeClass('disabled');
+                        return false;
+                    }
+                });
+            });
+        </script>
+        <?php
+    }
+    add_action('admin_footer', 'lpdh_admin_deck_validation_js');
 
 endif;
 

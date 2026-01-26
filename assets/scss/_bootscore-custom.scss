@@ -1281,3 +1281,43 @@ input[type="file"]::file-selector-button {
         }
     }
 }
+
+/* Scryfall Autocomplete Styles - Frontend Only */
+.page-template-page-deck-editor {
+    .scryfall-helper-container {
+        margin-bottom: 8px;
+    }
+
+    .scryfall-result {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px;
+    }
+
+    .scryfall-image {
+        width: 30px;
+        height: auto;
+        border-radius: 2px;
+    }
+
+    .scryfall-name {
+        font-weight: 600;
+    }
+
+    /* Adjust Select2 height to match standard inputs on frontend */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 5px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 26px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+}
