@@ -5627,6 +5627,7 @@ function lpdh_manage_admin_bar($show)
     return $show;
 }
 
+
 /**
  * Include Admin Help Guide
  */
