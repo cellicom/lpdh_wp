@@ -150,9 +150,16 @@ get_header(); ?>
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="commander" class="form-label fw-bold">Commander</label>
-                                <input type="text" name="commander" id="commander" class="form-control"
-                                    value="<?php echo $is_edit ? esc_attr(get_field('commander', $edit_id)) : (isset($_POST['commander']) ? esc_attr($_POST['commander']) : ''); ?>"
-                                    required>
+                                <select name="commander" id="commander" class="form-control" required>
+                                    <?php if ($is_edit):
+                                        $current_commander = get_field('commander', $edit_id);
+                                        if ($current_commander): ?>
+                                            <option value="<?php echo esc_attr($current_commander); ?>" selected>
+                                                <?php echo esc_html($current_commander); ?>
+                                            </option>
+                                        <?php endif;
+                                    endif; ?>
+                                </select>
                                 <small class="text-info d-block mt-1">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Please enter the exact name of the card.
@@ -172,8 +179,16 @@ get_header(); ?>
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="partner" class="form-label fw-bold">Partner / Background</label>
-                                <input type="text" name="partner" id="partner" class="form-control"
-                                    value="<?php echo $is_edit ? esc_attr(get_field('partner', $edit_id)) : (isset($_POST['partner']) ? esc_attr($_POST['partner']) : ''); ?>">
+                                <select name="partner" id="partner" class="form-control">
+                                    <?php if ($is_edit):
+                                        $current_partner = get_field('partner', $edit_id);
+                                        if ($current_partner): ?>
+                                            <option value="<?php echo esc_attr($current_partner); ?>" selected>
+                                                <?php echo esc_html($current_partner); ?>
+                                            </option>
+                                        <?php endif;
+                                    endif; ?>
+                                </select>
                                 <small class="text-info d-block mt-1">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Please enter the exact name of the card.

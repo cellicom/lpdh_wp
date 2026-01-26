@@ -947,6 +947,108 @@ select.form-select {
     }
 }
 
+/* Select2 Custom Styling (Global) */
+.select2-container--default {
+    .select2-selection--single {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(var(--bs-secondary-rgb), 0.5) !important;
+        border-radius: 0.75rem !important;
+        height: auto !important;
+        padding: 0.5rem 0.75rem !important;
+        transition: all 0.3s ease !important;
+        outline: none !important;
+
+        .select2-selection__rendered {
+            color: #fff !important;
+            padding-left: 0 !important;
+            line-height: 1.5 !important;
+        }
+
+        .select2-selection__arrow {
+            height: 100% !important;
+            right: 10px !important;
+
+            b {
+                border-color: rgba(255, 255, 255, 0.5) transparent transparent transparent !important;
+            }
+        }
+    }
+
+    &.select2-container--focus,
+    &.select2-container--open {
+        .select2-selection--single {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            border-color: var(--bs-primary) !important;
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+
+            .select2-selection__arrow b {
+                border-color: transparent transparent var(--bs-primary) transparent !important;
+            }
+        }
+    }
+
+    .select2-dropdown {
+        background-color: #1a1635 !important; // Darker shade for dropdown
+        border: 1px solid var(--bs-primary) !important;
+        border-radius: 0.75rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+        z-index: 1060 !important;
+    }
+
+    .select2-search--dropdown {
+        padding: 10px !important;
+        background-color: transparent !important;
+
+        .select2-search__field {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 0.5rem !important;
+            color: #fff !important;
+            padding: 8px 12px !important;
+            outline: none !important;
+
+            &:focus {
+                border-color: var(--bs-primary) !important;
+            }
+        }
+    }
+
+    .select2-results__option {
+        padding: 10px 15px !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        background-color: transparent !important;
+
+        &[aria-selected="true"] {
+            background-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+            color: #fff !important;
+        }
+
+        &--highlighted[aria-selected] {
+            background-color: var(--bs-primary) !important;
+            color: #fff !important;
+        }
+    }
+
+    // Custom formatting for card results
+    .scryfall-result {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .scryfall-image {
+            width: 40px;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .scryfall-name {
+            font-weight: 600;
+        }
+    }
+}
+
 input[type="file"]::file-selector-button {
     background-color: var(--bs-secondary);
     color: white;
@@ -1159,17 +1261,18 @@ input[type="file"]::file-selector-button {
         color: #5865F2;
     }
 }
+
 @media (max-width: 768px) {
     .single-deck .entry-header {
         .d-flex.justify-content-between.align-items-center.mb-3 {
             flex-direction: column-reverse;
             align-items: center !important;
             text-align: center;
-            
+
             .entry-title {
                 margin-top: 1rem;
             }
-            
+
             .deck-actions {
                 width: 100%;
                 justify-content: center;

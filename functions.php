@@ -62,6 +62,12 @@ function bootscore_child_enqueue_styles()
     // Select2
     wp_enqueue_style('select2-css', get_stylesheet_directory_uri() . '/assets/css/select2.min.css', array(), '4.1.0-rc.0');
     wp_enqueue_script('select2-js', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
+
+    // Deck Editor JS (Conditional)
+    if (is_page_template('page-templates/page-deck-editor.php')) {
+        $modified_DeckEditorJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/deck-editor.js'));
+        wp_enqueue_script('deck-editor-js', get_stylesheet_directory_uri() . '/assets/js/deck-editor.js', array('jquery', 'select2-js'), $modified_DeckEditorJS, true);
+    }
 }
 
 /**
