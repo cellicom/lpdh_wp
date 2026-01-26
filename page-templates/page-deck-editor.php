@@ -52,6 +52,10 @@ if (isset($_POST['deck_editor_nonce']) && wp_verify_nonce($_POST['deck_editor_no
         $errors[] = "Deck name is required.";
     }
 
+    if (empty($commander)) {
+        $errors[] = "Commander name is required.";
+    }
+
     if (empty($errors)) {
         $post_data = array(
             'post_title' => $deck_name,
@@ -147,7 +151,12 @@ get_header(); ?>
                             <div class="col-md-6">
                                 <label for="commander" class="form-label fw-bold">Commander</label>
                                 <input type="text" name="commander" id="commander" class="form-control"
-                                    value="<?php echo $is_edit ? esc_attr(get_field('commander', $edit_id)) : (isset($_POST['commander']) ? esc_attr($_POST['commander']) : ''); ?>">
+                                    value="<?php echo $is_edit ? esc_attr(get_field('commander', $edit_id)) : (isset($_POST['commander']) ? esc_attr($_POST['commander']) : ''); ?>"
+                                    required>
+                                <small class="text-info d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Please enter the exact name of the card.
+                                </small>
                             </div>
                             <div class="col-md-6">
                                 <label for="commander_image" class="form-label fw-bold">Commander Image</label>
@@ -165,6 +174,10 @@ get_header(); ?>
                                 <label for="partner" class="form-label fw-bold">Partner / Background</label>
                                 <input type="text" name="partner" id="partner" class="form-control"
                                     value="<?php echo $is_edit ? esc_attr(get_field('partner', $edit_id)) : (isset($_POST['partner']) ? esc_attr($_POST['partner']) : ''); ?>">
+                                <small class="text-info d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Please enter the exact name of the card.
+                                </small>
                             </div>
                             <div class="col-md-6">
                                 <label for="partner_image" class="form-label fw-bold">Partner Image</label>

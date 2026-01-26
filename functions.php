@@ -499,7 +499,8 @@ function deck_custom_columns($columns)
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
-    $new_columns['decklist'] = 'Decklist';
+    $new_columns['commander'] = 'Commander';
+    $new_columns['decklist'] = 'Link';
     $new_columns['author'] = 'Author';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
@@ -512,10 +513,24 @@ add_filter('manage_deck_posts_columns', 'deck_custom_columns');
 function deck_custom_columns_data($column, $post_id)
 {
     switch ($column) {
+        case 'commander':
+            $commander = get_field('field_commander', $post_id);
+            $partner = get_field('field_partner', $post_id);
+            if ($commander) {
+                $scryfall_url_commander = 'https://scryfall.com/search?q="' . urlencode($commander) . '"';
+                echo '<a href="' . esc_url($scryfall_url_commander) . '" target="_blank" rel="noopener">' . esc_html($commander) . '</a>';
+                if ($partner) {
+                    $scryfall_url_partner = 'https://scryfall.com/search?q="' . urlencode($partner) . '"';
+                    echo '<br><a href="' . esc_url($scryfall_url_partner) . '" target="_blank" rel="noopener">' . esc_html($partner) . '</a>';
+                }
+            } else {
+                echo '-';
+            }
+            break;
         case 'decklist':
             $decklist = get_field('field_decklist', $post_id);
             if ($decklist) {
-                echo '<a href="' . esc_url($decklist) . '" target="_blank" rel="noopener">External Link</a>';
+                echo '<a href="' . esc_url($decklist) . '" target="_blank" rel="noopener"><span class="dashicons dashicons-external" style="color: black;"></span></a>';
             } else {
                 echo '-';
             }
@@ -558,6 +573,36 @@ function deck_column_orderby($query)
     }
 }
 add_action('pre_get_posts', 'deck_column_orderby');
+
+/**
+ * Customize admin users list columns
+ */
+function lpdh_customize_user_columns($columns)
+{
+    unset($columns['posts']); // Hide Posts column
+    $columns['decks'] = __('Decks', 'text_domain'); // Add Decks column
+    return $columns;
+}
+add_filter('manage_users_columns', 'lpdh_customize_user_columns');
+
+/**
+ * Populate Decks column in admin users list
+ */
+function lpdh_populate_user_decks_column($output, $column_name, $user_id)
+{
+    if ($column_name === 'decks') {
+        $count = count_user_posts($user_id, 'deck');
+        if ($count > 0) {
+            // Link to the user's decks in admin
+            $url = admin_url('edit.php?post_type=deck&author=' . $user_id);
+            return '<a href="' . esc_url($url) . '">' . $count . '</a>';
+        }
+        return '0';
+    }
+    return $output;
+}
+add_filter('manage_users_custom_column', 'lpdh_populate_user_decks_column', 10, 3);
+
 
 /**
  * Restrict admin menu for players - show only Dashboard, Profile, and Decks
@@ -831,7 +876,7 @@ function banned_card_custom_columns($columns)
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
-    $new_columns['scryfall_link'] = 'Scryfall Link';
+    $new_columns['scryfall_link'] = 'Link';
     $new_columns['shortcode'] = 'Shortcode';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
@@ -847,7 +892,7 @@ function banned_card_custom_columns_data($column, $post_id)
         case 'scryfall_link':
             $scryfall_link = get_field('field_scryfall_link', $post_id);
             if ($scryfall_link) {
-                echo '<a href="' . esc_url($scryfall_link) . '" target="_blank" rel="noopener">Scryfall Link</a>';
+                echo '<a href="' . esc_url($scryfall_link) . '" target="_blank" rel="noopener" style="text-decoration: none;"><span class="dashicons dashicons-external" style="color: black;"></span></a>';
             } else {
                 echo '-';
             }
@@ -1159,7 +1204,7 @@ function place_custom_columns($columns)
     $new_columns['title'] = $columns['title'];
     $new_columns['place_address'] = 'Address';
     $new_columns['place_homepage'] = 'Website';
-    $new_columns['author'] = 'Author';
+    $new_columns['events'] = 'Events';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -1187,12 +1232,20 @@ function place_custom_columns_data($column, $post_id)
                 echo '-';
             }
             break;
-        case 'author':
-            $author_id = get_post_field('post_author', $post_id);
-            $author_user = get_userdata($author_id);
-            if ($author_user) {
-                echo '<a href="' . esc_url(get_edit_user_link($author_id)) . '">' . esc_html($author_user->display_name) . '</a>';
-            }
+        case 'events':
+            $count = new WP_Query(array(
+                'post_type' => 'event',
+                'posts_per_page' => -1,
+                'meta_query' => array(
+                    array(
+                        'key' => 'event_place',
+                        'value' => $post_id,
+                        'compare' => '='
+                    )
+                ),
+                'fields' => 'ids'
+            ));
+            echo intval($count->found_posts);
             break;
     }
 }
@@ -1832,7 +1885,9 @@ function event_custom_columns($columns)
     $new_columns['title'] = $columns['title'];
     $new_columns['event_place'] = 'Place';
     $new_columns['event_date'] = 'Date';
-    $new_columns['event_fb_link'] = 'Facebook Event';
+    $new_columns['event_fb_link'] = 'FB';
+    $new_columns['event_winner'] = 'Winner';
+    $new_columns['event_players'] = 'Players';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -1847,7 +1902,8 @@ function event_custom_columns_data($column, $post_id)
         case 'event_place':
             $event_place = get_field('field_event_place', $post_id);
             if ($event_place) {
-                echo esc_html($event_place->post_title);
+                $edit_link = get_edit_post_link($event_place->ID);
+                echo '<a href="' . esc_url($edit_link) . '">' . esc_html($event_place->post_title) . '</a>';
             } else {
                 echo '-';
             }
@@ -1855,7 +1911,7 @@ function event_custom_columns_data($column, $post_id)
         case 'event_date':
             $event_date = get_field('field_event_date', $post_id);
             if ($event_date) {
-                echo esc_html(date_i18n('d/m/Y H:i', strtotime($event_date)));
+                echo esc_html(date_i18n('d/m/Y', strtotime($event_date))) . '<br>' . esc_html(date_i18n('H:i', strtotime($event_date)));
             } else {
                 echo '-';
             }
@@ -1863,10 +1919,121 @@ function event_custom_columns_data($column, $post_id)
         case 'event_fb_link':
             $event_fb_link = get_field('field_event_fb_link', $post_id);
             if ($event_fb_link) {
-                echo '<a href="' . esc_url($event_fb_link) . '" target="_blank" rel="noopener">Link Facebook</a>';
+                echo '<a href="' . esc_url($event_fb_link) . '" target="_blank" rel="noopener" style="color:#1877F2;"><span class="dashicons dashicons-facebook"></span></a>';
             } else {
                 echo '-';
             }
+            break;
+        case 'event_winner':
+            $all_rankings = array();
+
+            // USE ONLY THE REPEATER FIELD (Ignore JSON as per user request)
+            $repeater_sources = array('field_event_ranking', 'event_ranking', 'field_ranking', 'ranking');
+            foreach ($repeater_sources as $source) {
+                $repeater_data = get_field($source, $post_id);
+                if (is_array($repeater_data) && !empty($repeater_data)) {
+                    $all_rankings = $repeater_data;
+                    break;
+                }
+            }
+
+            $winner_data = null;
+            if (is_array($all_rankings) && !empty($all_rankings)) {
+                // Try to find the winner (pos=1) supporting multiple possible keys for position
+                foreach ($all_rankings as $rank) {
+                    $pos = null;
+                    $pos_keys = array('pos', 'field_ranking_pos', 'position', 'rank', 'ranking', 'place');
+                    foreach ($pos_keys as $pk) {
+                        if (isset($rank[$pk]) && ($rank[$pk] == 1 || $rank[$pk] === '1')) {
+                            $pos = 1;
+                            break;
+                        }
+                    }
+
+                    if ($pos == 1) {
+                        $winner_data = $rank;
+                        break;
+                    }
+                }
+                // Fallback to first entry if no pos=1 found
+                if (!$winner_data) {
+                    $winner_data = $all_rankings[0];
+                }
+            }
+
+            if ($winner_data) {
+                // Robust extraction of user ID from multiple possible keys
+                $raw_id = null;
+                $keys_to_check = array('player_id', 'user_id', 'field_ranking_player_id', 'ID', 'userid', 'player', 'user');
+                foreach ($keys_to_check as $key) {
+                    if (isset($winner_data[$key]) && !empty($winner_data[$key])) {
+                        $val = $winner_data[$key];
+                        // If it's a numeric ID, or an object/array with ID/id, we accept it as ID source
+                        if (is_numeric($val) || (is_array($val) && (isset($val['ID']) || isset($val['id']))) || (is_object($val) && (isset($val->ID) || isset($val->id)))) {
+                            $raw_id = $val;
+                            break;
+                        }
+                    }
+                }
+
+                $user_id = 0;
+                if ($raw_id) {
+                    if (is_array($raw_id)) {
+                        if (isset($raw_id['ID'])) {
+                            $user_id = $raw_id['ID'];
+                        } elseif (isset($raw_id['id'])) {
+                            $user_id = $raw_id['id'];
+                        } else {
+                            $first = reset($raw_id);
+                            if (is_array($first) && (isset($first['ID']) || isset($first['id']))) {
+                                $user_id = isset($first['ID']) ? $first['ID'] : $first['id'];
+                            } elseif (is_numeric($first)) {
+                                $user_id = intval($first);
+                            }
+                        }
+                    } elseif (is_object($raw_id)) {
+                        $user_id = isset($raw_id->ID) ? $raw_id->ID : (isset($raw_id->id) ? $raw_id->id : 0);
+                    } elseif (is_numeric($raw_id)) {
+                        $user_id = intval($raw_id);
+                    }
+                }
+
+                $name = '-';
+                $name_keys = array('name', 'field_ranking_name', 'display_name', 'player_name', 'player', 'user_name');
+                foreach ($name_keys as $nk) {
+                    if (isset($winner_data[$nk]) && !empty($winner_data[$nk]) && is_string($winner_data[$nk])) {
+                        $name = $winner_data[$nk];
+                        break;
+                    }
+                }
+
+                if ($user_id) {
+                    $user = get_userdata($user_id);
+                    if ($user) {
+                        $display_name = $user->display_name;
+                        $edit_link = get_edit_user_link($user_id);
+                        echo '<a href="' . esc_url($edit_link) . '">' . esc_html($display_name) . '</a>';
+                    } else {
+                        echo esc_html($name);
+                    }
+                } else {
+                    echo esc_html($name);
+                }
+            } else {
+                echo '-';
+            }
+            break;
+        case 'event_players':
+            $all_rankings = array();
+            $repeater_sources = array('field_event_ranking', 'event_ranking', 'field_ranking', 'ranking');
+            foreach ($repeater_sources as $source) {
+                $repeater_data = get_field($source, $post_id);
+                if (is_array($repeater_data) && !empty($repeater_data)) {
+                    $all_rankings = $repeater_data;
+                    break;
+                }
+            }
+            echo is_array($all_rankings) ? count($all_rankings) : 0;
             break;
     }
 }
@@ -1910,6 +2077,53 @@ function hide_event_menu_from_players()
     }
 }
 add_action('admin_menu', 'hide_event_menu_from_players', 999);
+
+/**
+ * Adjust event list column widths
+ */
+function lpdh_event_list_column_widths()
+{
+    $screen = get_current_screen();
+    if ($screen && $screen->id === 'edit-event') {
+        echo '<style>
+            .column-title { width: 25%; }
+            .column-event_players { width: 60px !important; text-align: center; }
+            .column-event_fb_link { width: 40px !important; text-align: center; }
+            .column-event_date { width: 100px !important; }
+        </style>';
+    }
+}
+add_action('admin_head', 'lpdh_event_list_column_widths');
+
+/**
+ * Adjust deck list column widths
+ */
+function lpdh_deck_list_column_widths()
+{
+    $screen = get_current_screen();
+    if ($screen && $screen->id === 'edit-deck') {
+        echo '<style>
+            .column-title { width: 35% !important; }
+            .column-commander { width: 35% !important; }
+            .column-decklist { width: 40px !important; text-align: center; }
+        </style>';
+    }
+}
+add_action('admin_head', 'lpdh_deck_list_column_widths');
+
+/**
+ * Adjust banned card list column widths
+ */
+function lpdh_banned_card_list_column_widths()
+{
+    $screen = get_current_screen();
+    if ($screen && $screen->id === 'edit-banned_card') {
+        echo '<style>
+            .column-scryfall_link { width: 40px !important; text-align: center; }
+        </style>';
+    }
+}
+add_action('admin_head', 'lpdh_banned_card_list_column_widths');
 
 /**
  * Restrict access to Event admin pages for non-administrators
@@ -1962,205 +2176,205 @@ function event_ranking_auto_fill_name()
 {
     ?>
     <script type="text/javascript">
-                (function ($) {
-                            // ACF user action - this ha        ndles the AJAX loaded user data
-                    if (typeof acf !== 'undefined') {
-                        acf.add_action('user', function (userData, $el) {
-                            if (userData && userData.display_name) {
-                                var $row = $el.closest('tr.acf-row');
-                                var $nameField = $row.find('input[name*="field_ranking_name"]');
-                                //Non aggiornare più il display name
-                                //$nameField.val(userData.display_name);
-                            }
-                        });
+        (function ($) {
+            // ACF user action - this ha        ndles the AJAX loaded user data
+            if (typeof acf !== 'undefined') {
+                acf.add_action('user', function (userData, $el) {
+                    if (userData && userData.display_name) {
+                        var $row = $el.closest('tr.acf-row');
+                        var $nameField = $row.find('input[name*="field_ranking_name"]');
+                        //Non aggiornare più il display name
+                        //$nameField.val(userData.display_name);
+                    }
+                });
+            }
+
+            // Populate Rankings button functionality
+            $(document).on('click', '#populate-rankings-btn', function (e) {
+                e.preventDefault();
+
+                var $btn = $(this);
+                var $jsonField = $('#acf-field_event_rankings_json');
+                var jsonData = $jsonField.val();
+
+                if (!jsonData) {
+                    console.warn('Nessun dato JSON presente nel campo Rankings JSON');
+                    return;
+                }
+
+                try {
+                    var rankings = JSON.parse(jsonData);
+
+                    if (!Array.isArray(rankings) || rankings.length === 0) {
+                        console.warn('Il formato JSON non è valido o è vuoto');
+                        return;
                     }
 
-                    // Populate Rankings button functionality
-                    $(document).on('click', '#populate-rankings-btn', function (e) {
-                        e.preventDefault();
+                    // Find the ranking repeater
+                    var $repeater = $('[data-name="event_ranking"]');
+                    var $addButton = $repeater.find('.acf-button[data-event="add-row"]');
 
-                        var $btn = $(this);
-                        var $jsonField = $('#acf-field_event_rankings_json');
-                        var jsonData = $jsonField.val();
+                    if (!$repeater.length || !$addButton.length) {
+                        console.warn('Repeater rankings non trovato');
+                        return;
+                    }
 
-                        if (!jsonData) {
-                            console.warn('Nessun dato JSON presente nel campo Rankings JSON');
-                            return;
+                    var $tbody = $repeater.find('tbody');
+
+                    // Clear existing rows
+                    $tbody.find('.acf-row:not(.acf-clone)').remove();
+
+                    // Use ACF's native add row functionality to ensure correct initialization (including nonces)
+                    rankings.forEach(function (ranking) {
+                        // Trigger add row
+                        $addButton.trigger('click');
+
+                        // Get the new row (last one)
+                        var $row = $tbody.find('.acf-row:not(.acf-clone)').last();
+
+                        // Map fields supporting both new format (filed_ranking_...) and old format (...)
+                        var pos = ranking.field_ranking_pos !== undefined ? ranking.field_ranking_pos : ranking.pos;
+                        var name = ranking.field_ranking_name !== undefined ? ranking.field_ranking_name : ranking.name;
+                        var points = ranking.field_ranking_points !== undefined ? ranking.field_ranking_points : ranking.points;
+                        var win = ranking.field_ranking_win !== undefined ? ranking.field_ranking_win : ranking.win;
+                        var draw = ranking.field_ranking_draw !== undefined ? ranking.field_ranking_draw : ranking.draw;
+                        var lose = ranking.field_ranking_lose !== undefined ? ranking.field_ranking_lose : ranking.lose;
+                        var via = ranking.field_ranking_via !== undefined ? ranking.field_ranking_via : ranking.via;
+                        var deck = ranking.field_ranking_deck !== undefined ? ranking.field_ranking_deck : (ranking.deck !== undefined ? ranking.deck : "");
+                        var player_id = ranking.field_ranking_player_id !== undefined ? ranking.field_ranking_player_id : ranking.player_id;
+                        var player_deck_id = ranking.field_ranking_player_deck_id !== undefined ? ranking.field_ranking_player_deck_id : (ranking.player_deck_id !== undefined ? ranking.player_deck_id : "");
+
+                        // Populate UI fields
+                        if (pos !== undefined) $row.find('[data-name="pos"] input').val(pos);
+                        if (name !== undefined) $row.find('[data-name="name"] input').val(name);
+                        if (points !== undefined) $row.find('[data-name="points"] input').val(points);
+                        if (win !== undefined) $row.find('[data-name="win"] input').val(win);
+                        if (draw !== undefined) $row.find('[data-name="draw"] input').val(draw);
+                        if (lose !== undefined) $row.find('[data-name="lose"] input').val(lose);
+                        if (via !== undefined) $row.find('[data-name="via"] input').val(via);
+                        if (deck !== undefined) $row.find('[data-name="deck"] input').val(deck);
+                        if (player_id !== undefined) {
+                            var $userSelect = $row.find('[data-name="player_id"] select');
+                            if ($userSelect.length && player_id) {
+                                // For ACF user fields, we might need a more complex way to set it if it's Select2
+                                // but if it's a standard select, this works. Usually ACF uses Select2.
+                                // We'll try basic val() first, if it fails we might need acf.getField().val()
+                            }
+                            $row.find('[data-name="player_id"] input[type="hidden"]').val(player_id);
                         }
+                        if (player_deck_id !== undefined) $row.find('[data-name="player_deck_id"] input').val(player_deck_id);
+                    });
 
-                        try {
-                            var rankings = JSON.parse(jsonData);
+                } catch (err) {
+                    console.error('Errore nel parsing JSON:', err);
+                }
+            });
 
-                            if (!Array.isArray(rankings) || rankings.length === 0) {
-                                console.warn('Il formato JSON non è valido o è vuoto');
-                                return;
-                            }
+            // Sync Players button functionality
+            $(document).on('click', '#sync-players-btn', function (e) {
+                e.preventDefault();
 
-                            // Find the ranking repeater
-                            var $repeater = $('[data-name="event_ranking"]');
-                            var $addButton = $repeater.find('.acf-button[data-event="add-row"]');
+                var $btn = $(this);
+                var $repeater = $('[data-name="event_ranking"]');
+                var $rows = $repeater.find('.acf-row:not(.acf-clone)');
+                var $msg = $('#sync-players-msg');
 
-                            if (!$repeater.length || !$addButton.length) {
-                                console.warn('Repeater rankings non trovato');
-                                return;
-                            }
+                $msg.hide().css('color', '');
 
-                            var $tbody = $repeater.find('tbody');
+                if (!$rows.length) {
+                    $msg.text('No rows found in rankings.').css('color', '#d63638').show();
+                    setTimeout(function () { $msg.fadeOut(); }, 5000);
+                    return;
+                }
 
-                            // Clear existing rows
-                            $tbody.find('.acf-row:not(.acf-clone)').remove();
+                $btn.prop('disabled', true).text('Syncing...');
 
-                            // Use ACF's native add row functionality to ensure correct initialization (including nonces)
-                            rankings.forEach(function (ranking) {
-                                // Trigger add row
-                                $addButton.trigger('click');
+                var namesToSync = [];
+                $rows.each(function (index) {
+                    var $row = $(this);
+                    var name = $row.find('[data-name="name"] input').val();
 
-                                // Get the new row (last one)
-                                var $row = $tbody.find('.acf-row:not(.acf-clone)').last();
+                    if (name) {
+                        namesToSync.push({
+                            row_index: index,
+                            name: name
+                        });
+                    }
+                });
 
-                                // Map fields supporting both new format (filed_ranking_...) and old format (...)
-                                var pos = ranking.field_ranking_pos !== undefined ? ranking.field_ranking_pos : ranking.pos;
-                                var name = ranking.field_ranking_name !== undefined ? ranking.field_ranking_name : ranking.name;
-                                var points = ranking.field_ranking_points !== undefined ? ranking.field_ranking_points : ranking.points;
-                                var win = ranking.field_ranking_win !== undefined ? ranking.field_ranking_win : ranking.win;
-                                var draw = ranking.field_ranking_draw !== undefined ? ranking.field_ranking_draw : ranking.draw;
-                                var lose = ranking.field_ranking_lose !== undefined ? ranking.field_ranking_lose : ranking.lose;
-                                var via = ranking.field_ranking_via !== undefined ? ranking.field_ranking_via : ranking.via;
-                                var deck = ranking.field_ranking_deck !== undefined ? ranking.field_ranking_deck : (ranking.deck !== undefined ? ranking.deck : "");
-                                var player_id = ranking.field_ranking_player_id !== undefined ? ranking.field_ranking_player_id : ranking.player_id;
-                                var player_deck_id = ranking.field_ranking_player_deck_id !== undefined ? ranking.field_ranking_player_deck_id : (ranking.player_deck_id !== undefined ? ranking.player_deck_id : "");
+                if (namesToSync.length === 0) {
+                    $btn.prop('disabled', false).text('Sync Player');
+                    return;
+                }
 
-                                // Populate UI fields
-                                if (pos !== undefined) $row.find('[data-name="pos"] input').val(pos);
-                                if (name !== undefined) $row.find('[data-name="name"] input').val(name);
-                                if (points !== undefined) $row.find('[data-name="points"] input').val(points);
-                                if (win !== undefined) $row.find('[data-name="win"] input').val(win);
-                                if (draw !== undefined) $row.find('[data-name="draw"] input').val(draw);
-                                if (lose !== undefined) $row.find('[data-name="lose"] input').val(lose);
-                                if (via !== undefined) $row.find('[data-name="via"] input').val(via);
-                                if (deck !== undefined) $row.find('[data-name="deck"] input').val(deck);
-                                if (player_id !== undefined) {
-                                    var $userSelect = $row.find('[data-name="player_id"] select');
-                                    if ($userSelect.length && player_id) {
-                                        // For ACF user fields, we might need a more complex way to set it if it's Select2
-                                        // but if it's a standard select, this works. Usually ACF uses Select2.
-                                        // We'll try basic val() first, if it fails we might need acf.getField().val()
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'sync_ranking_players',
+                        names: namesToSync,
+                        nonce: '<?php echo wp_create_nonce('sync_ranking_players_nonce'); ?>'
+                    },
+                    success: function (response) {
+                        if (response.success && response.data) {
+                            var matchCount = 0;
+                            response.data.forEach(function (match) {
+                                var $row = $rows.eq(match.row_index);
+                                var $select = $row.find('[data-name="player_id"] select');
+
+                                if ($select.length && match.user_id) {
+                                    // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
+                                    if ($select.find('option[value="' + match.user_id + '"]').length === 0) {
+                                        $select.append(new Option(match.display_name, match.user_id, true, true));
                                     }
-                                    $row.find('[data-name="player_id"] input[type="hidden"]').val(player_id);
+                                    $select.val(match.user_id).trigger('change');
+                                    matchCount++;
                                 }
-                                if (player_deck_id !== undefined) $row.find('[data-name="player_deck_id"] input').val(player_deck_id);
                             });
-
-                        } catch (err) {
-                            console.error('Errore nel parsing JSON:', err);
+                            $msg.text('Sync completed: ' + matchCount + ' players matched.').css('color', '#46b450').show();
+                        } else {
+                            $msg.text('No players found.').css('color', '#d63638').show();
                         }
-                    });
+                    },
+                    error: function () {
+                        $msg.text('Error during synchronization.').css('color', '#d63638').show();
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).text('Sync Player');
+                        setTimeout(function () { $msg.fadeOut(); }, 5000);
+                    }
+                });
+            });
 
-                    // Sync Players button functionality
-                    $(document).on('click', '#sync-players-btn', function (e) {
-                        e.preventDefault();
+            // Clear Rankings button functionality
+            $(document).on('click', '#clear-rankings-btn', function (e) {
+                e.preventDefault();
 
-                        var $btn = $(this);
-                        var $repeater = $('[data-name="event_ranking"]');
-                        var $rows = $repeater.find('.acf-row:not(.acf-clone)');
-                        var $msg = $('#sync-players-msg');
+                var $btn = $(this);
+                var $repeater = $('[data-name="event_ranking"]');
 
-                        $msg.hide().css('color', '');
+                if (!$repeater.length) {
+                    console.warn('Repeater rankings non trovato');
+                    return;
+                }
 
-                        if (!$rows.length) {
-                            $msg.text('No rows found in rankings.').css('color', '#d63638').show();
-                            setTimeout(function () { $msg.fadeOut(); }, 5000);
-                            return;
-                        }
+                var $tbody = $repeater.find('tbody');
 
-                        $btn.prop('disabled', true).text('Syncing...');
+                // Remove all existing rows
+                $tbody.find('.acf-row').remove();
 
-                        var namesToSync = [];
-                        $rows.each(function (index) {
-                            var $row = $(this);
-                            var name = $row.find('[data-name="name"] input').val();
+                // Trigger ACF update for the repeater
+                acf.doAction('remove', $tbody);
 
-                            if (name) {
-                                namesToSync.push({
-                                    row_index: index,
-                                    name: name
-                                });
-                            }
-                        });
+                // Update row numbers
+                $tbody.find('.acf-row-number').each(function (index) {
+                    $(this).text(index + 1);
+                });
+            });
 
-                        if (namesToSync.length === 0) {
-                            $btn.prop('disabled', false).text('Sync Player');
-                            return;
-                        }
-
-                        $.ajax({
-                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                            type: 'POST',
-                            data: {
-                                action: 'sync_ranking_players',
-                                names: namesToSync,
-                                nonce: '<?php echo wp_create_nonce('sync_ranking_players_nonce'); ?>'
-                            },
-                            success: function (response) {
-                                if (response.success && response.data) {
-                                    var matchCount = 0;
-                                    response.data.forEach(function (match) {
-                                        var $row = $rows.eq(match.row_index);
-                                        var $select = $row.find('[data-name="player_id"] select');
-
-                                        if ($select.length && match.user_id) {
-                                            // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
-                                            if ($select.find('option[value="' + match.user_id + '"]').length === 0) {
-                                                $select.append(new Option(match.display_name, match.user_id, true, true));
-                                            }
-                                            $select.val(match.user_id).trigger('change');
-                                            matchCount++;
-                                        }
-                                    });
-                                    $msg.text('Sync completed: ' + matchCount + ' players matched.').css('color', '#46b450').show();
-                                } else {
-                                    $msg.text('No players found.').css('color', '#d63638').show();
-                                }
-                            },
-                            error: function () {
-                                $msg.text('Error during synchronization.').css('color', '#d63638').show();
-                            },
-                            complete: function () {
-                                $btn.prop('disabled', false).text('Sync Player');
-                                setTimeout(function () { $msg.fadeOut(); }, 5000);
-                            }
-                        });
-                    });
-
-                    // Clear Rankings button functionality
-                    $(document).on('click', '#clear-rankings-btn', function (e) {
-                        e.preventDefault();
-
-                        var $btn = $(this);
-                        var $repeater = $('[data-name="event_ranking"]');
-
-                        if (!$repeater.length) {
-                            console.warn('Repeater rankings non trovato');
-                            return;
-                        }
-
-                        var $tbody = $repeater.find('tbody');
-
-                        // Remove all existing rows
-                        $tbody.find('.acf-row').remove();
-
-                        // Trigger ACF update for the repeater
-                        acf.doAction('remove', $tbody);
-
-                        // Update row numbers
-                        $tbody.find('.acf-row-number').each(function (index) {
-                            $(this).text(index + 1);
-                        });
-                    });
-
-                })(jQuery);
-            </script>
-            <?php
+        })(jQuery);
+    </script>
+    <?php
 }
 add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
 
@@ -2170,31 +2384,31 @@ add_action('acf/input/admin_footer', 'event_ranking_auto_fill_name');
 function add_populate_rankings_button()
 {
     ?>
-            <script type="text/javascript">
-                (function ($) {
-                    // Add buttons after rankings_json field
-                    function addButtons() {
-                        var $jsonField = $('#acf-field_event_rankings_json');
+    <script type="text/javascript">
+        (function ($) {
+            // Add buttons after rankings_json field
+            function addButtons() {
+                var $jsonField = $('#acf-field_event_rankings_json');
 
-                        if ($jsonField.length && !$('#populate-rankings-btn').length) {
-                            $jsonField.after(
-                                '<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px; margin-right:5px;">Populate Rankings</button>' +
-                                '<button type="button" id="sync-players-btn" class="button button-secondary" style="margin-top:5px; margin-right:5px;">Sync Player</button>' +
-                                '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>' +
-                                '<span id="sync-players-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
-                            );
-                        }
-                    }
+                if ($jsonField.length && !$('#populate-rankings-btn').length) {
+                    $jsonField.after(
+                        '<button type="button" id="populate-rankings-btn" class="button button-primary" style="margin-top:5px; margin-right:5px;">Populate Rankings</button>' +
+                        '<button type="button" id="sync-players-btn" class="button button-secondary" style="margin-top:5px; margin-right:5px;">Sync Player</button>' +
+                        '<button type="button" id="clear-rankings-btn" class="button button-secondary" style="margin-top:5px;">Clear Rankings</button>' +
+                        '<span id="sync-players-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
+                    );
+                }
+            }
 
-                    // Run on load and after ACF ready
-                    $(document).ready(function () {
-                        setTimeout(addButtons, 100);
-                    });
+            // Run on load and after ACF ready
+            $(document).ready(function () {
+                setTimeout(addButtons, 100);
+            });
 
-                    acf.add_action('ready', addButtons);
-                })(jQuery);
-            </script>
-            <?php
+            acf.add_action('ready', addButtons);
+        })(jQuery);
+    </script>
+    <?php
 }
 add_action('acf/input/admin_head', 'add_populate_rankings_button');
 
@@ -2342,123 +2556,123 @@ function event_ranking_populate_player_deck()
 {
     ?>
 
-            <script type="text/javascript">
-                (function ($) {
-                    // Function to add temporary select with search below deck field
-                    function addDeckSelector($row, playerId) {
-                        // Remove any existing deck selector
-                        $row.find('.temp-deck-selector').remove();
+    <script type="text/javascript">
+        (function ($) {
+            // Function to add temporary select with search below deck field
+            function addDeckSelector($row, playerId) {
+                // Remove any existing deck selector
+                $row.find('.temp-deck-selector').remove();
 
-                        // Find the deck field
-                        var $deckField = $row.find('.acf-field-ranking-deck');
-                        var $deckIdField = $row.find('.acf-field-ranking-player-deck-id');
+                // Find the deck field
+                var $deckField = $row.find('.acf-field-ranking-deck');
+                var $deckIdField = $row.find('.acf-field-ranking-player-deck-id');
 
-                        if (!$deckField.length || !playerId) {
-                            return;
+                if (!$deckField.length || !playerId) {
+                    return;
+                }
+
+                // Create temporary select element with Select2
+                var $selector = $(
+                    '<div class="temp-deck-selector" style="margin-top:8px;">' +
+                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Select deck:</label>' +
+                    '<select class="deck-quick-select" style="width:100%;">' +
+                    '<option value="">-- Search deck --</option>' +
+                    '</select>' +
+                    '</div>'
+                );
+
+                // Find the deck input and populate when selection changes
+                var $deckInput = $deckField.find('input[type="text"]');
+                var $deckIdInput = $deckIdField.find('input[type="number"]');
+
+                $selector.find('select').on('change', function () {
+                    var selectedDeckId = $(this).val();
+                    var selectedDeckTitle = $(this).find('option:selected').text();
+
+                    if (selectedDeckId) {
+                        $deckInput.val(selectedDeckTitle);
+                        $deckIdInput.val(selectedDeckId);
+                    }
+                });
+
+                // Add selector after the deck field
+                $deckField.append($selector);
+
+                // Initialize Select2 on the new select
+                $selector.find('select').select2({
+                    placeholder: '-- Search deck --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                // Fetch decks for this player
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'get_user_decks',
+                        user_id: playerId,
+                        nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
+                    },
+                    beforeSend: function () {
+                        $selector.find('select').html('<option value="">Loading...</option>');
+                    },
+                    success: function (response) {
+                        var $select = $selector.find('select');
+                        $select.html('<option value="">-- Search deck --</option>');
+
+                        if (response.success && response.data && response.data.length > 0) {
+                            $.each(response.data, function (index, deck) {
+                                $select.append(
+                                    $('<option></option>')
+                                        .val(deck.ID)
+                                        .text(deck.post_title)
+                                );
+                            });
+                        } else {
+                            $select.html('<option value="">No decks available</option>');
                         }
 
-                        // Create temporary select element with Select2
-                        var $selector = $(
-                            '<div class="temp-deck-selector" style="margin-top:8px;">' +
-                            '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Select deck:</label>' +
-                            '<select class="deck-quick-select" style="width:100%;">' +
-                            '<option value="">-- Search deck --</option>' +
-                            '</select>' +
-                            '</div>'
-                        );
-
-                        // Find the deck input and populate when selection changes
-                        var $deckInput = $deckField.find('input[type="text"]');
-                        var $deckIdInput = $deckIdField.find('input[type="number"]');
-
-                        $selector.find('select').on('change', function () {
-                            var selectedDeckId = $(this).val();
-                            var selectedDeckTitle = $(this).find('option:selected').text();
-
-                            if (selectedDeckId) {
-                                $deckInput.val(selectedDeckTitle);
-                                $deckIdInput.val(selectedDeckId);
-                            }
-                        });
-
-                        // Add selector after the deck field
-                        $deckField.append($selector);
-
-                        // Initialize Select2 on the new select
-                        $selector.find('select').select2({
-                            placeholder: '-- Search deck --',
-                            allowClear: true,
-                            width: '100%'
-                        });
-
-                        // Fetch decks for this player
-                        $.ajax({
-                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                            type: 'POST',
-                            data: {
-                                action: 'get_user_decks',
-                                user_id: playerId,
-                                nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
-                            },
-                            beforeSend: function () {
-                                $selector.find('select').html('<option value="">Loading...</option>');
-                            },
-                            success: function (response) {
-                                var $select = $selector.find('select');
-                                $select.html('<option value="">-- Search deck --</option>');
-
-                                if (response.success && response.data && response.data.length > 0) {
-                                    $.each(response.data, function (index, deck) {
-                                        $select.append(
-                                            $('<option></option>')
-                                                .val(deck.ID)
-                                                .text(deck.post_title)
-                                        );
-                                    });
-                                } else {
-                                    $select.html('<option value="">No decks available</option>');
-                                }
-
-                                // Refresh Select2
-                                $select.trigger('change.select2');
-                            },
-                            error: function () {
-                                $selector.find('select').html('<option value="">Loading error</option>');
-                                $selector.find('select').trigger('change.select2');
-                            }
-                        });
+                        // Refresh Select2
+                        $select.trigger('change.select2');
+                    },
+                    error: function () {
+                        $selector.find('select').html('<option value="">Loading error</option>');
+                        $selector.find('select').trigger('change.select2');
                     }
+                });
+            }
 
-                    // Handler for player_id selection in ranking repeater
-                    $(document).on('change', 'select[name*="field_ranking_player_id"]', function (e) {
-                        var $row = $(this).closest('tr.acf-row');
-                        var playerId = $(this).val();
+            // Handler for player_id selection in ranking repeater
+            $(document).on('change', 'select[name*="field_ranking_player_id"]', function (e) {
+                var $row = $(this).closest('tr.acf-row');
+                var playerId = $(this).val();
 
-                        // Update the deck selector for this row
+                // Update the deck selector for this row
+                addDeckSelector($row, playerId);
+            });
+
+            // Handle ACF's ready/append events
+            acf.add_action('ready append', function ($el) {
+                // Find all player_id selects in ranking rows
+                $el.find('select[name*="field_ranking_player_id"]').each(function () {
+                    var $row = $(this).closest('tr.acf-row');
+                    var playerId = $(this).val();
+
+                    if (playerId) {
                         addDeckSelector($row, playerId);
-                    });
+                    }
+                });
+            });
 
-                    // Handle ACF's ready/append events
-                    acf.add_action('ready append', function ($el) {
-                        // Find all player_id selects in ranking rows
-                        $el.find('select[name*="field_ranking_player_id"]').each(function () {
-                            var $row = $(this).closest('tr.acf-row');
-                            var playerId = $(this).val();
+            // Clean up deck selector when row is removed
+            $(document).on('acf/remove', '.acf-row', function () {
+                $(this).find('.temp-deck-selector').remove();
+            });
 
-                            if (playerId) {
-                                addDeckSelector($row, playerId);
-                            }
-                        });
-                    });
-
-                    // Clean up deck selector when row is removed
-                    $(document).on('acf/remove', '.acf-row', function () {
-                        $(this).find('.temp-deck-selector').remove();
-                    });
-
-                })(jQuery);
-            </script>
-            <?php
+        })(jQuery);
+    </script>
+    <?php
 }
 add_action('acf/input/admin_footer', 'event_ranking_populate_player_deck');
 
@@ -2656,153 +2870,153 @@ add_action('wp_ajax_toggle_event_participation', 'ajax_toggle_event_participatio
 function add_update_survey_button_script()
 {
     ?>
-            <script type="text/javascript">
-                (function ($) {
-                    // Add button before survey field
-                    function addUpdateSurveyButton() {
-                        // Target specific field by key to be safe
-                        var $surveyField = $('.acf-field[data-key="field_event_survey"]');
+    <script type="text/javascript">
+        (function ($) {
+            // Add button before survey field
+            function addUpdateSurveyButton() {
+                // Target specific field by key to be safe
+                var $surveyField = $('.acf-field[data-key="field_event_survey"]');
 
-                        if ($surveyField.length && !$('#update-survey-btn').length) {
-                            // Append to the label area of the survey field
-                            $surveyField.find('> .acf-label').append(
-                                '<div class="update-survey-controls" style="margin-top: 10px;">' +
-                                '<button type="button" id="update-survey-btn" class="button button-primary">Update Survey</button>' +
-                                '<span id="update-survey-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>' +
-                                '<p class="description" style="margin-top: 5px;">Automatically adds players from rankings to the survey field if they are not already present.</p>' +
-                                '</div>'
-                            );
+                if ($surveyField.length && !$('#update-survey-btn').length) {
+                    // Append to the label area of the survey field
+                    $surveyField.find('> .acf-label').append(
+                        '<div class="update-survey-controls" style="margin-top: 10px;">' +
+                        '<button type="button" id="update-survey-btn" class="button button-primary">Update Survey</button>' +
+                        '<span id="update-survey-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>' +
+                        '<p class="description" style="margin-top: 5px;">Automatically adds players from rankings to the survey field if they are not already present.</p>' +
+                        '</div>'
+                    );
+                }
+            }
+
+            // Run on load and after ACF ready
+            $(document).ready(function () {
+                setTimeout(addUpdateSurveyButton, 500);
+            });
+
+            if (typeof acf !== 'undefined') {
+                acf.add_action('ready', addUpdateSurveyButton);
+            }
+
+            // Handle click
+            $(document).on('click', '#update-survey-btn', function (e) {
+                e.preventDefault();
+
+                var $msg = $('#update-survey-msg');
+                // Reset message
+                $msg.hide().css('color', '');
+
+                var players = [];
+
+                // Get players from rankings
+                var $rankingRows = $('[data-name="event_ranking"] .acf-row:not(.acf-clone)');
+                $rankingRows.each(function () {
+                    var $field = $(this).find('[data-name="player_id"]');
+                    var $select = $field.find('select');
+                    var val = $select.val();
+
+                    // Try to get text for the option
+                    var text = '';
+                    if ($select.length && val) {
+                        text = $select.find('option[value="' + val + '"]').text();
+                    }
+
+                    // Fallback if text is empty (get it from the name field)
+                    if (!text) {
+                        var $nameInput = $(this).find('[data-name="name"] input');
+                        if ($nameInput.length) {
+                            text = $nameInput.val();
                         }
                     }
 
-                    // Run on load and after ACF ready
-                    $(document).ready(function () {
-                        setTimeout(addUpdateSurveyButton, 500);
-                    });
-
-                    if (typeof acf !== 'undefined') {
-                        acf.add_action('ready', addUpdateSurveyButton);
+                    if (val) {
+                        players.push({ id: val, text: text || 'User ' + val });
                     }
+                });
 
-                    // Handle click
-                    $(document).on('click', '#update-survey-btn', function (e) {
-                        e.preventDefault();
+                // Get existing survey users
+                var existingIds = [];
+                var $surveyRepeater = $('.acf-field[data-key="field_event_survey"]');
+                var $surveyRows = $surveyRepeater.find('.acf-row:not(.acf-clone)');
+                $surveyRows.each(function () {
+                    // Check both select and hidden input (for different ACF versions/settings)
+                    var $field = $(this).find('[data-key="field_survey_user"]');
+                    var $input = $field.find('select');
+                    if (!$input.length) $input = $field.find('input[type="hidden"]');
+                    var val = $input.val();
+                    if (val) {
+                        existingIds.push(val);
+                    }
+                });
 
-                        var $msg = $('#update-survey-msg');
-                        // Reset message
-                        $msg.hide().css('color', '');
+                // Filter new users
+                var newPlayers = players.filter(function (player) {
+                    return existingIds.indexOf(player.id) === -1;
+                });
 
-                        var players = [];
+                // Remove duplicates
+                var uniquePlayers = [];
+                var uniqueIds = [];
+                $.each(newPlayers, function (i, el) {
+                    if ($.inArray(el.id, uniqueIds) === -1) {
+                        uniqueIds.push(el.id);
+                        uniquePlayers.push(el);
+                    }
+                });
+                newPlayers = uniquePlayers;
 
-                        // Get players from rankings
-                        var $rankingRows = $('[data-name="event_ranking"] .acf-row:not(.acf-clone)');
-                        $rankingRows.each(function () {
-                            var $field = $(this).find('[data-name="player_id"]');
-                            var $select = $field.find('select');
-                            var val = $select.val();
+                if (newPlayers.length === 0) {
+                    $msg.text('All players are already present.').css('color', '#d63638').show();
+                    return;
+                }
 
-                            // Try to get text for the option
-                            var text = '';
-                            if ($select.length && val) {
-                                text = $select.find('option[value="' + val + '"]').text();
-                            }
+                // Add rows using DOM manipulation with delay to ensure fields are ready
+                var $addButton = $surveyRepeater.find('.acf-button[data-event="add-row"]');
 
-                            // Fallback if text is empty (get it from the name field)
-                            if (!text) {
-                                var $nameInput = $(this).find('[data-name="name"] input');
-                                if ($nameInput.length) {
-                                    text = $nameInput.val();
-                                }
-                            }
+                if ($addButton.length) {
+                    var addedCount = 0;
 
-                            if (val) {
-                                players.push({ id: val, text: text || 'User ' + val });
-                            }
-                        });
-
-                        // Get existing survey users
-                        var existingIds = [];
-                        var $surveyRepeater = $('.acf-field[data-key="field_event_survey"]');
-                        var $surveyRows = $surveyRepeater.find('.acf-row:not(.acf-clone)');
-                        $surveyRows.each(function () {
-                            // Check both select and hidden input (for different ACF versions/settings)
-                            var $field = $(this).find('[data-key="field_survey_user"]');
-                            var $input = $field.find('select');
-                            if (!$input.length) $input = $field.find('input[type="hidden"]');
-                            var val = $input.val();
-                            if (val) {
-                                existingIds.push(val);
-                            }
-                        });
-
-                        // Filter new users
-                        var newPlayers = players.filter(function (player) {
-                            return existingIds.indexOf(player.id) === -1;
-                        });
-
-                        // Remove duplicates
-                        var uniquePlayers = [];
-                        var uniqueIds = [];
-                        $.each(newPlayers, function (i, el) {
-                            if ($.inArray(el.id, uniqueIds) === -1) {
-                                uniqueIds.push(el.id);
-                                uniquePlayers.push(el);
-                            }
-                        });
-                        newPlayers = uniquePlayers;
-
-                        if (newPlayers.length === 0) {
-                            $msg.text('All players are already present.').css('color', '#d63638').show();
+                    function addNextUser(index) {
+                        if (index >= newPlayers.length) {
+                            $msg.text('Successfully added ' + addedCount + ' users!').css('color', '#46b450').show();
+                            setTimeout(function () { $msg.fadeOut(); }, 5000);
                             return;
                         }
 
-                        // Add rows using DOM manipulation with delay to ensure fields are ready
-                        var $addButton = $surveyRepeater.find('.acf-button[data-event="add-row"]');
+                        var player = newPlayers[index];
+                        $addButton.click();
 
-                        if ($addButton.length) {
-                            var addedCount = 0;
+                        // Wait a tick for DOM update and ACF initialization
+                        setTimeout(function () {
+                            var $newRow = $surveyRepeater.find('.acf-row:not(.acf-clone)').last();
+                            var $field = $newRow.find('[data-key="field_survey_user"]');
+                            var $select = $field.find('select');
 
-                            function addNextUser(index) {
-                                if (index >= newPlayers.length) {
-                                    $msg.text('Successfully added ' + addedCount + ' users!').css('color', '#46b450').show();
-                                    setTimeout(function () { $msg.fadeOut(); }, 5000);
-                                    return;
+                            if ($select.length) {
+                                // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
+                                if ($select.find('option[value="' + player.id + '"]').length === 0) {
+                                    $select.append(new Option(player.text, player.id, true, true));
                                 }
-
-                                var player = newPlayers[index];
-                                $addButton.click();
-
-                                // Wait a tick for DOM update and ACF initialization
-                                setTimeout(function () {
-                                    var $newRow = $surveyRepeater.find('.acf-row:not(.acf-clone)').last();
-                                    var $field = $newRow.find('[data-key="field_survey_user"]');
-                                    var $select = $field.find('select');
-
-                                    if ($select.length) {
-                                        // If it's a Select2/AJAX field, we might need to add the option tag if it doesn't exist
-                                        if ($select.find('option[value="' + player.id + '"]').length === 0) {
-                                            $select.append(new Option(player.text, player.id, true, true));
-                                        }
-                                        $select.val(player.id).trigger('change');
-                                    } else {
-                                        // Fallback for hidden input
-                                        $field.find('input[type="hidden"]').val(player.id).trigger('change');
-                                    }
-
-                                    addedCount++;
-                                    addNextUser(index + 1);
-                                }, 200);
+                                $select.val(player.id).trigger('change');
+                            } else {
+                                // Fallback for hidden input
+                                $field.find('input[type="hidden"]').val(player.id).trigger('change');
                             }
 
-                            addNextUser(0);
-                        } else {
-                            alert('Error: Cannot find "Add Row" button.');
-                        }
-                    });
+                            addedCount++;
+                            addNextUser(index + 1);
+                        }, 200);
+                    }
 
-                })(jQuery);
-            </script>
-            <?php
+                    addNextUser(0);
+                } else {
+                    alert('Error: Cannot find "Add Row" button.');
+                }
+            });
+
+        })(jQuery);
+    </script>
+    <?php
 }
 add_action('acf/input/admin_footer', 'add_update_survey_button_script');
 
@@ -3135,335 +3349,335 @@ function render_player_stats_page()
 
     // Render HTML
     ?>
-            <div class="wrap">
-                <h1>Player Stats: <?php echo esc_html($target_user ? $target_user->display_name : 'Unknown User'); ?></h1>
+    <div class="wrap">
+        <h1>Player Stats: <?php echo esc_html($target_user ? $target_user->display_name : 'Unknown User'); ?></h1>
 
-                <form method="get" action="" style="margin: 20px 0;">
-                    <input type="hidden" name="page" value="player-stats">
+        <form method="get" action="" style="margin: 20px 0;">
+            <input type="hidden" name="page" value="player-stats">
 
-                    <?php if (current_user_can('administrator')): ?>
-                                <div
-                                    style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block;">
-                                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px;">Select Player (Admin):</label>
-                                    <?php
-                                    wp_dropdown_users(array(
-                                        'name' => 'stats_user_id',
-                                        'selected' => $user_id,
-                                        'show_option_none' => 'Select User',
-                                        'show' => 'display_name_with_login',
-                                        'class' => '',
-                                    ));
-                                    ?>
-                                    <input type="submit" class="button" value="View">
-                                </div>
-                                <br>
-                    <?php endif; ?>
-
-                    <label for="stats_year" style="font-weight: bold; margin-right: 10px;">Filter by year:</label>
-                    <select name="stats_year" id="stats_year" onchange="this.form.submit()">
-                        <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
-                        <?php foreach ($available_years as $y): ?>
-                                    <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
-                                        <?php echo esc_html($y); ?>
-                                    </option>
-                        <?php endforeach; ?>
-                    </select>
-                </form>
-
-                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
-                    <!-- Box 1: Riepilogo -->
-                    <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                        <h2 class="title">Summary</h2>
-                        <div style="margin-top: 15px;">
-                            <table class="form-table" role="presentation">
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">Tournament Attendance</th>
-                                        <td><?php echo $total_attendance; ?> 🙋</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Wins (1st place)</th>
-                                        <td><?php echo $total_wins; ?> 🏆</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Last Places</th>
-                                        <td><?php echo $total_last_places; ?> 🤡</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Most Used Deck</th>
-                                        <td>
-                                            <?php if ($most_used_deck_id): ?>
-                                                        <a
-                                                            href="<?php echo get_edit_post_link($most_used_deck_id); ?>"><?php echo esc_html($most_used_deck_name); ?></a>
-                                            <?php else: ?>
-                                                        <?php echo esc_html($most_used_deck_name); ?>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Box 2: Mazzi più usati -->
-                    <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                        <h2 class="title">Most Used Decks</h2>
-                        <canvas id="deckUsageChart" style="max-height: 300px;"></canvas>
-                    </div>
-
-                    <!-- Box 3: Andamento Win Rate -->
-                    <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                        <h2 class="title">Win Rate Trend</h2>
-                        <canvas id="winRateChart" style="max-height: 300px;"></canvas>
-                    </div>
-
-                    <!-- Box 4: Andamento ELO -->
-                    <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
-                        <h2 class="title">ELO Trend</h2>
-                        <canvas id="eloChart" style="max-height: 300px;"></canvas>
-                    </div>
+            <?php if (current_user_can('administrator')): ?>
+                <div
+                    style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block;">
+                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px;">Select Player (Admin):</label>
+                    <?php
+                    wp_dropdown_users(array(
+                        'name' => 'stats_user_id',
+                        'selected' => $user_id,
+                        'show_option_none' => 'Select User',
+                        'show' => 'display_name_with_login',
+                        'class' => '',
+                    ));
+                    ?>
+                    <input type="submit" class="button" value="View">
                 </div>
+                <br>
+            <?php endif; ?>
 
-                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Pie Chart
-                        var ctx = document.getElementById('deckUsageChart').getContext('2d');
-                        new Chart(ctx, {
-                            type: 'pie',
-                            data: {
-                                labels: <?php echo json_encode($chart_labels); ?>,
-                                datasets: [{
-                                    data: <?php echo json_encode($chart_data); ?>,
-                                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#76A346', '#FDB45C', '#949FB1', '#4D5360'],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { position: 'bottom' } }
-                            }
-                        });
+            <label for="stats_year" style="font-weight: bold; margin-right: 10px;">Filter by year:</label>
+            <select name="stats_year" id="stats_year" onchange="this.form.submit()">
+                <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
+                <?php foreach ($available_years as $y): ?>
+                    <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
+                        <?php echo esc_html($y); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </form>
 
-                        // Line Chart
-                        var ctxLine = document.getElementById('winRateChart').getContext('2d');
-                        new Chart(ctxLine, {
-                            type: 'line',
-                            data: {
-                                labels: <?php echo json_encode($line_labels); ?>,
-                                datasets: [{
-                                    label: 'Win Rate %',
-                                    data: <?php echo json_encode($line_data); ?>,
-                                    borderColor: '#36A2EB',
-                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                    tension: 0.3,
-                                    fill: true
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        max: 100,
-                                        ticks: { callback: function (value) { return value + "%" } }
-                                    }
-                                },
-                                plugins: { legend: { display: false } }
-                            }
-                        });
-
-                        // ELO Chart
-                        var ctxElo = document.getElementById('eloChart').getContext('2d');
-                        new Chart(ctxElo, {
-                            type: 'line',
-                            data: {
-                                labels: <?php echo json_encode($elo_history_labels); ?>,
-                                datasets: [{
-                                    label: 'ELO',
-                                    data: <?php echo json_encode($elo_history_data); ?>,
-                                    borderColor: '#8e44ad',
-                                    backgroundColor: 'rgba(142, 68, 173, 0.2)',
-                                    tension: 0.3,
-                                    fill: true
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } }
-                            }
-                        });
-                    });
-                </script>
-
-
-                <hr style="margin: 30px 0;">
-
-                <h2>My Decks</h2>
-                <table class="wp-list-table widefat fixed striped table-view-list">
-                    <thead>
-                        <tr>
-                            <th>Deck</th>
-                            <th>Tournament Wins</th>
-                            <th>Match Wins</th>
-                            <th>Match Draws</th>
-                            <th>Match Losses</th>
-                            <th>Win Rate</th>
-                            <th>Attendance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($current_page_decks)): ?>
-                                    <?php foreach ($current_page_decks as $deck):
-                                        $total_matches = $deck['stats']['match_wins'] + $deck['stats']['match_draws'] + $deck['stats']['match_losses'];
-                                        $win_rate = $total_matches > 0 ? round(($deck['stats']['match_wins'] / $total_matches) * 100, 1) : 0;
-                                        ?>
-                                                <tr>
-                                                    <td>
-                                                        <strong><a
-                                                                href="<?php echo get_edit_post_link($deck['id']); ?>"><?php echo esc_html($deck['title']); ?></a></strong>
-                                                        <?php if ($deck['commander']): ?>
-                                                                    <br>
-                                                                    <span class="description">
-                                                                        <?php echo esc_html($deck['commander']); ?>
-                                                                        <?php if ($deck['partner'])
-                                                                            echo ' (' . esc_html($deck['partner']) . ')'; ?>
-                                                                    </span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?php echo $deck['stats']['wins']; ?></td>
-                                                    <td><?php echo $deck['stats']['match_wins']; ?></td>
-                                                    <td><?php echo $deck['stats']['match_draws']; ?></td>
-                                                    <td><?php echo $deck['stats']['match_losses']; ?></td>
-                                                    <td><?php echo $win_rate; ?>%</td>
-                                                    <td><?php echo $deck['stats']['attendance']; ?></td>
-                                                </tr>
-                                    <?php endforeach; ?>
-                        <?php else: ?>
-                                    <tr>
-                                        <td colspan="7">No decks found.</td>
-                                    </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-
-                <?php
-                // Pagination Decks
-                if ($total_deck_pages > 1) {
-                    $page_links = paginate_links(array(
-                        'base' => add_query_arg('paged_decks', '%#%'),
-                        'format' => '',
-                        'prev_text' => '&laquo;',
-                        'next_text' => '&raquo;',
-                        'total' => $total_deck_pages,
-                        'current' => $paged_decks,
-                        'add_args' => array('paged_events' => $paged_events) // Keep event page
-                    ));
-                    if ($page_links) {
-                        echo '<div class="tablenav"><div class="tablenav-pages">' . $page_links . '</div></div>';
-                    }
-                }
-                ?>
-
-                <hr style="margin: 30px 0;">
-
-                <h2>Event History</h2>
-                <table class="wp-list-table widefat fixed striped table-view-list">
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Date and Place</th>
-                            <th>Position</th>
-                            <th>Participants</th>
-                            <th>Deck Used</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($current_page_events)): ?>
-                                    <?php foreach ($current_page_events as $event_data):
-                                        $event_post = $event_data['event_post'];
-                                        $rank = $event_data['ranking'];
-                                        $event_date = $event_data['event_date'];
-                                        $total_players = $event_data['total_players'];
-
-                                        $place_obj = get_field('field_event_place', $event_post->ID);
-                                        $place_name = $place_obj ? $place_obj->post_title : '-';
-
-                                        $deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : 0;
-                                        $deck_name_manual = isset($rank['deck']) ? $rank['deck'] : '';
-                                        $deck_name = '-';
-                                        if ($deck_id) {
-                                            $d_post = get_post($deck_id);
-                                            if ($d_post)
-                                                $deck_name = $d_post->post_title;
-                                        }
-
-                                        $pos_style = '';
-                                        if ($rank['pos'] == 1)
-                                            $pos_style = 'color: #D4AF37; font-weight: bold;';
-                                        elseif ($rank['pos'] == 2)
-                                            $pos_style = 'color: #A9A9A9; font-weight: bold;';
-                                        elseif ($rank['pos'] == 3)
-                                            $pos_style = 'color: #CD7F32; font-weight: bold;';
-                                        ?>
-                                                <tr>
-                                                    <td>
-                                                        <a href="<?php echo get_permalink($event_post->ID); ?>" target="_blank">
-                                                            <?php echo esc_html($event_post->post_title); ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <?php
-                                                        if ($event_date)
-                                                            echo date_i18n('d/m/Y', strtotime($event_date));
-                                                        echo '<br><span class="description">' . esc_html($place_name) . '</span>';
-                                                        ?>
-                                                    </td>
-                                                    <td><span style="<?php echo $pos_style; ?>"><?php echo esc_html($rank['pos']); ?></span></td>
-                                                    <td><?php echo $total_players; ?></td>
-                                                    <td>
-                                                        <?php if ($deck_id): ?>
-                                                                    <a href="<?php echo get_edit_post_link($deck_id); ?>">
-                                                                        <?php echo esc_html($deck_name); ?>
-                                                                    </a>
-                                                        <?php elseif (!empty($deck_name_manual)): ?>
-                                                                    <?php echo esc_html($deck_name_manual); ?>
-                                                        <?php else: ?>
-                                                                    -
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
-                                    <?php endforeach; ?>
-                        <?php else: ?>
-                                    <tr>
-                                        <td colspan="5">No events found.</td>
-                                    </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-
-                <?php
-                // Pagination Events
-                if ($total_event_pages > 1) {
-                    $page_links = paginate_links(array(
-                        'base' => add_query_arg('paged_events', '%#%'),
-                        'format' => '',
-                        'prev_text' => '&laquo;',
-                        'next_text' => '&raquo;',
-                        'total' => $total_event_pages,
-                        'current' => $paged_events,
-                        'add_args' => array('paged_decks' => $paged_decks) // Keep deck page
-                    ));
-                    if ($page_links) {
-                        echo '<div class="tablenav"><div class="tablenav-pages">' . $page_links . '</div></div>';
-                    }
-                }
-                ?>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+            <!-- Box 1: Riepilogo -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title">Summary</h2>
+                <div style="margin-top: 15px;">
+                    <table class="form-table" role="presentation">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Tournament Attendance</th>
+                                <td><?php echo $total_attendance; ?> 🙋</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Wins (1st place)</th>
+                                <td><?php echo $total_wins; ?> 🏆</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Last Places</th>
+                                <td><?php echo $total_last_places; ?> 🤡</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Most Used Deck</th>
+                                <td>
+                                    <?php if ($most_used_deck_id): ?>
+                                        <a
+                                            href="<?php echo get_edit_post_link($most_used_deck_id); ?>"><?php echo esc_html($most_used_deck_name); ?></a>
+                                    <?php else: ?>
+                                        <?php echo esc_html($most_used_deck_name); ?>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <?php
+
+            <!-- Box 2: Mazzi più usati -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title">Most Used Decks</h2>
+                <canvas id="deckUsageChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <!-- Box 3: Andamento Win Rate -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title">Win Rate Trend</h2>
+                <canvas id="winRateChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <!-- Box 4: Andamento ELO -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title">ELO Trend</h2>
+                <canvas id="eloChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Pie Chart
+                var ctx = document.getElementById('deckUsageChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: <?php echo json_encode($chart_labels); ?>,
+                        datasets: [{
+                            data: <?php echo json_encode($chart_data); ?>,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#76A346', '#FDB45C', '#949FB1', '#4D5360'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+
+                // Line Chart
+                var ctxLine = document.getElementById('winRateChart').getContext('2d');
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: <?php echo json_encode($line_labels); ?>,
+                        datasets: [{
+                            label: 'Win Rate %',
+                            data: <?php echo json_encode($line_data); ?>,
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { callback: function (value) { return value + "%" } }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // ELO Chart
+                var ctxElo = document.getElementById('eloChart').getContext('2d');
+                new Chart(ctxElo, {
+                    type: 'line',
+                    data: {
+                        labels: <?php echo json_encode($elo_history_labels); ?>,
+                        datasets: [{
+                            label: 'ELO',
+                            data: <?php echo json_encode($elo_history_data); ?>,
+                            borderColor: '#8e44ad',
+                            backgroundColor: 'rgba(142, 68, 173, 0.2)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            });
+        </script>
+
+
+        <hr style="margin: 30px 0;">
+
+        <h2>My Decks</h2>
+        <table class="wp-list-table widefat fixed striped table-view-list">
+            <thead>
+                <tr>
+                    <th>Deck</th>
+                    <th>Tournament Wins</th>
+                    <th>Match Wins</th>
+                    <th>Match Draws</th>
+                    <th>Match Losses</th>
+                    <th>Win Rate</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($current_page_decks)): ?>
+                    <?php foreach ($current_page_decks as $deck):
+                        $total_matches = $deck['stats']['match_wins'] + $deck['stats']['match_draws'] + $deck['stats']['match_losses'];
+                        $win_rate = $total_matches > 0 ? round(($deck['stats']['match_wins'] / $total_matches) * 100, 1) : 0;
+                        ?>
+                        <tr>
+                            <td>
+                                <strong><a
+                                        href="<?php echo get_edit_post_link($deck['id']); ?>"><?php echo esc_html($deck['title']); ?></a></strong>
+                                <?php if ($deck['commander']): ?>
+                                    <br>
+                                    <span class="description">
+                                        <?php echo esc_html($deck['commander']); ?>
+                                        <?php if ($deck['partner'])
+                                            echo ' (' . esc_html($deck['partner']) . ')'; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo $deck['stats']['wins']; ?></td>
+                            <td><?php echo $deck['stats']['match_wins']; ?></td>
+                            <td><?php echo $deck['stats']['match_draws']; ?></td>
+                            <td><?php echo $deck['stats']['match_losses']; ?></td>
+                            <td><?php echo $win_rate; ?>%</td>
+                            <td><?php echo $deck['stats']['attendance']; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="7">No decks found.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <?php
+        // Pagination Decks
+        if ($total_deck_pages > 1) {
+            $page_links = paginate_links(array(
+                'base' => add_query_arg('paged_decks', '%#%'),
+                'format' => '',
+                'prev_text' => '&laquo;',
+                'next_text' => '&raquo;',
+                'total' => $total_deck_pages,
+                'current' => $paged_decks,
+                'add_args' => array('paged_events' => $paged_events) // Keep event page
+            ));
+            if ($page_links) {
+                echo '<div class="tablenav"><div class="tablenav-pages">' . $page_links . '</div></div>';
+            }
+        }
+        ?>
+
+        <hr style="margin: 30px 0;">
+
+        <h2>Event History</h2>
+        <table class="wp-list-table widefat fixed striped table-view-list">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date and Place</th>
+                    <th>Position</th>
+                    <th>Participants</th>
+                    <th>Deck Used</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($current_page_events)): ?>
+                    <?php foreach ($current_page_events as $event_data):
+                        $event_post = $event_data['event_post'];
+                        $rank = $event_data['ranking'];
+                        $event_date = $event_data['event_date'];
+                        $total_players = $event_data['total_players'];
+
+                        $place_obj = get_field('field_event_place', $event_post->ID);
+                        $place_name = $place_obj ? $place_obj->post_title : '-';
+
+                        $deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : 0;
+                        $deck_name_manual = isset($rank['deck']) ? $rank['deck'] : '';
+                        $deck_name = '-';
+                        if ($deck_id) {
+                            $d_post = get_post($deck_id);
+                            if ($d_post)
+                                $deck_name = $d_post->post_title;
+                        }
+
+                        $pos_style = '';
+                        if ($rank['pos'] == 1)
+                            $pos_style = 'color: #D4AF37; font-weight: bold;';
+                        elseif ($rank['pos'] == 2)
+                            $pos_style = 'color: #A9A9A9; font-weight: bold;';
+                        elseif ($rank['pos'] == 3)
+                            $pos_style = 'color: #CD7F32; font-weight: bold;';
+                        ?>
+                        <tr>
+                            <td>
+                                <a href="<?php echo get_permalink($event_post->ID); ?>" target="_blank">
+                                    <?php echo esc_html($event_post->post_title); ?>
+                                </a>
+                            </td>
+                            <td>
+                                <?php
+                                if ($event_date)
+                                    echo date_i18n('d/m/Y', strtotime($event_date));
+                                echo '<br><span class="description">' . esc_html($place_name) . '</span>';
+                                ?>
+                            </td>
+                            <td><span style="<?php echo $pos_style; ?>"><?php echo esc_html($rank['pos']); ?></span></td>
+                            <td><?php echo $total_players; ?></td>
+                            <td>
+                                <?php if ($deck_id): ?>
+                                    <a href="<?php echo get_edit_post_link($deck_id); ?>">
+                                        <?php echo esc_html($deck_name); ?>
+                                    </a>
+                                <?php elseif (!empty($deck_name_manual)): ?>
+                                    <?php echo esc_html($deck_name_manual); ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5">No events found.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <?php
+        // Pagination Events
+        if ($total_event_pages > 1) {
+            $page_links = paginate_links(array(
+                'base' => add_query_arg('paged_events', '%#%'),
+                'format' => '',
+                'prev_text' => '&laquo;',
+                'next_text' => '&raquo;',
+                'total' => $total_event_pages,
+                'current' => $paged_events,
+                'add_args' => array('paged_decks' => $paged_decks) // Keep deck page
+            ));
+            if ($page_links) {
+                echo '<div class="tablenav"><div class="tablenav-pages">' . $page_links . '</div></div>';
+            }
+        }
+        ?>
+    </div>
+    <?php
 }
 
 /**
@@ -3495,72 +3709,72 @@ function add_update_leaderboard_button()
         return;
     }
     ?>
-            <script type="text/javascript">
-                (function ($) {
-                    function addUpdateLeaderboardButton() {
-                        var $jsonField = $('.acf-field[data-key="field_leaderboard_rankings_json"]');
+    <script type="text/javascript">
+        (function ($) {
+            function addUpdateLeaderboardButton() {
+                var $jsonField = $('.acf-field[data-key="field_leaderboard_rankings_json"]');
 
-                        if ($jsonField.length && !$('#update-leaderboard-btn').length) {
-                            $jsonField.find('.acf-input').append(
-                                '<button type="button" id="update-leaderboard-btn" class="button button-primary" style="margin-top:10px;">Update Leaderboard</button>' +
-                                '<span id="update-leaderboard-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
-                            );
+                if ($jsonField.length && !$('#update-leaderboard-btn').length) {
+                    $jsonField.find('.acf-input').append(
+                        '<button type="button" id="update-leaderboard-btn" class="button button-primary" style="margin-top:10px;">Update Leaderboard</button>' +
+                        '<span id="update-leaderboard-msg" style="margin-left: 10px; font-weight: bold; display: none;"></span>'
+                    );
+                }
+            }
+
+            $(document).ready(function () {
+                setTimeout(addUpdateLeaderboardButton, 500);
+            });
+
+            if (typeof acf !== 'undefined') {
+                acf.add_action('ready', addUpdateLeaderboardButton);
+            }
+
+            $(document).on('click', '#update-leaderboard-btn', function (e) {
+                e.preventDefault();
+                var $btn = $(this);
+                var $msg = $('#update-leaderboard-msg');
+                var $yearField = $('.acf-field[data-key="field_leaderboard_year"] select');
+                var year = $yearField.val();
+
+                if (!year) {
+                    alert('Select a year before updating.');
+                    return;
+                }
+
+                $btn.prop('disabled', true).text('Updating...');
+                $msg.hide();
+
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'update_leaderboard_rankings',
+                        year: year,
+                        post_id: <?php echo get_the_ID() ? get_the_ID() : 0; ?>,
+                        nonce: '<?php echo wp_create_nonce('update_leaderboard_nonce'); ?>'
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var $textarea = $('.acf-field[data-key="field_leaderboard_rankings_json"] textarea');
+                            $textarea.val(JSON.stringify(response.data, null, 2));
+                            $msg.text('Leaderboard updated!').css('color', '#46b450').show();
+                        } else {
+                            $msg.text('Error: ' + (response.data || 'Unknown')).css('color', '#d63638').show();
                         }
+                    },
+                    error: function () {
+                        $msg.text('Connection error.').css('color', '#d63638').show();
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).text('Update Leaderboard');
+                        setTimeout(function () { $msg.fadeOut(); }, 5000);
                     }
-
-                    $(document).ready(function () {
-                        setTimeout(addUpdateLeaderboardButton, 500);
-                    });
-
-                    if (typeof acf !== 'undefined') {
-                        acf.add_action('ready', addUpdateLeaderboardButton);
-                    }
-
-                    $(document).on('click', '#update-leaderboard-btn', function (e) {
-                        e.preventDefault();
-                        var $btn = $(this);
-                        var $msg = $('#update-leaderboard-msg');
-                        var $yearField = $('.acf-field[data-key="field_leaderboard_year"] select');
-                        var year = $yearField.val();
-
-                        if (!year) {
-                            alert('Select a year before updating.');
-                            return;
-                        }
-
-                        $btn.prop('disabled', true).text('Updating...');
-                        $msg.hide();
-
-                        $.ajax({
-                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                            type: 'POST',
-                            data: {
-                                action: 'update_leaderboard_rankings',
-                                year: year,
-                                post_id: <?php echo get_the_ID() ? get_the_ID() : 0; ?>,
-                                nonce: '<?php echo wp_create_nonce('update_leaderboard_nonce'); ?>'
-                            },
-                            success: function (response) {
-                                if (response.success) {
-                                    var $textarea = $('.acf-field[data-key="field_leaderboard_rankings_json"] textarea');
-                                    $textarea.val(JSON.stringify(response.data, null, 2));
-                                    $msg.text('Leaderboard updated!').css('color', '#46b450').show();
-                                } else {
-                                    $msg.text('Error: ' + (response.data || 'Unknown')).css('color', '#d63638').show();
-                                }
-                            },
-                            error: function () {
-                                $msg.text('Connection error.').css('color', '#d63638').show();
-                            },
-                            complete: function () {
-                                $btn.prop('disabled', false).text('Update Leaderboard');
-                                setTimeout(function () { $msg.fadeOut(); }, 5000);
-                            }
-                        });
-                    });
-                })(jQuery);
-            </script>
-            <?php
+                });
+            });
+        })(jQuery);
+    </script>
+    <?php
 }
 add_action('acf/input/admin_footer', 'add_update_leaderboard_button');
 
@@ -4241,14 +4455,14 @@ function lpdh_banned_card_shortcode($atts)
 
         ob_start();
         ?>
-                        <div class="banned-cards-list mx-auto" style="max-width: 900px;">
-                            <?php get_template_part('template-parts/shortcode-banned-card', null, array('align' => $atts['align'])); ?>
-                        </div>
-                        <?php
-                        $output = ob_get_clean();
+        <div class="banned-cards-list mx-auto" style="max-width: 900px;">
+            <?php get_template_part('template-parts/shortcode-banned-card', null, array('align' => $atts['align'])); ?>
+        </div>
+        <?php
+        $output = ob_get_clean();
 
-                        wp_reset_postdata();
-                        return $output;
+        wp_reset_postdata();
+        return $output;
     }
 
     return '';
@@ -4298,125 +4512,125 @@ function lpdh_theme_settings_render()
     $profile_editor_page_id = get_option('lpdh_profile_editor_page_id', 0);
     $stats_page_id = get_option('lpdh_stats_page_id', 0);
     ?>
-            <div class="wrap">
-                <h1>LPDH Theme Settings</h1>
-                <form method="post">
-                    <?php wp_nonce_field('lpdh_theme_settings_save'); ?>
-                    <input type="hidden" name="lpdh_theme_action" value="save">
+    <div class="wrap">
+        <h1>LPDH Theme Settings</h1>
+        <form method="post">
+            <?php wp_nonce_field('lpdh_theme_settings_save'); ?>
+            <input type="hidden" name="lpdh_theme_action" value="save">
 
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">Active Theme</th>
-                            <td>
-                                <select name="lpdh_active_theme">
-                                    <option value="default" <?php selected($active_theme, 'default'); ?>>Bootscore Default</option>
-                                    <option value="vaporwave" <?php selected($active_theme, 'vaporwave'); ?>>Vaporwave (80s Neon)
-                                    </option>
-                                    <option value="vaporwave-green" <?php selected($active_theme, 'vaporwave-green'); ?>>Vaporwave
-                                        Green (Neon Forest)
-                                    </option>
-                                    <option value="lost-wood" <?php selected($active_theme, 'lost-wood'); ?>>Lost Wood (Forest)
-                                    </option>
-                                </select>
-                                <p class="description">Select the aesthetic for the entire platform.</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Select Deck Editor Page</th>
-                            <td>
-                                <?php
-                                wp_dropdown_pages(array(
-                                    'name' => 'lpdh_deck_editor_page_id',
-                                    'selected' => $deck_editor_page_id,
-                                    'show_option_none' => '-- Select Page --',
-                                    'option_none_value' => '0'
-                                ));
-                                ?>
-                                <p class="description">Select the page that uses the "Deck Editor" template.</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Select Profile Editor Page</th>
-                            <td>
-                                <?php
-                                wp_dropdown_pages(array(
-                                    'name' => 'lpdh_profile_editor_page_id',
-                                    'selected' => $profile_editor_page_id,
-                                    'show_option_none' => '-- Select Page --',
-                                    'option_none_value' => '0'
-                                ));
-                                ?>
-                                <p class="description">Select the page that uses the "User Profile Editor" template.</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Select Statistics Page</th>
-                            <td>
-                                <?php
-                                wp_dropdown_pages(array(
-                                    'name' => 'lpdh_stats_page_id',
-                                    'selected' => $stats_page_id,
-                                    'show_option_none' => '-- Select Page --',
-                                    'option_none_value' => '0'
-                                ));
-                                ?>
-                                <p class="description">Select the page that uses the "User Statistics" template.</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Select Login/Register Page</th>
-                            <td>
-                                <?php
-                                $login_register_page_id = get_option('lpdh_login_register_page_id', 0);
-                                wp_dropdown_pages(array(
-                                    'name' => 'lpdh_login_register_page_id',
-                                    'selected' => $login_register_page_id,
-                                    'show_option_none' => '-- Select Page --',
-                                    'option_none_value' => '0'
-                                ));
-                                ?>
-                                <p class="description">Select the page that uses the "Registration Page" template.</p>
-                            </td>
-                        </tr>
-                    </table>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Active Theme</th>
+                    <td>
+                        <select name="lpdh_active_theme">
+                            <option value="default" <?php selected($active_theme, 'default'); ?>>Bootscore Default</option>
+                            <option value="vaporwave" <?php selected($active_theme, 'vaporwave'); ?>>Vaporwave (80s Neon)
+                            </option>
+                            <option value="vaporwave-green" <?php selected($active_theme, 'vaporwave-green'); ?>>Vaporwave
+                                Green (Neon Forest)
+                            </option>
+                            <option value="lost-wood" <?php selected($active_theme, 'lost-wood'); ?>>Lost Wood (Forest)
+                            </option>
+                        </select>
+                        <p class="description">Select the aesthetic for the entire platform.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Deck Editor Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_deck_editor_page_id',
+                            'selected' => $deck_editor_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Deck Editor" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Profile Editor Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_profile_editor_page_id',
+                            'selected' => $profile_editor_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "User Profile Editor" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Statistics Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_stats_page_id',
+                            'selected' => $stats_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "User Statistics" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Login/Register Page</th>
+                    <td>
+                        <?php
+                        $login_register_page_id = get_option('lpdh_login_register_page_id', 0);
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_login_register_page_id',
+                            'selected' => $login_register_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Registration Page" template.</p>
+                    </td>
+                </tr>
+            </table>
 
-                    <hr>
-                    <h2>Socials</h2>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">Instagram URL</th>
-                            <td>
-                                <input type="url" name="lpdh_instagram_link"
-                                    value="<?php echo esc_url(get_option('lpdh_instagram_link')); ?>" class="regular-text">
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Discord URL</th>
-                            <td>
-                                <input type="url" name="lpdh_discord_link"
-                                    value="<?php echo esc_url(get_option('lpdh_discord_link')); ?>" class="regular-text">
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Facebook URL</th>
-                            <td>
-                                <input type="url" name="lpdh_facebook_link"
-                                    value="<?php echo esc_url(get_option('lpdh_facebook_link')); ?>" class="regular-text">
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">X (Twitter) URL</th>
-                            <td>
-                                <input type="url" name="lpdh_x_link" value="<?php echo esc_url(get_option('lpdh_x_link')); ?>"
-                                    class="regular-text">
-                            </td>
-                        </tr>
-                    </table>
+            <hr>
+            <h2>Socials</h2>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Instagram URL</th>
+                    <td>
+                        <input type="url" name="lpdh_instagram_link"
+                            value="<?php echo esc_url(get_option('lpdh_instagram_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Discord URL</th>
+                    <td>
+                        <input type="url" name="lpdh_discord_link"
+                            value="<?php echo esc_url(get_option('lpdh_discord_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Facebook URL</th>
+                    <td>
+                        <input type="url" name="lpdh_facebook_link"
+                            value="<?php echo esc_url(get_option('lpdh_facebook_link')); ?>" class="regular-text">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">X (Twitter) URL</th>
+                    <td>
+                        <input type="url" name="lpdh_x_link" value="<?php echo esc_url(get_option('lpdh_x_link')); ?>"
+                            class="regular-text">
+                    </td>
+                </tr>
+            </table>
 
-                    <?php submit_button(); ?>
-                </form>
-            </div>
-            <?php
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
 }
 
 /**
@@ -4596,72 +4810,72 @@ add_action('add_meta_boxes', 'lpdh_add_banned_card_metabox');
 function lpdh_render_banned_card_shortcode_metabox($post)
 {
     ?>
-            <div class="lpdh-metabox-content" style="padding: 10px 0;">
-                <div style="margin-bottom: 15px;">
-                    <label for="lpdh_shortcode_align"
-                        style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
-                    <select id="lpdh_shortcode_align" style="width: 100%;">
-                        <option value="right" selected>Right</option>
-                        <option value="left">Left</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
-                    <div style="display: flex; gap: 5px; align-items: center;">
-                        <input type="text" id="lpdh_banned_card_shortcode_input"
-                            value='[banned_card id="<?php echo $post->ID; ?>" align="right"]' readonly
-                            style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
-                            onclick="this.select();">
-                        <button type="button" class="button button-secondary" id="lpdh_copy_shortcode" title="Copy Shortcode"
-                            style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                            <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
-                        </button>
-                    </div>
-                </div>
+    <div class="lpdh-metabox-content" style="padding: 10px 0;">
+        <div style="margin-bottom: 15px;">
+            <label for="lpdh_shortcode_align"
+                style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
+            <select id="lpdh_shortcode_align" style="width: 100%;">
+                <option value="right" selected>Right</option>
+                <option value="left">Left</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="lpdh_banned_card_shortcode_input"
+                    value='[banned_card id="<?php echo $post->ID; ?>" align="right"]' readonly
+                    style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
+                    onclick="this.select();">
+                <button type="button" class="button button-secondary" id="lpdh_copy_shortcode" title="Copy Shortcode"
+                    style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                </button>
             </div>
-            <script>
-                (function () {
-                    const select = document.getElem  entById('lpdh_shortcode_align');
-                    const input = document.getElementById('lpdh_banned_card_shortcode_input');
-                    const btn = document.getElementById('lpdh_copy_shortcode');
-                    const postId = '<?php echo $post->ID; ?>';
+        </div>
+    </div>
+    <script>
+        (function () {
+            const select = document.getElem  entById('lpdh_shortcode_align');
+            const input = document.getElementById('lpdh_banned_card_shortcode_input');
+            const btn = document.getElementById('lpdh_copy_shortcode');
+            const postId = '<?php echo $post->ID; ?>';
 
-                    if (!select || !input || !btn) return;
+            if (!select || !input || !btn) return;
 
-                    select.addEventListener('change', function () {
-                        input.value = '[banned_card id="' + postId + '" align="' + this.value + '"]';
-                    });
+            select.addEventListener('change', function () {
+                input.value = '[banned_card id="' + postId + '" align="' + this.value + '"]';
+            });
 
-                    btn.addEventListener('click', function () {
-                        input.select();
-                        try {
-                            const successful = document.execCommand('copy');
-                            if (successful) {
-                                const icon = btn.querySelector('.dashicons');
-                                icon.classList.remove('dashicons-clipboard');
-                                icon.classList.add('dashicons-yes');
-                                btn.style.borderColor = '#46b450';
-                                btn.style.color = '#46b450';
+            btn.addEventListener('click', function () {
+                input.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        const icon = btn.querySelector('.dashicons');
+                        icon.classList.remove('dashicons-clipboard');
+                        icon.classList.add('dashicons-yes');
+                        btn.style.borderColor = '#46b450';
+                        btn.style.color = '#46b450';
 
-                                setTimeout(() => {
-                                    icon.classList.remove('dashicons-yes');
-                                    icon.classList.add('dashicons-clipboard');
-                                    btn.style.borderColor = '';
-                                    btn.style.color = '';
-                                }, 2000);
-                            }
-                        } catch (err) {
-                            console.error('Copy failed', err);
-                        }
-                    });
+                        setTimeout(() => {
+                            icon.classList.remove('dashicons-yes');
+                            icon.classList.add('dashicons-clipboard');
+                            btn.style.borderColor = '';
+                            btn.style.color = '';
+                        }, 2000);
+                    }
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+            });
 
-                    // Auto-select on focus
-                    input.addEventListener('focus', function () {
-                        this.select();
-                    });
-                })();
-            </script>
-            <?php
+            // Auto-select on focus
+            input.addEventListener('focus', function () {
+                this.select();
+            });
+        })();
+    </script>
+    <?php
 }
 
 /**
@@ -4723,168 +4937,168 @@ function lpdh_render_post_shortcode_metabox($post)
     // Standard WP styles for autocomplete
     wp_enqueue_script('jquery-ui-autocomplete');
     ?>
-            <div class="lpdh-generator-content" style="padding: 10px 0;">
-                <div style="margin-bottom: 12px;">
-                    <label for="lpdh_card_search" style="display: block; margin-bottom: 5px; font-weight: 600;">Search Card:</label>
-                    <input type="text" id="lpdh_card_search" placeholder="Type card name..." style="width: 100%;">
-                    <input type="hidden" id="lpdh_selected_card_id" value="">
-                </div>
+    <div class="lpdh-generator-content" style="padding: 10px 0;">
+        <div style="margin-bottom: 12px;">
+            <label for="lpdh_card_search" style="display: block; margin-bottom: 5px; font-weight: 600;">Search Card:</label>
+            <input type="text" id="lpdh_card_search" placeholder="Type card name..." style="width: 100%;">
+            <input type="hidden" id="lpdh_selected_card_id" value="">
+        </div>
 
-                <div style="margin-bottom: 12px;">
-                    <label for="lpdh_gen_align" style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
-                    <select id="lpdh_gen_align" style="width: 100%;">
-                        <option value="right">Right</option>
-                        <option value="left" selected>Left</option>
-                    </select>
-                </div>
+        <div style="margin-bottom: 12px;">
+            <label for="lpdh_gen_align" style="display: block; margin-bottom: 5px; font-weight: 600;">Alignment:</label>
+            <select id="lpdh_gen_align" style="width: 100%;">
+                <option value="right">Right</option>
+                <option value="left" selected>Left</option>
+            </select>
+        </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
-                    <div style="display: flex; gap: 5px; align-items: center;">
-                        <input type="text" id="lpdh_gen_shortcode_input" value="" readonly placeholder="Select a card..."
-                            style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
-                            onclick="this.select();">
-                        <button type="button" class="button button-secondary" id="lpdh_copy_gen_shortcode" title="Copy"
-                            style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                            <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" class="button button-primary" id="lpdh_add_to_editor"
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;">
-                    <span class="dashicons dashicons-plus-alt"
-                        style="font-size: 18px; width: 18px; height: 18px; margin-top: 2px;"></span>
-                    Add to Content
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Shortcode:</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="lpdh_gen_shortcode_input" value="" readonly placeholder="Select a card..."
+                    style="flex-grow: 1; background: #f0f0f1; cursor: pointer; border-color: #ccd0d4;"
+                    onclick="this.select();">
+                <button type="button" class="button button-secondary" id="lpdh_copy_gen_shortcode" title="Copy"
+                    style="padding: 0 8px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <span class="dashicons dashicons-clipboard" style="font-size: 18px; width: 18px; height: 18px;"></span>
                 </button>
             </div>
+        </div>
 
-            <script>
-                jQuery(document).ready(function ($) {
-                    const $search = $('#lpdh_card_search');
-                    const $cardId = $('#lpdh_selected_card_id');
-                    const $align = $('#lpdh_gen_align');
-                    const $input = $('#lpdh_gen_shortcode_input');
-                    const $copyBtn = $('#lpdh_copy_gen_shortcode');
-                    const $addBtn = $('#lpdh_add_to_editor');
+        <button type="button" class="button button-primary" id="lpdh_add_to_editor"
+            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;">
+            <span class="dashicons dashicons-plus-alt"
+                style="font-size: 18px; width: 18px; height: 18px; margin-top: 2px;"></span>
+            Add to Content
+        </button>
+    </div>
 
-                    function updateShortcode() {
-                        const id = $cardId.val();
-                        if (id) {
-                            $input.val('[banned_card id="' + id + '" align="' + $align.val() + '"]');
-                        } else {
-                            $input.val('');
-                        }
-                    }
+    <script>
+        jQuery(document).ready(function ($) {
+            const $search = $('#lpdh_card_search');
+            const $cardId = $('#lpdh_selected_card_id');
+            const $align = $('#lpdh_gen_align');
+            const $input = $('#lpdh_gen_shortcode_input');
+            const $copyBtn = $('#lpdh_copy_gen_shortcode');
+            const $addBtn = $('#lpdh_add_to_editor');
 
-                    $search.autocomplete({
-                        source: function (request, response) {
-                            $.ajax({
-                                url: ajaxurl,
-                                dataType: "json",
-                                data: {
-                                    action: 'lpdh_search_banned_cards',
-                                    term: request.term,
-                                    nonce: '<?php echo wp_create_nonce("lpdh_banned_card_search"); ?>'
-                                },
-                                success: function (data) {
-                                    response(data);
-                                }
-                            });
+            function updateShortcode() {
+                const id = $cardId.val();
+                if (id) {
+                    $input.val('[banned_card id="' + id + '" align="' + $align.val() + '"]');
+                } else {
+                    $input.val('');
+                }
+            }
+
+            $search.autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: ajaxurl,
+                        dataType: "json",
+                        data: {
+                            action: 'lpdh_search_banned_cards',
+                            term: request.term,
+                            nonce: '<?php echo wp_create_nonce("lpdh_banned_card_search"); ?>'
                         },
-                        minLength: 2,
-                        select: function (event, ui) {
-                            $cardId.val(ui.item.id);
-                            updateShortcode();
+                        success: function (data) {
+                            response(data);
                         }
                     });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $cardId.val(ui.item.id);
+                    updateShortcode();
+                }
+            });
 
-                    $align.on('change', updateShortcode);
+            $align.on('change', updateShortcode);
 
-                    $copyBtn.on('click', function () {
-                        if (!$input.val()) return;
-                        $input.select();
-                        document.execCommand('copy');
+            $copyBtn.on('click', function () {
+                if (!$input.val()) return;
+                $input.select();
+                document.execCommand('copy');
 
-                        const $icon = $(this).find('.dashicons');
-                        $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes');
-                        $(this).css({ borderColor: '#46b450', color: '#46b450' });
+                const $icon = $(this).find('.dashicons');
+                $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes');
+                $(this).css({ borderColor: '#46b450', color: '#46b450' });
 
-                        setTimeout(() => {
-                            $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
-                            $(this).css({ borderColor: '', color: '' });
-                        }, 2000);
-                    });
+                setTimeout(() => {
+                    $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
+                    $(this).css({ borderColor: '', color: '' });
+                }, 2000);
+            });
 
-                    $addBtn.on('click', function (e) {
-                        e.preventDefault();
-                        const shortcode = $input.val();
-                        if (!shortcode) {
-                            alert('Please select a card first.');
-                            return;
-                        }
+            $addBtn.on('click', function (e) {
+                e.preventDefault();
+                const shortcode = $input.val();
+                if (!shortcode) {
+                    alert('Please select a card first.');
+                    return;
+                }
 
-                        // 1. Try Classic Editor (TinyMCE) first - most common fallback if Gutenberg is disabled
-                        if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden()) {
-                            tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);
-                            return;
-                        }
+                // 1. Try Classic Editor (TinyMCE) first - most common fallback if Gutenberg is disabled
+                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden()) {
+                    tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);
+                    return;
+                }
 
-                        // 2. Try Gutenberg (Block Editor)
-                        if (typeof wp !== 'undefined' && wp.data && wp.blocks) {
-                            // Check if block editor is actually enqueued and available
-                            const blockEditor = (wp.data.select('core/block-editor') || wp.data.select('core/editor'));
-                            if (blockEditor) {
-                                const dispatcher = (wp.data.dispatch('core/block-editor') || wp.data.dispatch('core/editor'));
-                                if (dispatcher && dispatcher.insertBlocks) {
-                                    try {
-                                        const block = wp.blocks.createBlock('core/shortcode', { text: shortcode });
-                                        if (block) {
-                                            dispatcher.insertBlocks([block]);
-                                            return;
-                                        }
-                                    } catch (err) {
-                                        // Only log if it's not a common "no editor" scenario
-                                    }
+                // 2. Try Gutenberg (Block Editor)
+                if (typeof wp !== 'undefined' && wp.data && wp.blocks) {
+                    // Check if block editor is actually enqueued and available
+                    const blockEditor = (wp.data.select('core/block-editor') || wp.data.select('core/editor'));
+                    if (blockEditor) {
+                        const dispatcher = (wp.data.dispatch('core/block-editor') || wp.data.dispatch('core/editor'));
+                        if (dispatcher && dispatcher.insertBlocks) {
+                            try {
+                                const block = wp.blocks.createBlock('core/shortcode', { text: shortcode });
+                                if (block) {
+                                    dispatcher.insertBlocks([block]);
+                                    return;
                                 }
+                            } catch (err) {
+                                // Only log if it's not a common "no editor" scenario
                             }
                         }
-
-                        // 3. Fallback to textarea (code editor or simple content area)
-                        const $content = $('#content');
-                        if ($content.length) {
-                            const cursorPos = $content.prop('selectionStart') || 0;
-                            const text = $content.val();
-                            $content.val(text.substring(0, cursorPos) + shortcode + text.substring(cursorPos));
-                        } else {
-                            alert('Could not find editor content area.');
-                        }
-                    });
-                });
-            </script>
-            <style>
-                .ui-autocomplete {
-                    z-index: 100000 !important;
-                    background: #fff;
-                    border: 1px solid #ccd0d4;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
                 }
 
-                .ui-menu-item-wrapper {
-                    padding: 8px 12px;
-                    cursor: pointer;
+                // 3. Fallback to textarea (code editor or simple content area)
+                const $content = $('#content');
+                if ($content.length) {
+                    const cursorPos = $content.prop('selectionStart') || 0;
+                    const text = $content.val();
+                    $content.val(text.substring(0, cursorPos) + shortcode + text.substring(cursorPos));
+                } else {
+                    alert('Could not find editor content area.');
                 }
+            });
+        });
+    </script>
+    <style>
+        .ui-autocomplete {
+            z-index: 100000 !important;
+            background: #fff;
+            border: 1px solid #ccd0d4;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-                .ui-state-active,
-                .ui-state-focus {
-                    background-color: #2271b1 !important;
-                    color: #fff !important;
-                    margin: 0 !important;
-                }
-            </style>
-            <?php
+        .ui-menu-item-wrapper {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .ui-state-active,
+        .ui-state-focus {
+            background-color: #2271b1 !important;
+            color: #fff !important;
+            margin: 0 !important;
+        }
+    </style>
+    <?php
 }
 
 /**
@@ -4911,338 +5125,338 @@ function lpdh_render_event_ocr_metabox($post)
     // Enqueue Tesseract.js (v5)
     wp_enqueue_script('tesseract-js', get_stylesheet_directory_uri() . '/assets/js/tesseract.min.js', array(), '5.0.2', true);
     ?>
-            <div style="padding: 15px;">
-                <div
-                    style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
-                    <strong><span class="dashicons dashicons-warning" style="vertical-align: text-top; margin-right: 5px;"></span>
-                        Warning:</strong> The OCR recognition system may not be 100% accurate. Please carefully verify the generated
-                    data in the table below before applying it to the ranking JSON.
-                </div>
-                <div
-                    style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
-                    <span style="font-weight: 600;">Device Type:</span>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        <input type="radio" name="lpdh_ocr_device" value="automatic" checked> Automatic
-                    </label>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        <input type="radio" name="lpdh_ocr_device" value="android"> Android
-                    </label>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        <input type="radio" name="lpdh_ocr_device" value="iphone"> iPhone
-                    </label>
-                </div>
+    <div style="padding: 15px;">
+        <div
+            style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
+            <strong><span class="dashicons dashicons-warning" style="vertical-align: text-top; margin-right: 5px;"></span>
+                Warning:</strong> The OCR recognition system may not be 100% accurate. Please carefully verify the generated
+            data in the table below before applying it to the ranking JSON.
+        </div>
+        <div
+            style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
+            <span style="font-weight: 600;">Device Type:</span>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="lpdh_ocr_device" value="automatic" checked> Automatic
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="lpdh_ocr_device" value="android"> Android
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="lpdh_ocr_device" value="iphone"> iPhone
+            </label>
+        </div>
 
-                <div id="lpdh-ocr-container"
-                    style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; background: #f9f9f9; cursor: pointer; border-radius: 4px;">
-                    <span class="dashicons dashicons-upload"
-                        style="font-size: 40px; width: 40px; height: 40px; color: #2271b1;"></span>
-                    <p style="margin: 10px 0; font-size: 14px;"><strong>Drag & Drop</strong> ranking screenshot here or <a href="#"
-                            id="lpdh-ocr-browse">browse files</a></p>
-                    <input type="file" id="lpdh-ocr-file-input" style="display: none;" accept="image/*">
-                </div>
+        <div id="lpdh-ocr-container"
+            style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; background: #f9f9f9; cursor: pointer; border-radius: 4px;">
+            <span class="dashicons dashicons-upload"
+                style="font-size: 40px; width: 40px; height: 40px; color: #2271b1;"></span>
+            <p style="margin: 10px 0; font-size: 14px;"><strong>Drag & Drop</strong> ranking screenshot here or <a href="#"
+                    id="lpdh-ocr-browse">browse files</a></p>
+            <input type="file" id="lpdh-ocr-file-input" style="display: none;" accept="image/*">
+        </div>
 
-                <div id="lpdh-ocr-progress-container" style="display: none; margin-top: 15px;">
-                    <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 5px;">
-                        <div id="lpdh-ocr-progress-bar"
-                            style="width: 0%; height: 100%; background: #2271b1; transition: width 0.2s ease;"></div>
-                    </div>
-                    <p id="lpdh-ocr-status" style="font-size: 11px; color: #666; font-style: italic;">Initializing Tesseract...</p>
-                </div>
-
-                <div id="lpdh-ocr-results" style="display: none; margin-top: 20px; text-align: left;">
-                    <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
-                        Candidates</h4>
-                    <div class="table-responsive"
-                        style="max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ddd;">
-                        <table class="wp-list-table widefat fixed striped" style="border: none;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;">Pos</th>
-                                    <th>Player Name</th>
-                                    <th style="width: 40px;">Pts</th>
-                                    <th style="width: 80px;">W-L-D</th>
-                                    <th style="width: 60px;">Via%</th>
-                                    <th style="width: 40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="lpdh-ocr-tbody">
-                                <!-- Rows populated via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <button type="button" id="lpdh-ocr-apply" class="button button-primary">Apply to Ranking JSON</button>
-                        <button type="button" id="lpdh-ocr-reset" class="button button-secondary">Clear and Restart</button>
-                    </div>
-                </div>
+        <div id="lpdh-ocr-progress-container" style="display: none; margin-top: 15px;">
+            <div style="height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 5px;">
+                <div id="lpdh-ocr-progress-bar"
+                    style="width: 0%; height: 100%; background: #2271b1; transition: width 0.2s ease;"></div>
             </div>
+            <p id="lpdh-ocr-status" style="font-size: 11px; color: #666; font-style: italic;">Initializing Tesseract...</p>
+        </div>
 
-            <script>
-                jQuery(document).ready(function ($) {
-                    const $container = $('#lpdh-ocr-container');
-                    const $input = $('#lpdh-ocr-file-input');
-                    const $browse = $('#lpdh-ocr-browse');
-                    const $progress = $('#lpdh-ocr-progress-container');
-                    const $bar = $('#lpdh-ocr-progress-bar');
-                    const $status = $('#lpdh-ocr-status');
-                    const $results = $('#lpdh-ocr-results');
-                    const $tbody = $('#lpdh-ocr-tbody');
-                    const $apply = $('#lpdh-ocr-apply');
-                    const $reset = $('#lpdh-ocr-reset');
-                    const $jsonField = $('#acf-field_event_rankings_json');
+        <div id="lpdh-ocr-results" style="display: none; margin-top: 20px; text-align: left;">
+            <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
+                Candidates</h4>
+            <div class="table-responsive"
+                style="max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ddd;">
+                <table class="wp-list-table widefat fixed striped" style="border: none;">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">Pos</th>
+                            <th>Player Name</th>
+                            <th style="width: 40px;">Pts</th>
+                            <th style="width: 80px;">W-L-D</th>
+                            <th style="width: 60px;">Via%</th>
+                            <th style="width: 40px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="lpdh-ocr-tbody">
+                        <!-- Rows populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button type="button" id="lpdh-ocr-apply" class="button button-primary">Apply to Ranking JSON</button>
+                <button type="button" id="lpdh-ocr-reset" class="button button-secondary">Clear and Restart</button>
+            </div>
+        </div>
+    </div>
 
-                    // Drag & Drop Handlers
-                    $container.on('dragover dragenter', function (e) {
-                        e.preventDefault();
-                        $(this).css({ background: '#f0f6fb', borderColor: '#2271b1' });
-                    }).on('dragleave dragend drop', function (e) {
-                        if (e.type === 'drop') {
-                            e.preventDefault();
-                            const files = e.originalEvent.dataTransfer.files;
-                            if (files.length) processFile(files[0]);
+    <script>
+        jQuery(document).ready(function ($) {
+            const $container = $('#lpdh-ocr-container');
+            const $input = $('#lpdh-ocr-file-input');
+            const $browse = $('#lpdh-ocr-browse');
+            const $progress = $('#lpdh-ocr-progress-container');
+            const $bar = $('#lpdh-ocr-progress-bar');
+            const $status = $('#lpdh-ocr-status');
+            const $results = $('#lpdh-ocr-results');
+            const $tbody = $('#lpdh-ocr-tbody');
+            const $apply = $('#lpdh-ocr-apply');
+            const $reset = $('#lpdh-ocr-reset');
+            const $jsonField = $('#acf-field_event_rankings_json');
+
+            // Drag & Drop Handlers
+            $container.on('dragover dragenter', function (e) {
+                e.preventDefault();
+                $(this).css({ background: '#f0f6fb', borderColor: '#2271b1' });
+            }).on('dragleave dragend drop', function (e) {
+                if (e.type === 'drop') {
+                    e.preventDefault();
+                    const files = e.originalEvent.dataTransfer.files;
+                    if (files.length) processFile(files[0]);
+                }
+                $(this).css({ background: '#f9f9f9', borderColor: '#ccd0d4' });
+            });
+
+            $browse.click(e => { e.preventDefault(); $input.click(); });
+            $input.change(e => { if (e.target.files.length) processFile(e.target.files[0]); });
+
+            async function processFile(file) {
+                $progress.show();
+                $results.hide();
+                $tbody.empty();
+
+                try {
+                    // Pre-process image using Canvas to improve OCR (Grayscale + Contrast)
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    await new Promise(resolve => img.onload = resolve);
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    // Specific pre-processing based on device selection
+                    let device = $('input[name="lpdh_ocr_device"]:checked').val();
+
+                    // Automatic Detection: iPhone vs Android heuristic
+                    if (device === 'automatic') {
+                        const ratio = img.height / img.width;
+
+                        // Range for modern tall iPhones (X to 15) is very specific: ~2.16-2.17
+                        // Androids vary more, often 2.22 (Sony/tall) or 2.0 (standard).
+                        device = (ratio > 2.14 && ratio < 2.18) ? 'iphone' : 'android';
+
+                        // Refinement: Scan for characterist selection colors
+                        // iPhone uses Orange highlight, Android uses Purple highlight
+                        const scanCanvas = document.createElement('canvas');
+                        scanCanvas.width = 1; scanCanvas.height = img.height;
+                        const scanCtx = scanCanvas.getContext('2d');
+                        scanCtx.drawImage(img, Math.floor(img.width * 0.5), 0, 1, img.height, 0, 0, 1, img.height);
+                        const data = scanCtx.getImageData(0, 0, 1, img.height).data;
+
+                        let seenOrange = false; let seenPurple = false;
+                        for (let i = 0; i < data.length; i += 4) {
+                            const r = data[i], g = data[i + 1], b = data[i + 2];
+                            // Orange detection (iPhone): R>180, G~100, B<100
+                            if (r > 180 && g > 80 && g < 150 && b < 100) seenOrange = true;
+                            // Purple detection (Android): R~100, G~100, B>200
+                            if (r > 80 && r < 150 && g > 80 && g < 150 && b > 200) seenPurple = true;
                         }
-                        $(this).css({ background: '#f9f9f9', borderColor: '#ccd0d4' });
-                    });
 
-                    $browse.click(e => { e.preventDefault(); $input.click(); });
-                    $input.change(e => { if (e.target.files.length) processFile(e.target.files[0]); });
+                        if (seenOrange && !seenPurple) device = 'iphone';
+                        if (seenPurple && !seenOrange) device = 'android';
 
-                    async function processFile(file) {
-                        $progress.show();
-                        $results.hide();
-                        $tbody.empty();
-
-                        try {
-                            // Pre-process image using Canvas to improve OCR (Grayscale + Contrast)
-                            const img = new Image();
-                            img.src = URL.createObjectURL(file);
-                            await new Promise(resolve => img.onload = resolve);
-
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-
-                            // Specific pre-processing based on device selection
-                            let device = $('input[name="lpdh_ocr_device"]:checked').val();
-
-                            // Automatic Detection: iPhone vs Android heuristic
-                            if (device === 'automatic') {
-                                const ratio = img.height / img.width;
-
-                                // Range for modern tall iPhones (X to 15) is very specific: ~2.16-2.17
-                                // Androids vary more, often 2.22 (Sony/tall) or 2.0 (standard).
-                                device = (ratio > 2.14 && ratio < 2.18) ? 'iphone' : 'android';
-
-                                // Refinement: Scan for characterist selection colors
-                                // iPhone uses Orange highlight, Android uses Purple highlight
-                                const scanCanvas = document.createElement('canvas');
-                                scanCanvas.width = 1; scanCanvas.height = img.height;
-                                const scanCtx = scanCanvas.getContext('2d');
-                                scanCtx.drawImage(img, Math.floor(img.width * 0.5), 0, 1, img.height, 0, 0, 1, img.height);
-                                const data = scanCtx.getImageData(0, 0, 1, img.height).data;
-
-                                let seenOrange = false; let seenPurple = false;
-                                for (let i = 0; i < data.length; i += 4) {
-                                    const r = data[i], g = data[i + 1], b = data[i + 2];
-                                    // Orange detection (iPhone): R>180, G~100, B<100
-                                    if (r > 180 && g > 80 && g < 150 && b < 100) seenOrange = true;
-                                    // Purple detection (Android): R~100, G~100, B>200
-                                    if (r > 80 && r < 150 && g > 80 && g < 150 && b > 200) seenPurple = true;
-                                }
-
-                                if (seenOrange && !seenPurple) device = 'iphone';
-                                if (seenPurple && !seenOrange) device = 'android';
-
-                                console.log('LPDH OCR: Auto-detect (Ratio:', ratio.toFixed(3), 'Orange:', seenOrange, 'Purple:', seenPurple, ') ->', device);
-                            }
-
-                            // Update UI title with device type
-                            const deviceLabel = device === 'iphone' ? 'iPhone' : 'Android';
-                            $('#lpdh-ocr-title').text('OCR Candidates (' + deviceLabel + ')');
-
-                            if (device === 'iphone') {
-                                // Balanced boost for dark mode: too much contrast/brightness "washes out" character details
-                                ctx.filter = 'grayscale(1) contrast(2.5) brightness(1.1)';
-                            } else {
-                                // Original stable value for Android
-                                ctx.filter = 'grayscale(1) contrast(1.5)';
-                            }
-                            ctx.drawImage(img, 0, 0);
-
-                            const processedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                            const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
-
-                            const worker = await Tesseract.createWorker('eng+ita', 1, {
-                                logger: m => {
-                                    if (m.status === 'recognizing text') {
-                                        $bar.css('width', (m.progress * 100) + '%');
-                                        $status.text('Recognizing... ' + Math.round(m.progress * 100) + '%');
-                                    } else {
-                                        $status.text(m.status);
-                                    }
-                                }
-                            });
-
-                            // Use the processed image
-                            const { data: { text, lines } } = await worker.recognize(processedFile);
-                            await worker.terminate();
-                            URL.revokeObjectURL(img.src);
-
-                            console.log('--- OCR FULL TEXT START ---');
-                            console.log(text);
-                            console.log('--- OCR FULL TEXT END ---');
-
-                            parseLines(lines);
-                            $progress.hide();
-                            $results.show();
-                        } catch (err) {
-                            console.error(err);
-                            alert('OCR failed: ' + err.message);
-                            $progress.hide();
-                        }
+                        console.log('LPDH OCR: Auto-detect (Ratio:', ratio.toFixed(3), 'Orange:', seenOrange, 'Purple:', seenPurple, ') ->', device);
                     }
 
-                    function parseLines(lines) {
-                        const parsed = [];
-                        let lastPos = 0;
-                        const device = $('input[name="lpdh_ocr_device"]:checked').val();
+                    // Update UI title with device type
+                    const deviceLabel = device === 'iphone' ? 'iPhone' : 'Android';
+                    $('#lpdh-ocr-title').text('OCR Candidates (' + deviceLabel + ')');
 
-                        lines.forEach(lineObj => {
-                            let text = lineObj.text.trim();
-                            if (!text || text.length < 3) return;
+                    if (device === 'iphone') {
+                        // Balanced boost for dark mode: too much contrast/brightness "washes out" character details
+                        ctx.filter = 'grayscale(1) contrast(2.5) brightness(1.1)';
+                    } else {
+                        // Original stable value for Android
+                        ctx.filter = 'grayscale(1) contrast(1.5)';
+                    }
+                    ctx.drawImage(img, 0, 0);
 
-                            console.log('--- Evaluating line:', text);
+                    const processedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
 
-                            // Skip headers and known junk
-                            const skipKeywords = ['DOPO', 'TURNO', 'RANKING', 'EVENTO', 'ROUND', 'TABLE', 'V-S-P', '%VIA', '%VP', 'INCONTRO', 'GIOCATORE', 'CLASSIFICA', 'PUNTI', 'POS '];
-                            const upperText = text.toUpperCase();
+                    const worker = await Tesseract.createWorker('eng+ita', 1, {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                $bar.css('width', (m.progress * 100) + '%');
+                                $status.text('Recognizing... ' + Math.round(m.progress * 100) + '%');
+                            } else {
+                                $status.text(m.status);
+                            }
+                        }
+                    });
 
-                            // clock filter (e.g. ":31") - check for colon followed by digits at start
-                            if (/^[:;]\d+/.test(text.trim())) {
-                                console.log('Line skipped (clock/time noise)');
+                    // Use the processed image
+                    const { data: { text, lines } } = await worker.recognize(processedFile);
+                    await worker.terminate();
+                    URL.revokeObjectURL(img.src);
+
+                    console.log('--- OCR FULL TEXT START ---');
+                    console.log(text);
+                    console.log('--- OCR FULL TEXT END ---');
+
+                    parseLines(lines);
+                    $progress.hide();
+                    $results.show();
+                } catch (err) {
+                    console.error(err);
+                    alert('OCR failed: ' + err.message);
+                    $progress.hide();
+                }
+            }
+
+            function parseLines(lines) {
+                const parsed = [];
+                let lastPos = 0;
+                const device = $('input[name="lpdh_ocr_device"]:checked').val();
+
+                lines.forEach(lineObj => {
+                    let text = lineObj.text.trim();
+                    if (!text || text.length < 3) return;
+
+                    console.log('--- Evaluating line:', text);
+
+                    // Skip headers and known junk
+                    const skipKeywords = ['DOPO', 'TURNO', 'RANKING', 'EVENTO', 'ROUND', 'TABLE', 'V-S-P', '%VIA', '%VP', 'INCONTRO', 'GIOCATORE', 'CLASSIFICA', 'PUNTI', 'POS '];
+                    const upperText = text.toUpperCase();
+
+                    // clock filter (e.g. ":31") - check for colon followed by digits at start
+                    if (/^[:;]\d+/.test(text.trim())) {
+                        console.log('Line skipped (clock/time noise)');
+                        return;
+                    }
+
+                    if (skipKeywords.some(kw => upperText.includes(kw))) {
+                        console.log('Line skipped (header/junk match)');
+                        return;
+                    }
+
+                    // Pre-cleaning: remove artifacts at start and normalize spaces
+                    text = text.replace(/^[^\w\(]+/, '').replace(/[\|｜\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+
+                    // Specific trailing noise cleanup (important for iPhone)
+                    // Remove random characters at the end that aren't part of a percentage or record
+                    text = text.replace(/[^0-9%.\-]+$/, '').trim();
+
+                    try {
+                        let pos = '', name = '', points = '0', win = '0', draw = '0', lose = '0', via = '0%';
+
+                        // A. Get Position (Forward Search)
+                        const posMatch = text.match(/^(\d+)/);
+                        if (posMatch) {
+                            pos = posMatch[1];
+                            text = text.substring(posMatch[0].length).trim();
+                        } else {
+                            const lazyPosMatch = text.match(/^\D*(\d+)/);
+                            if (lazyPosMatch) {
+                                pos = lazyPosMatch[1];
+                                text = text.substring(text.indexOf(pos) + pos.length).trim();
+                            }
+                        }
+                        if ((!pos || isNaN(pos)) && device === 'iphone') {
+                            pos = (lastPos + 1).toString();
+                        }
+                        lastPos = parseInt(pos) || lastPos;
+
+                        // B. Find the start of data tokens (Numbers/Records/Percentages)
+                        // We look for where the name ends and the numeric data begins.
+                        const dataStartMatch = text.match(/(\s\d+[\s\-\.\–\—]|\s\d+$)/);
+                        let nameRaw = text;
+                        let tail = '';
+
+                        if (dataStartMatch) {
+                            const idx = text.indexOf(dataStartMatch[1]);
+                            nameRaw = text.substring(0, idx).trim();
+                            tail = text.substring(idx).trim();
+                        }
+
+                        // C. Name Cleanup
+                        nameRaw = nameRaw.replace(/^[\s\.\,\)\-]+/, '').replace(/(\.\.\.|\.\s+).*$/, '').replace(/[^a-zA-Z\s\'].*$/, '').replace(/\.*$/, '').trim();
+                        const nameParts = nameRaw.split(/\s+/);
+                        if (nameParts.length >= 2) {
+                            const firstName = nameParts[0];
+                            const rest = nameRaw.substring(nameRaw.indexOf(firstName) + firstName.length).trim();
+                            let formattedSurname = '';
+                            let letterCount = 0;
+                            for (let i = 0; i < rest.length; i++) {
+                                const char = rest[i];
+                                formattedSurname += char;
+                                if (/[a-zA-Z]/.test(char)) letterCount++;
+                                if (letterCount === 3) break;
+                            }
+                            name = firstName + ' ' + formattedSurname + '.';
+                        } else {
+                            name = nameRaw;
+                        }
+
+                        // D. Tokenization of Tail (Points, Record, Via)
+                        // Split tail into tokens: dashed records, percentages, or numbers
+                        const tokens = tail.split(/[\s\–\—]+/).filter(t => t.length > 0);
+                        let foundPoints = false;
+                        let foundRecord = false;
+                        let foundVia = false;
+
+                        tokens.forEach(token => {
+                            // 1. Check for Record (W-D-L) e.g. "2-1-1" or "2.1.1"
+                            const recordMatch = token.match(/^(\d+)[\-\.\/](\d+)[\-\.\/](\d+)$/);
+                            if (!foundRecord && recordMatch) {
+                                win = recordMatch[1];
+                                lose = recordMatch[2];
+                                draw = recordMatch[3];
+                                foundRecord = true;
                                 return;
                             }
 
-                            if (skipKeywords.some(kw => upperText.includes(kw))) {
-                                console.log('Line skipped (header/junk match)');
+                            // 2. Check for Percentage (Via)
+                            // We pick the FIRST percentage token we find after the record (or in general)
+                            if (!foundVia && (token.includes('%') || token.includes('.') || token.includes(','))) {
+                                const numVal = token.replace(',', '.').replace('%', '');
+                                if (!isNaN(parseFloat(numVal)) && (token.includes('%') || (numVal.includes('.') && numVal.length >= 3))) {
+                                    let v = parseFloat(numVal);
+                                    if (device === 'iphone' && v > 100) v = v / 10;
+                                    via = (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%';
+                                    foundVia = true;
+                                    return;
+                                }
+                            }
+
+                            // 3. Check for Points (First plain number that isn't position)
+                            if (!foundPoints && /^\d+$/.test(token)) {
+                                points = token;
+                                foundPoints = true;
                                 return;
                             }
 
-                            // Pre-cleaning: remove artifacts at start and normalize spaces
-                            text = text.replace(/^[^\w\(]+/, '').replace(/[\|｜\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
-
-                            // Specific trailing noise cleanup (important for iPhone)
-                            // Remove random characters at the end that aren't part of a percentage or record
-                            text = text.replace(/[^0-9%.\-]+$/, '').trim();
-
-                            try {
-                                let pos = '', name = '', points = '0', win = '0', draw = '0', lose = '0', via = '0%';
-
-                                // A. Get Position (Forward Search)
-                                const posMatch = text.match(/^(\d+)/);
-                                if (posMatch) {
-                                    pos = posMatch[1];
-                                    text = text.substring(posMatch[0].length).trim();
-                                } else {
-                                    const lazyPosMatch = text.match(/^\D*(\d+)/);
-                                    if (lazyPosMatch) {
-                                        pos = lazyPosMatch[1];
-                                        text = text.substring(text.indexOf(pos) + pos.length).trim();
-                                    }
-                                }
-                                if ((!pos || isNaN(pos)) && device === 'iphone') {
-                                    pos = (lastPos + 1).toString();
-                                }
-                                lastPos = parseInt(pos) || lastPos;
-
-                                // B. Find the start of data tokens (Numbers/Records/Percentages)
-                                // We look for where the name ends and the numeric data begins.
-                                const dataStartMatch = text.match(/(\s\d+[\s\-\.\–\—]|\s\d+$)/);
-                                let nameRaw = text;
-                                let tail = '';
-
-                                if (dataStartMatch) {
-                                    const idx = text.indexOf(dataStartMatch[1]);
-                                    nameRaw = text.substring(0, idx).trim();
-                                    tail = text.substring(idx).trim();
-                                }
-
-                                // C. Name Cleanup
-                                nameRaw = nameRaw.replace(/^[\s\.\,\)\-]+/, '').replace(/(\.\.\.|\.\s+).*$/, '').replace(/[^a-zA-Z\s\'].*$/, '').replace(/\.*$/, '').trim();
-                                const nameParts = nameRaw.split(/\s+/);
-                                if (nameParts.length >= 2) {
-                                    const firstName = nameParts[0];
-                                    const rest = nameRaw.substring(nameRaw.indexOf(firstName) + firstName.length).trim();
-                                    let formattedSurname = '';
-                                    let letterCount = 0;
-                                    for (let i = 0; i < rest.length; i++) {
-                                        const char = rest[i];
-                                        formattedSurname += char;
-                                        if (/[a-zA-Z]/.test(char)) letterCount++;
-                                        if (letterCount === 3) break;
-                                    }
-                                    name = firstName + ' ' + formattedSurname + '.';
-                                } else {
-                                    name = nameRaw;
-                                }
-
-                                // D. Tokenization of Tail (Points, Record, Via)
-                                // Split tail into tokens: dashed records, percentages, or numbers
-                                const tokens = tail.split(/[\s\–\—]+/).filter(t => t.length > 0);
-                                let foundPoints = false;
-                                let foundRecord = false;
-                                let foundVia = false;
-
-                                tokens.forEach(token => {
-                                    // 1. Check for Record (W-D-L) e.g. "2-1-1" or "2.1.1"
-                                    const recordMatch = token.match(/^(\d+)[\-\.\/](\d+)[\-\.\/](\d+)$/);
-                                    if (!foundRecord && recordMatch) {
-                                        win = recordMatch[1];
-                                        lose = recordMatch[2];
-                                        draw = recordMatch[3];
-                                        foundRecord = true;
-                                        return;
-                                    }
-
-                                    // 2. Check for Percentage (Via)
-                                    // We pick the FIRST percentage token we find after the record (or in general)
-                                    if (!foundVia && (token.includes('%') || token.includes('.') || token.includes(','))) {
-                                        const numVal = token.replace(',', '.').replace('%', '');
-                                        if (!isNaN(parseFloat(numVal)) && (token.includes('%') || (numVal.includes('.') && numVal.length >= 3))) {
-                                            let v = parseFloat(numVal);
-                                            if (device === 'iphone' && v > 100) v = v / 10;
-                                            via = (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%';
-                                            foundVia = true;
-                                            return;
-                                        }
-                                    }
-
-                                    // 3. Check for Points (First plain number that isn't position)
-                                    if (!foundPoints && /^\d+$/.test(token)) {
-                                        points = token;
-                                        foundPoints = true;
-                                        return;
-                                    }
-
-                                    // 4. Predictive Record Split (iPhone 3-digit merge)
-                                    if (!foundRecord && /^\d{3}$/.test(token) && device === 'iphone' && !foundPoints) {
-                                        win = token[0]; lose = token[1]; draw = token[2];
-                                        foundRecord = true;
-                                    }
-                                });
-
-                                if (name && name.length >= 3 && pos) {
-                                    parsed.push({ pos, name, points, win, draw, lose, via });
-                                }
-                            } catch (e) {
-                                console.error('Line parse error:', e, text);
+                            // 4. Predictive Record Split (iPhone 3-digit merge)
+                            if (!foundRecord && /^\d{3}$/.test(token) && device === 'iphone' && !foundPoints) {
+                                win = token[0]; lose = token[1]; draw = token[2];
+                                foundRecord = true;
                             }
                         });
 
-                        if (parsed.length) {
-                            parsed.forEach((item, i) => {
-                                const row = `
+                        if (name && name.length >= 3 && pos) {
+                            parsed.push({ pos, name, points, win, draw, lose, via });
+                        }
+                    } catch (e) {
+                        console.error('Line parse error:', e, text);
+                    }
+                });
+
+                if (parsed.length) {
+                    parsed.forEach((item, i) => {
+                        const row = `
                         <tr>
                             <td><input type="text" class="ocr-pos" value="${item.pos}" style="width:100%;"></td>
                             <td><input type="text" class="ocr-name" value="${item.name}" style="width:100%;"></td>
@@ -5256,73 +5470,73 @@ function lpdh_render_event_ocr_metabox($post)
                             <td><button type="button" class="ocr-del" style="background:none; border:none; color:red; cursor:pointer;">&times;</button></td>
                         </tr>
                     `;
-                                $tbody.append(row);
-                            });
-                        } else {
-                            $tbody.append('<tr><td colspan="6" style="text-align:center;">Could not parse any clear ranking rows. Please verify image quality.</td></tr>');
-                        }
-                    }
-
-                    $tbody.on('click', '.ocr-del', function () { $(this).closest('tr').remove(); });
-
-                    $reset.click(() => {
-                        $input.val('');
-                        $tbody.empty();
-                        $results.hide();
-                        $progress.hide();
+                        $tbody.append(row);
                     });
+                } else {
+                    $tbody.append('<tr><td colspan="6" style="text-align:center;">Could not parse any clear ranking rows. Please verify image quality.</td></tr>');
+                }
+            }
 
-                    $apply.click(() => {
-                        const data = [];
-                        $tbody.find('tr').each(function () {
-                            const $row = $(this);
-                            if ($row.find('.ocr-name').length) {
-                                data.push({
-                                    field_ranking_pos: $row.find('.ocr-pos').val(),
-                                    field_ranking_name: $row.find('.ocr-name').val(),
-                                    field_ranking_points: $row.find('.ocr-points').val(),
-                                    field_ranking_win: $row.find('.ocr-win').val(),
-                                    field_ranking_draw: $row.find('.ocr-draw').val(),
-                                    field_ranking_lose: $row.find('.ocr-lose').val(),
-                                    field_ranking_via: $row.find('.ocr-via').val()
-                                });
-                            }
+            $tbody.on('click', '.ocr-del', function () { $(this).closest('tr').remove(); });
+
+            $reset.click(() => {
+                $input.val('');
+                $tbody.empty();
+                $results.hide();
+                $progress.hide();
+            });
+
+            $apply.click(() => {
+                const data = [];
+                $tbody.find('tr').each(function () {
+                    const $row = $(this);
+                    if ($row.find('.ocr-name').length) {
+                        data.push({
+                            field_ranking_pos: $row.find('.ocr-pos').val(),
+                            field_ranking_name: $row.find('.ocr-name').val(),
+                            field_ranking_points: $row.find('.ocr-points').val(),
+                            field_ranking_win: $row.find('.ocr-win').val(),
+                            field_ranking_draw: $row.find('.ocr-draw').val(),
+                            field_ranking_lose: $row.find('.ocr-lose').val(),
+                            field_ranking_via: $row.find('.ocr-via').val()
                         });
-
-                        if (data.length) {
-                            $jsonField.val(JSON.stringify(data, null, 2)).trigger('change');
-
-                            // Show success feedback
-                            const $icon = $apply.prev().length ? $apply.prev() : $('<span class="dashicons dashicons-yes" style="color:#46b450; margin-right:5px;"></span>').insertBefore($apply);
-                            $apply.text('Done!');
-                            setTimeout(() => {
-                                $apply.text('Apply to Ranking JSON');
-                                $icon.remove();
-                            }, 2000);
-
-                            // Scroll to the JSON field and highlight it
-                            $('html, body').animate({
-                                scrollTop: $jsonField.offset().top - 100
-                            }, 500);
-                            $jsonField.css('border-color', '#46b450');
-                            setTimeout(() => $jsonField.css('border-color', ''), 3000);
-                        }
-                    });
+                    }
                 });
-            </script>
-            <style>
-                #lpdh-ocr-results input {
-                    padding: 2px 5px;
-                    height: 26px;
-                    font-size: 12px;
-                }
 
-                #lpdh-ocr-results td {
-                    padding: 4px;
-                    vertical-align: middle;
+                if (data.length) {
+                    $jsonField.val(JSON.stringify(data, null, 2)).trigger('change');
+
+                    // Show success feedback
+                    const $icon = $apply.prev().length ? $apply.prev() : $('<span class="dashicons dashicons-yes" style="color:#46b450; margin-right:5px;"></span>').insertBefore($apply);
+                    $apply.text('Done!');
+                    setTimeout(() => {
+                        $apply.text('Apply to Ranking JSON');
+                        $icon.remove();
+                    }, 2000);
+
+                    // Scroll to the JSON field and highlight it
+                    $('html, body').animate({
+                        scrollTop: $jsonField.offset().top - 100
+                    }, 500);
+                    $jsonField.css('border-color', '#46b450');
+                    setTimeout(() => $jsonField.css('border-color', ''), 3000);
                 }
-            </style>
-            <?php
+            });
+        });
+    </script>
+    <style>
+        #lpdh-ocr-results input {
+            padding: 2px 5px;
+            height: 26px;
+            font-size: 12px;
+        }
+
+        #lpdh-ocr-results td {
+            padding: 4px;
+            vertical-align: middle;
+        }
+    </style>
+    <?php
 }
 
 /**

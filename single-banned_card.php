@@ -50,19 +50,30 @@ get_header(); ?>
                                         <?php the_content(); ?>
                                     </div>
 
-                                    <?php if ($scryfall_link): ?>
+                                    <?php if ($scryfall_link):
+                                        $scryfall_host = parse_url($scryfall_link, PHP_URL_HOST);
+                                        // Remove 'www.'
+                                        $scryfall_name = preg_replace('/^www\./', '', $scryfall_host);
+                                        // Remove extension (everything after the last dot)
+                                        $scryfall_name = preg_replace('/\.[^.]+$/', '', $scryfall_name);
+                                        // Split by dots to handle subdomains (like sub.domain -> Sub Domain)
+                                        $parts = explode('.', $scryfall_name);
+                                        $parts = array_map('ucfirst', $parts);
+                                        $scryfall_display_name = implode(' ', $parts);
+                                        ?>
                                         <div class="mt-4">
                                             <a href="<?php echo esc_url($scryfall_link); ?>" target="_blank" rel="noopener"
                                                 class="btn btn-primary">
-                                                View on Scryfall <i class="fas fa-external-link-alt fa-xs ms-1"></i>
+                                                View on <?php echo esc_html($scryfall_display_name); ?> <i
+                                                    class="fas fa-external-link-alt fa-xs ms-1"></i>
                                             </a>
                                         </div>
                                     <?php endif; ?>
                                 </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
             <?php endwhile; ?>
         </div>
     </main>
