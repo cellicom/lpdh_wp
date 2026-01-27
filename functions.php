@@ -41,6 +41,31 @@ function lpdh_check_dependencies()
 add_action('after_setup_theme', 'lpdh_check_dependencies');
 
 /**
+ * Helper function to retrieve banned card names
+ */
+function lpdh_get_banned_card_names()
+{
+    $banned_cards_query = new WP_Query(array(
+        'post_type' => 'banned_card',
+        'posts_per_page' => -1,
+        'fields' => 'ids',
+        'no_found_rows' => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+    ));
+
+    $banned_card_names = array();
+    if ($banned_cards_query->have_posts()) {
+        foreach ($banned_cards_query->posts as $post_id) {
+            $banned_card_names[] = get_the_title($post_id);
+        }
+    }
+
+    // Normalize names for simpler JS comparison (lowercase)
+    return array_map('strtolower', $banned_card_names);
+}
+
+/**
  * Enqueue scripts and styles
  */
 add_action('wp_enqueue_scripts', 'bootscore_child_enqueue_styles');
@@ -80,6 +105,10 @@ function bootscore_child_enqueue_styles()
     $modified_ScryfallJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/scryfall-autocomplete.js'));
     wp_register_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
 
+    // Fetch Banned Cards for Autocomplete
+    $banned_card_names = lpdh_get_banned_card_names();
+    wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_card_names);
+
     // Deck Editor JS (Conditional)
     if (is_page_template('page-templates/page-deck-editor.php')) {
         wp_enqueue_script('scryfall-autocomplete-core');
@@ -106,6 +135,27 @@ function lpdh_admin_enqueue_scripts($hook)
         // Enqueue our common Scryfall utility if it exists (it should, as registered above in frontend but needs to be accessible here too)
         $modified_ScryfallJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/scryfall-autocomplete.js'));
         wp_enqueue_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
+
+        // Localize Banned Cards for Admin
+        $banned_card_names = lpdh_get_banned_card_names();
+        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_card_names);
+
+        // Add inline style for Banned Badge in Select2 (mimic Bootstrap)
+        $custom_admin_css = "
+        .select2-results__option .badge.bg-danger {
+            background-color: #dc3545 !important;
+            color: #fff;
+            padding: 0.25em 0.5em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+            margin-left: 0.5rem;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+    ";
+        wp_add_inline_style('select2-css', $custom_admin_css);
 
         // Enqueue our admin-specific autocomplete helper script
         $modified_AdminJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/admin-deck-editor.js'));
@@ -579,11 +629,11 @@ if (function_exists('acf_add_local_field_group')):
             return;
         ?>
         <script type="text/javascript">
-            jQuery(docu         ment).re         ady(f              unction($) {
+            jQuery(document).ready(function ($) {
                 $('#publish, #save-post').on('click', function (e) {
                     var title = $('#title').val();
                     if (!title || title.trim().length === 0) {
-                        alert('Il titolo del mazzo è obbligatorio!');
+                        alert('Deck title is mandatory!');
                         $('#title').focus();
                         $('#major-publishing-actions .spinner').removeClass('is-active');
                         $('#publish, #save-post').removeClass('disabled');
@@ -5663,32 +5713,6 @@ function lpdh_manage_admin_bar($show)
     return $show;
 }
 
-
-
-/**
- * Get all banned card names
- */
-function lpdh_get_banned_card_names()
-{
-    static $banned_names = null;
-    if ($banned_names !== null) {
-        return $banned_names;
-    }
-
-    $banned_posts = get_posts(array(
-        'post_type' => 'banned_card',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-        'fields' => 'ids'
-    ));
-
-    $banned_names = array();
-    foreach ($banned_posts as $post_id) {
-        $banned_names[] = strtolower(trim(get_the_title($post_id)));
-    }
-
-    return $banned_names;
-}
 
 /**
  * Check if a deck contains banned cards

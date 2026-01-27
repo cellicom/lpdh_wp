@@ -12,12 +12,25 @@ var LPDH_Scryfall = (function ($) {
         if (card.loading) return card.text;
 
         var imgUrl = card.image || '';
+
+        // Banned Check
+        var isBanned = false;
+        if (typeof LPDH_Banned_Cards !== 'undefined' && Array.isArray(LPDH_Banned_Cards)) {
+            if (LPDH_Banned_Cards.includes(card.text.toLowerCase().trim())) {
+                isBanned = true;
+            }
+        } else {
+            console.warn('LPDH Scryfall: Banned cards list not loaded.');
+        }
+
         var markup = '<div class="scryfall-result">' +
             (imgUrl ? '<img src="' + imgUrl + '" class="scryfall-image" />' : '') +
-            '<span class="scryfall-name">' + card.text + '</span>' +
+            '<span class="scryfall-name">' + card.text +
+            (isBanned ? ' <span class="badge bg-danger ms-2" style="font-size: 0.7em;">Banned</span>' : '') +
+            '</span>' +
             '</div>';
 
-        return markup;
+        return $(markup);
     }
 
     /**
