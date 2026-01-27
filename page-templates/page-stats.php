@@ -321,7 +321,7 @@ get_header(); ?>
             <!-- Filters -->
             <div class="row justify-content-center mb-5">
                 <div class="col-md-4">
-                    <form method="get" action="<?php echo esc_url(home_url('/')); ?>"
+                    <form method="get" action="<?php echo esc_url(get_permalink()); ?>"
                         class="d-flex align-items-center mb-0">
                         <?php if (isset($_GET['page_id'])): ?>
                             <input type="hidden" name="page_id" value="<?php echo intval($_GET['page_id']); ?>">
