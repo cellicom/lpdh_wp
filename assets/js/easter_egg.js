@@ -289,7 +289,35 @@ jQuery(function ($) {
     /**
      * POINT 6: Deck Counterspell Easter Egg
      */
+    /**
+     * POINT 6: Deck Counterspell Easter Egg (Wilson Logic)
+     */
+    // Inject Wilson Styles
+    // Styles are now handled in _easter-egg.scss
+
     $('.deck-image-wrapper img').on('click', function () {
-        showCounterspellOverlay("Your commander is countered");
+        const cardName = $(this).attr('alt') ? $(this).attr('alt').toLowerCase().trim() : '';
+
+        if (cardName.includes('wilson, refined grizzly')) {
+            showWilsonOverlay();
+        } else {
+            showCounterspellOverlay("Your commander is countered");
+        }
     });
+
+    function showWilsonOverlay() {
+        const $overlay = $('<div class="deck-counter-overlay wilson-overlay">' +
+            '<div class="counter-text">Wilson cannot be countered!</div>' +
+            '<div class="wilson-icon">🐻🛡️</div>' +
+            '</div>');
+
+        $('body').append($overlay);
+        // Animate overlay appearance
+        setTimeout(() => { $overlay.addClass('active'); }, 10);
+
+        // Cleanup after animation
+        setTimeout(() => {
+            $overlay.fadeOut(500, function () { $(this).remove(); });
+        }, 3000);
+    }
 });

@@ -351,3 +351,42 @@
         transform: translateY(-50%) rotate(10deg);
     }
 }
+
+/* --- Easter Egg: Wilson (Uncounterable) --- */
+.wilson-overlay {
+    background: radial-gradient(circle, rgba(34, 139, 34, 0.9) 0%, rgba(0, 0, 0, 0.9) 100%) !important;
+
+    .counter-text {
+        color: #fff;
+        text-shadow: 0 0 20px #28a745, 0 0 40px #20c997 !important;
+    }
+
+    .wilson-icon {
+        font-size: 150px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        z-index: 100003;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    &.active .wilson-icon {
+        transform: translate(-50%, -50%) scale(1);
+        animation: pulse-shield 2s infinite;
+    }
+}
+
+@keyframes pulse-shield {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
