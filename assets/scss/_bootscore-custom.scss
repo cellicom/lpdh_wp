@@ -8,7 +8,128 @@
 @import "themes/lost-wood";
 @import "themes/vaporwave-green";
 
-// Add your own code here!
+// Cookie Consent (bs-cookie-settings)
+#bs-cookie-bar {
+    background: rgba(var(--bs-dark-rgb), 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--bs-primary);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1060;
+
+    #c-ttl {
+        color: var(--bs-primary);
+        font-family: 'Outfit', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(var(--bs-primary-rgb), 0.5);
+    }
+
+    #c-txt {
+        font-size: 0.9rem;
+        color: #e0e0e0;
+    }
+
+    #c-bns {
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            font-weight: 600;
+
+            &:hover {
+                background-color: var(--bs-secondary);
+                border-color: var(--bs-secondary);
+                box-shadow: 0 0 15px var(--bs-primary);
+            }
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border-color: rgba(255, 255, 255, 0.2);
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-color: var(--bs-primary);
+            }
+        }
+    }
+
+    #consent-links {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+
+        a {
+            color: var(--bs-primary);
+
+            &:hover {
+                color: var(--bs-secondary);
+            }
+        }
+    }
+}
+
+#bs-cookie-modal {
+    .modal-content {
+        background: var(--bs-dark);
+        border: 1px solid var(--bs-primary);
+        color: #fff;
+        box-shadow: 0 0 40px rgba(var(--bs-primary-rgb), 0.3);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+
+        .modal-title {
+            color: var(--bs-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+    }
+
+    .modal-body {
+        .c-bl {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+
+            .b-tl {
+                color: #fff;
+                font-weight: 600;
+
+                &.exp:hover {
+                    background: rgba(var(--bs-primary-rgb), 0.1);
+                    color: var(--bs-primary);
+                }
+            }
+
+            .form-switch .form-check-input {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-color: rgba(var(--bs-primary-rgb), 0.3);
+
+                &:checked {
+                    background-color: var(--bs-primary);
+                    border-color: var(--bs-primary);
+                    box-shadow: 0 0 10px var(--bs-primary);
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+    }
+}
+
+
 // Because this file is compiled after Bootstrap, you're also able to use Bootstrap mixins for better code.
 // Some examples can be found here: https://bootscore.me/documentation/bootstrap-css-sass
 

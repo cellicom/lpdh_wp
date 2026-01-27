@@ -25,6 +25,18 @@ function lpdh_check_dependencies()
             <?php
         });
     }
+
+    if (!function_exists('bs_cookie_settings')) {
+        add_action('admin_notices', function () {
+            ?>
+            <div class="notice notice-error is-dismissible">
+                <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
+                    <?php _e('bs Cookie Settings is NOT active. This theme requires this plugin for cookie consent compliance and preferences management. Please install and activate it.', 'text_domain'); ?>
+                </p>
+            </div>
+            <?php
+        });
+    }
 }
 add_action('after_setup_theme', 'lpdh_check_dependencies');
 
@@ -59,6 +71,7 @@ function bootscore_child_enqueue_styles()
         'nonce' => wp_create_nonce('lpdh_easter_egg_nonce')
     ));
 
+
     // Select2
     wp_enqueue_style('select2-css', get_stylesheet_directory_uri() . '/assets/css/select2.min.css', array(), '4.1.0-rc.0');
     wp_enqueue_script('select2-js', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
@@ -73,6 +86,10 @@ function bootscore_child_enqueue_styles()
         $modified_DeckEditorJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/deck-editor.js'));
         wp_enqueue_script('deck-editor-js', get_stylesheet_directory_uri() . '/assets/js/deck-editor.js', array('jquery', 'select2-js', 'scryfall-autocomplete-core'), $modified_DeckEditorJS, true);
     }
+
+    // LPDH Cookie Consent Init (for bs-cookie-settings plugin)
+    $modified_CookieSettingsInitJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/cookie-settings-init.js'));
+    wp_enqueue_script('lpdh-cookie-settings-init', get_stylesheet_directory_uri() . '/assets/js/cookie-settings-init.js', array('cookie-settings-js'), $modified_CookieSettingsInitJS, true);
 }
 
 /**
@@ -562,7 +579,7 @@ if (function_exists('acf_add_local_field_group')):
             return;
         ?>
         <script type="text/javascript">
-            jQuery(docu         ment).re         ady(function ($) {
+            jQuery(docu         ment).re         ady(f              unction($) {
                 $('#publish, #save-post').on('click', function (e) {
                     var title = $('#title').val();
                     if (!title || title.trim().length === 0) {
