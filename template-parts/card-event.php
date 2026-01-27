@@ -28,6 +28,28 @@ if (is_array($rankings)) {
     foreach ($rankings as $rank) {
         if (isset($rank['pos']) && intval($rank['pos']) === 1) {
             $winner_name = isset($rank['name']) ? $rank['name'] : '';
+
+            // Check if player_id is linked and use display_name if available
+            $player_user = isset($rank['player_id']) ? $rank['player_id'] : null;
+            $player_id = 0;
+
+            if ($player_user) {
+                if (is_numeric($player_user)) {
+                    $player_id = intval($player_user);
+                } elseif (is_array($player_user) && isset($player_user['ID'])) {
+                    $player_id = intval($player_user['ID']);
+                } elseif (is_object($player_user) && isset($player_user->ID)) {
+                    $player_id = intval($player_user->ID);
+                }
+            }
+            
+            if ($player_id) {
+                $user_info = get_userdata($player_id);
+                if ($user_info) {
+                    $winner_name = $user_info->display_name;
+                }
+            }
+
             $winner_deck = isset($rank['deck']) ? $rank['deck'] : '';
             break;
         }
