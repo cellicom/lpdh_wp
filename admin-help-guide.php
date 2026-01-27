@@ -62,9 +62,10 @@ function render_help_guide_page()
                     <a href="#banned">5. Banned Cards</a>
                     <a href="#leaderboards">6. Leaderboards</a>
                     <a href="#stats">7. Statistics & ELO</a>
-                    <a href="#roles">8. Roles & Security</a>
-                    <a href="#settings">9. Theme Settings</a>
-                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">10. Easter Eggs ✨</a>
+                    <a href="#profiles">8. Profiles & Account Management</a>
+                    <a href="#roles">9. Roles & Security</a>
+                    <a href="#settings">10. Theme Settings</a>
+                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">11. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -156,6 +157,13 @@ function render_help_guide_page()
                     </li>
                     <li><strong>Decklist URL:</strong> External link (Moxfield, deckstats.net, etc.).</li>
                     <li><strong>Decklist Text:</strong> Optional field for raw card list pasting.</li>
+                    <li><strong>Private Deck:</strong>
+                        <div
+                            style="background: #fff8e5; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #ffb900;">
+                            <strong>Logic:</strong> If enabled, the deck will only be visible to the author and site
+                            administrators. It will be hidden from public lists and search results.
+                        </div>
+                    </li>
                 </ul>
             </section>
 
@@ -306,27 +314,55 @@ function render_help_guide_page()
                     style="background: #2d333b; padding: 20px; border-radius: 8px; border: 1px solid #444c56; margin-top: 15px;">
                     <pre
                         style="margin: 0; color: #adbac7; font-size: 13px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; overflow-x: auto;">
-            // Core Calculation Snippet
-            $actual_score = $wins + ($draws * 0.5);
-            $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
-            $expected_score = $expected_score_rate * $games_played;
-            $k_factor = 32 / ($games_played);
+                        // Core Calculation Snippet
+                        $actual_score = $wins + ($draws * 0.5);
+                        $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+                        $expected_score = $expected_score_rate * $games_played;
+                        $k_factor = 32 / ($games_played);
 
-            // Position Adjustment
-            $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-            $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
-            $position_adjustment = 20 * ($rank_score - 0.5);
+                        // Position Adjustment
+                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                        $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+                        $position_adjustment = 20 * ($rank_score - 0.5);
 
-            // New ELO Result
-            $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
+                        // New ELO Result
+                        $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
                 </div>
+            </section>
+
+            <!-- SECTION: PROFILES -->
+            <section id="profiles" style="margin-bottom: 60px;">
+                <h2
+                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-admin-users"></span> 8. Profiles & Account Management
+                </h2>
+                <p>Manage user visibility and data privacy settings.</p>
+
+                <h4 style="margin-bottom: 10px;">User Settings:</h4>
+                <ul style="list-style: disc; margin-left: 20px;">
+                    <li><strong>Private Profile:</strong>
+                        <p class="small">A setting that hides the User Detail page from the public.
+                            - <strong>Admin:</strong> Accessible in the User Profile under "Personal Options".
+                            - <strong>Player:</strong> Accessible in the frontend <i>Profile Editor</i>.
+                            <br><i>Effect:</i> Other users will see a "Profile is Private" notice if they try to access the
+                            page.
+                        </p>
+                    </li>
+                    <li><strong>Account Deletion:</strong>
+                        <p class="small">Users can permanently delete their accounts from the "Danger Zone" section in the
+                            Profile Editor.
+                            <br><strong>Warning:</strong> This permanently removes the profile and <strong>all assigned
+                                decks</strong>. Events remain unchanged.
+                        </p>
+                    </li>
+                </ul>
             </section>
 
             <!-- SECTION: ROLES -->
             <section id="roles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-shield"></span> 8. Roles & Security
+                    <span class="dashicons dashicons-shield"></span> 9. Roles & Security
                 </h2>
                 <p><strong>Administrator:</strong> Unrestricted access. <br> <strong>Player:</strong> Limited to personal
                     Deck management with automatic redirection from restricted areas.</p>
@@ -336,7 +372,7 @@ function render_help_guide_page()
             <section id="settings" style="margin-bottom: 40px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-generic"></span> 9. Theme Settings
+                    <span class="dashicons dashicons-admin-generic"></span> 10. Theme Settings
                 </h2>
                 <p>Configure the site's aesthetics and technical mapping under <strong>Appearance > Theme Settings</strong>.
                 </p>
@@ -370,6 +406,10 @@ function render_help_guide_page()
                             <td><strong>Login/Register Page</strong></td>
                             <td>Sets the destination for the custom authentication screens.</td>
                         </tr>
+                        <tr>
+                            <td><strong>Social Links</strong></td>
+                            <td>Configure Instagram, Discord, Facebook, and X links for the site's footer.</td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
@@ -378,60 +418,74 @@ function render_help_guide_page()
             <section id="easter-eggs" style="margin-bottom: 40px;">
                 <h2
                     style="color: #d63638; background: #fff5f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-appearance"></span> 10. Easter Eggs & Hidden Features
+                    <span class="dashicons dashicons-admin-appearance"></span> 11. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <!-- Point 1 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
-                        <p class="small">Searching for <strong>"counterspell"</strong> or <strong>"contromagia"</strong> in
-                            the site search bar triggers a blue burst visual effect.</p>
-                    </div>
+                <details
+                    style="border: 1px solid #fecaca; border-radius: 8px; background: #fff5f5; overflow: hidden; margin-top: 20px;">
+                    <summary
+                        style="padding: 15px; cursor: pointer; color: #d63638; font-weight: bold; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                        <span>Click to view Easter Eggs (Spoiler Warning!)</span>
+                        <span class="dashicons dashicons-arrow-down-alt2"></span>
+                    </summary>
+                    <div style="padding: 20px; background: #fff; border-top: 1px solid #fecaca;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                            <!-- Point 1 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
+                                <p class="small">Searching for <strong>"counterspell"</strong> or
+                                    <strong>"contromagia"</strong> in
+                                    the site search bar triggers a blue burst visual effect.</p>
+                            </div>
 
-                    <!-- Point 2 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #7c2d12;">2. Daybound / Nightbound</h5>
-                        <p class="small">Pressing the keys <strong>"D"</strong> then <strong>"N"</strong> in sequence
-                            toggles the site theme with a sun/moon rising animation.</p>
-                    </div>
+                            <!-- Point 2 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #7c2d12;">2. Daybound / Nightbound</h5>
+                                <p class="small">Pressing the keys <strong>"D"</strong> then <strong>"N"</strong> in
+                                    sequence
+                                    toggles the site theme with a sun/moon rising animation.</p>
+                            </div>
 
-                    <!-- Point 3 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #d63638;">3. Forbidden Cards</h5>
-                        <p class="small">Searching for "expensive" cards (like <strong>Black Lotus</strong>) triggers a
-                            rejection screen and a random redirect.</p>
-                    </div>
+                            <!-- Point 3 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #d63638;">3. Forbidden Cards</h5>
+                                <p class="small">Searching for "expensive" cards (like <strong>Black Lotus</strong>)
+                                    triggers a
+                                    rejection screen and a random redirect.</p>
+                            </div>
 
-                    <!-- Point 4 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #111827;">4. Console Lives</h5>
-                        <p class="small">Opening the browser's <strong>Inspect Console</strong> reveals a greeting for the
-                            LPDH gods Gut and Balmor.</p>
-                    </div>
+                            <!-- Point 4 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #111827;">4. Console Lives</h5>
+                                <p class="small">Opening the browser's <strong>Inspect Console</strong> reveals a greeting
+                                    for the
+                                    LPDH gods Gut and Balmor.</p>
+                            </div>
 
-                    <!-- Point 5 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #b45309;">5. Commander Tax</h5>
-                        <p class="small">In profile pages, clicking the <strong>User Avatar</strong> adds +2 "Commander Tax"
-                            to a
-                            floating badge.</p>
-                    </div>
+                            <!-- Point 5 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #b45309;">5. Commander Tax</h5>
+                                <p class="small">In profile pages, clicking the <strong>User Avatar</strong> adds +2
+                                    "Commander Tax"
+                                    to a floating badge.</p>
+                            </div>
 
-                    <!-- Point 6 -->
-                    <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
-                        <h5 style="margin-top: 0; color: #2563eb;">6. Countered Commander</h5>
-                        <p class="small">Clicking the <strong>Commander Image</strong> on a deck page reveals one of 79
-                            different Counterspell artworks at random.</p>
+                            <!-- Point 6 -->
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                                <h5 style="margin-top: 0; color: #2563eb;">6. Countered Commander</h5>
+                                <p class="small">Clicking the <strong>Commander Image</strong> on a deck page reveals a
+                                    random artwork from various <strong>Counterspells</strong> or <strong>Mana
+                                        Tithes</strong>.</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </details>
             </section>
 
             <footer
                 style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #f0f0f1; text-align: center; font-style: italic; color: #646970;">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 1.8.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 1.9.6</p>
             </footer>
         </div>
     </div>
@@ -467,6 +521,18 @@ function render_help_guide_page()
         .small {
             font-size: 13px;
             color: #646970;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details[open] summary .dashicons-arrow-down-alt2 {
+            transform: rotate(180deg);
+        }
+
+        details summary .dashicons-arrow-down-alt2 {
+            transition: transform 0.2s ease;
         }
     </style>
     <?php

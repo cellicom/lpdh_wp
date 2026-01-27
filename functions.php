@@ -1585,7 +1585,7 @@ function register_event_post_type()
         'public' => true,
         'show_ui' => true,
         'show_in_menu' => true,
-        'menu_position' => 24,
+        'menu_position' => 4,
         'menu_icon' => 'dashicons-calendar',
         'show_in_admin_bar' => true,
         'show_in_nav_menus' => true,
