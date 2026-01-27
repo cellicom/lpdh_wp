@@ -6,6 +6,14 @@ A feature-rich, high-performance WordPress Child Theme built on the **Bootscore*
 
 This theme transforms WordPress into a comprehensive tournament management platform. It combines static content management with dynamic systems for player rankings, deck database management, and interactive community features.
 
+---
+
+> [!NOTE]
+> This theme is the result of an experiment.
+> Aside from graphical assets, the entire template was developed by AI—primarily Gemini, Copilot, and Blackbox—under my specific instructions. These prompts were sometimes detailed, and other times intentionally vague or imprecise, in order to challenge the AI's reasoning capabilities and test its understanding of the project context and objectives. This repository is public to serve as documentation of this experiment.
+
+---
+
 ## 🛠 Technical Foundation
 
 - **Base Framework:** [Bootscore](https://bootscore.me/) (Bootstrap 5 integrated with WordPress)
@@ -51,17 +59,12 @@ This is a **Bootscore Child Theme**.
 - **WordPress 6.4+**
 - **Bootscore Parent Theme** (v6.x)
 - **Advanced Custom Fields PRO (v6.x)** - Mandatory for data management and modular boxes.
+- **bs Cookie Settings (v.5.6.x)** - Mandatory for GDPR/CCPA compliance and user consents.
 
 ```bash
 # Compile SCSS to CSS
 npx sass assets/scss/main.scss assets/css/main.css
 ```
-
----
-
-*Developed for the LPDH Community. Based on the Bootscore Child Theme template.*
-
----
 
 > [!IMPORTANT]
 > LPDH - Legendary Pauper Commander is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
