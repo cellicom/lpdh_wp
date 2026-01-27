@@ -21,6 +21,32 @@ $user_id = $current_user->ID;
 $success = false;
 $errors = array();
 
+// Handle Account Deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_account') {
+    if (wp_verify_nonce($_POST['delete_account_nonce'], 'delete_account_action')) {
+        require_once(ABSPATH . 'wp-admin/includes/user.php');
+
+        // Permanently delete user's decks
+        $decks = get_posts(array(
+            'post_type' => 'deck',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'any'
+        ));
+
+        foreach ($decks as $deck) {
+            wp_delete_post($deck->ID, true);
+        }
+
+        // Delete user (without reassignment for other posts to keep events unchanged)
+        wp_delete_user($user_id);
+        wp_redirect(home_url());
+        exit;
+    } else {
+        $errors[] = "Security check failed for account deletion.";
+    }
+}
+
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'])) {
     if (wp_verify_nonce($_POST['profile_editor_nonce'], 'update_user_profile')) {
@@ -39,6 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
                 update_user_meta($user_id, $field, esc_url_raw($_POST[$field]));
             }
         }
+
+        // Private Profile
+        update_user_meta($user_id, 'private_profile', isset($_POST['private_profile']) ? '1' : '0');
 
         // Basic Info Update
         $userdata = array(
@@ -110,6 +139,8 @@ get_header(); ?>
                     <form method="post" class="profile-editor-form text-white">
                         <?php wp_nonce_field('update_user_profile', 'profile_editor_nonce'); ?>
 
+
+
                         <!-- Avatar Section -->
                         <div class="mb-5 text-center">
                             <div class="mb-3">
@@ -121,6 +152,22 @@ get_header(); ?>
                                 Your avatar is managed via <a href="https://gravatar.com" target="_blank"
                                     class="text-info text-decoration-underline">Gravatar</a>.
                             </p>
+                        </div>
+
+                        <hr class="border-secondary mb-5">
+
+                        <!-- Privacy Settings -->
+                        <h4 class="mb-4 text-primary"><i class="fas fa-shield-alt me-2"></i>Privacy Settings</h4>
+                        <div class="mb-4">
+                            <div class="form-check ps-0 d-flex align-items-center gap-3">
+                                <input type="checkbox" name="private_profile" id="private_profile"
+                                    class="form-check-input ms-0" value="1" <?php checked('1', get_user_meta($user_id, 'private_profile', true)); ?>>
+                                <label for="private_profile" class="form-label fw-bold mb-0">Private Profile</label>
+                            </div>
+                            <small class="text-warning d-block mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Your profile will become private hiding the user detail page.
+                            </small>
                         </div>
 
                         <hr class="border-secondary mb-5">
@@ -175,7 +222,7 @@ get_header(); ?>
                         </div>
 
                         <script>
-                            document.addEventListener('DOMContentLoaded', function() {
+                            document.addEventListener('DOMContentLoaded', function () {
                                 const firstName = document.getElementById('first_name');
                                 const lastName = document.getElementById('last_name');
                                 const nickname = document.getElementById('nickname');
@@ -266,10 +313,8 @@ get_header(); ?>
                         <div class="form-text text-info mb-4">Leave both blank if you don't want to change your
                             password.</div>
 
-                        <hr class="border-secondary my-5">
-
                         <!-- Actions -->
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-5">
                             <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>"
                                 class="btn btn-outline-light">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Profile
@@ -279,10 +324,61 @@ get_header(); ?>
                             </button>
                         </div>
                     </form>
+
+                    <!-- Danger Zone -->
+                    <div class="card border-danger bg-dark shadow-lg mt-5">
+                        <div class="card-body p-4">
+                            <h4 class="text-danger mb-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+                            </h4>
+                            <p class="text-light mb-4">
+                                Once you delete your account, there is no going back. Please be certain.
+                                <strong class="text-danger">All your assigned decks will also be permanently
+                                    deleted.</strong>
+                            </p>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteAccountModal">
+                                <i class="fas fa-user-slash me-2"></i>Delete My Account
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow bg-dark text-white border-danger">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-danger" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-circle text-danger fa-4x mb-3"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Are you absolutely sure?</h4>
+                <p class="text-light mb-0">
+                    This action is <strong class="text-danger uppercase">irreversible</strong>.
+                    Your profile, personal settings, and <strong class="text-danger">all your assigned decks</strong>
+                    will be permanently removed.
+                </p>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                <form method="post">
+                    <?php wp_nonce_field('delete_account_action', 'delete_account_nonce'); ?>
+                    <input type="hidden" name="action" value="delete_account">
+                    <button type="submit" class="btn btn-danger px-4">Yes, Delete My Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php get_footer(); ?>

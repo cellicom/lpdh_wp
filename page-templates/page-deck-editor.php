@@ -47,6 +47,7 @@ if (isset($_POST['deck_editor_nonce']) && wp_verify_nonce($_POST['deck_editor_no
     $partner = isset($_POST['partner']) ? sanitize_text_field($_POST['partner']) : '';
     $decklist_url = isset($_POST['decklist_url']) ? esc_url_raw($_POST['decklist_url']) : '';
     $decklist_text = isset($_POST['decklist_text']) ? sanitize_textarea_field($_POST['decklist_text']) : '';
+    $private_deck = isset($_POST['private_deck']) ? 1 : 0;
 
     if (empty($deck_name)) {
         $errors[] = "Deck name is required.";
@@ -80,6 +81,7 @@ if (isset($_POST['deck_editor_nonce']) && wp_verify_nonce($_POST['deck_editor_no
                 update_field('field_partner', $partner, $deck_id);
                 update_field('field_decklist', $decklist_url, $deck_id);
                 update_field('field_decklist_text', $decklist_text, $deck_id);
+                update_field('field_private_deck', $private_deck, $deck_id);
             }
 
             // Handle Image Uploads
@@ -203,6 +205,16 @@ get_header(); ?>
                                     If not uploaded, it will be automatically fetched from Scryfall.
                                 </small>
                             </div>
+                        </div>
+
+                        <div class="mb-4 d-flex align-items-center gap-2">
+                            <input type="checkbox" name="private_deck" id="private_deck" class="form-check-input"
+                                value="1" <?php echo ($is_edit && get_field('private_deck', $edit_id)) ? 'checked' : ''; ?>>
+                            <label for="private_deck" class="form-label fw-bold mb-0">Private Deck</label>
+                            <small class="text-warning d-block ms-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                This deck will become private and decklists will be hidden.
+                            </small>
                         </div>
 
                         <div class="mb-4">

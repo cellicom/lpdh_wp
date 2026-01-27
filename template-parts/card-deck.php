@@ -36,6 +36,9 @@ $show_author = $args['show_author'] ?? true;
                 <a href="<?php the_permalink(); ?>" class="text-decoration-none stretched-link">
                     <?php the_title(); ?>
                 </a>
+                <?php if (!lpdh_is_deck_legal(get_the_ID())): ?>
+                    <span class="badge bg-danger ms-1" style="font-size: 0.6em; vertical-align: middle;">NOT LEGAL</span>
+                <?php endif; ?>
             </h5>
             <?php
             $commander = get_field('commander');

@@ -435,6 +435,25 @@ if (function_exists('acf_add_local_field_group')):
                 'placeholder' => '',
             ),
             array(
+                'key' => 'field_private_deck',
+                'label' => 'Private Deck',
+                'name' => 'private_deck',
+                'type' => 'true_false',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'message' => 'This deck will become private and decklists will be hidden.',
+                'default_value' => 0,
+                'ui' => 0,
+                'ui_on_text' => '',
+                'ui_off_text' => '',
+            ),
+            array(
                 'key' => 'field_decklist',
                 'label' => 'Decklist (External Link)',
                 'name' => 'decklist',
@@ -543,7 +562,7 @@ if (function_exists('acf_add_local_field_group')):
             return;
         ?>
         <script type="text/javascript">
-            jQuery(document).ready(function ($) {
+            jQuery(docu         ment).re         ady(function ($) {
                 $('#publish, #save-post').on('click', function (e) {
                     var title = $('#title').val();
                     if (!title || title.trim().length === 0) {
@@ -5628,7 +5647,109 @@ function lpdh_manage_admin_bar($show)
 }
 
 
+
 /**
- * Include Admin Help Guide
+ * Get all banned card names
  */
+function lpdh_get_banned_card_names()
+{
+    static $banned_names = null;
+    if ($banned_names !== null) {
+        return $banned_names;
+    }
+
+    $banned_posts = get_posts(array(
+        'post_type' => 'banned_card',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'fields' => 'ids'
+    ));
+
+    $banned_names = array();
+    foreach ($banned_posts as $post_id) {
+        $banned_names[] = strtolower(trim(get_the_title($post_id)));
+    }
+
+    return $banned_names;
+}
+
+/**
+ * Check if a deck contains banned cards
+ */
+function lpdh_is_deck_legal($deck_id)
+{
+    $banned_names = lpdh_get_banned_card_names();
+    if (empty($banned_names)) {
+        return true;
+    }
+
+    $commander = get_field('commander', $deck_id);
+    $partner = get_field('partner', $deck_id);
+    $decklist_text = get_field('decklist_text', $deck_id);
+
+    $deck_cards = array();
+    if (!empty($commander)) {
+        $deck_cards[] = strtolower(trim($commander));
+    }
+    if (!empty($partner)) {
+        $deck_cards[] = strtolower(trim($partner));
+    }
+
+    if (!empty($decklist_text)) {
+        $lines = explode("\n", $decklist_text);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line))
+                continue;
+
+            // Remove quantity (e.g., "1 Sol Ring" -> "Sol Ring")
+            $card_name = preg_replace('/^\d+x?\s+/', '', $line);
+            $deck_cards[] = strtolower(trim($card_name));
+        }
+    }
+
+    foreach ($deck_cards as $card) {
+        if (in_array($card, $banned_names)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+/**
+ * Add Private Profile field to user profile page
+ */
+function lpdh_add_private_profile_field($user)
+{
+    $private_profile = get_user_meta($user->ID, 'private_profile', true);
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="private_profile">Private Profile</label></th>
+            <td>
+                <input type="checkbox" name="private_profile" id="private_profile" value="1" <?php checked('1', $private_profile); ?> />
+                <span class="description">Your profile will become private hiding the user detail page.</span>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+add_action('personal_options', 'lpdh_add_private_profile_field');
+
+/**
+ * Save Private Profile field
+ */
+function lpdh_save_private_profile_field($user_id)
+{
+    if (!current_user_can('edit_user', $user_id)) {
+        return false;
+    }
+    update_user_meta($user_id, 'private_profile', isset($_POST['private_profile']) ? '1' : '0');
+}
+add_action('personal_options_update', 'lpdh_save_private_profile_field');
+add_action('edit_user_profile_update', 'lpdh_save_private_profile_field');
+
 require_once get_stylesheet_directory() . '/admin-help-guide.php';
+

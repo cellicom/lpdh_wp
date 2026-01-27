@@ -491,6 +491,56 @@ body {
     }
 }
 
+
+/* --- iOS Toggle Style for Checkboxes --- */
+.form-check-input[type="checkbox"] {
+    position: relative !important;
+    width: 3rem !important;
+    height: 1.5rem !important;
+    appearance: none !important;
+    background-color: rgba(120, 120, 128, 0.3) !important;
+    background-image: none !important;
+    border-radius: 2rem !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s ease !important;
+    margin-top: 0 !important;
+    vertical-align: middle !important;
+    flex-shrink: 0;
+
+    &::before {
+        content: "" !important;
+        position: absolute !important;
+        top: 2px !important;
+        left: 2px !important;
+        width: calc(1.5rem - 4px) !important;
+        height: calc(1.5rem - 4px) !important;
+        background-color: #fff !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        transition: transform 0.3s cubic-bezier(0.45, 1, 0.4, 1) !important;
+    }
+
+    &:checked {
+        background-color: var(--bs-primary) !important;
+        border: none !important;
+
+        &::before {
+            transform: translateX(1.5rem) !important;
+        }
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
+        outline: none !important;
+    }
+}
+
+// Ensure theme compatibility
+body.theme-vaporwave .form-check-input[type="checkbox"]:checked {
+    background-color: var(--lpdh-primary) !important;
+}
+
 /* --- Component Styles --- */
 
 /* About List Grid */

@@ -35,7 +35,12 @@ get_header(); ?>
 
                             <header class="entry-header">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <?php the_title('<h1 class="entry-title mb-0">', '</h1>'); ?>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <?php the_title('<h1 class="entry-title mb-0">', '</h1>'); ?>
+                                        <?php if (!lpdh_is_deck_legal(get_the_ID())): ?>
+                                            <span class="badge bg-danger" style="font-size: 0.7em;">NOT LEGAL</span>
+                                        <?php endif; ?>
+                                    </div>
                                     <?php
                                     if (is_user_logged_in() && (get_the_author_meta('ID') == get_current_user_id() || current_user_can('administrator'))):
                                         $deck_editor_url = lpdh_get_deck_editor_url();
@@ -112,8 +117,9 @@ get_header(); ?>
                             // Display custom fields
                             $decklist = get_field('decklist');
                             $decklist_text = get_field('decklist_text');
+                            $private_deck = get_field('private_deck');
 
-                            if ($decklist || $decklist_text): ?>
+                            if (!$private_deck && ($decklist || $decklist_text)): ?>
                                 <div class="deck-custom-fields">
                                     <h3>Deck Information</h3>
 
