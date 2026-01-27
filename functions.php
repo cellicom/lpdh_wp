@@ -65,6 +65,9 @@ function lpdh_get_banned_card_names()
     return array_map('strtolower', $banned_card_names);
 }
 
+// Include Achievements System
+require_once get_stylesheet_directory() . '/inc/achievements.php';
+
 /**
  * Enqueue scripts and styles
  */
@@ -119,6 +122,24 @@ function bootscore_child_enqueue_styles()
     // LPDH Cookie Consent Init (for bs-cookie-settings plugin)
     $modified_CookieSettingsInitJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/cookie-settings-init.js'));
     wp_enqueue_script('lpdh-cookie-settings-init', get_stylesheet_directory_uri() . '/assets/js/cookie-settings-init.js', array('cookie-settings-js'), $modified_CookieSettingsInitJS, true);
+
+    // Commander Roulette JS
+    if (is_page_template('page-templates/page-roulette.php')) {
+        $modified_RouletteJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/lpdh-roulette.js'));
+        wp_enqueue_script('lpdh-roulette-js', get_stylesheet_directory_uri() . '/assets/js/lpdh-roulette.js', array('jquery'), $modified_RouletteJS, true);
+
+        // Localize vars
+        $user_id = get_current_user_id();
+        $stats = lpdh_get_spin_stats($user_id);
+
+        wp_localize_script('lpdh-roulette-js', 'lpdh_roulette_vars', array(
+            'banned_cards' => lpdh_get_banned_card_names(),
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('lpdh_spin_nonce'),
+            'initial_stats' => $stats,
+            'is_logged_in' => is_user_logged_in()
+        ));
+    }
 }
 
 /**
@@ -4654,6 +4675,7 @@ function lpdh_theme_settings_render()
         update_option('lpdh_profile_editor_page_id', intval($_POST['lpdh_profile_editor_page_id']));
         update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
         update_option('lpdh_login_register_page_id', intval($_POST['lpdh_login_register_page_id']));
+        update_option('lpdh_roulette_page_id', intval($_POST['lpdh_roulette_page_id']));
 
         // Save Social Links
         update_option('lpdh_instagram_link', esc_url_raw($_POST['lpdh_instagram_link']));
@@ -4747,6 +4769,21 @@ function lpdh_theme_settings_render()
                         ));
                         ?>
                         <p class="description">Select the page that uses the "Registration Page" template.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Select Commander Roulette Page</th>
+                    <td>
+                        <?php
+                        $roulette_page_id = get_option('lpdh_roulette_page_id', 0);
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_roulette_page_id',
+                            'selected' => $roulette_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
             </table>
@@ -4885,7 +4922,122 @@ function lpdh_get_extra_attributions()
 
     return $output;
 }
+/**
+ * Commander Roulette AJAX Handler
+ */
+function lpdh_spin_roulette()
+{
+    // Check Nonce
+    check_ajax_referer('lpdh_spin_nonce', 'nonce');
 
+    // Check Login
+    if (!is_user_logged_in()) {
+        wp_send_json_error(array('message' => 'You must be logged in to spin the wheel.'));
+    }
+
+    $user_id = get_current_user_id();
+    $today = date('Y-m-d');
+    $last_spin_date = get_user_meta($user_id, 'lpdh_last_spin_date', true);
+    $spins_today = intval(get_user_meta($user_id, 'lpdh_spins_today', true));
+    $daily_limit = 3;
+    $is_admin = current_user_can('manage_options');
+
+    // Reset drops if new day
+    if ($last_spin_date !== $today) {
+        $spins_today = 0;
+        update_user_meta($user_id, 'lpdh_last_spin_date', $today);
+        update_user_meta($user_id, 'lpdh_spins_today', 0);
+    }
+
+    // Check Limit
+    if (!$is_admin && $spins_today >= $daily_limit) {
+        wp_send_json_error(array('message' => 'You have used all your spins for today. Come back tomorrow!'));
+    }
+
+    // --- Scryfall API Fetch ---
+    // (type:creature type:legendary) (game:paper) rarity:uncommon
+    $query = '(type:creature type:legendary) (game:paper) rarity:uncommon';
+    $banned_cards = lpdh_get_banned_card_names();
+    if (!empty($banned_cards)) {
+        foreach ($banned_cards as $card) {
+            // Decode entities and escape quotes
+            $card_clean = str_replace('"', '', html_entity_decode($card));
+            $query .= ' -!"' . $card_clean . '"';
+        }
+    }
+
+    $api_url = 'https://api.scryfall.com/cards/random?q=' . urlencode($query);
+    $response = wp_remote_get($api_url);
+
+    if (is_wp_error($response)) {
+        error_log('LPDH Roulette API Error: ' . $response->get_error_message());
+        wp_send_json_error(array('message' => 'System Error: Unable to connect to Card Database.'));
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    $body = wp_remote_retrieve_body($response);
+    $card_data = json_decode($body, true);
+
+    if ($response_code !== 200 || !$card_data || (isset($card_data['object']) && $card_data['object'] === 'error')) {
+        error_log('LPDH Roulette Scryfall Error Code: ' . $response_code);
+        error_log('LPDH Roulette Scryfall Response: ' . $body);
+        error_log('LPDH Roulette Query URL: ' . $api_url); // Log the constructed URL for debugging
+
+        $msg = isset($card_data['details']) ? $card_data['details'] : 'Unknown Scryfall Error';
+        wp_send_json_error(array('message' => 'Scryfall Error: ' . $msg));
+    }
+
+    // --- Update Token Count ---
+    if (!$is_admin) {
+        $spins_today++;
+        update_user_meta($user_id, 'lpdh_spins_today', $spins_today);
+    }
+
+    // Return Data
+    wp_send_json_success(array(
+        'card' => $card_data,
+        'remaining_spins' => $is_admin ? 999 : ($daily_limit - $spins_today),
+        'total_spins' => $spins_today
+    ));
+}
+add_action('wp_ajax_lpdh_spin_roulette', 'lpdh_spin_roulette');
+
+/**
+ * Helper to get current spin stats for frontend
+ */
+function lpdh_get_spin_stats($user_id)
+{
+    if (!$user_id)
+        return array('remaining' => 0, 'limit' => 3, 'is_admin' => false);
+
+    $today = date('Y-m-d');
+    $last_spin_date = get_user_meta($user_id, 'lpdh_last_spin_date', true);
+    $spins_today = intval(get_user_meta($user_id, 'lpdh_spins_today', true));
+
+    if ($last_spin_date !== $today) {
+        $spins_today = 0; // It will be effectively 0, though not updated in DB until spin
+    }
+
+    $is_admin = user_can($user_id, 'manage_options');
+    $limit = 3;
+    $remaining = $is_admin ? 999 : max(0, $limit - $spins_today);
+
+    return array(
+        'remaining' => $remaining,
+        'limit' => $limit,
+        'is_admin' => $is_admin
+    );
+}
+
+// Ensure lpdh_roulette_vars includes AJAX URL and Nonce
+add_filter('wp_enqueue_scripts', function () {
+    if (is_page_template('page-templates/page-roulette.php')) {
+        // This is handled in the main enqueue function, but we need to ensure localizer has these new vars.
+        // We actually need to modify the EXISTING wp_localize_script call in bootscore_child_enqueue_styles
+        // or just accept we'll add them there.
+        // Let's modify the ORIGINAL wp_localize_script block in functions.php instead of adding a filter here.
+    }
+});
 /**
  * Get Social Links HTML for Footer
  */

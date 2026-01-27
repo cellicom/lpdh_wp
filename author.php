@@ -103,6 +103,57 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                             }
                             ?>
                         </div>
+
+                        <!-- Achievements -->
+                        <?php
+                        $user_achievements = lpdh_get_user_achievements($author_id);
+                        if (!empty($user_achievements)): ?>
+                            <div class="author-achievements mt-4">
+                                <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
+                                <div class="d-flex justify-content-center flex-wrap gap-3">
+                                    <?php foreach ($user_achievements as $badge): ?>
+                                        <div class="achievement-badge" data-bs-toggle="tooltip"
+                                            title="<?php echo esc_attr($badge['title'] . ': ' . $badge['description']); ?>">
+                                            <div class="badge-icon bg-<?php echo esc_attr($badge['color']); ?> shadow-sm">
+                                                <i class="fas <?php echo esc_attr($badge['icon']); ?>"></i>
+                                            </div>
+                                            <!-- Optional: Show title below
+                                            <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;"><?php echo esc_html($badge['title']); ?></small>
+                                            -->
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <style>
+                                .achievement-badge .badge-icon {
+                                    width: 45px;
+                                    height: 45px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 1.2rem;
+                                    color: #fff;
+                                    transition: transform 0.2s;
+                                }
+
+                                .achievement-badge:hover .badge-icon {
+                                    transform: scale(1.1);
+                                }
+
+                                .bg-bronze {
+                                    background: linear-gradient(135deg, #cd7f32, #8c5a2b);
+                                }
+
+                                .bg-silver {
+                                    background: linear-gradient(135deg, #c0c0c0, #808080);
+                                }
+
+                                .bg-gold {
+                                    background: linear-gradient(135deg, #ffd700, #b8860b);
+                                }
+                            </style>
+                        <?php endif; ?>
                     </div>
                 </div>
 
