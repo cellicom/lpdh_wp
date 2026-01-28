@@ -130,15 +130,14 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                     ?>
                                         <div class="achievement-badge" data-bs-toggle="tooltip"
                                             title="<?php echo esc_attr($badge['title']); ?>">
-                                            <div class="badge-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
+                                            <div class="lpdh-achievement-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
                                                 <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
 
                                     <?php if ($hidden_count > 0): ?>
-                                        <button type="button" class="btn btn-outline-secondary rounded-circle" 
-                                                style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;"
+                                        <button type="button" class="btn btn-outline-secondary rounded-circle lpdh-achievement-icon" 
                                                 data-bs-toggle="modal" data-bs-target="#achievementsModal">
                                             <small>+<?php echo $hidden_count; ?></small>
                                         </button>
@@ -146,19 +145,6 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                 </div>
                             </div>
                             
-                            <style>
-                                .achievement-badge .badge-icon {
-                                    width: 45px; height: 45px; border-radius: 50%;
-                                    display: flex; align-items: center; justify-content: center;
-                                    font-size: 1.2rem; color: #fff; transition: transform 0.2s;
-                                }
-                                .achievement-badge:hover .badge-icon { transform: scale(1.1); }
-                                /* Legacy Helper Classes */
-                                .bg-bronze { background: linear-gradient(135deg, #cd7f32, #8c5a2b); }
-                                .bg-silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
-                                .bg-gold { background: linear-gradient(135deg, #ffd700, #b8860b); }
-                            </style>
-
                             <!-- Achievements Modal -->
                             <div class="modal fade" id="achievementsModal" tabindex="-1" aria-labelledby="achievementsModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -179,18 +165,18 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                         $bg_class = 'bg-' . esc_attr($badge['color_class']);
                                                     }
                                                 ?>
-                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-start p-3">
-                                                    <div class="me-3">
-                                                        <div class="badge-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?> style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff;">
+                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-3">
+                                                    <div class="me-4">
+                                                        <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
                                                             <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                                         </div>
                                                     </div>
                                                     <div class="flex-grow-1">
-                                                        <div class="d-flex w-100 justify-content-between">
-                                                            <h5 class="mb-1 text-warning"><?php echo esc_html($badge['title']); ?></h5>
+                                                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                            <h5 class="mb-0 text-warning"><?php echo esc_html($badge['title']); ?></h5>
                                                             <small class="text-info"><?php echo esc_html($badge['date_unlocked']); ?></small>
                                                         </div>
-                                                        <p class="mb-1 text-light"><?php echo esc_html($badge['description']); ?></p>
+                                                        <p class="mb-0 text-white-50 small"><?php echo esc_html($badge['description']); ?></p>
                                                     </div>
                                                 </div>
                                                 <?php endforeach; ?>
