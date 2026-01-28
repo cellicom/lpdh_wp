@@ -329,11 +329,25 @@ function lpdh_get_user_achievements($user_id)
  */
 function lpdh_format_achievement($post)
 {
+    $icon = get_field('icon', $post->ID);
+
+    // Fix for ACF Font Awesome returning full HTML element despite return_format setting
+    // Usage in frontend expects just the class string.
+    if (is_string($icon) && strpos($icon, '<i') !== false) {
+        preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
+        if (isset($matches[1])) {
+            $icon = $matches[1];
+        } else {
+            // Fallback: try to just strip HTML, though mostly empty for icons
+            $icon = trim(strip_tags($icon));
+        }
+    }
+
     return [
         'id' => $post->ID,
         'title' => $post->post_title,
         'description' => $post->post_content,
-        'icon' => get_field('icon', $post->ID),
+        'icon' => $icon,
         'color_hex' => get_field('color_hex', $post->ID),
         'color_class' => get_field('color_class', $post->ID),
         // Fallback for current frontend if it expects 'color'
