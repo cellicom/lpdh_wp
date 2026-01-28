@@ -147,10 +147,10 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                             
                             <!-- Achievements Modal -->
                             <div class="modal fade" id="achievementsModal" tabindex="-1" aria-labelledby="achievementsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                                     <div class="modal-content bg-dark text-light border-secondary">
-                                        <div class="modal-header border-secondary">
-                                            <h5 class="modal-title" id="achievementsModalLabel">Unlocked Achievements (<?php echo $total_ach; ?>)</h5>
+                                        <div class="modal-header border-secondary py-2">
+                                            <h5 class="modal-title fs-6" id="achievementsModalLabel">Unlocked Achievements (<?php echo $total_ach; ?>)</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body p-0">
@@ -165,18 +165,18 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                         $bg_class = 'bg-' . esc_attr($badge['color_class']);
                                                     }
                                                 ?>
-                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-3">
+                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
                                                     <div class="me-3">
-                                                        <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
+                                                        <div class="lpdh-achievement-icon icon-compact <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
                                                             <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                                         </div>
                                                     </div>
                                                     <div class="flex-grow-1 text-start">
-                                                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                                            <h5 class="mb-0 text-warning"><?php echo esc_html($badge['title']); ?></h5>
-                                                            <small class="text-info text-nowrap ms-3"><?php echo esc_html($badge['date_unlocked']); ?></small>
+                                                        <div class="d-flex w-100 justify-content-between align-items-center mb-0">
+                                                            <h6 class="mb-0 text-warning small fw-bold"><?php echo esc_html($badge['title']); ?></h6>
+                                                            <small class="text-info text-nowrap ms-2" style="font-size: 0.75rem;"><?php echo esc_html($badge['date_unlocked']); ?></small>
                                                         </div>
-                                                        <p class="mb-0 text-white-50 small"><?php echo esc_html($badge['description']); ?></p>
+                                                        <p class="mb-0 text-white-50" style="font-size: 0.8rem; line-height: 1.2;"><?php echo esc_html($badge['description']); ?></p>
                                                     </div>
                                                 </div>
                                                 <?php endforeach; ?>

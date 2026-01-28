@@ -54,7 +54,36 @@ get_header();
                                 <?php the_content(); ?>
                             </div>
 
+                            <?php
+                            // Check Status
+                            $is_unlocked = false;
+                            $unlock_date = '';
+                            if (is_user_logged_in()) {
+                                $uid = get_current_user_id();
+                                $list = lpdh_get_user_achievements($uid);
+                                foreach ($list as $item) {
+                                    if ($item['id'] == $id) {
+                                        $is_unlocked = true;
+                                        $unlock_date = $item['date_unlocked'];
+                                        break;
+                                    }
+                                }
+                            }
+                            ?>
 
+                            <?php if ($is_unlocked): ?>
+                                <div class="mt-4 pt-4 border-top border-secondary">
+                                    <span class="badge bg-success fs-5 p-3">
+                                        <i class="fas fa-check-circle me-2"></i> Unlocked on <?php echo $unlock_date; ?>
+                                    </span>
+                                </div>
+                            <?php elseif (is_user_logged_in()): ?>
+                                <div class="mt-4 pt-4 border-top border-secondary">
+                                    <span class="badge bg-secondary fs-6 p-3 opacity-75">
+                                        <i class="fas fa-lock me-2"></i> Locked
+                                    </span>
+                                </div>
+                            <?php endif; ?>
                             
                         </div>
                         <div class="card-footer bg-dark border-secondary text-center py-3">

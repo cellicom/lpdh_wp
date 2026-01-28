@@ -6,16 +6,14 @@
 get_header();
 
 // Prepare User Unlocked Data if logged in (for styling)
+// Prepare User Unlocked Data if logged in (for styling)
 $user_unlocked_ids = [];
 if (is_user_logged_in()) {
-    $meta = get_user_meta(get_current_user_id(), 'lpdh_unlocked_achievements', true);
-    if (is_array($meta)) {
-        // Handle migration format safely: keys vs values
-        foreach ($meta as $k => $v) {
-            // New format: ID => TS. Old: Index => ID
-            if (is_int($k) && is_numeric($v) && $k < 1000) $user_unlocked_ids[] = $v;
-            else $user_unlocked_ids[] = $k;
-        }
+    $uid = get_current_user_id();
+    // Use the robust function to get consistent data (and trigger auto-unlocks)
+    $list = lpdh_get_user_achievements($uid);
+    foreach ($list as $item) {
+        $user_unlocked_ids[] = $item['id'];
     }
 }
 ?>
