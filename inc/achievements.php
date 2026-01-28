@@ -651,20 +651,23 @@ function lpdh_render_manage_achievements_page() {
 
         <?php if ($selected_user_id): 
             $all_achievements = get_posts(['post_type' => 'achievement', 'posts_per_page' => -1, 'post_status' => 'publish']);
-            $unlocked_data = get_user_meta($selected_user_id, 'lpdh_unlocked_achievements', true);
-            if (!is_array($unlocked_data)) $unlocked_data = [];
             
-            // Normalize for checking
-             $normalized_unlocked = [];
-             foreach ($unlocked_data as $k => $v) {
-                if (is_int($k) && is_numeric($v) && $k < 1000) $normalized_unlocked[$v] = time();
-                else $normalized_unlocked[$k] = $v;
-             }
+            // USE THE CENTRALIZED FUNCTION to ensure we see exactly what the frontend sees
+            // This handles ID vs Date format, AND performs auto-unlocked checks for stats
+            $user_achievements_list = lpdh_get_user_achievements($selected_user_id);
+            
+            // Convert to simple ID-keyed map for fast lookup
+            $normalized_unlocked = [];
+            foreach ($user_achievements_list as $ach_obj) {
+                // $ach_obj is like ['ID' => 123, 'title' => ..., 'date_unlocked_ts' => ...]
+                $normalized_unlocked[$ach_obj['ID']] = $ach_obj['date_unlocked_ts'];
+            }
         ?>
             <div id="lpdh-achievement-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
                 <?php foreach ($all_achievements as $post): 
                     $is_unlocked = isset($normalized_unlocked[$post->ID]);
-                    $unlock_date = $is_unlocked ? date('Y-m-d H:i', $normalized_unlocked[$post->ID]) : '';
+                    $unlock_ts = $is_unlocked ? $normalized_unlocked[$post->ID] : false;
+                    $unlock_date = $unlock_ts ? date('Y-m-d H:i', $unlock_ts) : '';
                     
                     $icon = get_field('icon', $post->ID);
                      if (is_string($icon) && strpos($icon, '<i') !== false) {
