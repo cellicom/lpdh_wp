@@ -659,8 +659,8 @@ function lpdh_render_manage_achievements_page() {
             // Convert to simple ID-keyed map for fast lookup
             $normalized_unlocked = [];
             foreach ($user_achievements_list as $ach_obj) {
-                // $ach_obj is like ['ID' => 123, 'title' => ..., 'date_unlocked_ts' => ...]
-                $normalized_unlocked[$ach_obj['ID']] = $ach_obj['date_unlocked_ts'];
+                // $ach_obj is like ['id' => 123, 'title' => ..., 'date_unlocked_ts' => ...]
+                $normalized_unlocked[$ach_obj['id']] = $ach_obj['date_unlocked_ts'];
             }
         ?>
             <div id="lpdh-achievement-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
