@@ -60,7 +60,7 @@ if (is_user_logged_in()) {
                                 <div class="card h-100 bg-dark text-light shadow-sm <?php echo $border_class; ?> achievement-card">
                                     <div class="card-body text-center py-4 <?php echo $opacity_class; ?>">
                                         
-                                        <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm mb-3" 
+                                        <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm mb-3 mx-auto" 
                                              <?php echo $bg_style; ?>>
                                             <i class="<?php echo esc_attr($icon); ?>"></i>
                                         </div>
@@ -79,11 +79,7 @@ if (is_user_logged_in()) {
                     <?php endwhile; ?>
                 </div>
                 
-                <style>
-                    .grayscale { filter: grayscale(100%); }
-                    .achievement-card { transition: transform 0.2s; }
-                    .achievement-card:hover { transform: translateY(-5px); }
-                </style>
+
 
                 <div class="mt-5">
                     <?php the_posts_pagination(); ?>

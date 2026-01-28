@@ -184,7 +184,7 @@ body {
     }
 }
 
-.card {
+.post-type-archive-banned_card .card, [data-acf-box="banlist"] .card, .acf-box[data-acf-box="banlist"] .card {
     transform: rotate(-0.5deg);
 
     &:nth-child(even) {
@@ -1620,3 +1620,14 @@ input[type="file"]::file-selector-button {
 .bg-gold {
     background: linear-gradient(135deg, #ffd700, #b8860b);
 }
+/* Achievement Archive Styles */
+.grayscale { filter: grayscale(100%); }
+.achievement-card { transition: transform 0.2s; }
+.achievement-card:hover { transform: translateY(-5px); }
+
+
+/* Achievement Archive Styles */
+.grayscale { filter: grayscale(100%); }
+.achievement-card { transition: transform 0.2s; }
+.achievement-card:hover { transform: translateY(-5px); }
+

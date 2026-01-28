@@ -541,12 +541,13 @@ add_action('admin_menu', 'lpdh_register_achievement_admin_page');
 
 // 7. Enqueue Assets for Admin Page
 function lpdh_achievements_admin_scripts($hook) {
-    if ($hook !== 'achievements_page_lpdh-manage-achievements') {
+    // Check if we are on the correct page (Robust check)
+    if (!isset($_GET['page']) || $_GET['page'] !== 'lpdh-manage-achievements') {
         return;
     }
 
-    // Font Awesome (using CDN for admin)
-    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+    // Font Awesome (using CDN for admin - v6 for better compatibility)
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
     // Select2
     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
@@ -574,6 +575,13 @@ function lpdh_render_manage_achievements_page() {
             display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem; color: #fff; flex-shrink: 0;
         }
+        /* Force FontAwesome Font Family to override WP Admin Dashicons/etc if conflict */
+        .lpdh-achievement-icon i {
+            font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+            font-weight: 900;
+            font-style: normal;
+        }
+        
         .lpdh-achievement-icon.icon-lg {
             width: 60px; height: 60px; font-size: 1.8rem;
         }
@@ -672,7 +680,7 @@ function lpdh_render_manage_achievements_page() {
                                                data-ach-id="<?php echo $post->ID; ?>" 
                                                data-user-id="<?php echo $selected_user_id; ?>"
                                                <?php checked($is_unlocked); ?>>
-                                        <span class="slider round">Toggle</span>
+                                        <span class="slider round"></span>
                                     </label>
                                     <span class="status-text" style="font-weight: bold; color: <?php echo $is_unlocked ? '#46b450' : '#dc3232'; ?>">
                                         <?php echo $is_unlocked ? 'Unlocked' : 'Locked'; ?>

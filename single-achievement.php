@@ -41,7 +41,7 @@ get_header();
                         <div class="card-body text-center py-5">
                             
                             <!-- Icon -->
-                            <div class="lpdh-achievement-icon icon-xl <?php echo $bg_class; ?> shadow-sm mb-4" 
+                            <div class="lpdh-achievement-icon icon-xl <?php echo $bg_class; ?> shadow-sm mb-4 mx-auto" 
                                  <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>"></i>
                             </div>
