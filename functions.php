@@ -19,7 +19,7 @@ function lpdh_check_dependencies()
             ?>
             <div class="notice notice-error is-dismissible">
                 <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('Advanced Custom Fields PRO is NOT active. This theme requires ACF PRO for data management, modular page sections, and core settings. Please install and activate it to ensure the site works correctly.', 'text_domain'); ?>
+                    <?php _e('Advanced Custom Fields PRO is NOT active. This theme requires ACF PRO for data management, modular page sections, and core settings. Please <a href="https://www.advancedcustomfields.com/pro/" target="_blank">install and activate it</a> to ensure the site works correctly.', 'text_domain'); ?>
                 </p>
             </div>
             <?php
@@ -31,7 +31,20 @@ function lpdh_check_dependencies()
             ?>
             <div class="notice notice-error is-dismissible">
                 <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('bs Cookie Settings is NOT active. This theme requires this plugin for cookie consent compliance and preferences management. Please install and activate it.', 'text_domain'); ?>
+                    <?php _e('bs Cookie Settings is NOT active. This theme requires this plugin for cookie consent compliance and preferences management. Please <a href="https://bootscore.me/documentation/bs-cookie-settings/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
+                </p>
+            </div>
+            <?php
+        });
+    }
+
+    // Check for ACF Font Awesome (Class ACFFA)
+    if (!class_exists('ACFFA')) {
+        add_action('admin_notices', function () {
+            ?>
+            <div class="notice notice-error is-dismissible">
+                <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
+                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons and other visual elements. Please <a href="https://wordpress.org/plugins/acf-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
                 </p>
             </div>
             <?php
