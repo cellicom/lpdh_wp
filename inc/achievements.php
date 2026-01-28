@@ -627,8 +627,24 @@ function lpdh_render_manage_achievements_page() {
             <?php if ($selected_user_id): ?>
                 <div class="alignleft actions">
                     <input type="text" id="lpdh-ach-search" placeholder="Search achievements..." style="height: 30px; margin-left: 20px;">
+                    <button type="button" id="lpdh-btn-delete-all" class="button button-link-delete" style="margin-left: 10px; color: #dc3232;">
+                        Delete All for <?php echo esc_html($u->display_name); ?>
+                    </button>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="lpdh-delete-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+            <div style="background:#fff; width:400px; padding:20px; margin:15% auto; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px; text-align:center;">
+                <h2 style="margin-top:0; color:#dc3232;">⚠ Warning</h2>
+                <p>Are you sure you want to delete <strong>ALL</strong> achievements for this user?</p>
+                <p>This action cannot be undone.</p>
+                <div style="margin-top:20px;">
+                    <button id="lpdh-confirm-delete" class="button button-primary bg-danger" style="background:#dc3232; border-color:#dc3232;">Yes, Delete Everything</button>
+                    <button id="lpdh-cancel-delete" class="button button-secondary">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <?php if ($selected_user_id): 
@@ -751,6 +767,44 @@ function lpdh_render_manage_achievements_page() {
                         }
                     });
                 });
+
+                // Delete All Handling
+                $('#lpdh-btn-delete-all').on('click', function(e) {
+                    e.preventDefault();
+                    $('#lpdh-delete-modal').fadeIn(200);
+                });
+
+                $('#lpdh-cancel-delete').on('click', function() {
+                    $('#lpdh-delete-modal').fadeOut(200);
+                });
+
+                $('#lpdh-confirm-delete').on('click', function() {
+                    var $btn = $(this);
+                    $btn.prop('disabled', true).text('Deleting...');
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lpdh_delete_all_user_achievements',
+                            user_id: <?php echo $selected_user_id; ?>,
+                            security: '<?php echo wp_create_nonce("lpdh_delete_all"); ?>'
+                        },
+                        success: function(response) {
+                            if(response.success) {
+                                alert('All achievements deleted.');
+                                location.reload();
+                            } else {
+                                alert('Error: ' + (response.data || 'Unknown error'));
+                                $btn.prop('disabled', false).text('Yes, Delete Everything');
+                            }
+                        },
+                        error: function() {
+                            alert('Request failed');
+                            $btn.prop('disabled', false).text('Yes, Delete Everything');
+                        }
+                    });
+                });
             });
             </script>
         <?php else: ?>
@@ -760,7 +814,7 @@ function lpdh_render_manage_achievements_page() {
     <?php
 }
 
-// AJAX Handler
+// AJAX Handler: Toggle Single
 function lpdh_ajax_toggle_user_achievement() {
     check_ajax_referer('lpdh_ach_toggle', 'security');
 
@@ -779,7 +833,7 @@ function lpdh_ajax_toggle_user_achievement() {
     $current_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
     if (!is_array($current_data)) $current_data = [];
 
-    // Visualize/Normalize data logic (similar to render)
+    // Normalize
     $normalized = [];
     foreach ($current_data as $k => $v) {
         if (is_int($k) && is_numeric($v) && $k < 1000) $normalized[$v] = time();
@@ -802,8 +856,29 @@ function lpdh_ajax_toggle_user_achievement() {
     }
 
     update_user_meta($user_id, 'lpdh_unlocked_achievements', $normalized);
-
+    
     wp_send_json_success(['date' => $date_string]);
 }
 add_action('wp_ajax_lpdh_toggle_user_achievement', 'lpdh_ajax_toggle_user_achievement');
+
+// AJAX Handler: Delete All
+function lpdh_ajax_delete_all_user_achievements() {
+    check_ajax_referer('lpdh_delete_all', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $user_id = intval($_POST['user_id']);
+
+    if (!$user_id) {
+        wp_send_json_error('Invalid User ID');
+    }
+
+    // Delete the meta entirely to wipe all history (old and new)
+    delete_user_meta($user_id, 'lpdh_unlocked_achievements');
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
 
