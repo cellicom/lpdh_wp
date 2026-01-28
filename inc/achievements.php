@@ -718,6 +718,102 @@ function lpdh_render_manage_achievements_page() {
             <div class="notice notice-info inline"><p>Please select a user to manage achievements.</p></div>
         <?php endif; ?>
     </div>
+    <script>
+    jQuery(document).ready(function($) {
+        // Init Select2
+        $('#lpdh-user-select').select2({
+            placeholder: "Select a User...",
+            allowClear: true
+        });
+
+        // Search Filter
+        $('#lpdh-ach-search').on('keyup', function() {
+            var value = $(this).val().toLowerCase();
+            $('#lpdh-achievement-grid .ach-card').filter(function() {
+                $(this).toggle($(this).data('title').indexOf(value) > -1)
+            });
+        });
+
+        // Toggle AJAX
+        $('.lpdh-ach-toggle').on('change', function() {
+            var $checkbox = $(this);
+            var $card = $checkbox.closest('.ach-card');
+            var achId = $checkbox.data('ach-id');
+            var userId = $checkbox.data('user-id');
+            var isChecked = $checkbox.is(':checked');
+            var $statusText = $card.find('.status-text');
+            var $dateDisplay = $card.find('.date-display');
+
+            $card.css('opacity', 0.5);
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'lpdh_toggle_user_achievement',
+                    user_id: userId,
+                    achievement_id: achId,
+                    status: isChecked ? 1 : 0,
+                    security: '<?php echo wp_create_nonce("lpdh_ach_toggle"); ?>'
+                },
+                success: function(response) {
+                    $card.css('opacity', 1);
+                    if(response.success) {
+                        $statusText.text(isChecked ? 'Unlocked' : 'Locked')
+                                   .css('color', isChecked ? '#46b450' : '#dc3232');
+                        $dateDisplay.text(response.data.date);
+                    } else {
+                        alert('Error: ' + (response.data || 'Unknown error'));
+                        $checkbox.prop('checked', !isChecked); // Revert
+                    }
+                },
+                error: function() {
+                    $card.css('opacity', 1);
+                    alert('Request failed');
+                    $checkbox.prop('checked', !isChecked); // Revert
+                }
+            });
+        });
+
+        // Delete All Handling
+        $('#lpdh-btn-delete-all').on('click', function(e) {
+            e.preventDefault();
+            $('#lpdh-delete-modal').fadeIn(200);
+        });
+
+        $('#lpdh-cancel-delete').on('click', function() {
+            $('#lpdh-delete-modal').fadeOut(200);
+        });
+
+        $('#lpdh-confirm-delete').on('click', function() {
+            var $btn = $(this);
+            $btn.prop('disabled', true).text('Deleting...');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'lpdh_delete_all_user_achievements',
+                    user_id: <?php echo isset($_GET['user_id']) ? intval($_GET['user_id']) : 0; ?>,
+                    security: '<?php echo wp_create_nonce("lpdh_delete_all"); ?>'
+                },
+                success: function(response) {
+                    if(response.success) {
+                        alert('All achievements deleted.');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.data || 'Unknown error'));
+                        $btn.prop('disabled', false).text('Yes, Delete Everything');
+                    }
+                },
+                error: function() {
+                    alert('Request failed');
+                    $btn.prop('disabled', false).text('Yes, Delete Everything');
+                }
+            });
+        });
+    });
+    </script>
     <?php
 }
 
@@ -790,100 +886,3 @@ function lpdh_ajax_delete_all_user_achievements() {
 }
 add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
 
-?>
-<script>
-jQuery(document).ready(function($) {
-    // Init Select2
-    $('#lpdh-user-select').select2({
-        placeholder: "Select a User...",
-        allowClear: true
-    });
-
-    // Search Filter
-    $('#lpdh-ach-search').on('keyup', function() {
-        var value = $(this).val().toLowerCase();
-        $('#lpdh-achievement-grid .ach-card').filter(function() {
-            $(this).toggle($(this).data('title').indexOf(value) > -1)
-        });
-    });
-
-    // Toggle AJAX
-    $('.lpdh-ach-toggle').on('change', function() {
-        var $checkbox = $(this);
-        var $card = $checkbox.closest('.ach-card');
-        var achId = $checkbox.data('ach-id');
-        var userId = $checkbox.data('user-id');
-        var isChecked = $checkbox.is(':checked');
-        var $statusText = $card.find('.status-text');
-        var $dateDisplay = $card.find('.date-display');
-
-        $card.css('opacity', 0.5);
-
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'lpdh_toggle_user_achievement',
-                user_id: userId,
-                achievement_id: achId,
-                status: isChecked ? 1 : 0,
-                security: '<?php echo wp_create_nonce("lpdh_ach_toggle"); ?>'
-            },
-            success: function(response) {
-                $card.css('opacity', 1);
-                if(response.success) {
-                    $statusText.text(isChecked ? 'Unlocked' : 'Locked')
-                               .css('color', isChecked ? '#46b450' : '#dc3232');
-                    $dateDisplay.text(response.data.date);
-                } else {
-                    alert('Error: ' + (response.data || 'Unknown error'));
-                    $checkbox.prop('checked', !isChecked); // Revert
-                }
-            },
-            error: function() {
-                $card.css('opacity', 1);
-                alert('Request failed');
-                $checkbox.prop('checked', !isChecked); // Revert
-            }
-        });
-    });
-
-    // Delete All Handling
-    $('#lpdh-btn-delete-all').on('click', function(e) {
-        e.preventDefault();
-        $('#lpdh-delete-modal').fadeIn(200);
-    });
-
-    $('#lpdh-cancel-delete').on('click', function() {
-        $('#lpdh-delete-modal').fadeOut(200);
-    });
-
-    $('#lpdh-confirm-delete').on('click', function() {
-        var $btn = $(this);
-        $btn.prop('disabled', true).text('Deleting...');
-
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'lpdh_delete_all_user_achievements',
-                user_id: <?php echo isset($_GET['user_id']) ? intval($_GET['user_id']) : 0; ?>,
-                security: '<?php echo wp_create_nonce("lpdh_delete_all"); ?>'
-            },
-            success: function(response) {
-                if(response.success) {
-                    alert('All achievements deleted.');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (response.data || 'Unknown error'));
-                    $btn.prop('disabled', false).text('Yes, Delete Everything');
-                }
-            },
-            error: function() {
-                alert('Request failed');
-                $btn.prop('disabled', false).text('Yes, Delete Everything');
-            }
-        });
-    });
-});
-</script>
