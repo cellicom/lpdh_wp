@@ -689,7 +689,8 @@ function lpdh_render_manage_achievements_page() {
                     $bg_style = '';
                     $bg_class = 'bg-primary';
                     if (!empty($color_hex)) {
-                        $bg_style = 'style="background-color: ' . esc_attr($color_hex) . ';"';
+                        $darker_hex = lpdh_adjust_brightness($color_hex, -40); // Darken by 40 steps
+                        $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($color_hex) . ', ' . esc_attr($darker_hex) . ');"';
                         $bg_class = '';
                     } elseif (!empty($color_class)) {
                         $bg_class = 'bg-' . esc_attr($color_class);

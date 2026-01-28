@@ -120,7 +120,8 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                         $bg_class = 'bg-primary'; 
                                         
                                         if (!empty($badge['color_hex'])) {
-                                            $bg_style = 'style="background-color: ' . esc_attr($badge['color_hex']) . ';"';
+                                            $darker = lpdh_adjust_brightness($badge['color_hex'], -40);
+                                            $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($badge['color_hex']) . ', ' . esc_attr($darker) . ');"';
                                             $bg_class = ''; 
                                         } elseif (!empty($badge['color_class'])) {
                                             $bg_class = 'bg-' . esc_attr($badge['color_class']);
@@ -159,7 +160,8 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                     $bg_style = '';
                                                     $bg_class = 'bg-primary';
                                                     if (!empty($badge['color_hex'])) {
-                                                        $bg_style = 'style="background-color: ' . esc_attr($badge['color_hex']) . ';"';
+                                                        $darker = lpdh_adjust_brightness($badge['color_hex'], -40);
+                                                        $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($badge['color_hex']) . ', ' . esc_attr($darker) . ');"';
                                                         $bg_class = '';
                                                     } elseif (!empty($badge['color_class'])) {
                                                         $bg_class = 'bg-' . esc_attr($badge['color_class']);

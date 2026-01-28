@@ -79,6 +79,38 @@ function lpdh_get_banned_card_names()
     return array_map('strtolower', $banned_card_names);
 }
 
+/**
+ * Adjust Brightness of HEX Color
+ * Used for Gradient Generation
+ * 
+ * @param string $hex
+ * @param int $steps (-255 to 255)
+ * @return string
+ */
+function lpdh_adjust_brightness($hex, $steps)
+{
+    // Steps should be between -255 and 255. Negative = darker, Positive = lighter
+    $steps = max(-255, min(255, $steps));
+
+    // Normalize HEX
+    $hex = str_replace('#', '', $hex);
+    if (strlen($hex) == 3) {
+        $hex = str_repeat(substr($hex, 0, 1), 2) . str_repeat(substr($hex, 1, 1), 2) . str_repeat(substr($hex, 2, 1), 2);
+    }
+
+    // Split into R, G, B
+    $color_parts = str_split($hex, 2);
+    $return = '#';
+
+    foreach ($color_parts as $color) {
+        $color = hexdec($color); // Convert to decimal
+        $color = max(0, min(255, $color + $steps)); // Adjust brightness
+        $return .= str_pad(dechex($color), 2, '0', STR_PAD_LEFT); // Make two char hex code
+    }
+
+    return $return;
+}
+
 // Include Achievements System
 require_once get_stylesheet_directory() . '/inc/achievements.php';
 
