@@ -124,7 +124,7 @@ if (function_exists('acf_add_local_field_group')):
                 'default_value' => '0',
             ),
 
-            // Row 2: Design
+            // Row 2: Icon Settings
             array(
                 'key' => 'field_ach_icon',
                 'label' => 'Icon Class',
@@ -132,11 +132,24 @@ if (function_exists('acf_add_local_field_group')):
                 'type' => 'font-awesome',
                 'instructions' => 'Pick an icon.',
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'default_value' => 'fa-medal',
                 'return_format' => 'class',
             ),
+            array(
+                'key' => 'field_ach_icon_color',
+                'label' => 'Icon Color',
+                'name' => 'icon_color',
+                'type' => 'color_picker',
+                'instructions' => 'Color of the Icon itself.',
+                'wrapper' => array(
+                    'width' => '50',
+                ),
+                'default_value' => '#FFFFFF',
+            ),
+
+            // Row 3: Appearance (Background)
             array(
                 'key' => 'field_ach_color_hex',
                 'label' => 'Color (Hex)',
@@ -144,7 +157,7 @@ if (function_exists('acf_add_local_field_group')):
                 'type' => 'color_picker',
                 'instructions' => 'Background Color',
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'default_value' => '',
             ),
@@ -155,20 +168,9 @@ if (function_exists('acf_add_local_field_group')):
                 'type' => 'text',
                 'instructions' => 'CSS Class Suffix (e.g. gold, silver)',
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'default_value' => '',
-            ),
-            array(
-                'key' => 'field_ach_icon_color',
-                'label' => 'Icon Color',
-                'name' => 'icon_color',
-                'type' => 'color_picker',
-                'instructions' => 'Color of the Icon itself.',
-                'wrapper' => array(
-                    'width' => '33',
-                ),
-                'default_value' => '#FFFFFF',
             ),
         ),
         'location' => array(
