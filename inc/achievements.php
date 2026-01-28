@@ -36,7 +36,7 @@ function lpdh_register_achievement_cpt()
         'has_archive'         => true,
         'show_ui'             => true,
         'show_in_menu'        => true,
-        'menu_position'       => 25,
+        'menu_position'       => 4,
         'menu_icon'           => 'dashicons-awards',
         'capability_type'     => 'post',
         'hierarchical'        => false,
