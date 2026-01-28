@@ -121,6 +121,7 @@ if (function_exists('acf_add_local_field_group')):
                     'width' => '33',
                 ),
                 'default_value' => 'fa-medal',
+                'return_format' => 'class',
             ),
             array(
                 'key' => 'field_ach_color_hex',
