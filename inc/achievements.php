@@ -142,7 +142,7 @@ if (function_exists('acf_add_local_field_group')):
                 'label' => 'Color (Hex)',
                 'name' => 'color_hex',
                 'type' => 'color_picker',
-                'instructions' => 'Background/Icon Color',
+                'instructions' => 'Background Color',
                 'wrapper' => array(
                     'width' => '33',
                 ),
@@ -158,6 +158,17 @@ if (function_exists('acf_add_local_field_group')):
                     'width' => '33',
                 ),
                 'default_value' => '',
+            ),
+            array(
+                'key' => 'field_ach_icon_color',
+                'label' => 'Icon Color',
+                'name' => 'icon_color',
+                'type' => 'color_picker',
+                'instructions' => 'Color of the Icon itself.',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
+                'default_value' => '#FFFFFF',
             ),
         ),
         'location' => array(
