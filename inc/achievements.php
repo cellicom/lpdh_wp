@@ -24,6 +24,7 @@ function lpdh_register_achievement_cpt()
         'edit_item'          => 'Edit Achievement',
         'new_item'           => 'New Achievement',
         'view_item'          => 'View Achievement',
+        'view_items'         => 'View Achievements',
         'search_items'       => 'Search Achievements',
         'not_found'          => 'No achievements found',
         'not_found_in_trash' => 'No achievements found in Trash',
