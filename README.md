@@ -58,8 +58,9 @@ This is a **Bootscore Child Theme**.
 ### Requirements
 - **WordPress 6.4+**
 - **Bootscore Parent Theme** (v6.x)
-- **Advanced Custom Fields PRO (v6.x)** - Mandatory for data management and modular boxes.
-- **bs Cookie Settings (v.5.6.x)** - Mandatory for GDPR/CCPA compliance and user consents.
+- **Advanced Custom Fields PRO (v6.x)** - [Download](https://www.advancedcustomfields.com/pro/) - Mandatory for data management and modular boxes.
+- **bs Cookie Settings (v.5.6.x)** - [Download](https://bootscore.me/documentation/bs-cookie-settings/) - Mandatory for GDPR/CCPA compliance and user consents.
+- **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/advanced-custom-fields-font-awesome/) - Mandatory for selecting achievement icons.
 
 ```bash
 # Compile SCSS to CSS

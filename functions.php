@@ -19,7 +19,7 @@ function lpdh_check_dependencies()
             ?>
             <div class="notice notice-error is-dismissible">
                 <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('Advanced Custom Fields PRO is NOT active. This theme requires ACF PRO for data management, modular page sections, and core settings. Please install and activate it to ensure the site works correctly.', 'text_domain'); ?>
+                    <?php _e('Advanced Custom Fields PRO is NOT active. This theme requires ACF PRO for data management, modular page sections, and core settings. Please <a href="https://www.advancedcustomfields.com/pro/" target="_blank">install and activate it</a> to ensure the site works correctly.', 'text_domain'); ?>
                 </p>
             </div>
             <?php
@@ -31,7 +31,21 @@ function lpdh_check_dependencies()
             ?>
             <div class="notice notice-error is-dismissible">
                 <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('bs Cookie Settings is NOT active. This theme requires this plugin for cookie consent compliance and preferences management. Please install and activate it.', 'text_domain'); ?>
+                    <?php _e('bs Cookie Settings is NOT active. This theme requires this plugin for cookie consent compliance and preferences management. Please <a href="https://bootscore.me/documentation/bs-cookie-settings/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
+                </p>
+            </div>
+            <?php
+        });
+    }
+
+    // Check for ACF Font Awesome
+    // We check for the version constant which is reliable for this plugin
+    if (!defined('ACFFA_VERSION')) {
+        add_action('admin_notices', function () {
+            ?>
+            <div class="notice notice-error is-dismissible">
+                <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
+                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons. Please <a href="https://wordpress.org/plugins/advanced-custom-fields-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
                 </p>
             </div>
             <?php
@@ -63,6 +77,38 @@ function lpdh_get_banned_card_names()
 
     // Normalize names for simpler JS comparison (lowercase)
     return array_map('strtolower', $banned_card_names);
+}
+
+/**
+ * Adjust Brightness of HEX Color
+ * Used for Gradient Generation
+ * 
+ * @param string $hex
+ * @param int $steps (-255 to 255)
+ * @return string
+ */
+function lpdh_adjust_brightness($hex, $steps)
+{
+    // Steps should be between -255 and 255. Negative = darker, Positive = lighter
+    $steps = max(-255, min(255, $steps));
+
+    // Normalize HEX
+    $hex = str_replace('#', '', $hex);
+    if (strlen($hex) == 3) {
+        $hex = str_repeat(substr($hex, 0, 1), 2) . str_repeat(substr($hex, 1, 1), 2) . str_repeat(substr($hex, 2, 1), 2);
+    }
+
+    // Split into R, G, B
+    $color_parts = str_split($hex, 2);
+    $return = '#';
+
+    foreach ($color_parts as $color) {
+        $color = hexdec($color); // Convert to decimal
+        $color = max(0, min(255, $color + $steps)); // Adjust brightness
+        $return .= str_pad(dechex($color), 2, '0', STR_PAD_LEFT); // Make two char hex code
+    }
+
+    return $return;
 }
 
 // Include Achievements System
