@@ -112,20 +112,42 @@ if (function_exists('acf_add_local_field_group')):
             // Row 2: Design
             array(
                 'key' => 'field_ach_icon',
-                'label' => 'Icon Class',
+                'label' => 'Icon',
                 'name' => 'icon',
-                'type' => 'font-awesome', // Requires ACF Font Awesome plugin, otherwise fallback to text if handled or generic text
-                'instructions' => 'Pick an icon.',
+                'type' => 'select',
+                'instructions' => 'Select an icon.',
                 'wrapper' => array(
                     'width' => '33',
                 ),
+                'choices' => array(
+                    'fa-trophy' => 'Trophy',
+                    'fa-medal' => 'Medal',
+                    'fa-crown' => 'Crown',
+                    'fa-star' => 'Star',
+                    'fa-bolt' => 'Bolt',
+                    'fa-fire' => 'Fire',
+                    'fa-shield-alt' => 'Shield',
+                    'fa-dungeon' => 'Dungeon',
+                    'fa-dragon' => 'Dragon',
+                    'fa-flask' => 'Flask',
+                    'fa-hammer' => 'Hammer',
+                    'fa-users' => 'Users',
+                    'fa-clock' => 'Clock',
+                    'fa-gem' => 'Gem',
+                    'fa-heart' => 'Heart',
+                    'fa-skull' => 'Skull',
+                    'fa-ghost' => 'Ghost',
+                    'fa-scroll' => 'Scroll',
+                    'fa-book-open' => 'Book',
+                ),
                 'default_value' => 'fa-medal',
+                'ui' => 1, // Uses Select2 for search
             ),
             array(
                 'key' => 'field_ach_color_hex',
                 'label' => 'Color (Hex)',
                 'name' => 'color_hex',
-                'type' => 'color_picker', // ACF Color Picker
+                'type' => 'color_picker',
                 'instructions' => 'Background/Icon Color',
                 'wrapper' => array(
                     'width' => '33',
