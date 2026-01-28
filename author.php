@@ -166,15 +166,15 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                     }
                                                 ?>
                                                 <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-3">
-                                                    <div class="me-4">
+                                                    <div class="me-3">
                                                         <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
                                                             <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                                         </div>
                                                     </div>
-                                                    <div class="flex-grow-1">
+                                                    <div class="flex-grow-1 text-start">
                                                         <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                                                             <h5 class="mb-0 text-warning"><?php echo esc_html($badge['title']); ?></h5>
-                                                            <small class="text-info"><?php echo esc_html($badge['date_unlocked']); ?></small>
+                                                            <small class="text-info text-nowrap ms-3"><?php echo esc_html($badge['date_unlocked']); ?></small>
                                                         </div>
                                                         <p class="mb-0 text-white-50 small"><?php echo esc_html($badge['description']); ?></p>
                                                     </div>

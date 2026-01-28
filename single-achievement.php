@@ -41,9 +41,8 @@ get_header();
                         <div class="card-body text-center py-5">
                             
                             <!-- Icon -->
-                            <div class="d-inline-flex align-items-center justify-content-center mb-4 rounded-circle shadow <?php echo $bg_class; ?>" 
-                                 <?php echo $bg_style; ?> 
-                                 style="width: 100px; height: 100px; font-size: 3rem; color: #fff;">
+                            <div class="lpdh-achievement-icon icon-xl <?php echo $bg_class; ?> shadow-sm mb-4" 
+                                 <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>"></i>
                             </div>
 
@@ -55,22 +54,7 @@ get_header();
                                 <?php the_content(); ?>
                             </div>
 
-                            <!-- Logic/Condition Info -->
-                            <div class="mt-5 pt-4 border-top border-secondary d-inline-block text-start">
-                                <h6 class="text-uppercase text-muted small mb-3">Unlock Condition</h6>
-                                <p class="mb-0 text-info font-monospace">
-                                    <?php 
-                                    $type = get_field('condition_type', $id);
-                                    if ($type === 'manual') {
-                                        echo 'Manual Unlock (Admin Awarded)';
-                                    } else {
-                                        echo esc_html(strtoupper($type)); 
-                                        echo ' <span class="text-white">' . esc_html(get_field('operator', $id)) . '</span> ';
-                                        echo esc_html(get_field('value', $id));
-                                    }
-                                    ?>
-                                </p>
-                            </div>
+
                             
                         </div>
                         <div class="card-footer bg-dark border-secondary text-center py-3">

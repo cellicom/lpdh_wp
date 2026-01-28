@@ -474,8 +474,8 @@ function lpdh_render_user_achievements_admin($user)
     </table>
     <?php
 }
-add_action('show_user_profile', 'lpdh_render_user_achievements_admin');
-add_action('edit_user_profile', 'lpdh_render_user_achievements_admin');
+// add_action('show_user_profile', 'lpdh_render_user_achievements_admin');
+// add_action('edit_user_profile', 'lpdh_render_user_achievements_admin');
 
 function lpdh_save_user_achievements_admin($user_id)
 {
@@ -521,3 +521,220 @@ function lpdh_save_user_achievements_admin($user_id)
 }
 add_action('personal_options_update', 'lpdh_save_user_achievements_admin');
 add_action('edit_user_profile_update', 'lpdh_save_user_achievements_admin');
+
+
+// -----------------------------------------------------------------------------
+// 6. Admin Submenu Page: Manage Achievements
+// -----------------------------------------------------------------------------
+
+function lpdh_register_achievement_admin_page() {
+    add_submenu_page(
+        'edit.php?post_type=achievement',
+        'Manage User Achievements',
+        'Manage Achievements',
+        'manage_options',
+        'lpdh-manage-achievements',
+        'lpdh_render_manage_achievements_page'
+    );
+}
+add_action('admin_menu', 'lpdh_register_achievement_admin_page');
+
+function lpdh_render_manage_achievements_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    // Handle User Selection
+    $selected_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+    
+    // Get all users for dropdown
+    $users = get_users(['orderby' => 'display_name']);
+
+    ?>
+    <div class="wrap">
+        <h1 class="wp-heading-inline">Manage User Achievements</h1>
+        
+        <!-- User Selector -->
+        <div class="tablenav top">
+            <div class="alignleft actions">
+                <form method="get" action="">
+                    <input type="hidden" name="post_type" value="achievement" />
+                    <input type="hidden" name="page" value="lpdh-manage-achievements" />
+                    <select name="user_id" id="lpdh-user-select" style="min-width: 250px;">
+                        <option value="">Select a User...</option>
+                        <?php foreach ($users as $u): ?>
+                            <option value="<?php echo $u->ID; ?>" <?php selected($selected_user_id, $u->ID); ?>>
+                                <?php echo esc_html($u->display_name . ' (' . $u->user_login . ')'); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="submit" class="button action" value="Select User" />
+                </form>
+            </div>
+            
+            <?php if ($selected_user_id): ?>
+                <div class="alignleft actions">
+                    <input type="text" id="lpdh-ach-search" placeholder="Search achievements..." style="width: 250px; margin-left: 20px;">
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($selected_user_id): 
+            $all_achievements = get_posts(['post_type' => 'achievement', 'posts_per_page' => -1, 'post_status' => 'publish']);
+            $unlocked_data = get_user_meta($selected_user_id, 'lpdh_unlocked_achievements', true);
+            if (!is_array($unlocked_data)) $unlocked_data = [];
+            
+            // Normalize for checking
+             $normalized_unlocked = [];
+             foreach ($unlocked_data as $k => $v) {
+                if (is_int($k) && is_numeric($v) && $k < 1000) $normalized_unlocked[$v] = time();
+                else $normalized_unlocked[$k] = $v;
+             }
+        ?>
+            <div id="lpdh-achievement-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <?php foreach ($all_achievements as $post): 
+                    $is_unlocked = isset($normalized_unlocked[$post->ID]);
+                    $unlock_date = $is_unlocked ? date('Y-m-d H:i', $normalized_unlocked[$post->ID]) : '';
+                    
+                    $icon = get_field('icon', $post->ID);
+                     if (is_string($icon) && strpos($icon, '<i') !== false) {
+                        preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
+                        $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
+                    }
+                ?>
+                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                        <div style="display: flex; align-items: start; gap: 15px;">
+                            <div style="font-size: 2rem; color: #444; width: 50px; text-align: center;">
+                                <i class="<?php echo esc_attr($icon); ?>"></i>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_trim_words($post->post_content, 10); ?></p>
+                                
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                    <label class="switch">
+                                        <input type="checkbox" class="lpdh-ach-toggle" 
+                                               data-ach-id="<?php echo $post->ID; ?>" 
+                                               data-user-id="<?php echo $selected_user_id; ?>"
+                                               <?php checked($is_unlocked); ?>>
+                                        <span class="slider round">Toggle</span>
+                                    </label>
+                                    <span class="status-text" style="font-weight: bold; color: <?php echo $is_unlocked ? '#46b450' : '#dc3232'; ?>">
+                                        <?php echo $is_unlocked ? 'Unlocked' : 'Locked'; ?>
+                                    </span>
+                                </div>
+                                <div class="date-display" style="font-size: 0.85em; color: #888; margin-top: 5px; text-align: right;">
+                                    <?php echo $is_unlocked ? $unlock_date : '-'; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <script>
+            jQuery(document).ready(function($) {
+                // Search Filter
+                $('#lpdh-ach-search').on('keyup', function() {
+                    var value = $(this).val().toLowerCase();
+                    $('#lpdh-achievement-grid .ach-card').filter(function() {
+                        $(this).toggle($(this).data('title').indexOf(value) > -1)
+                    });
+                });
+
+                // Toggle AJAX
+                $('.lpdh-ach-toggle').on('change', function() {
+                    var $checkbox = $(this);
+                    var $card = $checkbox.closest('.ach-card');
+                    var achId = $checkbox.data('ach-id');
+                    var userId = $checkbox.data('user-id');
+                    var isChecked = $checkbox.is(':checked');
+                    var $statusText = $card.find('.status-text');
+                    var $dateDisplay = $card.find('.date-display');
+
+                    $card.css('opacity', 0.5);
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lpdh_toggle_user_achievement',
+                            user_id: userId,
+                            achievement_id: achId,
+                            status: isChecked ? 1 : 0,
+                            security: '<?php echo wp_create_nonce("lpdh_ach_toggle"); ?>'
+                        },
+                        success: function(response) {
+                            $card.css('opacity', 1);
+                            if(response.success) {
+                                $statusText.text(isChecked ? 'Unlocked' : 'Locked')
+                                           .css('color', isChecked ? '#46b450' : '#dc3232');
+                                $dateDisplay.text(response.data.date);
+                            } else {
+                                alert('Error: ' + (response.data || 'Unknown error'));
+                                $checkbox.prop('checked', !isChecked); // Revert
+                            }
+                        },
+                        error: function() {
+                            $card.css('opacity', 1);
+                            alert('Request failed');
+                            $checkbox.prop('checked', !isChecked); // Revert
+                        }
+                    });
+                });
+            });
+            </script>
+        <?php else: ?>
+            <div class="notice notice-info inline"><p>Please select a user to manage achievements.</p></div>
+        <?php endif; ?>
+    </div>
+    <?php
+}
+
+// AJAX Handler
+function lpdh_ajax_toggle_user_achievement() {
+    check_ajax_referer('lpdh_ach_toggle', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $user_id = intval($_POST['user_id']);
+    $ach_id = intval($_POST['achievement_id']);
+    $status = intval($_POST['status']); // 1 = unlock, 0 = lock
+
+    if (!$user_id || !$ach_id) {
+        wp_send_json_error('Invalid ID');
+    }
+
+    $current_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+    if (!is_array($current_data)) $current_data = [];
+
+    // Visualize/Normalize data logic (similar to render)
+    $normalized = [];
+    foreach ($current_data as $k => $v) {
+        if (is_int($k) && is_numeric($v) && $k < 1000) $normalized[$v] = time();
+         else $normalized[$k] = $v;
+    }
+
+    $date_string = '-';
+
+    if ($status === 1) {
+        // Add if not exists
+        if (!isset($normalized[$ach_id])) {
+            $normalized[$ach_id] = time();
+        }
+        $date_string = date('Y-m-d H:i', $normalized[$ach_id]);
+    } else {
+        // Remove
+        if (isset($normalized[$ach_id])) {
+            unset($normalized[$ach_id]);
+        }
+    }
+
+    update_user_meta($user_id, 'lpdh_unlocked_achievements', $normalized);
+
+    wp_send_json_success(['date' => $date_string]);
+}
+add_action('wp_ajax_lpdh_toggle_user_achievement', 'lpdh_ajax_toggle_user_achievement');
+
