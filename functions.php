@@ -38,13 +38,14 @@ function lpdh_check_dependencies()
         });
     }
 
-    // Check for ACF Font Awesome (Class ACFFA)
-    if (!class_exists('ACFFA_Admin')) {
+    // Check for ACF Font Awesome
+    // We check for the version constant which is reliable for this plugin
+    if (!defined('ACFFA_VERSION')) {
         add_action('admin_notices', function () {
             ?>
             <div class="notice notice-error is-dismissible">
                 <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons and other visual elements. Please <a href="https://wordpress.org/plugins/advanced-custom-fields-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
+                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons. Please <a href="https://wordpress.org/plugins/advanced-custom-fields-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
                 </p>
             </div>
             <?php

@@ -111,15 +111,24 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                             <div class="author-achievements mt-4">
                                 <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
                                 <div class="d-flex justify-content-center flex-wrap gap-3">
-                                    <?php foreach ($user_achievements as $badge): ?>
+                                    <?php foreach ($user_achievements as $badge): 
+                                        $bg_style = '';
+                                        $bg_class = 'bg-primary'; // Default
+                                        
+                                        if (!empty($badge['color_hex'])) {
+                                            $bg_style = 'style="background-color: ' . esc_attr($badge['color_hex']) . ';"';
+                                            $bg_class = ''; // Override class if hex is set
+                                        } elseif (!empty($badge['color_class'])) {
+                                            $bg_class = 'bg-' . esc_attr($badge['color_class']);
+                                        } elseif (!empty($badge['color'])) {
+                                             $bg_class = 'bg-' . esc_attr($badge['color']);
+                                        }
+                                    ?>
                                         <div class="achievement-badge" data-bs-toggle="tooltip"
                                             title="<?php echo esc_attr($badge['title'] . ': ' . $badge['description']); ?>">
-                                            <div class="badge-icon bg-<?php echo esc_attr($badge['color']); ?> shadow-sm">
-                                                <i class="fas <?php echo esc_attr($badge['icon']); ?>"></i>
+                                            <div class="badge-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
+                                                <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                             </div>
-                                            <!-- Optional: Show title below
-                                            <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;"><?php echo esc_html($badge['title']); ?></small>
-                                            -->
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -140,18 +149,10 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                 .achievement-badge:hover .badge-icon {
                                     transform: scale(1.1);
                                 }
-
-                                .bg-bronze {
-                                    background: linear-gradient(135deg, #cd7f32, #8c5a2b);
-                                }
-
-                                .bg-silver {
-                                    background: linear-gradient(135deg, #c0c0c0, #808080);
-                                }
-
-                                .bg-gold {
-                                    background: linear-gradient(135deg, #ffd700, #b8860b);
-                                }
+                                /* Legacy Helper Classes if still used */
+                                .bg-bronze { background: linear-gradient(135deg, #cd7f32, #8c5a2b); }
+                                .bg-silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
+                                .bg-gold { background: linear-gradient(135deg, #ffd700, #b8860b); }
                             </style>
                         <?php endif; ?>
                     </div>
