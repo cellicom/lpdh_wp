@@ -60,7 +60,7 @@ This is a **Bootscore Child Theme**.
 - **Bootscore Parent Theme** (v6.x)
 - **Advanced Custom Fields PRO (v6.x)** - [Download](https://www.advancedcustomfields.com/pro/) - Mandatory for data management and modular boxes.
 - **bs Cookie Settings (v.5.6.x)** - [Download](https://bootscore.me/documentation/bs-cookie-settings/) - Mandatory for GDPR/CCPA compliance and user consents.
-- **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/acf-font-awesome/) - Mandatory for selecting achievement icons.
+- **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/advanced-custom-fields-font-awesome/) - Mandatory for selecting achievement icons.
 
 ```bash
 # Compile SCSS to CSS
