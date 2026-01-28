@@ -539,6 +539,22 @@ function lpdh_register_achievement_admin_page() {
 }
 add_action('admin_menu', 'lpdh_register_achievement_admin_page');
 
+// 7. Enqueue Assets for Admin Page
+function lpdh_achievements_admin_scripts($hook) {
+    if ($hook !== 'achievements_page_lpdh-manage-achievements') {
+        return;
+    }
+
+    // Font Awesome (using CDN for admin)
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
+    // Select2
+    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+}
+add_action('admin_enqueue_scripts', 'lpdh_achievements_admin_scripts');
+
+
 function lpdh_render_manage_achievements_page() {
     if (!current_user_can('manage_options')) {
         return;
@@ -551,6 +567,34 @@ function lpdh_render_manage_achievements_page() {
     $users = get_users(['orderby' => 'display_name']);
 
     ?>
+    <style>
+        /* Admin-specific styles for icons */
+        .lpdh-achievement-icon {
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff; flex-shrink: 0;
+        }
+        .lpdh-achievement-icon.icon-lg {
+            width: 60px; height: 60px; font-size: 1.8rem;
+        }
+        .bg-bronze { background: linear-gradient(135deg, #cd7f32, #8c5a2b); }
+        .bg-silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
+        .bg-gold { background: linear-gradient(135deg, #ffd700, #b8860b); }
+        
+        /* Switch Styles */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; margin-right: 10px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+        input:checked + .slider { background-color: #2196F3; }
+        input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+        
+        .select2-container { width: 300px !important; }
+    </style>
+
     <div class="wrap">
         <h1 class="wp-heading-inline">Manage User Achievements</h1>
         
@@ -560,7 +604,7 @@ function lpdh_render_manage_achievements_page() {
                 <form method="get" action="">
                     <input type="hidden" name="post_type" value="achievement" />
                     <input type="hidden" name="page" value="lpdh-manage-achievements" />
-                    <select name="user_id" id="lpdh-user-select" style="min-width: 250px;">
+                    <select name="user_id" id="lpdh-user-select" class="lpdh-select2">
                         <option value="">Select a User...</option>
                         <?php foreach ($users as $u): ?>
                             <option value="<?php echo $u->ID; ?>" <?php selected($selected_user_id, $u->ID); ?>>
@@ -568,13 +612,13 @@ function lpdh_render_manage_achievements_page() {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="submit" class="button action" value="Select User" />
+                    <input type="submit" class="button action" value="Select User" style="margin-left: 10px;" />
                 </form>
             </div>
             
             <?php if ($selected_user_id): ?>
                 <div class="alignleft actions">
-                    <input type="text" id="lpdh-ach-search" placeholder="Search achievements..." style="width: 250px; margin-left: 20px;">
+                    <input type="text" id="lpdh-ach-search" placeholder="Search achievements..." style="height: 30px; margin-left: 20px;">
                 </div>
             <?php endif; ?>
         </div>
@@ -601,10 +645,21 @@ function lpdh_render_manage_achievements_page() {
                         preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
                         $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
                     }
+                    
+                    $color_hex = get_field('color_hex', $post->ID);
+                    $color_class = get_field('color_class', $post->ID);
+                    $bg_style = '';
+                    $bg_class = 'bg-primary';
+                    if (!empty($color_hex)) {
+                        $bg_style = 'style="background-color: ' . esc_attr($color_hex) . ';"';
+                        $bg_class = '';
+                    } elseif (!empty($color_class)) {
+                        $bg_class = 'bg-' . esc_attr($color_class);
+                    }
                 ?>
                     <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                         <div style="display: flex; align-items: start; gap: 15px;">
-                            <div style="font-size: 2rem; color: #444; width: 50px; text-align: center;">
+                            <div class="lpdh-achievement-icon <?php echo $bg_class; ?>" <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>"></i>
                             </div>
                             <div style="flex-grow: 1;">
@@ -634,6 +689,12 @@ function lpdh_render_manage_achievements_page() {
 
             <script>
             jQuery(document).ready(function($) {
+                // Init Select2
+                $('#lpdh-user-select').select2({
+                    placeholder: "Select a User...",
+                    allowClear: true
+                });
+
                 // Search Filter
                 $('#lpdh-ach-search').on('keyup', function() {
                     var value = $(this).val().toLowerCase();
