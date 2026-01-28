@@ -129,10 +129,10 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                              $bg_class = 'bg-' . esc_attr($badge['color']);
                                         }
                                     ?>
-                                        <div class="achievement-badge" data-bs-toggle="tooltip"
                                             title="<?php echo esc_attr($badge['title']); ?>">
+                                            <?php $icon_col = isset($badge['icon_color']) && $badge['icon_color'] ? $badge['icon_color'] : '#ffffff'; ?>
                                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
-                                                <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
+                                                <i class="<?php echo esc_attr($badge['icon']); ?>" style="color: <?php echo esc_attr($icon_col); ?>;"></i>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -169,8 +169,9 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                 ?>
                                                 <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
                                                     <div class="me-3">
+                                                        <?php $icon_col = isset($badge['icon_color']) && $badge['icon_color'] ? $badge['icon_color'] : '#ffffff'; ?>
                                                         <div class="lpdh-achievement-icon icon-compact <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
-                                                            <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
+                                                            <i class="<?php echo esc_attr($badge['icon']); ?>" style="color: <?php echo esc_attr($icon_col); ?>;"></i>
                                                         </div>
                                                     </div>
                                                     <div class="flex-grow-1 text-start">

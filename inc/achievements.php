@@ -403,6 +403,7 @@ function lpdh_format_achievement($post, $date_timestamp = null)
         'title' => $post->post_title,
         'description' => $post->post_content,
         'icon' => $icon,
+        'icon_color' => get_field('icon_color', $post->ID),
         'color_hex' => get_field('color_hex', $post->ID),
         'color_class' => get_field('color_class', $post->ID),
         'color' => get_field('color_class', $post->ID) ?: 'gold',
@@ -698,8 +699,9 @@ function lpdh_render_manage_achievements_page() {
                 ?>
                     <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                         <div style="display: flex; align-items: start; gap: 15px;">
+                            <?php $icon_color = get_field('icon_color', $post->ID) ?: '#ffffff'; ?>
                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?>" <?php echo $bg_style; ?>>
-                                <i class="<?php echo esc_attr($icon); ?>"></i>
+                                <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
                             <div style="flex-grow: 1;">
                                 <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>

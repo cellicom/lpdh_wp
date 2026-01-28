@@ -42,9 +42,10 @@ get_header();
                         <div class="card-body text-center py-5">
                             
                             <!-- Icon -->
+                            <?php $icon_color = get_field('icon_color', get_the_ID()) ?: '#ffffff'; ?>
                             <div class="lpdh-achievement-icon icon-xl <?php echo $bg_class; ?> shadow-sm mb-4 mx-auto" 
                                  <?php echo $bg_style; ?>>
-                                <i class="<?php echo esc_attr($icon); ?>"></i>
+                                <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
 
                             <!-- Title -->
