@@ -47,6 +47,17 @@ function lpdh_register_achievement_cpt()
 }
 add_action('init', 'lpdh_register_achievement_cpt');
 
+/**
+ * Force Order by Date for Achievement Archive
+ */
+function lpdh_achievement_archive_order($query) {
+    if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
+        $query->set('orderby', 'date'); // Date Published
+        $query->set('order', 'DESC');   // Newest First
+    }
+}
+add_action('pre_get_posts', 'lpdh_achievement_archive_order');
+
 
 // -----------------------------------------------------------------------------
 // 2. ACF Fields (Programmatic)

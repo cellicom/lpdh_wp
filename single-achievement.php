@@ -73,7 +73,7 @@ get_header();
 
                             <?php if ($is_unlocked): ?>
                                 <div class="mt-4 pt-4 border-top border-secondary">
-                                    <span class="badge bg-success fs-5 p-3">
+                                    <span class="badge bg-success text-dark fs-5 p-3">
                                         <i class="fas fa-check-circle me-2"></i> Unlocked on <?php echo $unlock_date; ?>
                                     </span>
                                 </div>
