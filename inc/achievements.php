@@ -720,6 +720,76 @@ function lpdh_render_manage_achievements_page() {
     </div>
     <?php
 }
+
+
+// AJAX Handler: Toggle Single
+function lpdh_ajax_toggle_user_achievement() {
+    check_ajax_referer('lpdh_ach_toggle', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $user_id = intval($_POST['user_id']);
+    $ach_id = intval($_POST['achievement_id']);
+    $status = intval($_POST['status']); // 1 = unlock, 0 = lock
+
+    if (!$user_id || !$ach_id) {
+        wp_send_json_error('Invalid ID');
+    }
+
+    $current_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+    if (!is_array($current_data)) $current_data = [];
+
+    // Normalize
+    $normalized = [];
+    foreach ($current_data as $k => $v) {
+        if (is_int($k) && is_numeric($v) && $k < 1000) $normalized[$v] = time();
+         else $normalized[$k] = $v;
+    }
+
+    $date_string = '-';
+
+    if ($status === 1) {
+        // Add if not exists
+        if (!isset($normalized[$ach_id])) {
+            $normalized[$ach_id] = time();
+        }
+        $date_string = date('Y-m-d H:i', $normalized[$ach_id]);
+    } else {
+        // Remove
+        if (isset($normalized[$ach_id])) {
+            unset($normalized[$ach_id]);
+        }
+    }
+
+    update_user_meta($user_id, 'lpdh_unlocked_achievements', $normalized);
+    
+    wp_send_json_success(['date' => $date_string]);
+}
+add_action('wp_ajax_lpdh_toggle_user_achievement', 'lpdh_ajax_toggle_user_achievement');
+
+// AJAX Handler: Delete All
+function lpdh_ajax_delete_all_user_achievements() {
+    check_ajax_referer('lpdh_delete_all', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $user_id = intval($_POST['user_id']);
+
+    if (!$user_id) {
+        wp_send_json_error('Invalid User ID');
+    }
+
+    // Delete the meta entirely to wipe all history (old and new)
+    delete_user_meta($user_id, 'lpdh_unlocked_achievements');
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
+
 ?>
 <script>
 jQuery(document).ready(function($) {
@@ -817,72 +887,3 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
-
-// AJAX Handler: Toggle Single
-function lpdh_ajax_toggle_user_achievement() {
-    check_ajax_referer('lpdh_ach_toggle', 'security');
-
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error('Permission denied');
-    }
-
-    $user_id = intval($_POST['user_id']);
-    $ach_id = intval($_POST['achievement_id']);
-    $status = intval($_POST['status']); // 1 = unlock, 0 = lock
-
-    if (!$user_id || !$ach_id) {
-        wp_send_json_error('Invalid ID');
-    }
-
-    $current_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
-    if (!is_array($current_data)) $current_data = [];
-
-    // Normalize
-    $normalized = [];
-    foreach ($current_data as $k => $v) {
-        if (is_int($k) && is_numeric($v) && $k < 1000) $normalized[$v] = time();
-         else $normalized[$k] = $v;
-    }
-
-    $date_string = '-';
-
-    if ($status === 1) {
-        // Add if not exists
-        if (!isset($normalized[$ach_id])) {
-            $normalized[$ach_id] = time();
-        }
-        $date_string = date('Y-m-d H:i', $normalized[$ach_id]);
-    } else {
-        // Remove
-        if (isset($normalized[$ach_id])) {
-            unset($normalized[$ach_id]);
-        }
-    }
-
-    update_user_meta($user_id, 'lpdh_unlocked_achievements', $normalized);
-    
-    wp_send_json_success(['date' => $date_string]);
-}
-add_action('wp_ajax_lpdh_toggle_user_achievement', 'lpdh_ajax_toggle_user_achievement');
-
-// AJAX Handler: Delete All
-function lpdh_ajax_delete_all_user_achievements() {
-    check_ajax_referer('lpdh_delete_all', 'security');
-
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error('Permission denied');
-    }
-
-    $user_id = intval($_POST['user_id']);
-
-    if (!$user_id) {
-        wp_send_json_error('Invalid User ID');
-    }
-
-    // Delete the meta entirely to wipe all history (old and new)
-    delete_user_meta($user_id, 'lpdh_unlocked_achievements');
-
-    wp_send_json_success();
-}
-add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
-
