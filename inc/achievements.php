@@ -282,32 +282,30 @@ function lpdh_get_user_achievements($user_id)
     // Expected Format: [ ID => 'timestamp_or_date_string', ... ]
     $unlocked_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
 
-    // MIGRATION / INITIALIZATION
-    $migrated = false;
+    // STRICT VALIDATION (New Plan)
+    // We do not guess. We only accept [ID => Timestamp].
+    // If we find garbage (old indexed arrays), we discard it to fix corruption.
     if (!is_array($unlocked_data)) {
         $unlocked_data = [];
     } else {
-        // Check if simpler indexed array (old format)
-        // If keys are sequential integers (0, 1, 2...), it's likely the old format.
-        // Caveat: If user only has one ach [0 => 123], key is 0. 
-        // We can check if the value is an ID (int) vs a Date? 
-        // Achievement IDs are post IDs.
-        // Let's iterate and check.
-        $new_data = [];
+        $valid_data = [];
+        $has_changes = false;
+        
         foreach ($unlocked_data as $key => $val) {
-            if (is_int($key)) {
-                // Key is index, Value is ID. Need to flip.
-                // Since we don't have date, we use current time or null.
-                // Let's use current time to ensure they show up.
-                $new_data[$val] = time(); 
-                $migrated = true;
+            // Check if Value is a valid Timestamp (> 100000)
+            if (is_numeric($val) && $val > 100000) {
+                // Good data
+                $valid_data[$key] = $val;
             } else {
-                // Already associative [ID => Date]
-                $new_data[$key] = $val;
+                // Bad data (Old format, index, or corrupt)
+                // Discard it.
+                $has_changes = true; 
             }
         }
-        if ($migrated) {
-            $unlocked_data = $new_data;
+        
+        if ($has_changes || count($valid_data) !== count($unlocked_data)) {
+            $unlocked_data = $valid_data;
+            $migrated = true; // Trigger save
         }
     }
 
@@ -840,11 +838,14 @@ function lpdh_ajax_toggle_user_achievement() {
     $current_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
     if (!is_array($current_data)) $current_data = [];
 
-    // Normalize
+    // STRICT Normalization (Abandon old data if format matches old style)
     $normalized = [];
-    foreach ($current_data as $k => $v) {
-        if (is_int($k) && is_numeric($v) && $k < 1000) $normalized[$v] = time();
-         else $normalized[$k] = $v;
+    foreach ($current_data as $k => $valid_ts) {
+        // Enforce: Value > 100000 (Timestamp)
+        if (is_numeric($valid_ts) && $valid_ts > 100000) {
+            $normalized[$k] = $valid_ts;
+        }
+        // Else: Old format or garbage -> Discard
     }
 
     $date_string = '-';
