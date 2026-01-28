@@ -107,17 +107,21 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                         <!-- Achievements -->
                         <?php
                         $user_achievements = lpdh_get_user_achievements($author_id);
-                        if (!empty($user_achievements)): ?>
+                        if (!empty($user_achievements)): 
+                            $total_ach = count($user_achievements);
+                            $visible_ach = array_slice($user_achievements, 0, 5);
+                            $hidden_count = $total_ach - 5;
+                        ?>
                             <div class="author-achievements mt-4">
                                 <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
-                                <div class="d-flex justify-content-center flex-wrap gap-3">
-                                    <?php foreach ($user_achievements as $badge): 
+                                <div class="d-flex justify-content-center flex-wrap gap-3 align-items-center">
+                                    <?php foreach ($visible_ach as $badge): 
                                         $bg_style = '';
-                                        $bg_class = 'bg-primary'; // Default
+                                        $bg_class = 'bg-primary'; 
                                         
                                         if (!empty($badge['color_hex'])) {
                                             $bg_style = 'style="background-color: ' . esc_attr($badge['color_hex']) . ';"';
-                                            $bg_class = ''; // Override class if hex is set
+                                            $bg_class = ''; 
                                         } elseif (!empty($badge['color_class'])) {
                                             $bg_class = 'bg-' . esc_attr($badge['color_class']);
                                         } elseif (!empty($badge['color'])) {
@@ -125,35 +129,76 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                         }
                                     ?>
                                         <div class="achievement-badge" data-bs-toggle="tooltip"
-                                            title="<?php echo esc_attr($badge['title'] . ': ' . $badge['description']); ?>">
+                                            title="<?php echo esc_attr($badge['title']); ?>">
                                             <div class="badge-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
                                                 <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
+
+                                    <?php if ($hidden_count > 0): ?>
+                                        <button type="button" class="btn btn-outline-secondary rounded-circle" 
+                                                style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;"
+                                                data-bs-toggle="modal" data-bs-target="#achievementsModal">
+                                            <small>+<?php echo $hidden_count; ?></small>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
+                            
                             <style>
                                 .achievement-badge .badge-icon {
-                                    width: 45px;
-                                    height: 45px;
-                                    border-radius: 50%;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    font-size: 1.2rem;
-                                    color: #fff;
-                                    transition: transform 0.2s;
+                                    width: 45px; height: 45px; border-radius: 50%;
+                                    display: flex; align-items: center; justify-content: center;
+                                    font-size: 1.2rem; color: #fff; transition: transform 0.2s;
                                 }
-
-                                .achievement-badge:hover .badge-icon {
-                                    transform: scale(1.1);
-                                }
-                                /* Legacy Helper Classes if still used */
+                                .achievement-badge:hover .badge-icon { transform: scale(1.1); }
+                                /* Legacy Helper Classes */
                                 .bg-bronze { background: linear-gradient(135deg, #cd7f32, #8c5a2b); }
                                 .bg-silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
                                 .bg-gold { background: linear-gradient(135deg, #ffd700, #b8860b); }
                             </style>
+
+                            <!-- Achievements Modal -->
+                            <div class="modal fade" id="achievementsModal" tabindex="-1" aria-labelledby="achievementsModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content bg-dark text-light border-secondary">
+                                        <div class="modal-header border-secondary">
+                                            <h5 class="modal-title" id="achievementsModalLabel">Unlocked Achievements (<?php echo $total_ach; ?>)</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-0">
+                                            <div class="list-group list-group-flush">
+                                                <?php foreach ($user_achievements as $badge):
+                                                    $bg_style = '';
+                                                    $bg_class = 'bg-primary';
+                                                    if (!empty($badge['color_hex'])) {
+                                                        $bg_style = 'style="background-color: ' . esc_attr($badge['color_hex']) . ';"';
+                                                        $bg_class = '';
+                                                    } elseif (!empty($badge['color_class'])) {
+                                                        $bg_class = 'bg-' . esc_attr($badge['color_class']);
+                                                    }
+                                                ?>
+                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-start p-3">
+                                                    <div class="me-3">
+                                                        <div class="badge-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?> style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff;">
+                                                            <i class="<?php echo esc_attr($badge['icon']); ?>"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex w-100 justify-content-between">
+                                                            <h5 class="mb-1 text-warning"><?php echo esc_html($badge['title']); ?></h5>
+                                                            <small class="text-info"><?php echo esc_html($badge['date_unlocked']); ?></small>
+                                                        </div>
+                                                        <p class="mb-1 text-light"><?php echo esc_html($badge['description']); ?></p>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
