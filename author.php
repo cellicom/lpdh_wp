@@ -129,6 +129,7 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                              $bg_class = 'bg-' . esc_attr($badge['color']);
                                         }
                                     ?>
+                                        <div class="achievement-badge" data-bs-toggle="tooltip"
                                             title="<?php echo esc_attr($badge['title']); ?>">
                                             <?php $icon_col = isset($badge['icon_color']) && $badge['icon_color'] ? $badge['icon_color'] : '#ffffff'; ?>
                                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
