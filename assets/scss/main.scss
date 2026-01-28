@@ -1,59 +1,59 @@
-@import "../../../bootscore/assets/scss/bootstrap/mixins/banner";
+@import "bootstrap/mixins/banner";
 @include bsBanner("");
 
-@import "../../../bootscore/assets/scss/bootstrap/functions";
+@import "bootstrap/functions";
 
 @import "bootscore-variables";
 
-@import "../../../bootscore/assets/scss/bootstrap/variables";
-@import "../../../bootscore/assets/scss/bootstrap/variables-dark";
+@import "bootstrap/variables";
+@import "bootstrap/variables-dark";
 
 @import "bootscore-maps";
 
-@import "../../../bootscore/assets/scss/bootstrap/maps";
-@import "../../../bootscore/assets/scss/bootstrap/mixins";
+@import "bootstrap/maps";
+@import "bootstrap/mixins";
 
-@import "../../../bootscore/assets/scss/bootstrap/utilities";
+@import "bootstrap/utilities";
 
 @import "bootscore-utilities";
 
-@import "../../../bootscore/assets/scss/bootstrap/root";
-@import "../../../bootscore/assets/scss/bootstrap/reboot";
-@import "../../../bootscore/assets/scss/bootstrap/type";
-@import "../../../bootscore/assets/scss/bootstrap/images";
-@import "../../../bootscore/assets/scss/bootstrap/containers";
-@import "../../../bootscore/assets/scss/bootstrap/grid";
-@import "../../../bootscore/assets/scss/bootstrap/tables";
-@import "../../../bootscore/assets/scss/bootstrap/forms";
-@import "../../../bootscore/assets/scss/bootstrap/buttons";
-@import "../../../bootscore/assets/scss/bootstrap/transitions";
-@import "../../../bootscore/assets/scss/bootstrap/dropdown";
-@import "../../../bootscore/assets/scss/bootstrap/button-group";
-@import "../../../bootscore/assets/scss/bootstrap/nav";
-@import "../../../bootscore/assets/scss/bootstrap/navbar";
-@import "../../../bootscore/assets/scss/bootstrap/card";
-@import "../../../bootscore/assets/scss/bootstrap/accordion";
-@import "../../../bootscore/assets/scss/bootstrap/breadcrumb";
-@import "../../../bootscore/assets/scss/bootstrap/pagination";
-@import "../../../bootscore/assets/scss/bootstrap/badge";
-@import "../../../bootscore/assets/scss/bootstrap/alert";
-@import "../../../bootscore/assets/scss/bootstrap/progress";
-@import "../../../bootscore/assets/scss/bootstrap/list-group";
-@import "../../../bootscore/assets/scss/bootstrap/close";
-@import "../../../bootscore/assets/scss/bootstrap/toasts";
-@import "../../../bootscore/assets/scss/bootstrap/modal";
-@import "../../../bootscore/assets/scss/bootstrap/tooltip";
-@import "../../../bootscore/assets/scss/bootstrap/popover";
-@import "../../../bootscore/assets/scss/bootstrap/carousel";
-@import "../../../bootscore/assets/scss/bootstrap/spinners";
-@import "../../../bootscore/assets/scss/bootstrap/offcanvas";
-@import "../../../bootscore/assets/scss/bootstrap/placeholders";
+@import "bootstrap/root";
+@import "bootstrap/reboot";
+@import "bootstrap/type";
+@import "bootstrap/images";
+@import "bootstrap/containers";
+@import "bootstrap/grid";
+@import "bootstrap/tables";
+@import "bootstrap/forms";
+@import "bootstrap/buttons";
+@import "bootstrap/transitions";
+@import "bootstrap/dropdown";
+@import "bootstrap/button-group";
+@import "bootstrap/nav";
+@import "bootstrap/navbar";
+@import "bootstrap/card";
+@import "bootstrap/accordion";
+@import "bootstrap/breadcrumb";
+@import "bootstrap/pagination";
+@import "bootstrap/badge";
+@import "bootstrap/alert";
+@import "bootstrap/progress";
+@import "bootstrap/list-group";
+@import "bootstrap/close";
+@import "bootstrap/toasts";
+@import "bootstrap/modal";
+@import "bootstrap/tooltip";
+@import "bootstrap/popover";
+@import "bootstrap/carousel";
+@import "bootstrap/spinners";
+@import "bootstrap/offcanvas";
+@import "bootstrap/placeholders";
 
-@import "../../../bootscore/assets/scss/bootstrap/helpers";
+@import "bootstrap/helpers";
 
-@import "../../../bootscore/assets/scss/bootstrap/utilities/api";
+@import "bootstrap/utilities/api";
 
-@import "../../../bootscore/assets/scss/_bootscore-style.scss";
+@import "_bootscore-style.scss";
 //@import "bootscore-woocommerce"; // Comment or delete this line if WooCommerce styles are not needed
 @import "bootscore-custom";
 @import "easter-egg";
