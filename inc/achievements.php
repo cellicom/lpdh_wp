@@ -57,12 +57,7 @@ if (function_exists('acf_add_local_field_group')):
         'key' => 'group_achievement_data',
         'title' => 'Achievement Data',
         'fields' => array(
-            // Tab: Logic
-            array(
-                'key' => 'field_ach_tab_logic',
-                'label' => 'Logic',
-                'type' => 'tab',
-            ),
+            // Row 1: Logic
             array(
                 'key' => 'field_ach_condition_type',
                 'label' => 'Condition Based On',
@@ -70,12 +65,15 @@ if (function_exists('acf_add_local_field_group')):
                 'type' => 'select',
                 'instructions' => 'Which stat determines this achievement?',
                 'required' => 1,
+                'wrapper' => array(
+                    'width' => '33',
+                ),
                 'choices' => array(
                     'deck_count' => 'Number of Decks Created',
                     'win_count' => 'Number of Wins',
                     'event_count' => 'Events Attended',
                     'days_registered' => 'Days Since Registration',
-                    'global_elo' => 'Global Elo (Future Check)', // Placeholder
+                    'global_elo' => 'Global Elo (Future Check)',
                 ),
             ),
             array(
@@ -84,12 +82,17 @@ if (function_exists('acf_add_local_field_group')):
                 'name' => 'operator',
                 'type' => 'select',
                 'required' => 1,
+                'wrapper' => array(
+                    'width' => '33',
+                ),
                 'choices' => array(
                     '>' => 'Greater than (>)',
                     '>=' => 'Greater than or Equal (>=)',
                     '=' => 'Equals (=)',
                     '<=' => 'Less than or Equal (<=)',
                     '<' => 'Less than (<)',
+                    'CONTAINS' => 'Contains (Text)',
+                    'EQUALS' => 'Equals (Text)',
                 ),
                 'default_value' => '>=',
             ),
@@ -97,33 +100,48 @@ if (function_exists('acf_add_local_field_group')):
                 'key' => 'field_ach_value',
                 'label' => 'Threshold Value',
                 'name' => 'value',
-                'type' => 'text', // Changed to text as requested
-                'instructions' => 'The numeric count or value to match.',
+                'type' => 'text',
+                'instructions' => 'Numeric or user text value.',
                 'required' => 1,
+                'wrapper' => array(
+                    'width' => '33',
+                ),
                 'default_value' => '0',
             ),
 
-            // Tab: Design
-            array(
-                'key' => 'field_ach_tab_design',
-                'label' => 'Design',
-                'type' => 'tab',
-            ),
+            // Row 2: Design
             array(
                 'key' => 'field_ach_icon',
                 'label' => 'Icon Class',
                 'name' => 'icon',
-                'type' => 'text',
-                'instructions' => 'FontAwesome class (e.g. fa-trophy, fa-medal).',
+                'type' => 'font-awesome', // Requires ACF Font Awesome plugin, otherwise fallback to text if handled or generic text
+                'instructions' => 'Pick an icon.',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
                 'default_value' => 'fa-medal',
             ),
             array(
-                'key' => 'field_ach_color',
-                'label' => 'Color / Class',
-                'name' => 'color',
+                'key' => 'field_ach_color_hex',
+                'label' => 'Color (Hex)',
+                'name' => 'color_hex',
+                'type' => 'color_picker', // ACF Color Picker
+                'instructions' => 'Background/Icon Color',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
+                'default_value' => '#ffd700',
+            ),
+            array(
+                'key' => 'field_ach_color_class',
+                'label' => 'Color (Class)',
+                'name' => 'color_class',
                 'type' => 'text',
-                'instructions' => 'CSS class suffix or hex color. (used as "gold", "silver", "bronze" usually).',
-                'default_value' => 'gold',
+                'instructions' => 'CSS Class Suffix (e.g. gold, silver)',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
+                'default_value' => '',
             ),
         ),
         'location' => array(
@@ -312,9 +330,12 @@ function lpdh_format_achievement($post)
     return [
         'id' => $post->ID,
         'title' => $post->post_title,
-        'description' => $post->post_content, // Or custom field if you prefer
+        'description' => $post->post_content,
         'icon' => get_field('icon', $post->ID),
-        'color' => get_field('color', $post->ID)
+        'color_hex' => get_field('color_hex', $post->ID),
+        'color_class' => get_field('color_class', $post->ID),
+        // Fallback for current frontend if it expects 'color'
+        'color' => get_field('color_class', $post->ID) ?: 'gold' 
     ];
 }
 
