@@ -83,10 +83,10 @@ if (function_exists('acf_add_local_field_group')):
                 ),
                 'choices' => array(
                     'manual' => 'Manual Achievement',
-                    'deck_count' => 'Number of Decks Created',
-                    'win_count' => 'Number of Wins',
-                    'event_count' => 'Events Attended',
+                    'win_count' => 'Number of 1st Place',
                     'clown_count' => 'Number of Clown (Last Place)',
+                    'event_count' => 'Events Attended',
+                    'deck_count' => 'Number of Decks Created',
                     'days_registered' => 'Days Since Registration',
                     'global_elo' => 'Global Elo (Future Check)',
                 ),
