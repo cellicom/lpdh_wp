@@ -803,39 +803,8 @@ function lpdh_render_manage_achievements_page() {
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
                             <div style="flex-grow: 1;">
-                                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
-                                    <?php if (current_user_can('edit_post', $post->ID)): ?>
-                                        <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_kses_post($post->post_content); ?></p>
-                                
-                                <?php 
-                                    // Condition Display
-                                    $cond_type = get_field('condition_type', $post->ID);
-                                    $labels = [
-                                        'manual' => 'Manual',
-                                        'win_count' => 'Wins',
-                                        'clown_count' => 'Last Places',
-                                        'event_count' => 'Events',
-                                        'deck_count' => 'Decks',
-                                        'days_registered' => 'Days Registered',
-                                        'global_elo' => 'Elo',
-                                        'deck_with_banned' => 'Banned Decks',
-                                    ];
-                                    $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
-                                    
-                                    if ($cond_type !== 'manual') {
-                                        $operator = get_field('operator', $post->ID);
-                                        $value = get_field('value', $post->ID);
-                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>' . esc_html($label) . ' ' . esc_html($operator) . ' ' . esc_html($value) . '</strong></p>';
-                                    } else {
-                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>Manual Grant</strong></p>';
-                                    }
-                                ?>
+                                <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_trim_words($post->post_content, 10); ?></p>
                                 
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
                                     <label class="switch">
@@ -855,13 +824,13 @@ function lpdh_render_manage_achievements_page() {
                             </div>
                         </div>
                     </div>
-                <?php } // endforeach ?>
+                <?php endforeach; ?>
             </div>
 
 
-        <?php } else { ?>
+        <?php else: ?>
             <div class="notice notice-info inline"><p>Please select a user to manage achievements.</p></div>
-        <?php } ?>
+        <?php endif; ?>
     </div>
     <script>
     jQuery(document).ready(function($) {
@@ -1091,15 +1060,30 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
             $duplicated_count++;
 
             // Duplicate ACF Fields
+            // We get all meta and filter for what we need, or just rely on ACFs get_fields
+            // Better to use get_post_meta for everything to ensure we catch all custom fields
             $meta = get_post_meta($post_id);
 
             foreach ($meta as $key => $values) {
                 // Skip WP internal meta
                 if (strpos($key, '_') === 0 && strpos($key, '_acf') !== 0 && $key !== '_thumbnail_id') {
+                   // Actually ACF fields often define definition keys starting with _
+                   // So we should be careful. 
+                   // Safest is to duplicate everything that is NOT standard WP lock/edit stuff
                    if (in_array($key, ['_edit_lock', '_edit_last'])) continue;
                 }
                 
                 foreach ($values as $value) {
+                     // ACF Unserialization handled by add_post_meta automatically if we pass raw?
+                     // get_post_meta returns unserialized by default for single=false? No, returns array of values.
+                     // IMPORTANT: If we use add_post_meta, we should pass the raw value.
+                     // get_post_meta($id) returns [ key => [val1, val2] ]
+                     
+                     // Use simpler approach: Loop specific ACF fields we know
+                     // 'condition_type', 'operator', 'value', 'is_secret', 'icon', 'icon_color', 'color_hex', 'color_class'
+                     // But we want to be generic. 
+                     
+                     // Let's use get_post_meta duplication which is standard for clones
                      add_post_meta($new_post_id, $key, maybe_unserialize($value));
                 }
             }
