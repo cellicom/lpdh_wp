@@ -250,7 +250,7 @@ foreach ($yearly_stats as $y => $data) {
 }
 
 // --- Pagination Logic ---
-$items_per_page = 5;
+$items_per_page = 10;
 
 // Decks Pagination: Custom sorting by attendance
 $paged_decks = isset($_GET['p_decks']) ? max(1, intval($_GET['p_decks'])) : 1;

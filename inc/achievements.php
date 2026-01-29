@@ -151,12 +151,60 @@ if (function_exists('acf_add_local_field_group')):
                 'label' => 'Secret Achievement',
                 'name' => 'is_secret',
                 'type' => 'true_false',
-                'instructions' => 'If checked, title and description will be hidden until unlocked.',
+                'instructions' => 'Hidden from the main list unless unlocked.',
                 'wrapper' => array(
-                    'width' => '100',
+                    'width' => '33',
                 ),
                 'default_value' => 0,
                 'ui' => 1,
+            ),
+            array(
+                'key' => 'field_ach_yearly',
+                'label' => 'Yearly Achievement',
+                'name' => 'yearly',
+                'type' => 'true_false',
+                'instructions' => 'Check if this is an annual achievement.',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
+                'default_value' => 0,
+                'ui' => 1,
+            ),
+            array(
+                'key' => 'field_ach_year',
+                'label' => 'Reference Year',
+                'name' => 'year',
+                'type' => 'select',
+                'instructions' => 'Select the year for this achievement.',
+                'required' => 0,
+                'wrapper' => array(
+                    'width' => '34',
+                ),
+                'choices' => (function() {
+                    $ach_years = array();
+                    global $wpdb;
+                    $min_date = $wpdb->get_var("SELECT MIN(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date'");
+                    $max_date = $wpdb->get_var("SELECT MAX(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date'");
+                    
+                    $start_year = $min_date ? intval(date('Y', strtotime($min_date))) : intval(date('Y')) - 1;
+                    $end_year = $max_date ? intval(date('Y', strtotime($max_date))) + 1 : intval(date('Y')) + 1;
+
+                    if ($start_year > intval(date('Y'))) $start_year = intval(date('Y')) - 1;
+
+                    for ($y = $end_year; $y >= $start_year; $y--) {
+                        $ach_years[$y] = $y;
+                    }
+                    return $ach_years;
+                })(),
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_yearly',
+                            'operator' => '==',
+                            'value' => '1',
+                        ),
+                    ),
+                ),
             ),
 
             // Row 2: Icon Settings
@@ -230,38 +278,56 @@ endif;
  * Returns user stats, calculating them only if necessary.
  * 
  * @param int $user_id
- * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'global_elo']
+ * @param string $year 'global' or 'YYYY'
+ * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'elo', ...]
  */
-function lpdh_get_user_stats($user_id)
+function lpdh_get_user_stats($user_id, $year = 'global')
 {
+    static $stats_cache = [];
+    $cache_key = $user_id . '_' . $year;
+    if (isset($stats_cache[$cache_key])) {
+        return $stats_cache[$cache_key];
+    }
+
     // 1. Days Registered
     $user_data = get_userdata($user_id);
     $registered = $user_data ? strtotime($user_data->user_registered) : time();
-    $days_since_reg = floor((time() - $registered) / (60 * 60 * 24));
+    $comparison_time = time();
+    
+    if ($year !== 'global') {
+        $end_of_year = strtotime($year . '-12-31 23:59:59');
+        if ($end_of_year < $comparison_time) {
+            $comparison_time = $end_of_year;
+        }
+    }
+    
+    $days_since_reg = floor(($comparison_time - $registered) / (60 * 60 * 24));
+    if ($days_since_reg < 0) $days_since_reg = 0;
 
     // 2. Decks Count
-    $deck_count = count_user_posts($user_id, 'deck', true);
+    $deck_args = [
+        'post_type' => 'deck',
+        'author' => $user_id,
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'fields' => 'ids'
+    ];
+    if ($year !== 'global') {
+        $deck_args['date_query'] = [['year' => $year]];
+    }
+    $user_decks = get_posts($deck_args);
+    $deck_count = count($user_decks);
 
     // 2.1 Deck with Banned Cards
     $deck_with_banned = 0;
     if (function_exists('lpdh_get_banned_card_names')) {
-        $banned_cards = lpdh_get_banned_card_names(); // Returns array of lowercase names
-        if (!empty($banned_cards)) {
-            $user_decks = get_posts([
-                'post_type' => 'deck',
-                'author' => $user_id,
-                'posts_per_page' => -1,
-                'post_status' => 'publish',
-                'fields' => 'ids'
-            ]);
-
+        $banned_cards = lpdh_get_banned_card_names();
+        if (!empty($banned_cards) && !empty($user_decks)) {
             foreach ($user_decks as $d_id) {
-                // Check 'field_decklist_text', 'commander', and 'partner'
                 $list_text = get_field('decklist_text', $d_id);
                 $commander = get_field('commander', $d_id);
                 $partner = get_field('partner', $d_id);
 
-                // Handle Object vs String for Commander/Partner
                 if (is_object($commander)) $commander = $commander->post_title;
                 if (is_object($partner)) $partner = $partner->post_title;
 
@@ -269,85 +335,9 @@ function lpdh_get_user_stats($user_id)
 
                 if (!empty($full_check_text)) {
                     foreach ($banned_cards as $card) {
-                        // Simple check: is the banned card name in the text/commander/partner?
                         if (strpos($full_check_text, $card) !== false) {
                             $deck_with_banned++;
-                            break; // Count this deck once, move to next deck
-                        }
-                    }
-                }
-                    }
-        }
-    }
-
-    // 2.2 Spinned the Wheel
-    $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
-
-
-    // 3. Events, Wins & Clown Check (Heavy Query)
-    $events_attended = 0;
-    $win_count = 0;
-    $clown_count = 0;
-
-    global $wpdb;
-    
-    // 3. Events, Wins & Clown Check (Optimized ACF Repeater Query)
-    $events_attended = 0;
-    $win_count = 0;
-    $clown_count = 0;
-
-    // Search for User ID in 'event_ranking_%_player_id'
-    // Matches plain ID or Serialized Object (if ACF returns User Object)
-    // IMPORTANT: ACF stores repeater data using Field Name ('event_ranking'), not Field Key.
-    $sql = $wpdb->prepare(
-        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
-         WHERE meta_key LIKE %s 
-         AND (meta_value = %s OR meta_value LIKE %s)",
-        'event_ranking_%_player_id',
-        $user_id,
-        '%"ID";i:' . $user_id . ';%' // Serialized look-ahead
-    );
-
-    $participated_event_ids = $wpdb->get_col($sql);
-
-    if (!empty($participated_event_ids)) {
-        // Ensure they are valid published events
-        $valid_events = get_posts([
-            'post_type' => 'event',
-            'post_status' => 'publish',
-            'include' => $participated_event_ids,
-            'posts_per_page' => -1,
-            'fields' => 'ids'
-        ]);
-
-        foreach ($valid_events as $e_id) {
-            // Get the full repeater to check position
-            // Uses 'field_event_ranking' (Key) to safely retrieve structured data via ACF
-            $rankings = get_field('field_event_ranking', $e_id);
-            
-            if (is_array($rankings)) {
-                $total_players = count($rankings);
-                
-                foreach ($rankings as $rank) {
-                    $p_id = 0;
-                    $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
-                    
-                    if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
-                    elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
-                    elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
-
-                    if ($p_id == $user_id) {
-                        $events_attended++;
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        
-                        // Check Win
-                        if ($pos === 1) {
-                            $win_count++;
-                        }
-                        
-                        // Check Clown (Last Place)
-                        if ($total_players > 1 && $pos === $total_players) {
-                            $clown_count++;
+                            break;
                         }
                     }
                 }
@@ -355,7 +345,97 @@ function lpdh_get_user_stats($user_id)
         }
     }
 
-    return [
+    // 2.2 Spinned the Wheel (Ignore year filter for Roulette)
+    $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+
+
+    // 3. Events, Wins & Clown Check
+    $events_attended = 0;
+    $win_count = 0;
+    $clown_count = 0;
+
+    global $wpdb;
+    
+    // Search for User ID in 'event_ranking_%_player_id'
+    $sql = $wpdb->prepare(
+        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
+         WHERE meta_key LIKE %s 
+         AND (meta_value = %s OR meta_value LIKE %s)",
+        'event_ranking_%_player_id',
+        $user_id,
+        '%"ID";i:' . $user_id . ';%' 
+    );
+
+    $participated_event_ids = $wpdb->get_col($sql);
+
+    if (!empty($participated_event_ids)) {
+        $event_args = [
+            'post_type' => 'event',
+            'post_status' => 'publish',
+            'include' => $participated_event_ids,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ];
+        if ($year !== 'global') {
+            $event_args['date_query'] = [['year' => $year]];
+        }
+        $valid_events = get_posts($event_args);
+
+        foreach ($valid_events as $e_id) {
+            $rankings = get_field('field_event_ranking', $e_id);
+            
+            if (is_array($rankings)) {
+                $total_players = count($rankings);
+                foreach ($rankings as $rank) {
+                    $p_id = 0;
+                    $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
+                    if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
+                    elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
+                    elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
+
+                    if ($p_id == $user_id) {
+                        $events_attended++;
+                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                        if ($pos === 1) $win_count++;
+                        if ($total_players > 1 && $pos === $total_players) $clown_count++;
+                    }
+                }
+            }
+        }
+    }
+
+    // 4. Elo
+    $final_elo = 0;
+    if ($year !== 'global') {
+        // Fetch from Leaderboard CPT for specific year
+        $leaderboard_args = [
+            'post_type' => 'leaderboard',
+            'posts_per_page' => 1,
+            'meta_key' => 'year',
+            'meta_value' => $year
+        ];
+        $lb_query = new WP_Query($leaderboard_args);
+        if ($lb_query->have_posts()) {
+            $json = get_field('rankings_json', $lb_query->posts[0]->ID);
+            if ($json) {
+                $lb_data = json_decode($json, true);
+                if (is_array($lb_data)) {
+                    foreach ($lb_data as $entry) {
+                        $e_id = isset($entry['id']) ? $entry['id'] : (isset($entry['player_id']) ? $entry['player_id'] : 0);
+                        $e_name = isset($entry['name']) ? $entry['name'] : '';
+                        if (($e_id && $e_id == $user_id) || ($e_name && strcasecmp($e_name, $user_data->display_name) === 0)) {
+                            if (isset($entry['elo'])) {
+                                $final_elo = round($entry['elo']);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $res = [
         'deck_count' => $deck_count,
         'win_count' => $win_count,
         'event_count' => $events_attended,
@@ -363,8 +443,12 @@ function lpdh_get_user_stats($user_id)
         'deck_with_banned' => $deck_with_banned,
         'spinned_wheel_count' => $spinned_wheel_count,
         'days_registered' => $days_since_reg,
-        'global_elo' => 0 // Future implementation
+        'global_elo' => $final_elo,
+        'elo' => $final_elo
     ];
+    
+    $stats_cache[$cache_key] = $res;
+    return $res;
 }
 
 /**
@@ -396,16 +480,29 @@ function lpdh_check_achievement_condition($user_val, $operator, $target_val)
  * @param string $operator ('CONTAINS', 'EQUALS', etc)
  * @return bool
  */
-function lpdh_check_deck_commander($user_id, $target_name, $operator = 'CONTAINS') {
+/**
+ * Checks if user has a deck with a specific Commander or Partner.
+ * 
+ * @param int    $user_id
+ * @param string $target_name
+ * @param string $operator ('CONTAINS', 'EQUALS', etc)
+ * @param string $year 'global' or 'YYYY'
+ * @return bool
+ */
+function lpdh_check_deck_commander($user_id, $target_name, $operator = 'CONTAINS', $year = 'global') {
     if (empty($target_name)) return false;
 
-    $user_decks = get_posts([
+    $args = [
         'post_type' => 'deck',
         'author' => $user_id,
         'posts_per_page' => -1,
         'post_status' => 'publish',
         'fields' => 'ids'
-    ]);
+    ];
+    if ($year !== 'global') {
+        $args['date_query'] = [['year' => $year]];
+    }
+    $user_decks = get_posts($args);
 
     foreach ($user_decks as $d_id) {
         // ACF Fields for Commander/Partner
@@ -516,8 +613,6 @@ function lpdh_get_user_achievements($user_id)
 
     // If there are locked achievements, we need to calculate stats
     if (!empty($locked_achievements)) {
-        $stats = null; // Deferred loading
-
         foreach ($locked_achievements as $post) {
             $cond_type = get_field('condition_type', $post->ID);
             
@@ -526,12 +621,15 @@ function lpdh_get_user_achievements($user_id)
                 continue;
             }
 
+            $is_yearly = get_field('yearly', $post->ID);
+            $year = ($is_yearly && $cond_type !== 'spinned_wheel_count') ? get_field('year', $post->ID) : 'global';
+
             // Special Check: Deck with Commander/Partner
             if ($cond_type === 'deck_commander_partner') {
                 $target_name = get_field('value', $post->ID);
                 $operator = get_field('operator', $post->ID);
                 
-                if (lpdh_check_deck_commander($user_id, $target_name, $operator)) {
+                if (lpdh_check_deck_commander($user_id, $target_name, $operator, $year)) {
                     // Unlocked!
                     $unlock_date = time();
                     $unlocked_data[$post->ID] = $unlock_date;
@@ -541,10 +639,8 @@ function lpdh_get_user_achievements($user_id)
                 continue; // Skip standard stat check
             }
 
-            // Lazy load stats only if needed
-            if ($stats === null) {
-                $stats = lpdh_get_user_stats($user_id);
-            }
+            // Fetch stats for this achievement's year context
+            $stats = lpdh_get_user_stats($user_id, $year);
 
             $operator = get_field('operator', $post->ID);
             $target_val = get_field('value', $post->ID);
