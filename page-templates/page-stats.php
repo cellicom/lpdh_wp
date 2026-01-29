@@ -216,16 +216,19 @@ if ($events_query->have_posts()) {
 
                         // --- ELO History ---
                         if (!empty($name)) {
-                            // If this is the first tournament of the year, inject the 1200 start point if not present
-                            if ($event_year && !isset($elo_starts_added[$event_year])) {
-                                // For chart continuity, we add a point at Jan 1st
-                                $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
-                                $elo_history_data[] = LPDH_DEFAULT_ELO;
-                                $elo_starts_added[$event_year] = true;
+                            // Only add to Elo chart if global OR if it matches the selected year
+                            if ($selected_year === 'global' || $event_year === $selected_year) {
+                                // If this is the first tournament of the year, inject the 1200 start point if not present
+                                if ($event_year && !isset($elo_starts_added[$event_year])) {
+                                    // For chart continuity, we add a point at Jan 1st
+                                    $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
+                                    $elo_history_data[] = LPDH_DEFAULT_ELO;
+                                    $elo_starts_added[$event_year] = true;
+                                }
+                                
+                                $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
+                                $elo_history_data[] = round($player_elos[$name]);
                             }
-                            
-                            $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
-                            $elo_history_data[] = round($player_elos[$name]);
                         }
 
                         // Filter for main stats and charts (Attendance, Wins, etc.)
