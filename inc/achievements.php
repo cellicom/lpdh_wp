@@ -49,16 +49,55 @@ function lpdh_register_achievement_cpt()
 add_action('init', 'lpdh_register_achievement_cpt');
 
 /**
- * Force Order by Date for Achievement Archive
+ * Force Order for Achievement Archive
+ * Note: Sorting is handled via lpdh_achievement_archive_sort filter for full visibility
  */
 function lpdh_achievement_archive_order($query) {
     if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
-        $query->set('orderby', 'date'); // Date Published
-        $query->set('order', 'DESC');   // Newest First
-        $query->set('posts_per_page', -1); // Show all achievements
+        $query->set('posts_per_page', -1);
     }
 }
 add_action('pre_get_posts', 'lpdh_achievement_archive_order');
+
+/**
+ * Sort Achievements: Year DESC (populated first), Condition ASC, Value ASC
+ * Using posts_results filter to ensure visibility of posts with missing meta
+ */
+function lpdh_achievement_archive_sort($posts, $query) {
+    if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
+        usort($posts, function($a, $b) {
+            // 1. Year (DESC)
+            $year_a = get_field('year', $a->ID);
+            $year_b = get_field('year', $b->ID);
+            
+            // Treat empty/false as 0
+            $val_year_a = $year_a ? intval($year_a) : 0;
+            $val_year_b = $year_b ? intval($year_b) : 0;
+            
+            if ($val_year_a !== $val_year_b) {
+                return $val_year_b - $val_year_a; // DESC
+            }
+            
+            // 2. Condition Type (ASC)
+            $type_a = get_field('condition_type', $a->ID);
+            $type_b = get_field('condition_type', $b->ID);
+            $type_a = $type_a ?: '';
+            $type_b = $type_b ?: '';
+            
+            if ($type_a !== $type_b) {
+                return strcmp($type_a, $type_b);
+            }
+            
+            // 3. Value (ASC)
+            $val_a = get_field('value', $a->ID);
+            $val_b = get_field('value', $b->ID);
+            
+            return intval($val_a) - intval($val_b); // ASC
+        });
+    }
+    return $posts;
+}
+add_filter('posts_results', 'lpdh_achievement_archive_sort', 10, 2);
  
 /**
  * Define custom columns for Achievement List
