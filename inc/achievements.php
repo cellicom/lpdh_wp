@@ -797,13 +797,13 @@ function lpdh_render_manage_achievements_page() {
                         $bg_class = 'bg-' . esc_attr($color_class);
                     }
                 ?>
-                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                        <div style="display: flex; align-items: start; gap: 15px;">
+                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04); display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: start; gap: 15px; flex-grow: 1;">
                             <?php $icon_color = get_field('icon_color', $post->ID) ?: '#ffffff'; ?>
                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?>" <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
-                            <div style="flex-grow: 1;">
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
                                     <?php if (current_user_can('edit_post', $post->ID)): ?>
@@ -812,7 +812,9 @@ function lpdh_render_manage_achievements_page() {
                                         </a>
                                     <?php endif; ?>
                                 </div>
-                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_kses_post($post->post_content); ?></p>
+                                <div style="margin: 0 0 10px; color: #666; font-size: 0.9em; flex-grow: 1;">
+                                    <?php echo wp_kses_post($post->post_content); ?>
+                                </div>
                                 
                                 <?php 
                                     // Condition Display
@@ -838,7 +840,7 @@ function lpdh_render_manage_achievements_page() {
                                     }
                                 ?>
                                 
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid #eee;">
                                     <label class="switch">
                                         <input type="checkbox" class="lpdh-ach-toggle" 
                                                data-ach-id="<?php echo $post->ID; ?>" 
