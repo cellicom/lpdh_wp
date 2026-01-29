@@ -124,6 +124,18 @@ if (function_exists('acf_add_local_field_group')):
                 ),
                 'default_value' => '0',
             ),
+            array(
+                'key' => 'field_ach_is_secret',
+                'label' => 'Secret Achievement',
+                'name' => 'is_secret',
+                'type' => 'true_false',
+                'instructions' => 'If checked, title and description will be hidden until unlocked.',
+                'wrapper' => array(
+                    'width' => '100',
+                ),
+                'default_value' => 0,
+                'ui' => 1,
+            ),
 
             // Row 2: Icon Settings
             array(

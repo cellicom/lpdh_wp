@@ -65,8 +65,19 @@ if (is_user_logged_in()) {
                                             <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                                         </div>
                                         
-                                        <h5 class="card-title text-warning mb-2"><?php the_title(); ?></h5>
-                                        <p class="card-text small text-white-50"><?php echo wp_trim_words(get_the_content(), 10); ?></p>
+                                        <?php
+                                        $title_text = get_the_title();
+                                        $desc_text = get_the_content();
+                                        $is_secret = get_field('is_secret', $id);
+
+                                        if ($is_secret && !$is_unlocked) {
+                                            $title_text = "Secret Achievement";
+                                            $desc_text = "This achievement is secret. It can be unlocked in a specific mode.";
+                                        }
+                                        ?>
+                                        
+                                        <h5 class="card-title text-warning mb-2"><?php echo esc_html($title_text); ?></h5>
+                                        <p class="card-text small text-white-50"><?php echo wp_trim_words($desc_text, 10); ?></p>
                                     </div>
                                     <?php if ($is_unlocked): ?>
                                         <div class="card-footer bg-success text-white text-center py-1 small fw-bold">
