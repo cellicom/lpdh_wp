@@ -3740,7 +3740,7 @@ function render_player_stats_page()
             </select>
         </form>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
             <!-- Box 1: Riepilogo -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
                 <h2 class="title">Summary</h2>
@@ -3796,7 +3796,9 @@ function render_player_stats_page()
                 <h2 class="title">Most Used Decks</h2>
                 <canvas id="deckUsageChart" style="max-height: 300px;"></canvas>
             </div>
+        </div>
 
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
             <!-- Box 3: Andamento Win Rate -->
             <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
                 <h2 class="title">Win Rate Trend</h2>
