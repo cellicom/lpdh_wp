@@ -126,7 +126,8 @@ function bootscore_child_enqueue_styles()
     wp_enqueue_style('fonts', get_stylesheet_directory_uri() . '/assets/css/fonts.css', array(), $modified_fontsCss);
 
     // Compiled main.css (depends on parent-style and fonts to load after font definitions)
-    $modified_bootscoreChildCss = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/css/main.css'));
+    $main_css_path = get_stylesheet_directory() . '/assets/css/main.css';
+    $modified_bootscoreChildCss = file_exists($main_css_path) ? date('YmdHi', filemtime($main_css_path)) : '1.0.0';
     wp_enqueue_style('main', get_stylesheet_directory_uri() . '/assets/css/main.css', array('parent-style', 'fonts'), $modified_bootscoreChildCss);
 
     // style.css
