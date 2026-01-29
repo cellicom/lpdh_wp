@@ -49,13 +49,37 @@ function lpdh_register_achievement_cpt()
 add_action('init', 'lpdh_register_achievement_cpt');
 
 /**
- * Force Order by Date for Achievement Archive
+ * Force Order for Achievement Archive: Year DESC, Condition ASC, Value ASC
  */
 function lpdh_achievement_archive_order($query) {
     if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
-        $query->set('orderby', 'date'); // Date Published
-        $query->set('order', 'DESC');   // Newest First
-        $query->set('posts_per_page', -1); // Show all achievements
+        
+        $meta_query = array(
+            'relation' => 'AND',
+            'year_clause' => array(
+                'key'     => 'year',
+                'compare' => 'EXISTS',
+            ),
+            'type_clause' => array(
+                'key'     => 'condition_type',
+                'compare' => 'EXISTS',
+            ),
+            'value_clause' => array(
+                'key'     => 'value',
+                'compare' => 'EXISTS',
+                'type'    => 'NUMERIC',
+            ),
+        );
+        
+        $query->set('meta_query', $meta_query);
+        
+        $query->set('orderby', array(
+            'year_clause'  => 'DESC',
+            'type_clause'  => 'ASC',
+            'value_clause' => 'ASC',
+        ));
+        
+        $query->set('posts_per_page', -1);
     }
 }
 add_action('pre_get_posts', 'lpdh_achievement_archive_order');
