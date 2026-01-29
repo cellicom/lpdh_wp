@@ -305,6 +305,8 @@ $total_player_events = count($player_events);
 $total_event_pages = ceil($total_player_events / $items_per_page);
 $paged_player_events = array_slice($player_events, ($paged_events - 1) * $items_per_page, $items_per_page);
 
+
+
 get_header(); ?>
 
 <div id="primary" class="content-area">
@@ -323,14 +325,16 @@ get_header(); ?>
                 <div class="col-md-4">
                     <form method="get" action="<?php echo esc_url(get_permalink()); ?>"
                         class="d-flex align-items-center mb-0">
+                        
                         <?php if (isset($_GET['page_id'])): ?>
                             <input type="hidden" name="page_id" value="<?php echo intval($_GET['page_id']); ?>">
                         <?php endif; ?>
+
                         <?php if (isset($_GET['user_id'])): ?>
                             <input type="hidden" name="user_id" value="<?php echo intval($_GET['user_id']); ?>">
                         <?php endif; ?>
                         <label for="stats_year" class="me-3 fw-bold text-nowrap">Year:</label>
-                        <select name="stats_year" id="stats_year" class="form-select" onchange="this.form.submit()">
+                        <select name="stats_year" id="stats_year" class="form-select select-year" onchange="this.form.submit()">
                             <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
                             <?php foreach ($available_years as $y): ?>
                                 <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
@@ -742,6 +746,8 @@ get_header(); ?>
 </script>
 
 <style>
+
+
     .bg-gold {
         background-color: #ffd700 !important;
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);

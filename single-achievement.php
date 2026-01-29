@@ -48,12 +48,41 @@ get_header();
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
 
+                            <?php
+                            // Secret Check
+                            $is_secret = get_field('is_secret', $id);
+                            
+                            // Check Status (Done early for display logic)
+                            // Note: Logic duplicated from below slightly, but necessary for title masking
+                            $is_unlocked_check = false;
+                            $unlock_date_val = '';
+                            if (is_user_logged_in()) {
+                                $uid_check = get_current_user_id();
+                                $list_check = lpdh_get_user_achievements($uid_check);
+                                foreach ($list_check as $item_check) {
+                                    if ($item_check['id'] == $id) {
+                                        $is_unlocked_check = true;
+                                        $unlock_date_val = $item_check['date_unlocked'];
+                                        break;
+                                    }
+                                }
+                            }
+
+                            $title_text = get_the_title();
+                            $content_text = get_the_content();
+
+                            if ($is_secret && !$is_unlocked_check) {
+                                $title_text = "Secret Achievement";
+                                $content_text = "This achievement is secret. It can be unlocked in a specific mode.";
+                            }
+                            ?>
+
                             <!-- Title -->
-                            <h1 class="entry-title text-warning mb-3"><?php the_title(); ?></h1>
+                            <h1 class="entry-title text-warning mb-3"><?php echo esc_html($title_text); ?></h1>
 
                             <!-- Content -->
                             <div class="entry-content lead text-light" style="max-width: 600px; margin: 0 auto;">
-                                <?php the_content(); ?>
+                                <?php echo wp_kses_post($content_text); ?>
                             </div>
 
                             <?php

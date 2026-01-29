@@ -111,6 +111,15 @@ if (function_exists('acf_add_local_field_group')):
                     'EQUALS' => 'Equals (Text)',
                 ),
                 'default_value' => '>=',
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_condition_type',
+                            'operator' => '!=',
+                            'value' => 'manual',
+                        ),
+                    ),
+                ),
             ),
             array(
                 'key' => 'field_ach_value',
@@ -123,6 +132,27 @@ if (function_exists('acf_add_local_field_group')):
                     'width' => '33',
                 ),
                 'default_value' => '0',
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_condition_type',
+                            'operator' => '!=',
+                            'value' => 'manual',
+                        ),
+                    ),
+                ),
+            ),
+            array(
+                'key' => 'field_ach_is_secret',
+                'label' => 'Secret Achievement',
+                'name' => 'is_secret',
+                'type' => 'true_false',
+                'instructions' => 'If checked, title and description will be hidden until unlocked.',
+                'wrapper' => array(
+                    'width' => '100',
+                ),
+                'default_value' => 0,
+                'ui' => 1,
             ),
 
             // Row 2: Icon Settings
@@ -208,34 +238,88 @@ function lpdh_get_user_stats($user_id)
     // 2. Decks Count
     $deck_count = count_user_posts($user_id, 'deck', true);
 
+    // 2.1 Deck with Banned Cards
+    $deck_with_banned = 0;
+    if (function_exists('lpdh_get_banned_card_names')) {
+        $banned_cards = lpdh_get_banned_card_names(); // Returns array of lowercase names
+        if (!empty($banned_cards)) {
+            $user_decks = get_posts([
+                'post_type' => 'deck',
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'fields' => 'ids'
+            ]);
+
+            foreach ($user_decks as $d_id) {
+                // We check 'field_decklist_text' (ACF) or standard content? 
+                // Based on deck editor likely ACF 'field_decklist_text'
+                $list_text = get_field('decklist_text', $d_id);
+                if ($list_text) {
+                    $list_text_lower = strtolower($list_text);
+                    foreach ($banned_cards as $card) {
+                        // Simple check: is the banned card name in the text?
+                        // Improve this with regex if needed to avoid ensuring partial matches don't false positive
+                        // e.g. "Sol Ring" matching "Sol Ring" (Banned) vs "Sol Ring Wrapper" (Fake)
+                        // For now simple strpos is usually "good enough" for card names unless they are very short common words.
+                        if (strpos($list_text_lower, $card) !== false) {
+                            $deck_with_banned++;
+                            break; // Count this deck once, move to next deck
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // 3. Events, Wins & Clown Check (Heavy Query)
     $events_attended = 0;
     $win_count = 0;
     $clown_count = 0;
 
-    $events_query = new WP_Query([
-        'post_type' => 'event',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-        'fields' => 'ids',
-        'meta_query' => [
-            [
-                'key' => 'event_ranking',
-                'value' => '"player_id";i:' . $user_id,
-                'compare' => 'LIKE'
-            ]
-        ]
-    ]);
+    global $wpdb;
+    
+    // 3. Events, Wins & Clown Check (Optimized ACF Repeater Query)
+    $events_attended = 0;
+    $win_count = 0;
+    $clown_count = 0;
 
-    if ($events_query->have_posts()) {
-        foreach ($events_query->posts as $e_id) {
-            $rankings = get_field('event_ranking', $e_id);
+    // Search for User ID in 'event_ranking_%_player_id'
+    // Matches plain ID or Serialized Object (if ACF returns User Object)
+    // IMPORTANT: ACF stores repeater data using Field Name ('event_ranking'), not Field Key.
+    $sql = $wpdb->prepare(
+        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
+         WHERE meta_key LIKE %s 
+         AND (meta_value = %s OR meta_value LIKE %s)",
+        'event_ranking_%_player_id',
+        $user_id,
+        '%"ID";i:' . $user_id . ';%' // Serialized look-ahead
+    );
+
+    $participated_event_ids = $wpdb->get_col($sql);
+
+    if (!empty($participated_event_ids)) {
+        // Ensure they are valid published events
+        $valid_events = get_posts([
+            'post_type' => 'event',
+            'post_status' => 'publish',
+            'include' => $participated_event_ids,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ]);
+
+        foreach ($valid_events as $e_id) {
+            // Get the full repeater to check position
+            // Uses 'field_event_ranking' (Key) to safely retrieve structured data via ACF
+            $rankings = get_field('field_event_ranking', $e_id);
+            
             if (is_array($rankings)) {
                 $total_players = count($rankings);
                 
                 foreach ($rankings as $rank) {
                     $p_id = 0;
                     $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
+                    
                     if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
                     elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
                     elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
@@ -264,6 +348,7 @@ function lpdh_get_user_stats($user_id)
         'win_count' => $win_count,
         'event_count' => $events_attended,
         'clown_count' => $clown_count,
+        'deck_with_banned' => $deck_with_banned,
         'days_registered' => $days_since_reg,
         'global_elo' => 0 // Future implementation
     ];
@@ -306,6 +391,7 @@ function lpdh_get_user_achievements($user_id)
     // Retrieve stored achievements
     // Expected Format: [ ID => 'timestamp_or_date_string', ... ]
     $unlocked_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+    $migrated = false;
 
     // STRICT VALIDATION (New Plan)
     // We do not guess. We only accept [ID => Timestamp].
@@ -574,8 +660,8 @@ function lpdh_achievements_admin_scripts($hook) {
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
     // Select2
-    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
-    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+    wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
+    wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
 }
 add_action('admin_enqueue_scripts', 'lpdh_achievements_admin_scripts');
 
@@ -624,7 +710,13 @@ function lpdh_render_manage_achievements_page() {
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
         
-        .select2-container { width: 300px !important; }
+        .select2-container { width: 300px !important; max-width: 100%; }
+        
+        @media screen and (max-width: 782px) {
+            .select2-container { width: 100% !important; margin-bottom: 10px; }
+            .tablenav.top { height: auto; }
+            .tablenav .actions { display: block; float: none; margin-bottom: 10px; }
+        }
     </style>
 
     <div class="wrap">
@@ -711,17 +803,50 @@ function lpdh_render_manage_achievements_page() {
                         $bg_class = 'bg-' . esc_attr($color_class);
                     }
                 ?>
-                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                        <div style="display: flex; align-items: start; gap: 15px;">
+                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04); display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: start; gap: 15px; flex-grow: 1;">
                             <?php $icon_color = get_field('icon_color', $post->ID) ?: '#ffffff'; ?>
                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?>" <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
-                            <div style="flex-grow: 1;">
-                                <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
-                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_trim_words($post->post_content, 10); ?></p>
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+                                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                    <?php if (current_user_can('edit_post', $post->ID)): ?>
+                                        <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="margin: 0 0 10px; color: #666; font-size: 0.9em; flex-grow: 1;">
+                                    <?php echo wp_kses_post($post->post_content); ?>
+                                </div>
                                 
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                <?php 
+                                    // Condition Display
+                                    $cond_type = get_field('condition_type', $post->ID);
+                                    $labels = [
+                                        'manual' => 'Manual',
+                                        'win_count' => 'Wins',
+                                        'clown_count' => 'Last Places',
+                                        'event_count' => 'Events',
+                                        'deck_count' => 'Decks',
+                                        'days_registered' => 'Days Registered',
+                                        'global_elo' => 'Elo',
+                                        'deck_with_banned' => 'Banned Decks',
+                                    ];
+                                    $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
+                                    
+                                    if ($cond_type !== 'manual') {
+                                        $operator = get_field('operator', $post->ID);
+                                        $value = get_field('value', $post->ID);
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>' . esc_html($label) . ' ' . esc_html($operator) . ' ' . esc_html($value) . '</strong></p>';
+                                    } else {
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>Manual Grant</strong></p>';
+                                    }
+                                ?>
+                                
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid #eee;">
                                     <label class="switch">
                                         <input type="checkbox" class="lpdh-ach-toggle" 
                                                data-ach-id="<?php echo $post->ID; ?>" 
@@ -918,3 +1043,109 @@ function lpdh_ajax_delete_all_user_achievements() {
 }
 add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
 
+/**
+ * Add "Duplicate for next year" to Bulk Actions for Achievements
+ */
+function lpdh_achievement_custom_bulk_actions($actions)
+{
+    $actions['duplicate_year'] = 'Duplicate for next year';
+    return $actions;
+}
+add_filter('bulk_actions-edit-achievement', 'lpdh_achievement_custom_bulk_actions');
+
+/**
+ * Handle "Duplicate for next year" Bulk Action
+ */
+function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids)
+{
+    if ($doaction !== 'duplicate_year') {
+        return $redirect_to;
+    }
+
+    $duplicated_count = 0;
+
+    foreach ($post_ids as $post_id) {
+        // Get Original Post
+        $original_post = get_post($post_id);
+        
+        if (!$original_post) continue;
+
+        // Calculate New Title (Increment Year)
+        // Regex to find 4-digit year 20XX
+        $title = $original_post->post_title;
+        $year_found = false;
+        
+        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found) {
+            $year_found = true;
+            return intval($matches[1]) + 1;
+        }, $title);
+
+        if (!$year_found) {
+            // Append " (Next Year)" if no year found to avoid confusion
+            $new_title .= ' (Next Year)';
+        }
+
+        // Create New Post
+        $new_post_args = array(
+            'post_title'    => $new_title,
+            'post_content'  => $original_post->post_content,
+            'post_status'   => 'draft', // Draft for safety
+            'post_type'     => 'achievement',
+            'post_author'   => get_current_user_id(),
+        );
+
+        $new_post_id = wp_insert_post($new_post_args);
+
+        if ($new_post_id) {
+            $duplicated_count++;
+
+            // Duplicate ACF Fields
+            // We get all meta and filter for what we need, or just rely on ACFs get_fields
+            // Better to use get_post_meta for everything to ensure we catch all custom fields
+            $meta = get_post_meta($post_id);
+
+            foreach ($meta as $key => $values) {
+                // Skip WP internal meta
+                if (strpos($key, '_') === 0 && strpos($key, '_acf') !== 0 && $key !== '_thumbnail_id') {
+                   // Actually ACF fields often define definition keys starting with _
+                   // So we should be careful. 
+                   // Safest is to duplicate everything that is NOT standard WP lock/edit stuff
+                   if (in_array($key, ['_edit_lock', '_edit_last'])) continue;
+                }
+                
+                foreach ($values as $value) {
+                     // ACF Unserialization handled by add_post_meta automatically if we pass raw?
+                     // get_post_meta returns unserialized by default for single=false? No, returns array of values.
+                     // IMPORTANT: If we use add_post_meta, we should pass the raw value.
+                     // get_post_meta($id) returns [ key => [val1, val2] ]
+                     
+                     // Use simpler approach: Loop specific ACF fields we know
+                     // 'condition_type', 'operator', 'value', 'is_secret', 'icon', 'icon_color', 'color_hex', 'color_class'
+                     // But we want to be generic. 
+                     
+                     // Let's use get_post_meta duplication which is standard for clones
+                     add_post_meta($new_post_id, $key, maybe_unserialize($value));
+                }
+            }
+        }
+    }
+
+    // Build Redirect URL
+    return add_query_arg('lpdh_duplicated_count', $duplicated_count, $redirect_to);
+}
+add_filter('handle_bulk_actions-edit-achievement', 'lpdh_achievement_handle_bulk_actions', 10, 3);
+
+/**
+ * Show Admin Notice after Duplication
+ */
+function lpdh_achievement_bulk_action_admin_notice()
+{
+    if (!empty($_REQUEST['lpdh_duplicated_count'])) {
+        $count = intval($_REQUEST['lpdh_duplicated_count']);
+        printf(
+            '<div id="message" class="updated notice is-dismissible"><p>%s</p></div>',
+            sprintf(_n('%s achievement duplicated for next year.', '%s achievements duplicated for next year.', $count, 'text-domain'), $count)
+        );
+    }
+}
+add_action('admin_notices', 'lpdh_achievement_bulk_action_admin_notice');

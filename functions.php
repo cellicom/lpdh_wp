@@ -126,7 +126,8 @@ function bootscore_child_enqueue_styles()
     wp_enqueue_style('fonts', get_stylesheet_directory_uri() . '/assets/css/fonts.css', array(), $modified_fontsCss);
 
     // Compiled main.css (depends on parent-style and fonts to load after font definitions)
-    $modified_bootscoreChildCss = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/css/main.css'));
+    $main_css_path = get_stylesheet_directory() . '/assets/css/main.css';
+    $modified_bootscoreChildCss = file_exists($main_css_path) ? date('YmdHi', filemtime($main_css_path)) : '1.0.0';
     wp_enqueue_style('main', get_stylesheet_directory_uri() . '/assets/css/main.css', array('parent-style', 'fonts'), $modified_bootscoreChildCss);
 
     // style.css
@@ -3245,6 +3246,17 @@ function add_update_survey_button_script()
 add_action('acf/input/admin_footer', 'add_update_survey_button_script');
 
 /**
+ * Enqueue assets for Player Stats page
+ */
+function lpdh_player_stats_enqueue() {
+    if (isset($_GET['page']) && $_GET['page'] === 'player-stats') {
+        wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
+        wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
+    }
+}
+add_action('admin_enqueue_scripts', 'lpdh_player_stats_enqueue');
+
+/**
  * Add Stats page for Players
  */
 function register_stats_page()
@@ -3581,19 +3593,37 @@ function render_player_stats_page()
 
             <?php if (current_user_can('administrator')): ?>
                 <div
-                    style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block;">
-                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px;">Select Player (Admin):</label>
+                    style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block; width: 100%; box-sizing: border-box;">
+                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px; display: block; margin-bottom: 5px;">Select Player (Admin):</label>
                     <?php
-                    wp_dropdown_users(array(
-                        'name' => 'stats_user_id',
-                        'selected' => $user_id,
-                        'show_option_none' => 'Select User',
-                        'show' => 'display_name_with_login',
-                        'class' => '',
-                    ));
+                    $all_users = get_users(['orderby' => 'display_name']);
                     ?>
-                    <input type="submit" class="button" value="View">
+                    <select name="stats_user_id" id="stats_user_id" class="lpdh-stats-select2" onchange="this.form.submit()" style="width: 100%;">
+                        <option value="">Select User</option>
+                        <?php foreach ($all_users as $u): ?>
+                            <option value="<?php echo $u->ID; ?>" <?php selected($user_id, $u->ID); ?>>
+                                <?php echo esc_html($u->display_name . ' (' . $u->user_login . ')'); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+                
+                <style>
+                    /* Select2 Responsive Fixes */
+                    .select2-container { width: 300px !important; max-width: 100%; }
+                    @media screen and (max-width: 782px) {
+                        .select2-container { width: 100% !important; margin-bottom: 10px; }
+                        h1 { word-break: break-all; }
+                    }
+                </style>
+                <script>
+                    jQuery(document).ready(function($) {
+                        $('.lpdh-stats-select2').select2({
+                            width: 'resolve',
+                            placeholder: "Select a Player"
+                        });
+                    });
+                </script>
                 <br>
             <?php endif; ?>
 
