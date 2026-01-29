@@ -949,3 +949,27 @@ body.theme-vaporwave {
     background-attachment: fixed;
     min-height: 100vh;
 }
+
+/* Vaporwave Form Elements - Added via Agent */
+body.theme-vaporwave {
+
+    .form-control,
+    .form-select {
+        background-color: rgba(5, 0, 30, 0.6) !important;
+        border: 1px solid var(--lpdh-card-border) !important;
+        color: var(--lpdh-text) !important;
+        backdrop-filter: blur(5px);
+
+        &:focus {
+            background-color: rgba(5, 0, 30, 0.8) !important;
+            border-color: var(--lpdh-primary) !important;
+            box-shadow: 0 0 10px var(--lpdh-primary) !important;
+            color: #fff !important;
+        }
+
+        option {
+            background-color: #05001e;
+            color: #fff;
+        }
+    }
+}
