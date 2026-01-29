@@ -798,13 +798,239 @@ function lpdh_render_manage_achievements_page() {
                 ?>
                     <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                         <div style="display: flex; align-items: start; gap: 15px;">
+             $normalized_current[$k] = $v;
+        }
+    }
+
+    $new_ids = [];
+    if (isset($_POST['lpdh_manual_achievements']) && is_array($_POST['lpdh_manual_achievements'])) {
+        $new_ids = array_map('intval', $_POST['lpdh_manual_achievements']);
+    } elseif (isset($_POST['action']) && ($_POST['action'] == 'update' || $_POST['action'] == 'profile')) {
+        $new_ids = []; // All unchecked
+    } else {
+        return; // Not saving profile
+    }
+
+    // Construct new data array, preserving dates for existing ones
+    $final_data = [];
+    foreach ($new_ids as $id) {
+        if (isset($normalized_current[$id])) {
+            $final_data[$id] = $normalized_current[$id]; // Keep original date
+        } else {
+            $final_data[$id] = time(); // New grant, set to Now
+        }
+    }
+
+    update_user_meta($user_id, 'lpdh_unlocked_achievements', $final_data);
+}
+add_action('personal_options_update', 'lpdh_save_user_achievements_admin');
+add_action('edit_user_profile_update', 'lpdh_save_user_achievements_admin');
+
+
+// -----------------------------------------------------------------------------
+// 6. Admin Submenu Page: Manage Achievements
+// -----------------------------------------------------------------------------
+
+function lpdh_register_achievement_admin_page() {
+    add_submenu_page(
+        'edit.php?post_type=achievement',
+        'Manage User Achievements',
+        'Manage Achievements',
+        'manage_options',
+        'lpdh-manage-achievements',
+        'lpdh_render_manage_achievements_page'
+    );
+}
+add_action('admin_menu', 'lpdh_register_achievement_admin_page');
+
+// 7. Enqueue Assets for Admin Page
+function lpdh_achievements_admin_scripts($hook) {
+    // Check if we are on the correct page (Robust check)
+    if (!isset($_GET['page']) || $_GET['page'] !== 'lpdh-manage-achievements') {
+        return;
+    }
+
+    // Font Awesome (using CDN for admin - v6 for better compatibility)
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+    // Select2
+    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+}
+add_action('admin_enqueue_scripts', 'lpdh_achievements_admin_scripts');
+
+
+function lpdh_render_manage_achievements_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    // Handle User Selection
+    $selected_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+    
+    // Get all users for dropdown
+    $users = get_users(['orderby' => 'display_name']);
+
+    ?>
+    <style>
+        /* Admin-specific styles for icons */
+        .lpdh-achievement-icon {
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff; flex-shrink: 0;
+        }
+        /* Force FontAwesome Font Family to override WP Admin Dashicons/etc if conflict */
+        .lpdh-achievement-icon i {
+            font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+            font-weight: 900;
+            font-style: normal;
+        }
+        
+        .lpdh-achievement-icon.icon-lg {
+            width: 60px; height: 60px; font-size: 1.8rem;
+        }
+        .bg-bronze { background: linear-gradient(135deg, #cd7f32, #8c5a2b); }
+        .bg-silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
+        .bg-gold { background: linear-gradient(135deg, #ffd700, #b8860b); }
+        
+        /* Switch Styles */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; margin-right: 10px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+        input:checked + .slider { background-color: #2196F3; }
+        input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+        
+        .select2-container { width: 300px !important; }
+    </style>
+
+    <div class="wrap">
+        <h1 class="wp-heading-inline">Manage User Achievements</h1>
+        
+        <!-- User Selector -->
+        <div class="tablenav top">
+            <div class="alignleft actions">
+                <form method="get" action="">
+                    <input type="hidden" name="post_type" value="achievement" />
+                    <input type="hidden" name="page" value="lpdh-manage-achievements" />
+                    <select name="user_id" id="lpdh-user-select" class="lpdh-select2">
+                        <option value="">Select a User...</option>
+                        <?php foreach ($users as $u): ?>
+                            <option value="<?php echo $u->ID; ?>" <?php selected($selected_user_id, $u->ID); ?>>
+                                <?php echo esc_html($u->display_name . ' (' . $u->user_login . ')'); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="submit" class="button action" value="Select User" style="margin-left: 10px;" />
+                </form>
+            </div>
+            
+            <?php if ($selected_user_id): 
+                $sel_user = get_userdata($selected_user_id);
+            ?>
+                <div class="alignleft actions">
+                    <input type="text" id="lpdh-ach-search" placeholder="Search achievements..." style="height: 30px; margin-left: 20px;">
+                    <button type="button" id="lpdh-btn-delete-all" class="button button-primary" style="margin-left: 10px; background-color: #dc3232; border-color: #dc3232; color: #fff;">
+                        Delete All for <?php echo esc_html($sel_user ? $sel_user->display_name : 'User'); ?>
+                    </button>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="lpdh-delete-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+            <div style="background:#fff; width:400px; padding:20px; margin:15% auto; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px; text-align:center;">
+                <h2 style="margin-top:0; color:#dc3232;">⚠ Warning</h2>
+                <p>Are you sure you want to delete <strong>ALL</strong> achievements for this user?</p>
+                <p>This action cannot be undone.</p>
+                <div style="margin-top:20px;">
+                    <button id="lpdh-confirm-delete" class="button button-primary bg-danger" style="background:#dc3232; border-color:#dc3232;">Yes, Delete Everything</button>
+                    <button id="lpdh-cancel-delete" class="button button-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <?php if ($selected_user_id): 
+            $all_achievements = get_posts(['post_type' => 'achievement', 'posts_per_page' => -1, 'post_status' => 'publish']);
+            
+            // USE THE CENTRALIZED FUNCTION to ensure we see exactly what the frontend sees
+            // This handles ID vs Date format, AND performs auto-unlocked checks for stats
+            $user_achievements_list = lpdh_get_user_achievements($selected_user_id);
+            
+            // Convert to simple ID-keyed map for fast lookup
+            $normalized_unlocked = [];
+            foreach ($user_achievements_list as $ach_obj) {
+                // $ach_obj is like ['id' => 123, 'title' => ..., 'date_unlocked_ts' => ...]
+                $normalized_unlocked[$ach_obj['id']] = $ach_obj['date_unlocked_ts'];
+            }
+        ?>
+            <div id="lpdh-achievement-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <?php foreach ($all_achievements as $post): 
+                    $is_unlocked = isset($normalized_unlocked[$post->ID]);
+                    $unlock_ts = $is_unlocked ? $normalized_unlocked[$post->ID] : false;
+                    $unlock_date = $unlock_ts ? date('Y-m-d H:i', $unlock_ts) : '';
+                    
+                    $icon = get_field('icon', $post->ID);
+                     if (is_string($icon) && strpos($icon, '<i') !== false) {
+                        preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
+                        $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
+                    }
+                    
+                    $color_hex = get_field('color_hex', $post->ID);
+                    $color_class = get_field('color_class', $post->ID);
+                    $bg_style = '';
+                    $bg_class = 'bg-primary';
+                    if (!empty($color_hex)) {
+                        $darker_hex = lpdh_adjust_brightness($color_hex, -40); // Darken by 40 steps
+                        $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($color_hex) . ', ' . esc_attr($darker_hex) . ');"';
+                        $bg_class = '';
+                    } elseif (!empty($color_class)) {
+                        $bg_class = 'bg-' . esc_attr($color_class);
+                    }
+                ?>
+                    <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                        <div style="display: flex; align-items: start; gap: 15px;">
                             <?php $icon_color = get_field('icon_color', $post->ID) ?: '#ffffff'; ?>
                             <div class="lpdh-achievement-icon <?php echo $bg_class; ?>" <?php echo $bg_style; ?>>
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
                             <div style="flex-grow: 1;">
-                                <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
-                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_trim_words($post->post_content, 10); ?></p>
+                                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                    <?php if (current_user_can('edit_post', $post->ID)): ?>
+                                        <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_kses_post($post->post_content); ?></p>
+                                
+                                <?php 
+                                    // Condition Display
+                                    $cond_type = get_field('condition_type', $post->ID);
+                                    $labels = [
+                                        'manual' => 'Manual',
+                                        'win_count' => 'Wins',
+                                        'clown_count' => 'Last Places',
+                                        'event_count' => 'Events',
+                                        'deck_count' => 'Decks',
+                                        'days_registered' => 'Days Registered',
+                                        'global_elo' => 'Elo',
+                                        'deck_with_banned' => 'Banned Decks',
+                                    ];
+                                    $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
+                                    
+                                    if ($cond_type !== 'manual') {
+                                        $operator = get_field('operator', $post->ID);
+                                        $value = get_field('value', $post->ID);
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>' . esc_html($label) . ' ' . esc_html($operator) . ' ' . esc_html($value) . '</strong></p>';
+                                    } else {
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>Manual Grant</strong></p>';
+                                    }
+                                ?>
                                 
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
                                     <label class="switch">
@@ -1003,3 +1229,94 @@ function lpdh_ajax_delete_all_user_achievements() {
 }
 add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
 
+/**
+ * Add "Duplicate for next year" to Bulk Actions for Achievements
+ */
+function lpdh_achievement_custom_bulk_actions($actions)
+{
+    $actions['duplicate_year'] = 'Duplicate for next year';
+    return $actions;
+}
+add_filter('bulk_actions-edit-achievement', 'lpdh_achievement_custom_bulk_actions');
+
+/**
+ * Handle "Duplicate for next year" Bulk Action
+ */
+function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids)
+{
+    if ($doaction !== 'duplicate_year') {
+        return $redirect_to;
+    }
+
+    $duplicated_count = 0;
+
+    foreach ($post_ids as $post_id) {
+        // Get Original Post
+        $original_post = get_post($post_id);
+        
+        if (!$original_post) continue;
+
+        // Calculate New Title (Increment Year)
+        // Regex to find 4-digit year 20XX
+        $title = $original_post->post_title;
+        $year_found = false;
+        
+        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found) {
+            $year_found = true;
+            return intval($matches[1]) + 1;
+        }, $title);
+
+        if (!$year_found) {
+            // Append " (Next Year)" if no year found to avoid confusion
+            $new_title .= ' (Next Year)';
+        }
+
+        // Create New Post
+        $new_post_args = array(
+            'post_title'    => $new_title,
+            'post_content'  => $original_post->post_content,
+            'post_status'   => 'draft', // Draft for safety
+            'post_type'     => 'achievement',
+            'post_author'   => get_current_user_id(),
+        );
+
+        $new_post_id = wp_insert_post($new_post_args);
+
+        if ($new_post_id) {
+            $duplicated_count++;
+
+            // Duplicate ACF Fields
+            $meta = get_post_meta($post_id);
+
+            foreach ($meta as $key => $values) {
+                // Skip WP internal meta
+                if (strpos($key, '_') === 0 && strpos($key, '_acf') !== 0 && $key !== '_thumbnail_id') {
+                   if (in_array($key, ['_edit_lock', '_edit_last'])) continue;
+                }
+                
+                foreach ($values as $value) {
+                     add_post_meta($new_post_id, $key, maybe_unserialize($value));
+                }
+            }
+        }
+    }
+
+    // Build Redirect URL
+    return add_query_arg('lpdh_duplicated_count', $duplicated_count, $redirect_to);
+}
+add_filter('handle_bulk_actions-edit-achievement', 'lpdh_achievement_handle_bulk_actions', 10, 3);
+
+/**
+ * Show Admin Notice after Duplication
+ */
+function lpdh_achievement_bulk_action_admin_notice()
+{
+    if (!empty($_REQUEST['lpdh_duplicated_count'])) {
+        $count = intval($_REQUEST['lpdh_duplicated_count']);
+        printf(
+            '<div id="message" class="updated notice is-dismissible"><p>%s</p></div>',
+            sprintf(_n('%s achievement duplicated for next year.', '%s achievements duplicated for next year.', $count, 'text-domain'), $count)
+        );
+    }
+}
+add_action('admin_notices', 'lpdh_achievement_bulk_action_admin_notice');

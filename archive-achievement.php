@@ -76,45 +76,8 @@ if (is_user_logged_in()) {
                                         }
                                         ?>
                                         
-                                        <div class="d-flex justify-content-center align-items-center mb-2">
-                                            <h5 class="card-title text-warning mb-0 me-2"><?php echo esc_html($title_text); ?></h5>
-                                            <?php if (current_user_can('edit_post', $id)): ?>
-                                                <a href="<?php echo get_edit_post_link($id); ?>" class="text-secondary small" title="Edit Achievement">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <p class="card-text small text-white-50 mb-3"><?php echo wp_kses_post($desc_text); ?></p>
-
-                                        <?php 
-                                        // Condition Display logic
-                                        // Only show if NOT (Secret AND Locked)
-                                        if (!($is_secret && !$is_unlocked)) {
-                                            $cond_type = get_field('condition_type', $id);
-                                            
-                                            // Readable Labels
-                                            $labels = [
-                                                'manual' => 'Manual',
-                                                'win_count' => 'Wins',
-                                                'clown_count' => 'Last Places',
-                                                'event_count' => 'Events',
-                                                'deck_count' => 'Decks',
-                                                'days_registered' => 'Days Registered',
-                                                'global_elo' => 'Elo',
-                                            ];
-                                            
-                                            $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
-                                            
-                                            if ($cond_type !== 'manual') {
-                                                $operator = get_field('operator', $id);
-                                                $value = get_field('value', $id);
-                                                echo '<p class="card-text x-small text-muted mb-0">Condition: <strong>' . esc_html($label) . ' ' . esc_html($operator) . ' ' . esc_html($value) . '</strong></p>';
-                                            } else {
-                                                echo '<p class="card-text x-small text-muted mb-0">Condition: <strong>Manual Grant</strong></p>';
-                                            }
-                                        }
-                                        ?>
+                                        <h5 class="card-title text-warning mb-2"><?php echo esc_html($title_text); ?></h5>
+                                        <p class="card-text small text-white-50"><?php echo wp_trim_words($desc_text, 10); ?></p>
                                     </div>
                                     <?php if ($is_unlocked): ?>
                                         <div class="card-footer bg-success text-white text-center py-1 small fw-bold">
