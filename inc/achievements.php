@@ -111,6 +111,15 @@ if (function_exists('acf_add_local_field_group')):
                     'EQUALS' => 'Equals (Text)',
                 ),
                 'default_value' => '>=',
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_condition_type',
+                            'operator' => '!=',
+                            'value' => 'manual',
+                        ),
+                    ),
+                ),
             ),
             array(
                 'key' => 'field_ach_value',
@@ -123,6 +132,15 @@ if (function_exists('acf_add_local_field_group')):
                     'width' => '33',
                 ),
                 'default_value' => '0',
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_condition_type',
+                            'operator' => '!=',
+                            'value' => 'manual',
+                        ),
+                    ),
+                ),
             ),
             array(
                 'key' => 'field_ach_is_secret',
