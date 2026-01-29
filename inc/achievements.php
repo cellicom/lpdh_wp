@@ -59,6 +59,7 @@ function lpdh_achievement_archive_order($query) {
             'year_clause' => array(
                 'key'     => 'year',
                 'compare' => 'EXISTS',
+                'type'    => 'NUMERIC',
             ),
             'type_clause' => array(
                 'key'     => 'condition_type',
