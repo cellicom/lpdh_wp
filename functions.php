@@ -4677,23 +4677,7 @@ function bootscore_child_widgets_init()
     ));
 }
 
-/**
- * Get all Banned Card names (lowercase).
- * Used for strict deck checks in Achievements.
- */
-function lpdh_get_banned_card_names() {
-    $cards = get_posts([
-        'post_type' => 'banned_card',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-    ]);
-    
-    $names = [];
-    foreach ($cards as $p) {
-        $names[] = strtolower($p->post_title);
-    }
-    return $names;
-}
+
 
 /**
  * Shortcode [banned_card] to display a card exactly like in the banlist
