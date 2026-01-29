@@ -3586,8 +3586,47 @@ function render_player_stats_page()
     // --- New Stats Calculation (Added for Admin Update) ---
     // 1. Elo Display (Year End vs Current)
     $display_elo = isset($player_elos[$target_user->display_name]) ? round($player_elos[$target_user->display_name]) : 1200;
-    if ($selected_year !== 'global' && !empty($elo_history_data)) {
-        $display_elo = end($elo_history_data);
+    
+    // If year is selected, try to get from Leaderboard CPT first
+    if ($selected_year !== 'global') {
+        $leaderboard_args = array(
+            'post_type' => 'leaderboard',
+            'posts_per_page' => 1,
+            'meta_key' => 'year',
+            'meta_value' => $selected_year
+        );
+        $leaderboard_query = new WP_Query($leaderboard_args);
+        $found_leaderboard_elo = false;
+        
+        if ($leaderboard_query->have_posts()) {
+            $lid = $leaderboard_query->posts[0]->ID;
+            $json = get_field('rankings_json', $lid);
+            if ($json) {
+                $data = json_decode($json, true);
+                if (is_array($data)) {
+                    foreach ($data as $entry) {
+                        // Check by ID first if available, then Name
+                        $entry_id = isset($entry['id']) ? $entry['id'] : (isset($entry['player_id']) ? $entry['player_id'] : 0);
+                        $entry_name = isset($entry['name']) ? $entry['name'] : '';
+                        
+                        if ( ($entry_id && $entry_id == $user_id) || ($entry_name && strcasecmp($entry_name, $target_user->display_name) === 0) ) {
+                            if (isset($entry['elo'])) {
+                                $display_elo = round($entry['elo']);
+                                $found_leaderboard_elo = true;
+                                break;
+                            }
+                             // If no Elo in JSON, maybe it has points only? 
+                             // Assuming if user asks to take from leaderboard, Elo is there.
+                        }
+                    }
+                }
+            }
+        }
+        
+        // If not found in leaderboard (or no leaderboard for that year), fallback to calculated history
+        if (!$found_leaderboard_elo && !empty($elo_history_data)) {
+            $display_elo = end($elo_history_data);
+        }
     }
 
     // 2. Achievements
@@ -5135,11 +5174,11 @@ function lpdh_spin_roulette()
     if (!$is_admin) {
         $spins_today++;
         update_user_meta($user_id, 'lpdh_spins_today', $spins_today);
-
-        // Update Lifetime Spins (added for Achievements)
-        $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
-        update_user_meta($user_id, 'lpdh_lifetime_spins', $lifetime_spins + 1);
     }
+
+    // Update Lifetime Spins (Everyone counts for achievements and stats)
+    $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+    update_user_meta($user_id, 'lpdh_lifetime_spins', $lifetime_spins + 1);
 
     // Return Data
     wp_send_json_success(array(

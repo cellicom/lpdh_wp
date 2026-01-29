@@ -89,7 +89,7 @@ if (function_exists('acf_add_local_field_group')):
                     'event_count' => 'Events Attended',
                     'deck_count' => 'Number of Decks Created',
                     'days_registered' => 'Days Since Registration',
-                    'global_elo' => 'Global Elo (Future Check)',
+                    'global_elo' => 'Elo',
                     'deck_with_banned' => 'Deck with Banned Card',
                     'deck_commander_partner' => 'Deck with Commander/Partner',
                     'spinned_wheel_count' => 'Spinned the Wheel (Count)',

@@ -357,9 +357,45 @@ get_header(); ?>
             $current_elo = isset($player_elos[$user_display_name]) ? round($player_elos[$user_display_name]) : 1200;
             
             $display_elo = $current_elo;
-            if ($selected_year !== 'global' && !empty($elo_history_data)) {
-                // $elo_history_data contains only Elos from the selected year loop
-                $display_elo = end($elo_history_data);
+            
+            // IF YEAR SELECTED: Attempt to fetch finalized Elo from Leaderboard CPT
+            if ($selected_year !== 'global') {
+                $leaderboard_args = array(
+                    'post_type' => 'leaderboard',
+                    'posts_per_page' => 1,
+                    'meta_key' => 'year',
+                    'meta_value' => $selected_year
+                );
+                $leaderboard_query = new WP_Query($leaderboard_args);
+                $found_leaderboard_elo = false;
+
+                if ($leaderboard_query->have_posts()) {
+                    $lid = $leaderboard_query->posts[0]->ID;
+                    $json = get_field('rankings_json', $lid);
+                    if ($json) {
+                        $data = json_decode($json, true);
+                        if (is_array($data)) {
+                            foreach ($data as $entry) {
+                                // Check by ID first if available, then Name
+                                $entry_id = isset($entry['id']) ? $entry['id'] : (isset($entry['player_id']) ? $entry['player_id'] : 0);
+                                $entry_name = isset($entry['name']) ? $entry['name'] : '';
+                                
+                                if ( ($entry_id && $entry_id == $user_id) || ($entry_name && strcasecmp($entry_name, $target_user->display_name) === 0) ) {
+                                    if (isset($entry['elo'])) {
+                                        $display_elo = round($entry['elo']);
+                                        $found_leaderboard_elo = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Fallback to calculated history if no leaderboard entry found
+                if (!$found_leaderboard_elo && !empty($elo_history_data)) {
+                    $display_elo = end($elo_history_data);
+                }
             }
 
             // 2. Achievements
