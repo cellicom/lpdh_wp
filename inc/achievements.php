@@ -94,7 +94,7 @@ function lpdh_achievement_posts_custom_column($column, $post_id) {
                 'event_count' => 'Attendance',
                 'deck_count' => 'Decks',
                 'days_registered' => 'Registration',
-                'global_elo' => 'Elo',
+                'elo' => 'Elo',
                 'deck_with_banned' => 'Banned',
                 'deck_commander_partner' => 'Cmdr/Part',
                 'spinned_wheel_count' => 'Spins',
@@ -168,7 +168,7 @@ if (function_exists('acf_add_local_field_group')):
                     'event_count' => 'Events Attended',
                     'deck_count' => 'Number of Decks Created',
                     'days_registered' => 'Days Since Registration',
-                    'global_elo' => 'Elo',
+                    'elo' => 'Elo',
                     'deck_with_banned' => 'Deck with Banned Card',
                     'deck_commander_partner' => 'Deck with Commander/Partner',
                     'spinned_wheel_count' => 'Spinned the Wheel (Count)',
@@ -428,87 +428,60 @@ function lpdh_get_user_stats($user_id, $year = 'global')
     $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
 
 
-    // 3. Events, Wins & Clown Check
+    // 3. Events, Wins, Clowns & Elo from Leaderboard(s)
     $events_attended = 0;
     $win_count = 0;
     $clown_count = 0;
+    $final_elo = 0;
 
-    global $wpdb;
-    
-    // Search for User ID in 'event_ranking_%_player_id'
-    $sql = $wpdb->prepare(
-        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
-         WHERE meta_key LIKE %s 
-         AND (meta_value = %s OR meta_value LIKE %s)",
-        'event_ranking_%_player_id',
-        $user_id,
-        '%"ID";i:' . $user_id . ';%' 
-    );
+    $leaderboard_args = [
+        'post_type' => 'leaderboard',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    ];
 
-    $participated_event_ids = $wpdb->get_col($sql);
-
-    if (!empty($participated_event_ids)) {
-        $event_args = [
-            'post_type' => 'event',
-            'post_status' => 'publish',
-            'include' => $participated_event_ids,
-            'posts_per_page' => -1,
-            'fields' => 'ids'
+    if ($year !== 'global') {
+        $leaderboard_args['meta_query'] = [
+            [
+                'key' => 'year',
+                'value' => $year
+            ]
         ];
-        if ($year !== 'global') {
-            $event_args['date_query'] = [['year' => $year]];
-        }
-        $valid_events = get_posts($event_args);
-
-        foreach ($valid_events as $e_id) {
-            $rankings = get_field('field_event_ranking', $e_id);
-            
-            if (is_array($rankings)) {
-                $total_players = count($rankings);
-                foreach ($rankings as $rank) {
-                    $p_id = 0;
-                    $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
-                    if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
-                    elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
-                    elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
-
-                    if ($p_id == $user_id) {
-                        $events_attended++;
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        if ($pos === 1) $win_count++;
-                        if ($total_players > 1 && $pos === $total_players) $clown_count++;
-                    }
-                }
-            }
-        }
     }
 
-    // 4. Elo
-    $final_elo = 0;
-    if ($year !== 'global') {
-        // Fetch from Leaderboard CPT for specific year
-        $leaderboard_args = [
-            'post_type' => 'leaderboard',
-            'posts_per_page' => 1,
-            'meta_key' => 'year',
-            'meta_value' => $year
-        ];
-        $lb_query = new WP_Query($leaderboard_args);
-        if ($lb_query->have_posts()) {
-            $json = get_field('rankings_json', $lb_query->posts[0]->ID);
-            if ($json) {
-                $lb_data = json_decode($json, true);
-                if (is_array($lb_data)) {
-                    foreach ($lb_data as $entry) {
-                        $e_id = isset($entry['id']) ? $entry['id'] : (isset($entry['player_id']) ? $entry['player_id'] : 0);
-                        $e_name = isset($entry['name']) ? $entry['name'] : '';
-                        if (($e_id && $e_id == $user_id) || ($e_name && strcasecmp($e_name, $user_data->display_name) === 0)) {
-                            if (isset($entry['elo'])) {
-                                $final_elo = round($entry['elo']);
-                                break;
-                            }
+    $lb_posts = get_posts($leaderboard_args);
+
+    if (!empty($lb_posts)) {
+        foreach ($lb_posts as $lb_post) {
+            $json = get_field('rankings_json', $lb_post->ID);
+            if (!$json) continue;
+
+            $lb_data = json_decode($json, true);
+            if (!is_array($lb_data)) continue;
+
+            foreach ($lb_data as $entry) {
+                $e_id = isset($entry['user_id']) ? $entry['user_id'] : (isset($entry['id']) ? $entry['id'] : 0);
+                $e_name = isset($entry['name']) ? $entry['name'] : '';
+                
+                // Match by ID primarily, fallback to Name
+                if (($e_id && $e_id == $user_id) || ($e_name && $user_data && strcasecmp($e_name, $user_data->display_name) === 0)) {
+                    
+                    // Sum up stats
+                    $events_attended += isset($entry['count']) ? intval($entry['count']) : 0;
+                    $win_count += isset($entry['first']) ? intval($entry['first']) : 0;
+                    $clown_count += isset($entry['last']) ? intval($entry['last']) : 0;
+                    
+                    // Elo: MaximumReached if global, literal if yearly
+                    $current_entry_elo = isset($entry['elo']) ? round($entry['elo']) : 0;
+                    if ($year === 'global') {
+                        if ($current_entry_elo > $final_elo) {
+                            $final_elo = $current_entry_elo;
                         }
+                    } else {
+                        $final_elo = $current_entry_elo;
                     }
+                    
+                    break; // Found user in this leaderboard, move to next year
                 }
             }
         }
@@ -522,7 +495,6 @@ function lpdh_get_user_stats($user_id, $year = 'global')
         'deck_with_banned' => $deck_with_banned,
         'spinned_wheel_count' => $spinned_wheel_count,
         'days_registered' => $days_since_reg,
-        'global_elo' => $final_elo,
         'elo' => $final_elo
     ];
     
@@ -1104,7 +1076,7 @@ function lpdh_render_manage_achievements_page() {
                                         'event_count' => 'Events',
                                         'deck_count' => 'Decks',
                                         'days_registered' => 'Days Registered',
-                                        'global_elo' => 'Elo',
+                                        'elo' => 'Elo',
                                         'deck_with_banned' => 'Banned Decks',
                                     ];
                                     $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
@@ -1342,21 +1314,22 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
         
         if (!$original_post) continue;
 
-        // Calculate New Title (Increment Year)
-        // Regex to find 4-digit year 20XX
+        // Calculate New Title and Year (Incrementing ACF field if present)
         $title = $original_post->post_title;
-        $year_found = false;
-        $detected_next_year = false;
-        
-        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found, &$detected_next_year) {
-            $year_found = true;
-            $detected_next_year = intval($matches[1]) + 1;
-            return $detected_next_year;
-        }, $title);
+        $old_year = get_post_meta($post_id, 'year', true);
+        $next_year = false;
 
-        if (!$year_found) {
-            // Append " (Next Year)" if no year found to avoid confusion
-            $new_title .= ' (Next Year)';
+        if ($old_year) {
+            $next_year = intval($old_year) + 1;
+            // Precise replacement: replace the old year in the title with the new one
+            if (strpos($title, (string)$old_year) !== false) {
+                $new_title = str_replace((string)$old_year, (string)$next_year, $title);
+            } else {
+                $new_title = $title . ' ' . $next_year;
+            }
+        } else {
+            // No year field found, fall back to " (Next Year)" suffix pattern
+            $new_title = $title . ' (Next Year)';
         }
 
         // Create New Post
@@ -1374,47 +1347,23 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
             $duplicated_count++;
 
             // Duplicate ACF Fields
-            // We get all meta and filter for what we need, or just rely on ACFs get_fields
-            // Better to use get_post_meta for everything to ensure we catch all custom fields
             $meta = get_post_meta($post_id);
 
             foreach ($meta as $key => $values) {
                 // Skip WP internal meta
                 if (strpos($key, '_') === 0 && strpos($key, '_acf') !== 0 && $key !== '_thumbnail_id') {
-                   // Actually ACF fields often define definition keys starting with _
-                   // So we should be careful. 
-                   // Safest is to duplicate everything that is NOT standard WP lock/edit stuff
                    if (in_array($key, ['_edit_lock', '_edit_last'])) continue;
                 }
                 
                 foreach ($values as $value) {
-                     // ACF Unserialization handled by add_post_meta automatically if we pass raw?
-                     // get_post_meta($id) returns [ key => [val1, val2] ]
-                     
-                     // Use simpler approach: Loop specific ACF fields we know
-                     // 'condition_type', 'operator', 'value', 'is_secret', 'icon', 'icon_color', 'color_hex', 'color_class'
-                     // But we want to be generic. 
-                     
-                     // Let's use get_post_meta duplication which is standard for clones
                      add_post_meta($new_post_id, $key, maybe_unserialize($value));
                 }
             }
 
             // --- Update Year Field ---
-            $is_yearly = get_post_meta($post_id, 'yearly', true);
-            if ($is_yearly) {
-                $old_year = get_post_meta($post_id, 'year', true);
-                $new_year = false;
-
-                if ($old_year) {
-                    $new_year = intval($old_year) + 1;
-                } elseif ($detected_next_year) {
-                    $new_year = $detected_next_year;
-                }
-
-                if ($new_year) {
-                    update_post_meta($new_post_id, 'year', $new_year);
-                }
+            // If we calculated a next_year based on the ACF field, apply it
+            if ($next_year) {
+                update_post_meta($new_post_id, 'year', $next_year);
             }
         }
     }
