@@ -3583,6 +3583,56 @@ function render_player_stats_page()
     $offset_events = ($paged_events - 1) * $events_per_page;
     $current_page_events = array_slice($player_events, $offset_events, $events_per_page);
 
+    // --- New Stats Calculation (Added for Admin Update) ---
+    // 1. Elo Display (Year End vs Current)
+    $display_elo = isset($player_elos[$target_user->display_name]) ? round($player_elos[$target_user->display_name]) : 1200;
+    if ($selected_year !== 'global' && !empty($elo_history_data)) {
+        $display_elo = end($elo_history_data);
+    }
+
+    // 2. Achievements
+    $total_achievements = wp_count_posts('achievement')->publish;
+    $unlocked_achievements_count = 0;
+    if (function_exists('lpdh_get_user_achievements')) {
+        $unlocked_list = lpdh_get_user_achievements($user_id);
+        if ($selected_year !== 'global') {
+             foreach ($unlocked_list as $item) {
+                 $u_date = $item['date_unlocked'];
+                 $u_year = '';
+                 if (preg_match('/\d{4}/', $u_date, $matches)) {
+                      $u_year = $matches[0];
+                 }
+                 if ($u_year === $selected_year) {
+                      $unlocked_achievements_count++;
+                 }
+             }
+        } else {
+             $unlocked_achievements_count = count($unlocked_list);
+        }
+    } else {
+         $unlocked_meta = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+         $unlocked_achievements_count = is_array($unlocked_meta) ? count($unlocked_meta) : 0;
+    }
+
+    // 3. Roulette
+    $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+
+    // 4. Decks Owned (Filtered)
+    $deck_args_count = array(
+        'post_type' => 'deck',
+        'author' => $user_id,
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'fields' => 'ids'
+    );
+     if ($selected_year !== 'global') {
+        $deck_args_count['date_query'] = array(
+            array('year' => $selected_year),
+        );
+    }
+    $decks_query_count_obj = new WP_Query($deck_args_count);
+    $stats_decks_count = $decks_query_count_obj->found_posts;
+
     // Render HTML
     ?>
     <div class="wrap">
@@ -3656,6 +3706,22 @@ function render_player_stats_page()
                             <tr>
                                 <th scope="row">Last Places</th>
                                 <td><?php echo $total_last_places; ?> 🤡</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Calculated Elo</th>
+                                <td><?php echo $display_elo; ?></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Achievements</th>
+                                <td><?php echo $unlocked_achievements_count; ?> / <?php echo $total_achievements; ?></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Roulette Spins</th>
+                                <td><?php echo $lifetime_spins; ?></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Decks Owned</th>
+                                <td><?php echo $stats_decks_count; ?></td>
                             </tr>
                             <tr>
                                 <th scope="row">Most Used Deck</th>

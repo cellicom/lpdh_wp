@@ -256,17 +256,21 @@ function lpdh_get_user_stats($user_id)
             ]);
 
             foreach ($user_decks as $d_id) {
-                // We check 'field_decklist_text' (ACF) or standard content? 
-                // Based on deck editor likely ACF 'field_decklist_text'
+                // Check 'field_decklist_text', 'commander', and 'partner'
                 $list_text = get_field('decklist_text', $d_id);
-                if ($list_text) {
-                    $list_text_lower = strtolower($list_text);
+                $commander = get_field('commander', $d_id);
+                $partner = get_field('partner', $d_id);
+
+                // Handle Object vs String for Commander/Partner
+                if (is_object($commander)) $commander = $commander->post_title;
+                if (is_object($partner)) $partner = $partner->post_title;
+
+                $full_check_text = strtolower($list_text . ' ' . $commander . ' ' . $partner);
+
+                if (!empty($full_check_text)) {
                     foreach ($banned_cards as $card) {
-                        // Simple check: is the banned card name in the text?
-                        // Improve this with regex if needed to avoid ensuring partial matches don't false positive
-                        // e.g. "Sol Ring" matching "Sol Ring" (Banned) vs "Sol Ring Wrapper" (Fake)
-                        // For now simple strpos is usually "good enough" for card names unless they are very short common words.
-                        if (strpos($list_text_lower, $card) !== false) {
+                        // Simple check: is the banned card name in the text/commander/partner?
+                        if (strpos($full_check_text, $card) !== false) {
                             $deck_with_banned++;
                             break; // Count this deck once, move to next deck
                         }

@@ -347,25 +347,105 @@ get_header(); ?>
             </div>
 
             <!-- Summary Cards -->
+            <?php
+            // --- Prepare Additional Stats ---
+
+            // 1. Elo
+            // If year is selected, use the last recorded Elo in history for that year
+            // Otherwise use final calculated Elo
+            $user_display_name = $target_user->display_name;
+            $current_elo = isset($player_elos[$user_display_name]) ? round($player_elos[$user_display_name]) : 1200;
+            
+            $display_elo = $current_elo;
+            if ($selected_year !== 'global' && !empty($elo_history_data)) {
+                // $elo_history_data contains only Elos from the selected year loop
+                $display_elo = end($elo_history_data);
+            }
+
+            // 2. Achievements
+            $total_achievements = wp_count_posts('achievement')->publish;
+            $unlocked_achievements_count = 0;
+            if (function_exists('lpdh_get_user_achievements')) {
+                $unlocked_list = lpdh_get_user_achievements($user_id);
+                // Filter by year if selected
+                if ($selected_year !== 'global') {
+                    foreach ($unlocked_list as $item) {
+                        // Assuming date_unlocked is "d/m/Y H:i" OR timestamp? 
+                        // In achievements.php line 527: $unlock_date = time(); then lpdh_format_achievement uses date(..., $unlock_date)
+                        // It stores TIMESTAMP in array? No, get_user_achievements returns formatted array. 
+                        // Let's check lpdh_format_achievement return. Usually formatted string. 
+                        // If formatted "d/m/Y", we parse it.
+                        // Wait, lpdh_get_user_achievements returns array of arrays with 'date_unlocked'.
+                        // Let's safe check date parsing.
+                        $u_date = $item['date_unlocked']; 
+                        // Try strtotime. If "29/01/2026", strtotime might fail with slashes if assumed US format.
+                        // Standard lpdh date format seems to be d M Y or something. 
+                        // Actually, let's just use the timestamp if available? 
+                        // lpdh_get_user_achievements returns formatted date. 
+                        // Let's try to parse year from string.
+                        // If d/m/Y, substr(-4) works.
+                        $u_year = '';
+                        if (preg_match('/\d{4}/', $u_date, $matches)) {
+                            $u_year = $matches[0];
+                        }
+                        if ($u_year === $selected_year) {
+                            $unlocked_achievements_count++;
+                        }
+                    }
+                } else {
+                    $unlocked_achievements_count = count($unlocked_list);
+                }
+            } else {
+                $unlocked_meta = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+                $unlocked_achievements_count = is_array($unlocked_meta) ? count($unlocked_meta) : 0;
+            }
+
+            // 3. Roulette (Global Only - No timestamp log available)
+            $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+
+            // 4. Decks (Published Year)
+            $deck_args = array(
+                'post_type' => 'deck',
+                'author' => $user_id,
+                'post_status' => 'publish',
+                'posts_per_page' => -1,
+                'fields' => 'ids'
+            );
+            if ($selected_year !== 'global') {
+                $deck_args['date_query'] = array(
+                    array(
+                        'year'  => $selected_year,
+                    ),
+                );
+            }
+            $decks_query_count = new WP_Query($deck_args);
+            $count_user_decks = $decks_query_count->found_posts;
+            ?>
+
             <div class="row g-4 mb-5">
+                <!-- 1. Attendance -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-primary shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-primary small fw-bold mb-3">Attendance</h6>
                             <div class="display-4 fw-bold"><?php echo $total_attendance; ?></div>
-                            <div class="small  mt-2">Tournaments Joined</div>
+                            <div class="small mt-2">Tournaments Joined</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 2. Wins -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-success shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-success small fw-bold mb-3">Wins</h6>
                             <div class="display-4 fw-bold"><?php echo $total_wins; ?> 🏆</div>
-                            <div class="small  mt-2">1st Place Finishes</div>
+                            <div class="small mt-2">1st Place Finishes</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 3. Lose (Last Places) -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-danger shadow-sm">
                         <div class="card-body text-center">
@@ -375,6 +455,52 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
+
+                <!-- 4. Elo -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-warning shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-warning small fw-bold mb-3">ELO</h6>
+                            <div class="display-4 fw-bold"><?php echo $display_elo; ?></div>
+                            <div class="small mt-2">Skill Rating</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Obiettivi (Achievements) -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-info shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-info small fw-bold mb-3">Achievements</h6>
+                            <div class="display-4 fw-bold"><?php echo $unlocked_achievements_count; ?></div>
+                            <div class="small mt-2">out of <?php echo $total_achievements; ?> achievements</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Roulette -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-secondary shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-white-50 small fw-bold mb-3">Roulette Spins</h6>
+                            <div class="display-4 fw-bold"><?php echo $lifetime_spins; ?></div>
+                            <div class="small mt-2">times you spun the wheel</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Decks -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-primary shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-primary small fw-bold mb-3">Decks</h6>
+                            <div class="display-4 fw-bold"><?php echo $count_user_decks; ?></div>
+                            <div class="small mt-2">decks in your collection</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Most Used Deck -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-info shadow-sm">
                         <div class="card-body text-center">
@@ -389,7 +515,7 @@ get_header(); ?>
                                     <?php echo esc_html($most_used_deck_name); ?>
                                 <?php endif; ?>
                             </div>
-                            <div class="small  mt-2">Favorite Strategy</div>
+                            <div class="small mt-2">Favorite Strategy</div>
                         </div>
                     </div>
                 </div>

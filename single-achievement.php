@@ -38,8 +38,8 @@ get_header();
             ?>
 
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                    <div class="card bg-dark border-secondary shadow-lg">
-                        <div class="card-body text-center py-5">
+                    <div class="text-center py-5">
+                        <div class="container" style="max-width: 800px;">
                             
                             <!-- Icon -->
                             <?php $icon_color = get_field('icon_color', get_the_ID()) ?: '#ffffff'; ?>
@@ -117,7 +117,7 @@ get_header();
                             <?php endif; ?>
                             
                         </div>
-                        <div class="card-footer bg-dark border-secondary text-center py-3">
+                        <div class="text-center py-3">
                            <a href="<?php echo get_post_type_archive_link('achievement'); ?>" class="btn btn-outline-light btn-sm">
                                <i class="fas fa-arrow-left me-2"></i> All Achievements
                            </a>
