@@ -81,8 +81,8 @@ get_header(); ?>
                                                     <th scope="col">Player</th>
                                                     <th scope="col">Deck</th>
                                                     <th scope="col" class="text-center">Points</th>
-                                                    <th scope="col" class="text-center d-none d-sm-table-cell">W-L-D</th>
-                                                    <th scope="col" class="text-center d-none d-md-table-cell">Via %</th>
+                                                    <th scope="col" class="text-center">W-L-D</th>
+                                                    <th scope="col" class="text-center">Via %</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -217,7 +217,7 @@ get_header(); ?>
                                                             </div>
                                                         </td>
                                                         <td class="text-center fw-bold"><?php echo esc_html($points); ?></td>
-                                                        <td class="text-center d-none d-sm-table-cell">
+                                                        <td class="text-center">
                                                             <span
                                                                 class="badge bg-success bg-opacity-10 text-success"><?php echo esc_html($win); ?></span>
                                                             <span class="">-</span>
@@ -225,9 +225,9 @@ get_header(); ?>
                                                                 class="badge bg-danger bg-opacity-10 text-danger"><?php echo esc_html($lose); ?></span>
                                                             <span class="">-</span>
                                                             <span class=" badge bg-info bg-opacity-10
-                                                    text-info"><?php echo esc_html($draw); ?></span>
+                                                     text-info"><?php echo esc_html($draw); ?></span>
                                                         </td>
-                                                        <td class="text-center d-none d-md-table-cell small">
+                                                        <td class="text-center small">
                                                             <?php echo esc_html($via); ?>
                                                         </td>
                                                     </tr>

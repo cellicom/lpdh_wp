@@ -934,6 +934,30 @@ body.theme-vaporwave .form-check-input[type="checkbox"]:checked {
     text-decoration: underline !important;
 }
 
+/* Commander Popovers */
+.deck-popover {
+    max-width: 400px !important;
+    border: none !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+
+    .popover-body {
+        padding: 0.5rem;
+        background: #fff;
+    }
+}
+
+.cmdr-popover-img {
+    width: 180px;
+    height: auto;
+    display: block;
+}
+
+.cmdr-popover-img-large {
+    width: 250px;
+    height: auto;
+    display: block;
+}
+
 /* Full-Screen Search Overlay */
 .search-overlay {
     position: fixed !important;
