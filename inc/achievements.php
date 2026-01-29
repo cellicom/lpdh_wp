@@ -250,13 +250,14 @@ function lpdh_get_user_stats($user_id)
     $win_count = 0;
     $clown_count = 0;
 
-    // Search for User ID in 'field_event_ranking_%_player_id'
+    // Search for User ID in 'event_ranking_%_player_id'
     // Matches plain ID or Serialized Object (if ACF returns User Object)
+    // IMPORTANT: ACF stores repeater data using Field Name ('event_ranking'), not Field Key.
     $sql = $wpdb->prepare(
         "SELECT DISTINCT post_id FROM $wpdb->postmeta 
          WHERE meta_key LIKE %s 
          AND (meta_value = %s OR meta_value LIKE %s)",
-        'field_event_ranking_%_player_id',
+        'event_ranking_%_player_id',
         $user_id,
         '%"ID";i:' . $user_id . ';%' // Serialized look-ahead
     );
@@ -275,7 +276,7 @@ function lpdh_get_user_stats($user_id)
 
         foreach ($valid_events as $e_id) {
             // Get the full repeater to check position
-            // Uses 'field_event_ranking' as per single-event.php usage
+            // Uses 'field_event_ranking' (Key) to safely retrieve structured data via ACF
             $rankings = get_field('field_event_ranking', $e_id);
             
             if (is_array($rankings)) {
