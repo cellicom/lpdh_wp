@@ -660,8 +660,8 @@ function lpdh_achievements_admin_scripts($hook) {
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
     // Select2
-    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
-    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+    wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
+    wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
 }
 add_action('admin_enqueue_scripts', 'lpdh_achievements_admin_scripts');
 
@@ -710,7 +710,13 @@ function lpdh_render_manage_achievements_page() {
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
         
-        .select2-container { width: 300px !important; }
+        .select2-container { width: 300px !important; max-width: 100%; }
+        
+        @media screen and (max-width: 782px) {
+            .select2-container { width: 100% !important; margin-bottom: 10px; }
+            .tablenav.top { height: auto; }
+            .tablenav .actions { display: block; float: none; margin-bottom: 10px; }
+        }
     </style>
 
     <div class="wrap">
