@@ -38,15 +38,28 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Scryfall Integration:** Real-time fetching of card art for commanders and partners via the Scryfall API.
 - **Interactive Deck Visuals:** Custom image wrappers with localized card interactions.
 
-### 4. Modular Page Building
-- **ACF Flexible Content:** A "No Sidebar" template that allows administrators to build complex layouts (FAQ accordions, Link grids, Team lists, Action buttons) using modular blocks without touching code.
+### 4. Achievements & Milestones ⭐
+- **Dynamic Achievements:** A system that tracks player statistics (Wins, Events, Elo) and automatically unlocks badges.
+- **Yearly Badge System:** Achievements can be tied to specific years, featuring a ribbon overlay.
+- **Admin Management:** Dedicated dashboard to manually grant/revoke badges or verify conditions.
+- **Secret Achievements:** Titles and descriptions are masked on other users' profiles to maintain the mystery.
 
-### 5. Advanced Banned List
-- **Ban List:** Dynamic management of the format's restricted cards.
-- **Shortcode Generator:** Custom admin tool to easily insert interactive banned card boxes into posts and articles.
+### 5. Commander Roulette
+- **Randomizer:** An interactive tool that suggests a random **Uncommon Legendary Creature** for a player's next game, automatically excluding cards in the **Banned List**.
+- **Rate Limiting:** Every user has **3 tokens per day**.
+- **Admin Mode:** Site administrators bypass the token limit for testing or demonstration.
 
-### 6. Frontend Profile Governance
-- **Profile Management:** Player-centric frontend dashboard to update personal details, avatars, meta preferences and decks.
+### 6. Modular Page Building
+- **ACF Flexible Content:** A "No Sidebar" template that allows administrators to build complex layouts (FAQ accordions, Link grids, Team lists, Action buttons) using modular blocks.
+
+### 7. Advanced Banned List & Integration
+- **Scryfall Autocomplete:** Admin tool that suggests official card names and automatically fetches metadata.
+- **Image Fallback:** Automatic card scan fetching from Scryfall if no image is uploaded.
+- **Shortcode Generator:** Integration tool to easily insert interactive banned card boxes into posts.
+
+### 8. Frontend Governance & Sync
+- **Profile Privacy:** Player-centric dashboard to manage visibility and account settings.
+- **Improved Name Matching:** Robust event synchronization algorithm that handles multi-word surnames and abbreviations.
 
 ## ✨ Easter Eggs & Community Interactions
 The theme includes several interactive "secrets" to engage the community. Found it all!

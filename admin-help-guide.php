@@ -57,15 +57,17 @@ function render_help_guide_page()
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
                     <a href="#events">1. Events & Rankings</a>
                     <a href="#decks">2. Decks Management</a>
-                    <a href="#articles">3. Articles & News</a>
-                    <a href="#pages">4. Pages & ACF Boxes</a>
-                    <a href="#banned">5. Banned Cards</a>
-                    <a href="#leaderboards">6. Leaderboards</a>
-                    <a href="#stats">7. Statistics & ELO</a>
-                    <a href="#profiles">8. Profiles & Account Management</a>
-                    <a href="#roles">9. Roles & Security</a>
-                    <a href="#settings">10. Theme Settings</a>
-                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">11. Easter Eggs ✨</a>
+                    <a href="#achievements" style="font-weight: bold; color: #2271b1;">3. Achievements System ⭐</a>
+                    <a href="#roulette" style="color: #6b21a8;">4. Commander Roulette</a>
+                    <a href="#articles">5. Articles & News</a>
+                    <a href="#pages">6. Pages & ACF Boxes</a>
+                    <a href="#banned">7. Banned Cards</a>
+                    <a href="#leaderboards">8. Leaderboards</a>
+                    <a href="#stats">9. Statistics & ELO</a>
+                    <a href="#profiles">10. Profiles & Preferences</a>
+                    <a href="#roles">11. Roles & Security</a>
+                    <a href="#settings">12. Theme Settings</a>
+                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">13. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -167,11 +169,96 @@ function render_help_guide_page()
                 </ul>
             </section>
 
+            <!-- SECTION: ACHIEVEMENTS -->
+            <section id="achievements" style="margin-bottom: 60px;">
+                <h2
+                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-awards"></span> 3. Achievements System
+                </h2>
+                <p>Track player milestones, deck variety, and seasonal competitive effort.</p>
+
+                <h4 style="margin-bottom: 10px;">Managing Achievements (CPT):</h4>
+                <p>Every achievement is a post in the <i>Achievements</i> CPT. Key ACF fields include:</p>
+                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Field Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Condition Type</strong></td>
+                            <td>The metric to track (Wins, Events, Elo, Specific Commander, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Operator / Value</strong></td>
+                            <td>Example: <i>Wins (Condition) > (Operator) 10 (Value)</i>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Yearly / Year</strong></td>
+                            <td>If enabled, the badge is tied to a specific year and shows a ribbon overlay.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Icon Selection</strong></td>
+                            <td>Choose between a simple FontAwesome icon or a custom Uploaded Image.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-bottom: 10px;">Special Admin Tools:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span>
+                            Manage User Achievements</h5>
+                        <p class="small">Accessed via the <strong>Achievements menu</strong>. Search for a user to see a
+                            toggle-grid of all achievements. You can manually grant/revoke badges or use the
+                            <strong>"Check"</strong> microscope to verify if the user meets the requirements based on their
+                            current stats.
+                        </p>
+                    </div>
+                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #46b450;"><span class="dashicons dashicons-calendar"></span>
+                            Duplicate for Next Year</h5>
+                        <p class="small">In the <strong>Achievements List</strong>, select badges and use Bulk Actions >
+                            <i>Duplicate for next year</i>. The system clones the badges, increments the year field, and
+                            updates title automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 15px; margin-top: 20px; border-radius: 4px;">
+                    <strong>Automatic Unlocking:</strong> Achievements are checked and granted automatically whenever an
+                    event is synchronized via the <strong>Sync Player</strong> tool. Manual overrides are always possible
+                    through the <i>Manage Achievements</i> page.
+                </div>
+            </section>
+
+            <!-- SECTION: ROULETTE -->
+            <section id="roulette" style="margin-bottom: 60px;">
+                <h2
+                    style="color: #6b21a8; background: #f3e8ff; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-update"></span> 4. Commander Roulette
+                </h2>
+                <p>An interactive feature where players receive a random Commander suggestion from a curated list.</p>
+
+                <h4 style="margin-bottom: 10px;">Key Logic:</h4>
+                <ul style="list-style: disc; margin-left: 20px;">
+                    <li><strong>Rate Limiting:</strong> Regular players receive <strong>3 tokens per day</strong>. A counter
+                        is shown next to the spin button.</li>
+                    <li><strong>Admin Bypass:</strong> Site administrators have <strong>infinite tokens</strong> for testing
+                        purposes.</li>
+                    <li><strong>Pool Selection:</strong> The system picks from <strong>Uncommon Legendary Creatures</strong>
+                        (LPDH legal), automatically excluding cards currently in the <i>Banned List</i> CPT.</li>
+                </ul>
+            </section>
+
             <!-- SECTION: ARTICLES -->
             <section id="articles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-post"></span> 3. Articles (WordPress Posts)
+                    <span class="dashicons dashicons-admin-post"></span> 5. Articles (WordPress Posts)
                 </h2>
                 <p>Use standard WordPress <strong>Posts</strong> for news, announcements, and tournament reports.</p>
 
@@ -195,7 +282,7 @@ function render_help_guide_page()
             <section id="pages" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-page"></span> 4. Pages & ACF Boxes
+                    <span class="dashicons dashicons-admin-page"></span> 6. Pages & ACF Boxes
                 </h2>
                 <p>Pages are the structural backbone of the site. Most use the <strong>No Sidebar With ACF Boxes</strong>
                     template for modular content.</p>
@@ -262,11 +349,17 @@ function render_help_guide_page()
             <section id="banned" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-dismiss"></span> 5. Banned Cards
+                    <span class="dashicons dashicons-dismiss"></span> 7. Banned Cards
                 </h2>
 
                 <h4 style="margin-bottom: 10px;">Managing the List:</h4>
                 <p>Use the <i>Banned Cards</i> CPT. Each entry requires a name and a <strong>Scryfall Link</strong>.</p>
+                <div
+                    style="background: #fffcf5; padding: 15px; border: 1px solid #faecd8; border-radius: 6px; margin-bottom: 15px;">
+                    <strong>🚀 Tool: Admin Autocomplete</strong><br>
+                    When typing a card name in the editor, the system suggests official names from Scryfall. Selecting one
+                    **automatically** populates the Scryfall URL and basic card metadata.
+                </div>
                 <div
                     style="background: #e7f5fe; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #0073aa;">
                     <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload
@@ -284,7 +377,7 @@ function render_help_guide_page()
             <section id="leaderboards" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-awards"></span> 6. Leaderboards
+                    <span class="dashicons dashicons-awards"></span> 8. Leaderboards
                 </h2>
                 <p>Leaderboards represent the stabilized rankings for a specific competitive year.</p>
                 <ul style="list-style: disc; margin-left: 20px;">
@@ -303,9 +396,10 @@ function render_help_guide_page()
             <section id="stats" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-chart-area"></span> 7. Statistics & ELO
+                    <span class="dashicons dashicons-chart-area"></span> 9. Statistics & ELO
                 </h2>
-                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in
+                    Event rankings.</p>
 
                 <h4 style="margin-top: 25px; margin-bottom: 10px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
@@ -314,19 +408,19 @@ function render_help_guide_page()
                     style="background: #2d333b; padding: 20px; border-radius: 8px; border: 1px solid #444c56; margin-top: 15px;">
                     <pre
                         style="margin: 0; color: #adbac7; font-size: 13px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; overflow-x: auto;">
-                        // Core Calculation Snippet
-                        $actual_score = $wins + ($draws * 0.5);
-                        $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
-                        $expected_score = $expected_score_rate * $games_played;
-                        $k_factor = 32 / ($games_played);
+                                        // Core Calculation Snippet
+                                        $actual_score = $wins + ($draws * 0.5);
+                                        $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+                                        $expected_score = $expected_score_rate * $games_played;
+                                        $k_factor = 32 / ($games_played);
 
-                        // Position Adjustment
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
-                        $position_adjustment = 20 * ($rank_score - 0.5);
+                                        // Position Adjustment
+                                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                                        $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+                                        $position_adjustment = 20 * ($rank_score - 0.5);
 
-                        // New ELO Result
-                        $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
+                                        // New ELO Result
+                                        $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
                 </div>
             </section>
 
@@ -334,27 +428,17 @@ function render_help_guide_page()
             <section id="profiles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-users"></span> 8. Profiles & Account Management
+                    <span class="dashicons dashicons-admin-users"></span> 10. Profiles & Preferences
                 </h2>
-                <p>Manage user visibility and data privacy settings.</p>
+                <p>Manage user visibility, achievement privacy, and data settings.</p>
 
-                <h4 style="margin-bottom: 10px;">User Settings:</h4>
+                <h4 style="margin-bottom: 10px;">User Security & Privacy:</h4>
                 <ul style="list-style: disc; margin-left: 20px;">
-                    <li><strong>Private Profile:</strong>
-                        <p class="small">A setting that hides the User Detail page from the public.
-                            - <strong>Admin:</strong> Accessible in the User Profile under "Personal Options".
-                            - <strong>Player:</strong> Accessible in the frontend <i>Profile Editor</i>.
-                            <br><i>Effect:</i> Other users will see a "Profile is Private" notice if they try to access the
-                            page.
-                        </p>
-                    </li>
-                    <li><strong>Account Deletion:</strong>
-                        <p class="small">Users can permanently delete their accounts from the "Danger Zone" section in the
-                            Profile Editor.
-                            <br><strong>Warning:</strong> This permanently removes the profile and <strong>all assigned
-                                decks</strong>. Events remain unchanged.
-                        </p>
-                    </li>
+                    <li><strong>Secret Achievements:</strong> By default, locked achievements show titles/desc. However,
+                        when viewing **another user's profile**, these are masked as "Secret Achievement" unless the visitor
+                        has also unlocked them.</li>
+                    <li><strong>Private Profile:</strong> Hides the User Detail page from the public.</li>
+                    <li><strong>Account Deletion:</strong> Permanent removal of profile and assigned decks.</li>
                 </ul>
             </section>
 
@@ -362,22 +446,20 @@ function render_help_guide_page()
             <section id="roles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-shield"></span> 9. Roles & Security
+                    <span class="dashicons dashicons-shield"></span> 11. Roles & Security
                 </h2>
-                <p><strong>Administrator:</strong> Unrestricted access. <br> <strong>Player:</strong> Limited to personal
-                    Deck management with automatic redirection from restricted areas.</p>
+                <p><strong>Administrator:</strong> Full access. <br> <strong>Player:</strong> Limited to deck management.
+                </p>
             </section>
 
             <!-- SECTION: SETTINGS -->
             <section id="settings" style="margin-bottom: 40px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-generic"></span> 10. Theme Settings
+                    <span class="dashicons dashicons-admin-generic"></span> 12. Theme Settings
                 </h2>
-                <p>Configure the site's aesthetics and technical mapping under <strong>Appearance > Theme Settings</strong>.
-                </p>
+                <p>Configure aesthetics and mapping under <strong>Appearance > Theme Settings</strong>.</p>
 
-                <h4 style="margin-bottom: 10px;">Configuration Options:</h4>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
                         <tr>
@@ -388,27 +470,15 @@ function render_help_guide_page()
                     <tbody>
                         <tr>
                             <td><strong>Active Theme</strong></td>
-                            <td>Switches the global design (e.g., Default, Vaporwave, Lost Wood).</td>
+                            <td>Switches global design (Default, Vaporwave, Lost Wood, etc.).</td>
                         </tr>
                         <tr>
-                            <td><strong>Deck Editor Page</strong></td>
-                            <td>Links the custom Deck Editor template to a site page.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Profile Editor Page</strong></td>
-                            <td>Links the User Profile management template.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Statistics Page</strong></td>
-                            <td>Links the global ELO and performance tracking page.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Login/Register Page</strong></td>
-                            <td>Sets the destination for the custom authentication screens.</td>
+                            <td><strong>Cookie Consent</strong></td>
+                            <td>Configure the "Cookie Bar" text and branding for GDPR/privacy compliance.</td>
                         </tr>
                         <tr>
                             <td><strong>Social Links</strong></td>
-                            <td>Configure Instagram, Discord, Facebook, and X links for the site's footer.</td>
+                            <td>Configure Instagram, Discord, Facebook, and X links for the footer.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -418,7 +488,7 @@ function render_help_guide_page()
             <section id="easter-eggs" style="margin-bottom: 40px;">
                 <h2
                     style="color: #d63638; background: #fff5f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-appearance"></span> 11. Easter Eggs & Hidden Features
+                    <span class="dashicons dashicons-admin-appearance"></span> 13. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
@@ -436,7 +506,8 @@ function render_help_guide_page()
                                 <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
                                 <p class="small">Searching for <strong>"counterspell"</strong> or
                                     <strong>"contromagia"</strong> in
-                                    the site search bar triggers a blue burst visual effect.</p>
+                                    the site search bar triggers a blue burst visual effect.
+                                </p>
                             </div>
 
                             <!-- Point 2 -->
