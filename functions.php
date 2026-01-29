@@ -2660,24 +2660,22 @@ function ajax_sync_ranking_players()
 
         foreach ($names as $item) {
             $search_name = trim($item['name']);
+            $search_name_clean = rtrim($search_name, '.'); // Remove trailing dot if present
             $found_user = null;
 
-            // Try to parse "Name Sur." (Firstname + 3 chars of Lastname + dot)
-            $parts = explode(' ', $search_name);
-            if (count($parts) > 1) {
-                $last_chunk = end($parts);
-                // Check if it ends with dot and has length 4 (3 chars + dot) e.g. "Mar."
-                if (substr($last_chunk, -1) === '.') {
-                    $short_last = substr($last_chunk, 0, -1); // "Mar"
-                    $first_part = implode(' ', array_slice($parts, 0, -1)); // "Angelo"
+            foreach ($users as $user) {
+                // Combine names for comparison
+                $full_name = trim($user->first_name . ' ' . $user->last_name);
+                $display_name = $user->display_name;
 
-                    foreach ($users as $user) {
-                        // Check first name exact match and last name starts with short_last
-                        if (strcasecmp($user->first_name, $first_part) === 0 && stripos($user->last_name, $short_last) === 0) {
-                            $found_user = $user;
-                            break;
-                        }
-                    }
+                // Try to match based on display name or combined first/last name
+                // Checking if the candidate name starts with the search string
+                if (
+                    (stripos($display_name, $search_name_clean) === 0) ||
+                    (stripos($full_name, $search_name_clean) === 0)
+                ) {
+                    $found_user = $user;
+                    break;
                 }
             }
 
@@ -3253,7 +3251,8 @@ add_action('acf/input/admin_footer', 'add_update_survey_button_script');
 /**
  * Enqueue assets for Player Stats page
  */
-function lpdh_player_stats_enqueue() {
+function lpdh_player_stats_enqueue()
+{
     if (isset($_GET['page']) && $_GET['page'] === 'player-stats') {
         wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
         wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
@@ -3540,7 +3539,7 @@ function render_player_stats_page()
     // --- Global ELO Aggregation by Year ---
     if ($selected_year === 'global' && !empty($elo_history_data)) {
         $year_points = array();
-        foreach($elo_history_labels as $idx => $label) {
+        foreach ($elo_history_labels as $idx => $label) {
             $parts = explode('/', $label);
             if (count($parts) === 3) {
                 $y = '20' . $parts[2];
@@ -3643,12 +3642,12 @@ function render_player_stats_page()
 
     // --- Centralized Stats Source ---
     $player_stats = lpdh_get_player_stats($user_id, $selected_year);
-    
+
     // Override manual counts with official leaderboard data
-    $total_attendance   = $player_stats['event_count'];
-    $total_wins         = $player_stats['win_count'];
-    $total_last_places   = $player_stats['clown_count'];
-    $display_elo        = $player_stats['elo'];
+    $total_attendance = $player_stats['event_count'];
+    $total_wins = $player_stats['win_count'];
+    $total_last_places = $player_stats['clown_count'];
+    $display_elo = $player_stats['elo'];
 
     // 2. Achievements
     $total_achievements = wp_count_posts('achievement')->publish;
@@ -3656,14 +3655,14 @@ function render_player_stats_page()
     if (function_exists('lpdh_get_user_achievements')) {
         $unlocked_list = lpdh_get_user_achievements($user_id);
         if ($selected_year !== 'global') {
-             foreach ($unlocked_list as $item) {
-                 $u_date = isset($item['date_unlocked_ts']) ? date('Y', $item['date_unlocked_ts']) : '';
-                 if ($u_date === $selected_year) {
-                      $unlocked_achievements_count++;
-                 }
-             }
+            foreach ($unlocked_list as $item) {
+                $u_date = isset($item['date_unlocked_ts']) ? date('Y', $item['date_unlocked_ts']) : '';
+                if ($u_date === $selected_year) {
+                    $unlocked_achievements_count++;
+                }
+            }
         } else {
-             $unlocked_achievements_count = count($unlocked_list);
+            $unlocked_achievements_count = count($unlocked_list);
         }
     }
 
@@ -3684,11 +3683,14 @@ function render_player_stats_page()
             <?php if (current_user_can('administrator')): ?>
                 <div
                     style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block; width: 100%; box-sizing: border-box;">
-                    <label for="stats_user_id" style="font-weight: bold; margin-right: 10px; display: block; margin-bottom: 5px;">Select Player (Admin):</label>
+                    <label for="stats_user_id"
+                        style="font-weight: bold; margin-right: 10px; display: block; margin-bottom: 5px;">Select Player
+                        (Admin):</label>
                     <?php
                     $all_users = get_users(['orderby' => 'display_name']);
                     ?>
-                    <select name="stats_user_id" id="stats_user_id" class="lpdh-stats-select2" onchange="this.form.submit()" style="width: 100%;">
+                    <select name="stats_user_id" id="stats_user_id" class="lpdh-stats-select2" onchange="this.form.submit()"
+                        style="width: 100%;">
                         <option value="">Select User</option>
                         <?php foreach ($all_users as $u): ?>
                             <option value="<?php echo $u->ID; ?>" <?php selected($user_id, $u->ID); ?>>
@@ -3697,17 +3699,27 @@ function render_player_stats_page()
                         <?php endforeach; ?>
                     </select>
                 </div>
-                
+
                 <style>
                     /* Select2 Responsive Fixes */
-                    .select2-container { width: 300px !important; max-width: 100%; }
+                    .select2-container {
+                        width: 300px !important;
+                        max-width: 100%;
+                    }
+
                     @media screen and (max-width: 782px) {
-                        .select2-container { width: 100% !important; margin-bottom: 10px; }
-                        h1 { word-break: break-all; }
+                        .select2-container {
+                            width: 100% !important;
+                            margin-bottom: 10px;
+                        }
+
+                        h1 {
+                            word-break: break-all;
+                        }
                     }
                 </style>
                 <script>
-                    jQuery(document).ready(function($) {
+                    jQuery(document).ready(function ($) {
                         $('.lpdh-stats-select2').select2({
                             width: 'resolve',
                             placeholder: "Select a Player"
@@ -6148,23 +6160,26 @@ require_once get_stylesheet_directory() . '/admin-help-guide.php';
  * Centralized function to get player statistics from various sources.
  * Primarily uses the Leaderboard CPT for performance and accuracy.
  */
-function lpdh_get_player_stats($user_id, $year = 'global') {
+function lpdh_get_player_stats($user_id, $year = 'global')
+{
     static $stats_cache = [];
     $cache_key = $user_id . '_' . $year;
-    if (isset($stats_cache[$cache_key])) return $stats_cache[$cache_key];
+    if (isset($stats_cache[$cache_key]))
+        return $stats_cache[$cache_key];
 
     $user_data = get_userdata($user_id);
     $registered = $user_data ? strtotime($user_data->user_registered) : time();
-    
+
     // Comparison date for 'days_since_reg'
     $comparison_time = time();
     if ($year !== 'global') {
         $comparison_year = intval($year);
         $comparison_time = strtotime($comparison_year . '-12-31 23:59:59');
     }
-    
+
     $days_since_reg = floor(($comparison_time - $registered) / (60 * 60 * 24));
-    if ($days_since_reg < 0) $days_since_reg = 0;
+    if ($days_since_reg < 0)
+        $days_since_reg = 0;
 
     // 1. Decks Count
     $deck_args = [
@@ -6190,8 +6205,10 @@ function lpdh_get_player_stats($user_id, $year = 'global') {
                 $commander = get_field('commander', $d_id);
                 $partner = get_field('partner', $d_id);
 
-                if (is_object($commander)) $commander = $commander->post_title;
-                if (is_object($partner)) $partner = $partner->post_title;
+                if (is_object($commander))
+                    $commander = $commander->post_title;
+                if (is_object($partner))
+                    $partner = $partner->post_title;
 
                 $full_check_text = strtolower($list_text . ' ' . $commander . ' ' . $partner);
 
@@ -6237,24 +6254,27 @@ function lpdh_get_player_stats($user_id, $year = 'global') {
     if (!empty($lb_posts)) {
         foreach ($lb_posts as $lb_post) {
             $json = get_field('rankings_json', $lb_post->ID);
-            if (!$json) continue;
+            if (!$json)
+                continue;
 
             $lb_data = json_decode($json, true);
-            if (!is_array($lb_data)) continue;
+            if (!is_array($lb_data))
+                continue;
 
             foreach ($lb_data as $entry) {
                 $e_id = isset($entry['user_id']) ? $entry['user_id'] : (isset($entry['id']) ? $entry['id'] : 0);
                 $e_name = isset($entry['name']) ? $entry['name'] : '';
-                
+
                 if (($e_id && $e_id == $user_id) || ($e_name && $user_data && strcasecmp($e_name, $user_data->display_name) === 0)) {
                     $events_attended += isset($entry['count']) ? intval($entry['count']) : 0;
                     $win_count += isset($entry['first']) ? intval($entry['first']) : 0;
                     $clown_count += isset($entry['last']) ? intval($entry['last']) : 0;
                     $total_points += isset($entry['points']) ? intval($entry['points']) : 0;
-                    
+
                     $current_entry_elo = isset($entry['elo']) ? round($entry['elo']) : 0;
                     if ($year === 'global') {
-                        if ($current_entry_elo > $final_elo) $final_elo = $current_entry_elo;
+                        if ($current_entry_elo > $final_elo)
+                            $final_elo = $current_entry_elo;
                     } else {
                         $final_elo = $current_entry_elo;
                     }
@@ -6275,7 +6295,7 @@ function lpdh_get_player_stats($user_id, $year = 'global') {
         'elo' => $final_elo,
         'points' => $total_points
     ];
-    
+
     $stats_cache[$cache_key] = $res;
     return $res;
 }
@@ -6283,17 +6303,24 @@ function lpdh_get_player_stats($user_id, $year = 'global') {
 /**
  * Checks a single condition against a value.
  */
-function lpdh_check_stat_condition($user_val, $operator, $target_val) {
+function lpdh_check_stat_condition($user_val, $operator, $target_val)
+{
     if (is_numeric($user_val) && is_numeric($target_val)) {
         $user_val = floatval($user_val);
         $target_val = floatval($target_val);
     }
     switch ($operator) {
-        case '>': return $user_val > $target_val;
-        case '>=': return $user_val >= $target_val;
-        case '=': return $user_val == $target_val;
-        case '<=': return $user_val <= $target_val;
-        case '<': return $user_val < $target_val;
-        default: return false;
+        case '>':
+            return $user_val > $target_val;
+        case '>=':
+            return $user_val >= $target_val;
+        case '=':
+            return $user_val == $target_val;
+        case '<=':
+            return $user_val <= $target_val;
+        case '<':
+            return $user_val < $target_val;
+        default:
+            return false;
     }
 }
