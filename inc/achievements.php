@@ -238,6 +238,40 @@ function lpdh_get_user_stats($user_id)
     // 2. Decks Count
     $deck_count = count_user_posts($user_id, 'deck', true);
 
+    // 2.1 Deck with Banned Cards
+    $deck_with_banned = 0;
+    if (function_exists('lpdh_get_banned_card_names')) {
+        $banned_cards = lpdh_get_banned_card_names(); // Returns array of lowercase names
+        if (!empty($banned_cards)) {
+            $user_decks = get_posts([
+                'post_type' => 'deck',
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'fields' => 'ids'
+            ]);
+
+            foreach ($user_decks as $d_id) {
+                // We check 'field_decklist_text' (ACF) or standard content? 
+                // Based on deck editor likely ACF 'field_decklist_text'
+                $list_text = get_field('decklist_text', $d_id);
+                if ($list_text) {
+                    $list_text_lower = strtolower($list_text);
+                    foreach ($banned_cards as $card) {
+                        // Simple check: is the banned card name in the text?
+                        // Improve this with regex if needed to avoid ensuring partial matches don't false positive
+                        // e.g. "Sol Ring" matching "Sol Ring" (Banned) vs "Sol Ring Wrapper" (Fake)
+                        // For now simple strpos is usually "good enough" for card names unless they are very short common words.
+                        if (strpos($list_text_lower, $card) !== false) {
+                            $deck_with_banned++;
+                            break; // Count this deck once, move to next deck
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // 3. Events, Wins & Clown Check (Heavy Query)
     $events_attended = 0;
     $win_count = 0;
@@ -314,6 +348,7 @@ function lpdh_get_user_stats($user_id)
         'win_count' => $win_count,
         'event_count' => $events_attended,
         'clown_count' => $clown_count,
+        'deck_with_banned' => $deck_with_banned,
         'days_registered' => $days_since_reg,
         'global_elo' => 0 // Future implementation
     ];
