@@ -278,8 +278,7 @@ function lpdh_get_user_stats($user_id)
 
     // 2.2 Spinned the Wheel
     $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
-        }
-    }
+
 
     // 3. Events, Wins & Clown Check (Heavy Query)
     $events_attended = 0;
