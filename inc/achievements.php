@@ -243,29 +243,48 @@ function lpdh_get_user_stats($user_id)
     $win_count = 0;
     $clown_count = 0;
 
-    $events_query = new WP_Query([
-        'post_type' => 'event',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-        'fields' => 'ids',
-        'meta_query' => [
-            [
-                'key' => 'event_ranking',
-                'value' => '"player_id";i:' . $user_id,
-                'compare' => 'LIKE'
-            ]
-        ]
-    ]);
+    global $wpdb;
+    
+    // 3. Events, Wins & Clown Check (Optimized ACF Repeater Query)
+    $events_attended = 0;
+    $win_count = 0;
+    $clown_count = 0;
 
-    if ($events_query->have_posts()) {
-        foreach ($events_query->posts as $e_id) {
-            $rankings = get_field('event_ranking', $e_id);
+    // Search for User ID in 'field_event_ranking_%_player_id'
+    // Matches plain ID or Serialized Object (if ACF returns User Object)
+    $sql = $wpdb->prepare(
+        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
+         WHERE meta_key LIKE %s 
+         AND (meta_value = %s OR meta_value LIKE %s)",
+        'field_event_ranking_%_player_id',
+        $user_id,
+        '%"ID";i:' . $user_id . ';%' // Serialized look-ahead
+    );
+
+    $participated_event_ids = $wpdb->get_col($sql);
+
+    if (!empty($participated_event_ids)) {
+        // Ensure they are valid published events
+        $valid_events = get_posts([
+            'post_type' => 'event',
+            'post_status' => 'publish',
+            'include' => $participated_event_ids,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ]);
+
+        foreach ($valid_events as $e_id) {
+            // Get the full repeater to check position
+            // Uses 'field_event_ranking' as per single-event.php usage
+            $rankings = get_field('field_event_ranking', $e_id);
+            
             if (is_array($rankings)) {
                 $total_players = count($rankings);
                 
                 foreach ($rankings as $rank) {
                     $p_id = 0;
                     $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
+                    
                     if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
                     elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
                     elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
