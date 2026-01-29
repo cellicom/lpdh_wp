@@ -305,7 +305,7 @@ function render_help_guide_page()
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
                     <span class="dashicons dashicons-chart-area"></span> 7. Statistics & ELO
                 </h2>
-                <p>Starting ELO is 1200. Stats are calculated based on synced player names in Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
 
                 <h4 style="margin-top: 25px; margin-bottom: 10px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the

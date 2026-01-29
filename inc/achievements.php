@@ -55,9 +55,89 @@ function lpdh_achievement_archive_order($query) {
     if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
         $query->set('orderby', 'date'); // Date Published
         $query->set('order', 'DESC');   // Newest First
+        $query->set('posts_per_page', -1); // Show all achievements
     }
 }
 add_action('pre_get_posts', 'lpdh_achievement_archive_order');
+ 
+/**
+ * Define custom columns for Achievement List
+ */
+function lpdh_achievement_posts_columns($columns) {
+    $new_columns = [];
+    foreach ($columns as $key => $value) {
+        $new_columns[$key] = $value;
+        if ($key === 'title') {
+            $new_columns['ach_condition'] = 'Condition';
+            $new_columns['ach_secret']    = 'Secret';
+            $new_columns['ach_year']      = 'Year';
+        }
+    }
+    return $new_columns;
+}
+add_filter('manage_achievement_posts_columns', 'lpdh_achievement_posts_columns');
+
+/**
+ * Display content for custom columns
+ */
+function lpdh_achievement_posts_custom_column($column, $post_id) {
+    switch ($column) {
+        case 'ach_condition':
+            $type = get_field('condition_type', $post_id);
+            $oper = get_field('operator', $post_id);
+            $val  = get_field('value', $post_id);
+            
+            $labels = [
+                'manual' => 'Manual',
+                'win_count' => 'Wins',
+                'clown_count' => 'Clowns',
+                'event_count' => 'Attendance',
+                'deck_count' => 'Decks',
+                'days_registered' => 'Registration',
+                'elo' => 'Elo',
+                'deck_with_banned' => 'Banned',
+                'deck_commander_partner' => 'Cmdr/Part',
+                'spinned_wheel_count' => 'Spins',
+            ];
+
+            if ($type === 'manual') {
+                echo 'Manual';
+            } else {
+                $type_label = isset($labels[$type]) ? $labels[$type] : $type;
+                echo '<strong>' . esc_html($type_label) . '</strong> ' . esc_html($oper) . ' ' . esc_html($val);
+            }
+            break;
+
+        case 'ach_secret':
+            $is_secret = get_field('is_secret', $post_id);
+            if ($is_secret) {
+                echo '<span class="dashicons dashicons-hidden" style="color:#d63638;" title="Secret"></span> Yes';
+            } else {
+                echo '<span class="dashicons dashicons-visibility" style="color:#999;" title="Not Secret"></span> No';
+            }
+            break;
+
+        case 'ach_year':
+            $is_yearly = get_field('yearly', $post_id);
+            $year = get_field('year', $post_id);
+            if ($is_yearly && $year) {
+                echo '<strong>' . esc_html($year) . '</strong>';
+            } else {
+                echo '<span style="color:#999;">-</span>';
+            }
+            break;
+    }
+}
+add_action('manage_achievement_posts_custom_column', 'lpdh_achievement_posts_custom_column', 10, 2);
+
+/**
+ * Make custom columns sortable
+ */
+function lpdh_achievement_sortable_columns($columns) {
+    $columns['ach_year'] = 'ach_year';
+    return $columns;
+}
+add_filter('manage_edit-achievement_sortable_columns', 'lpdh_achievement_sortable_columns');
 
 
 // -----------------------------------------------------------------------------
@@ -79,7 +159,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Which stat determines this achievement?',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '100',
                 ),
                 'choices' => array(
                     'manual' => 'Manual Achievement',
@@ -88,7 +168,10 @@ if (function_exists('acf_add_local_field_group')):
                     'event_count' => 'Events Attended',
                     'deck_count' => 'Number of Decks Created',
                     'days_registered' => 'Days Since Registration',
-                    'global_elo' => 'Global Elo (Future Check)',
+                    'elo' => 'Elo',
+                    'deck_with_banned' => 'Deck with Banned Card',
+                    'deck_commander_partner' => 'Deck with Commander/Partner',
+                    'spinned_wheel_count' => 'Spinned the Wheel (Count)',
                 ),
             ),
             array(
@@ -99,7 +182,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Choose how to compare the user stat with the threshold value.',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'choices' => array(
                     '>' => 'Greater than (>)',
@@ -129,7 +212,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Numeric or user text value.',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'default_value' => '0',
                 'conditional_logic' => array(
@@ -147,12 +230,60 @@ if (function_exists('acf_add_local_field_group')):
                 'label' => 'Secret Achievement',
                 'name' => 'is_secret',
                 'type' => 'true_false',
-                'instructions' => 'If checked, title and description will be hidden until unlocked.',
+                'instructions' => 'Hidden from the main list unless unlocked.',
                 'wrapper' => array(
-                    'width' => '100',
+                    'width' => '33',
                 ),
                 'default_value' => 0,
                 'ui' => 1,
+            ),
+            array(
+                'key' => 'field_ach_yearly',
+                'label' => 'Yearly Achievement',
+                'name' => 'yearly',
+                'type' => 'true_false',
+                'instructions' => 'Check if this is an annual achievement.',
+                'wrapper' => array(
+                    'width' => '33',
+                ),
+                'default_value' => 0,
+                'ui' => 1,
+            ),
+            array(
+                'key' => 'field_ach_year',
+                'label' => 'Reference Year',
+                'name' => 'year',
+                'type' => 'select',
+                'instructions' => 'Select the year for this achievement.',
+                'required' => 0,
+                'wrapper' => array(
+                    'width' => '34',
+                ),
+                'choices' => (function() {
+                    $ach_years = array();
+                    global $wpdb;
+                    $min_date = $wpdb->get_var("SELECT MIN(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date'");
+                    $max_date = $wpdb->get_var("SELECT MAX(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date'");
+                    
+                    $start_year = $min_date ? intval(date('Y', strtotime($min_date))) : intval(date('Y')) - 1;
+                    $end_year = $max_date ? intval(date('Y', strtotime($max_date))) + 1 : intval(date('Y')) + 1;
+
+                    if ($start_year > intval(date('Y'))) $start_year = intval(date('Y')) - 1;
+
+                    for ($y = $end_year; $y >= $start_year; $y--) {
+                        $ach_years[$y] = $y;
+                    }
+                    return $ach_years;
+                })(),
+                'conditional_logic' => array(
+                    array(
+                        array(
+                            'field' => 'field_ach_yearly',
+                            'operator' => '==',
+                            'value' => '1',
+                        ),
+                    ),
+                ),
             ),
 
             // Row 2: Icon Settings
@@ -226,151 +357,81 @@ endif;
  * Returns user stats, calculating them only if necessary.
  * 
  * @param int $user_id
- * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'global_elo']
+ * @param string $year 'global' or 'YYYY'
+ * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'elo', ...]
  */
-function lpdh_get_user_stats($user_id)
-{
-    // 1. Days Registered
-    $user_data = get_userdata($user_id);
-    $registered = $user_data ? strtotime($user_data->user_registered) : time();
-    $days_since_reg = floor((time() - $registered) / (60 * 60 * 24));
 
-    // 2. Decks Count
-    $deck_count = count_user_posts($user_id, 'deck', true);
 
-    // 2.1 Deck with Banned Cards
-    $deck_with_banned = 0;
-    if (function_exists('lpdh_get_banned_card_names')) {
-        $banned_cards = lpdh_get_banned_card_names(); // Returns array of lowercase names
-        if (!empty($banned_cards)) {
-            $user_decks = get_posts([
-                'post_type' => 'deck',
-                'author' => $user_id,
-                'posts_per_page' => -1,
-                'post_status' => 'publish',
-                'fields' => 'ids'
-            ]);
 
-            foreach ($user_decks as $d_id) {
-                // We check 'field_decklist_text' (ACF) or standard content? 
-                // Based on deck editor likely ACF 'field_decklist_text'
-                $list_text = get_field('decklist_text', $d_id);
-                if ($list_text) {
-                    $list_text_lower = strtolower($list_text);
-                    foreach ($banned_cards as $card) {
-                        // Simple check: is the banned card name in the text?
-                        // Improve this with regex if needed to avoid ensuring partial matches don't false positive
-                        // e.g. "Sol Ring" matching "Sol Ring" (Banned) vs "Sol Ring Wrapper" (Fake)
-                        // For now simple strpos is usually "good enough" for card names unless they are very short common words.
-                        if (strpos($list_text_lower, $card) !== false) {
-                            $deck_with_banned++;
-                            break; // Count this deck once, move to next deck
-                        }
-                    }
-                }
-            }
-        }
-    }
+/**
+ * Checks if user has a deck with a specific Commander or Partner.
+ * 
+ * @param int    $user_id
+ * @param string $target_name
+ * @param string $operator ('CONTAINS', 'EQUALS', etc)
+ * @return bool
+ */
+/**
+ * Checks if user has a deck with a specific Commander or Partner.
+ * 
+ * @param int    $user_id
+ * @param string $target_name
+ * @param string $operator ('CONTAINS', 'EQUALS', etc)
+ * @param string $year 'global' or 'YYYY'
+ * @return bool
+ */
+function lpdh_check_deck_commander($user_id, $target_name, $operator = 'CONTAINS', $year = 'global') {
+    if (empty($target_name)) return false;
 
-    // 3. Events, Wins & Clown Check (Heavy Query)
-    $events_attended = 0;
-    $win_count = 0;
-    $clown_count = 0;
-
-    global $wpdb;
-    
-    // 3. Events, Wins & Clown Check (Optimized ACF Repeater Query)
-    $events_attended = 0;
-    $win_count = 0;
-    $clown_count = 0;
-
-    // Search for User ID in 'event_ranking_%_player_id'
-    // Matches plain ID or Serialized Object (if ACF returns User Object)
-    // IMPORTANT: ACF stores repeater data using Field Name ('event_ranking'), not Field Key.
-    $sql = $wpdb->prepare(
-        "SELECT DISTINCT post_id FROM $wpdb->postmeta 
-         WHERE meta_key LIKE %s 
-         AND (meta_value = %s OR meta_value LIKE %s)",
-        'event_ranking_%_player_id',
-        $user_id,
-        '%"ID";i:' . $user_id . ';%' // Serialized look-ahead
-    );
-
-    $participated_event_ids = $wpdb->get_col($sql);
-
-    if (!empty($participated_event_ids)) {
-        // Ensure they are valid published events
-        $valid_events = get_posts([
-            'post_type' => 'event',
-            'post_status' => 'publish',
-            'include' => $participated_event_ids,
-            'posts_per_page' => -1,
-            'fields' => 'ids'
-        ]);
-
-        foreach ($valid_events as $e_id) {
-            // Get the full repeater to check position
-            // Uses 'field_event_ranking' (Key) to safely retrieve structured data via ACF
-            $rankings = get_field('field_event_ranking', $e_id);
-            
-            if (is_array($rankings)) {
-                $total_players = count($rankings);
-                
-                foreach ($rankings as $rank) {
-                    $p_id = 0;
-                    $p_id_field = isset($rank['player_id']) ? $rank['player_id'] : null;
-                    
-                    if (is_array($p_id_field) && isset($p_id_field['ID'])) $p_id = $p_id_field['ID'];
-                    elseif (is_object($p_id_field)) $p_id = $p_id_field->ID;
-                    elseif (is_numeric($p_id_field)) $p_id = intval($p_id_field);
-
-                    if ($p_id == $user_id) {
-                        $events_attended++;
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        
-                        // Check Win
-                        if ($pos === 1) {
-                            $win_count++;
-                        }
-                        
-                        // Check Clown (Last Place)
-                        if ($total_players > 1 && $pos === $total_players) {
-                            $clown_count++;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return [
-        'deck_count' => $deck_count,
-        'win_count' => $win_count,
-        'event_count' => $events_attended,
-        'clown_count' => $clown_count,
-        'deck_with_banned' => $deck_with_banned,
-        'days_registered' => $days_since_reg,
-        'global_elo' => 0 // Future implementation
+    $args = [
+        'post_type' => 'deck',
+        'author' => $user_id,
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'fields' => 'ids'
     ];
+    if ($year !== 'global') {
+        $args['date_query'] = [['year' => $year]];
+    }
+    $user_decks = get_posts($args);
+
+    foreach ($user_decks as $d_id) {
+        // ACF Fields for Commander/Partner
+        // Assuming they are text fields or post objects? usually text or relation.
+        // Based on previous context, they might be text names or IDs. 
+        // Let's assume text for names as per request "nome preciso".
+        $commander = get_field('commander', $d_id); // Returns string or object
+        $partner = get_field('partner', $d_id);
+
+        if (is_object($commander)) $commander = $commander->post_title;
+        if (is_object($partner)) $partner = $partner->post_title;
+
+        $commander = is_string($commander) ? $commander : '';
+        $partner = is_string($partner) ? $partner : '';
+
+        // Check Logic
+        if (lpdh_compare_string($commander, $target_name, $operator) || 
+            lpdh_compare_string($partner, $target_name, $operator)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
- * Checks a single condition against a value.
+ * String comparison helper
  */
-function lpdh_check_achievement_condition($user_val, $operator, $target_val)
-{
-    if (is_numeric($user_val) && is_numeric($target_val)) {
-        $user_val = floatval($user_val);
-        $target_val = floatval($target_val);
-    }
+function lpdh_compare_string($haystack, $needle, $operator) {
+    if (empty($haystack) || empty($needle)) return false;
+    
+    $haystack = strtolower(trim($haystack));
+    $needle = strtolower(trim($needle));
 
-    switch ($operator) {
-        case '>': return $user_val > $target_val;
-        case '>=': return $user_val >= $target_val;
-        case '=': return $user_val == $target_val;
-        case '<=': return $user_val <= $target_val;
-        case '<': return $user_val < $target_val;
-        default: return false;
+    if ($operator === 'EQUALS' || $operator === '=') {
+        return $haystack === $needle;
+    } else {
+        // Default to CONTAINS
+        return strpos($haystack, $needle) !== false;
     }
 }
 
@@ -443,8 +504,6 @@ function lpdh_get_user_achievements($user_id)
 
     // If there are locked achievements, we need to calculate stats
     if (!empty($locked_achievements)) {
-        $stats = null; // Deferred loading
-
         foreach ($locked_achievements as $post) {
             $cond_type = get_field('condition_type', $post->ID);
             
@@ -453,16 +512,32 @@ function lpdh_get_user_achievements($user_id)
                 continue;
             }
 
-            // Lazy load stats only if needed
-            if ($stats === null) {
-                $stats = lpdh_get_user_stats($user_id);
+            $is_yearly = get_field('yearly', $post->ID);
+            $year = ($is_yearly && $cond_type !== 'spinned_wheel_count') ? get_field('year', $post->ID) : 'global';
+
+            // Special Check: Deck with Commander/Partner
+            if ($cond_type === 'deck_commander_partner') {
+                $target_name = get_field('value', $post->ID);
+                $operator = get_field('operator', $post->ID);
+                
+                if (lpdh_check_deck_commander($user_id, $target_name, $operator, $year)) {
+                    // Unlocked!
+                    $unlock_date = time();
+                    $unlocked_data[$post->ID] = $unlock_date;
+                    $final_list[] = lpdh_format_achievement($post, $unlock_date);
+                    $newly_unlocked = true;
+                }
+                continue; // Skip standard stat check
             }
+
+            // Fetch stats for this achievement's year context
+            $stats = lpdh_get_player_stats($user_id, $year);
 
             $operator = get_field('operator', $post->ID);
             $target_val = get_field('value', $post->ID);
             $user_val = isset($stats[$cond_type]) ? $stats[$cond_type] : 0;
 
-            if (lpdh_check_achievement_condition($user_val, $operator, $target_val)) {
+            if (lpdh_check_stat_condition($user_val, $operator, $target_val)) {
                 // Unlocked!
                 $unlock_date = time();
                 $unlocked_data[$post->ID] = $unlock_date;
@@ -811,7 +886,16 @@ function lpdh_render_manage_achievements_page() {
                             </div>
                             <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                    <h3 style="margin: 0; font-size: 1.1em;">
+                                        <?php echo esc_html($post->post_title); ?>
+                                        <?php 
+                                        $is_yearly = get_field('yearly', $post->ID);
+                                        $year = get_field('year', $post->ID);
+                                        if ($is_yearly && $year): ?>
+                                            <i class="fa-solid fa-calendar-days" style="margin-left: 5px; opacity: 0.7; font-size: 0.8em;" title="Yearly Achievement"></i>
+                                            <span style="font-size: 0.8em; opacity: 0.8;">(<?php echo esc_html($year); ?>)</span>
+                                        <?php endif; ?>
+                                    </h3>
                                     <?php if (current_user_can('edit_post', $post->ID)): ?>
                                         <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
                                             <i class="fas fa-edit"></i>
@@ -832,7 +916,7 @@ function lpdh_render_manage_achievements_page() {
                                         'event_count' => 'Events',
                                         'deck_count' => 'Decks',
                                         'days_registered' => 'Days Registered',
-                                        'global_elo' => 'Elo',
+                                        'elo' => 'Elo',
                                         'deck_with_banned' => 'Banned Decks',
                                     ];
                                     $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
@@ -861,6 +945,15 @@ function lpdh_render_manage_achievements_page() {
                                 <div class="date-display" style="font-size: 0.85em; color: #888; margin-top: 5px; text-align: right;">
                                     <?php echo $is_unlocked ? $unlock_date : '-'; ?>
                                 </div>
+                                <?php if (!$is_unlocked && $cond_type !== 'manual'): ?>
+                                    <div style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: right;">
+                                        <button type="button" class="button button-small lpdh-ach-check" 
+                                                data-ach-id="<?php echo $post->ID; ?>" 
+                                                data-user-id="<?php echo $selected_user_id; ?>">
+                                            <i class="fas fa-microscope"></i> Check
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -925,6 +1018,55 @@ function lpdh_render_manage_achievements_page() {
                     $card.css('opacity', 1);
                     alert('Request failed');
                     $checkbox.prop('checked', !isChecked); // Revert
+                }
+            });
+        });
+
+        // Check Condition AJAX
+        $('.lpdh-ach-check').on('click', function() {
+            var $btn = $(this);
+            var achId = $btn.data('ach-id');
+            var userId = $btn.data('user-id');
+            var originalText = $btn.html();
+
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'lpdh_check_achievement_condition',
+                    ach_id: achId,
+                    user_id: userId,
+                    security: '<?php echo wp_create_nonce("lpdh_ach_nonce"); ?>'
+                },
+                success: function(response) {
+                    $btn.prop('disabled', false).html(originalText);
+                    if (response.success) {
+                        var data = response.data;
+                        console.log("--- ACHIEVEMENT CHECK ---");
+                        console.log("Post ID: " + achId);
+                        console.log("Condition: " + data.condition_label);
+                        console.log("Context: " + data.year_context);
+                        console.log("User Value: " + data.user_value);
+                        console.log("Operator: " + data.operator);
+                        console.log("Target Value: " + data.target_value);
+                        console.log("Is Met: " + (data.is_met ? "TRUE \u2705" : "FALSE \u274C"));
+                        console.log("--------------------------");
+
+                        if (data.is_met) {
+                            alert("Result: TRUE \u2705\nThe user meets the requirements for this achievement!");
+                        } else {
+                            alert("Result: FALSE \u274C\nThe user DOES NOT meet the requirements for this achievement yet.\n\n" + 
+                                  "Current: " + data.user_value + " | Target: " + data.target_value);
+                        }
+                    } else {
+                        alert('Error: ' + response.data);
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false).html(originalText);
+                    alert('Request failed.');
                 }
             });
         });
@@ -1044,6 +1186,72 @@ function lpdh_ajax_delete_all_user_achievements() {
 add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
 
 /**
+ * AJAX Handler: Check Achievement Condition for a specific user
+ */
+function lpdh_ajax_check_achievement_condition() {
+    check_ajax_referer('lpdh_ach_nonce', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $ach_id = intval($_POST['ach_id']);
+    $user_id = intval($_POST['user_id']);
+
+    if (!$ach_id || !$user_id) {
+        wp_send_json_error('Invalid ID');
+    }
+
+    $post = get_post($ach_id);
+    if (!$post) wp_send_json_error('Achievement not found');
+
+    $cond_type = get_field('condition_type', $ach_id);
+    $is_yearly = get_field('yearly', $ach_id);
+    $year = ($is_yearly && $cond_type !== 'spinned_wheel_count') ? get_field('year', $ach_id) : 'global';
+
+    $stats = lpdh_get_player_stats($user_id, $year);
+
+    $operator = get_field('operator', $ach_id);
+    $target_val = get_field('value', $ach_id);
+    $user_val = 0;
+
+    // Special Check: Deck with Commander/Partner
+    if ($cond_type === 'deck_commander_partner') {
+        $target_name = get_field('value', $ach_id);
+        $operator = get_field('operator', $ach_id);
+        $is_met = lpdh_check_deck_commander($user_id, $target_name, $operator, $year);
+        $user_val = $is_met ? 1 : 0;
+        $target_val = 1;
+    } else {
+        $user_val = isset($stats[$cond_type]) ? $stats[$cond_type] : 0;
+        $is_met = lpdh_check_stat_condition($user_val, $operator, $target_val);
+    }
+
+    $labels = [
+        'manual' => 'Manual',
+        'win_count' => 'Wins',
+        'clown_count' => 'Last Places',
+        'event_count' => 'Events',
+        'deck_count' => 'Decks',
+        'days_registered' => 'Registration',
+        'elo' => 'Elo',
+        'deck_with_banned' => 'Banned',
+        'deck_commander_partner' => 'Cmdr/Part',
+        'spinned_wheel_count' => 'Spins'
+    ];
+
+    wp_send_json_success([
+        'user_value' => $user_val,
+        'target_value' => $target_val,
+        'operator' => $operator,
+        'is_met' => $is_met,
+        'condition_label' => isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type,
+        'year_context' => $year
+    ]);
+}
+add_action('wp_ajax_lpdh_check_achievement_condition', 'lpdh_ajax_check_achievement_condition');
+
+/**
  * Add "Duplicate for next year" to Bulk Actions for Achievements
  */
 function lpdh_achievement_custom_bulk_actions($actions)
@@ -1070,19 +1278,22 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
         
         if (!$original_post) continue;
 
-        // Calculate New Title (Increment Year)
-        // Regex to find 4-digit year 20XX
+        // Calculate New Title and Year (Incrementing ACF field if present)
         $title = $original_post->post_title;
-        $year_found = false;
-        
-        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found) {
-            $year_found = true;
-            return intval($matches[1]) + 1;
-        }, $title);
+        $old_year = get_post_meta($post_id, 'year', true);
+        $next_year = false;
 
-        if (!$year_found) {
-            // Append " (Next Year)" if no year found to avoid confusion
-            $new_title .= ' (Next Year)';
+        if ($old_year) {
+            $next_year = intval($old_year) + 1;
+            // Precise replacement: replace the old year in the title with the new one
+            if (strpos($title, (string)$old_year) !== false) {
+                $new_title = str_replace((string)$old_year, (string)$next_year, $title);
+            } else {
+                $new_title = $title . ' ' . $next_year;
+            }
+        } else {
+            // No year field found, fall back to " (Next Year)" suffix pattern
+            $new_title = $title . ' (Next Year)';
         }
 
         // Create New Post
@@ -1100,32 +1311,23 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
             $duplicated_count++;
 
             // Duplicate ACF Fields
-            // We get all meta and filter for what we need, or just rely on ACFs get_fields
-            // Better to use get_post_meta for everything to ensure we catch all custom fields
             $meta = get_post_meta($post_id);
 
             foreach ($meta as $key => $values) {
                 // Skip WP internal meta
                 if (strpos($key, '_') === 0 && strpos($key, '_acf') !== 0 && $key !== '_thumbnail_id') {
-                   // Actually ACF fields often define definition keys starting with _
-                   // So we should be careful. 
-                   // Safest is to duplicate everything that is NOT standard WP lock/edit stuff
                    if (in_array($key, ['_edit_lock', '_edit_last'])) continue;
                 }
                 
                 foreach ($values as $value) {
-                     // ACF Unserialization handled by add_post_meta automatically if we pass raw?
-                     // get_post_meta returns unserialized by default for single=false? No, returns array of values.
-                     // IMPORTANT: If we use add_post_meta, we should pass the raw value.
-                     // get_post_meta($id) returns [ key => [val1, val2] ]
-                     
-                     // Use simpler approach: Loop specific ACF fields we know
-                     // 'condition_type', 'operator', 'value', 'is_secret', 'icon', 'icon_color', 'color_hex', 'color_class'
-                     // But we want to be generic. 
-                     
-                     // Let's use get_post_meta duplication which is standard for clones
                      add_post_meta($new_post_id, $key, maybe_unserialize($value));
                 }
+            }
+
+            // --- Update Year Field ---
+            // If we calculated a next_year based on the ACF field, apply it
+            if ($next_year) {
+                update_post_meta($new_post_id, 'year', $next_year);
             }
         }
     }

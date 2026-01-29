@@ -93,7 +93,7 @@ if (is_user_logged_in()) {
 
 
                 <div class="mt-5">
-                    <?php the_posts_pagination(); ?>
+                    <!-- Pagination Removed -->
                 </div>
 
             <?php else : ?>

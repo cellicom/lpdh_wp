@@ -39,19 +39,20 @@ $player_events = array();
 $yearly_stats = array(); // year => [wins, total]
 
 // Get all events
-$events_query = new WP_Query(array(
+$event_args = array(
     'post_type' => 'event',
     'posts_per_page' => -1,
     'post_status' => 'publish',
     'meta_key' => 'event_date',
     'orderby' => 'meta_value',
     'order' => 'ASC' // Chronological for ELO calc
-));
+);
 
-// Collect available years
+// Collect available years (needed for filter UI)
+$events_years_query = new WP_Query($event_args);
 $available_years = array();
-if ($events_query->have_posts()) {
-    foreach ($events_query->posts as $p) {
+if ($events_years_query->have_posts()) {
+    foreach ($events_years_query->posts as $p) {
         $d = get_field('event_date', $p->ID);
         if ($d) {
             $y = date('Y', strtotime($d));
@@ -71,10 +72,29 @@ if (!in_array($current_year, $available_years)) {
 
 $selected_year = isset($_GET['stats_year']) ? $_GET['stats_year'] : $current_year;
 
+// --- Optimization: Filter main query if not global ---
+if ($selected_year !== 'global') {
+    $sel_y = intval($selected_year);
+    $prev_y = $sel_y - 1;
+    $next_y = $sel_y + 1;
+    
+    $event_args['meta_query'] = array(
+        array(
+            'key' => 'event_date',
+            'value' => array($prev_y . '-01-01', $next_y . '-12-31'),
+            'compare' => 'BETWEEN',
+            'type' => 'DATE'
+        )
+    );
+}
+$events_query = new WP_Query($event_args);
+
 // ELO Tracking
 $player_elos = array();
 $elo_history_labels = array();
 $elo_history_data = array();
+$last_processed_year = '';
+$elo_starts_added = array(); // track if we added the 1200 start for a year
 
 if ($events_query->have_posts()) {
     while ($events_query->have_posts()) {
@@ -84,6 +104,12 @@ if ($events_query->have_posts()) {
         // Filter by year
         $event_date_raw = get_field('event_date', $event_id);
         $event_year = $event_date_raw ? date('Y', strtotime($event_date_raw)) : '';
+
+        // --- Yearly ELO Reset ---
+        if ($event_year && $event_year !== $last_processed_year) {
+            $player_elos = array(); // Reset all to LPDH_DEFAULT_ELO
+            $last_processed_year = $event_year;
+        }
 
         $rankings = get_field('event_ranking', $event_id);
 
@@ -112,12 +138,12 @@ if ($events_query->have_posts()) {
                     continue;
 
                 if (!isset($player_elos[$name])) {
-                    $player_elos[$name] = 1200;
+                    $player_elos[$name] = LPDH_DEFAULT_ELO;
                 }
                 $event_participants_names[] = $name;
                 $total_event_elo += $player_elos[$name];
             }
-            $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : 1200;
+            $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : LPDH_DEFAULT_ELO;
 
             // Process Rankings for Stats & ELO Update
             foreach ($rankings as $index => $rank) {
@@ -159,63 +185,110 @@ if ($events_query->have_posts()) {
                     }
                 }
 
-                if ($p_id == $user_id) {
-                    // Collect Yearly Stats
-                    if ($event_year) {
-                        if (!isset($yearly_stats[$event_year])) {
-                            $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
+                    if ($p_id == $user_id) {
+                        // Found the user
+                        
+                        // Capture stats for global calculation OR for the 3-year range
+                        // (Note: we already filtered the query to 3 years if not global)
+                        
+                        // --- Yearly Stats (for Win Rate Trend) ---
+                        if ($event_year) {
+                            $y_val = intval($event_year);
+                            // If not global, only collect for prev, current, next
+                            if ($selected_year === 'global' || ($y_val >= $prev_y && $y_val <= $next_y)) {
+                                if (!isset($yearly_stats[$event_year])) {
+                                    $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
+                                }
+                                $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
+                                $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                                $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                                $yearly_stats[$event_year]['wins'] += $m_win;
+                                $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
+                            }
                         }
-                        $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
-                        $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                        $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                        $yearly_stats[$event_year]['wins'] += $m_win;
-                        $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
-                    }
 
-                    if ($selected_year !== 'global' && $event_year !== $selected_year) {
-                        continue;
-                    }
+                        $player_events[] = array(
+                            'event_id' => $event_id,
+                            'ranking' => $rank,
+                            'event_date' => $event_date_raw,
+                            'total_players' => $total_players
+                        );
 
-                    $total_attendance++;
-                    $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                    if ($pos === 1)
-                        $total_wins++;
-                    if ($index === $total_players - 1)
-                        $total_last_places++;
-
-                    $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
-                    if ($deck_id) {
-                        if (!isset($deck_usage_counts[$deck_id]))
-                            $deck_usage_counts[$deck_id] = 0;
-                        $deck_usage_counts[$deck_id]++;
-
-                        if (!isset($deck_performance[$deck_id])) {
-                            $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                        // --- ELO History ---
+                        if (!empty($name)) {
+                            // Only add to Elo chart if global OR if it matches the selected year
+                            if ($selected_year === 'global' || $event_year === $selected_year) {
+                                // If this is the first tournament of the year, inject the 1200 start point if not present
+                                if ($event_year && !isset($elo_starts_added[$event_year])) {
+                                    // For chart continuity, we add a point at Jan 1st
+                                    $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
+                                    $elo_history_data[] = LPDH_DEFAULT_ELO;
+                                    $elo_starts_added[$event_year] = true;
+                                }
+                                
+                                $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
+                                $elo_history_data[] = round($player_elos[$name]);
+                            }
                         }
-                        $deck_performance[$deck_id]['attendance']++;
+
+                        // Filter for main stats and charts (Attendance, Wins, etc.)
+                        // Only count for the SELECTED year
+                        if ($selected_year !== 'global' && $event_year !== $selected_year) {
+                            continue;
+                        }
+
+                        $total_attendance++;
+                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
                         if ($pos === 1)
-                            $deck_performance[$deck_id]['wins']++;
-                        $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
-                        $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                        $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                    }
+                            $total_wins++;
+                        if ($index === $total_players - 1)
+                            $total_last_places++;
 
-                    $player_events[] = array(
-                        'event_id' => $event_id,
-                        'ranking' => $rank,
-                        'event_date' => $event_date_raw,
-                        'total_players' => $total_players
-                    );
+                        $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
+                        if ($deck_id) {
+                            if (!isset($deck_usage_counts[$deck_id]))
+                                $deck_usage_counts[$deck_id] = 0;
+                            $deck_usage_counts[$deck_id]++;
 
-                    if (!empty($name)) {
-                        $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
-                        $elo_history_data[] = round($player_elos[$name]);
+                            if (!isset($deck_performance[$deck_id])) {
+                                $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                            }
+                            $deck_performance[$deck_id]['attendance']++;
+                            if ($pos === 1)
+                                $deck_performance[$deck_id]['wins']++;
+                            $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
+                            $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                            $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                        }
                     }
                 }
             }
         }
-    }
     wp_reset_postdata();
+}
+
+// --- Global ELO Aggregation by Year ---
+if ($selected_year === 'global' && !empty($elo_history_data)) {
+    $yearly_elo_avg = array();
+    // Re-process elo_history to get max/last elo per year
+    // Since events are ASC, we just take the last point of each year
+    $temp_elo_labels = array();
+    $temp_elo_data = array();
+    
+    // player_events is chronological ASC in the loop above
+    // Let's use a mapping approach
+    $year_points = array();
+    foreach($elo_history_labels as $idx => $label) {
+        // Label is dd/mm/yy
+        $parts = explode('/', $label);
+        if (count($parts) === 3) {
+            $y = '20' . $parts[2];
+            $year_points[$y] = $elo_history_data[$idx];
+        }
+    }
+    
+    $elo_history_labels = array_keys($year_points);
+    $elo_history_data = array_values($year_points);
 }
 
 $player_events = array_reverse($player_events);
@@ -250,7 +323,7 @@ foreach ($yearly_stats as $y => $data) {
 }
 
 // --- Pagination Logic ---
-$items_per_page = 5;
+$items_per_page = 10;
 
 // Decks Pagination: Custom sorting by attendance
 $paged_decks = isset($_GET['p_decks']) ? max(1, intval($_GET['p_decks'])) : 1;
@@ -347,25 +420,67 @@ get_header(); ?>
             </div>
 
             <!-- Summary Cards -->
+            <?php
+            // --- Prepare Centralized Stats ---
+            $player_stats = lpdh_get_player_stats($user_id, $selected_year);
+            
+            // Override local loop variables with official values from Leaderboard CPT
+            $total_attendance   = $player_stats['event_count'];
+            $total_wins         = $player_stats['win_count'];
+            $total_last_places   = $player_stats['clown_count'];
+            $display_elo        = $player_stats['elo'];
+            
+            // 2. Achievements
+            $total_achievements = wp_count_posts('achievement')->publish;
+            $unlocked_achievements_count = 0;
+            if (function_exists('lpdh_get_user_achievements')) {
+                $unlocked_list = lpdh_get_user_achievements($user_id);
+                if ($selected_year !== 'global') {
+                    foreach ($unlocked_list as $item) {
+                        $u_date = isset($item['date_unlocked_ts']) ? date('Y', $item['date_unlocked_ts']) : '';
+                        if ($u_date === $selected_year) {
+                            $unlocked_achievements_count++;
+                        }
+                    }
+                } else {
+                    $unlocked_achievements_count = count($unlocked_list);
+                }
+            } else {
+                $unlocked_meta = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+                $unlocked_achievements_count = is_array($unlocked_meta) ? count($unlocked_meta) : 0;
+            }
+
+            // 3. Roulette (Global Only)
+            $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+
+            // 4. Decks (Published Year)
+            $count_user_decks = $player_stats['deck_count'];
+            ?>
+
             <div class="row g-4 mb-5">
+                <!-- 1. Attendance -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-primary shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-primary small fw-bold mb-3">Attendance</h6>
                             <div class="display-4 fw-bold"><?php echo $total_attendance; ?></div>
-                            <div class="small  mt-2">Tournaments Joined</div>
+                            <div class="small mt-2">Tournaments Joined</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 2. Wins -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-success shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-success small fw-bold mb-3">Wins</h6>
                             <div class="display-4 fw-bold"><?php echo $total_wins; ?> 🏆</div>
-                            <div class="small  mt-2">1st Place Finishes</div>
+                            <div class="small mt-2">1st Place Finishes</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 3. Lose (Last Places) -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-danger shadow-sm">
                         <div class="card-body text-center">
@@ -375,6 +490,52 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
+
+                <!-- 4. Elo -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-warning shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-warning small fw-bold mb-3">ELO</h6>
+                            <div class="display-4 fw-bold"><?php echo $display_elo; ?></div>
+                            <div class="small mt-2">Skill Rating</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Obiettivi (Achievements) -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-info shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-info small fw-bold mb-3">Achievements</h6>
+                            <div class="display-4 fw-bold"><?php echo $unlocked_achievements_count; ?></div>
+                            <div class="small mt-2">out of <?php echo $total_achievements; ?> achievements</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Roulette -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-secondary shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-white-50 small fw-bold mb-3">Roulette Spins</h6>
+                            <div class="display-4 fw-bold"><?php echo $lifetime_spins; ?></div>
+                            <div class="small mt-2">times you spun the wheel</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Decks -->
+                <div class="col-md-3">
+                    <div class="card h-100 bg-transparent text-white border-primary shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-primary small fw-bold mb-3">Decks</h6>
+                            <div class="display-4 fw-bold"><?php echo $count_user_decks; ?></div>
+                            <div class="small mt-2">decks in your collection</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Most Used Deck -->
                 <div class="col-md-3">
                     <div class="card h-100 bg-transparent text-white border-info shadow-sm">
                         <div class="card-body text-center">
@@ -389,7 +550,7 @@ get_header(); ?>
                                     <?php echo esc_html($most_used_deck_name); ?>
                                 <?php endif; ?>
                             </div>
-                            <div class="small  mt-2">Favorite Strategy</div>
+                            <div class="small mt-2">Favorite Strategy</div>
                         </div>
                     </div>
                 </div>

@@ -38,8 +38,8 @@ get_header();
             ?>
 
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                    <div class="card bg-dark border-secondary shadow-lg">
-                        <div class="card-body text-center py-5">
+                    <div class="text-center py-5">
+                        <div class="container" style="max-width: 800px;">
                             
                             <!-- Icon -->
                             <?php $icon_color = get_field('icon_color', get_the_ID()) ?: '#ffffff'; ?>
@@ -117,10 +117,56 @@ get_header();
                             <?php endif; ?>
                             
                         </div>
-                        <div class="card-footer bg-dark border-secondary text-center py-3">
+                        <div class="text-center py-3">
                            <a href="<?php echo get_post_type_archive_link('achievement'); ?>" class="btn btn-outline-light btn-sm">
                                <i class="fas fa-arrow-left me-2"></i> All Achievements
                            </a>
+                           <div class="mt-5 pt-4 border-top border-secondary">
+                                <h4 class="text-white mb-4"><?php esc_html_e('These users have unlocked this achievement:', 'lpdh'); ?></h4>
+                                <div class="d-flex flex-wrap justify-content-center gap-3">
+                                    <?php
+                                    // Query users who have this achievement unlocked
+                                    // We search for the post ID in the serialized array string
+                                    // Using key search "i:123;" (older) or just the ID if stored as simple array?
+                                    // Based on get_user_achievements, it stores [ID => time]. 
+                                    // So serialized string contains "i:POSTID;" as a KEY.
+                                    
+                                    global $wpdb;
+                                    $ach_id = get_the_ID();
+                                    $meta_key = 'lpdh_unlocked_achievements';
+                                    
+                                    // Like query for serialized integer key: i:123;
+                                    $like_key = 'i:' . $ach_id . ';';
+
+                                    // Use WP_User_Query for better performance than get_users() handling
+                                    $user_query = new WP_User_Query(array(
+                                        'meta_query' => array(
+                                            array(
+                                                'key'     => $meta_key,
+                                                'value'   => $like_key,
+                                                'compare' => 'LIKE'
+                                            )
+                                        ),
+                                        'fields' => 'all_with_meta', // lighter return? actually need ID
+                                    ));
+
+                                    $unlocked_users = $user_query->get_results();
+
+                                    if (!empty($unlocked_users)) {
+                                        foreach ($unlocked_users as $user) {
+                                            $profile_url = get_author_posts_url($user->ID);
+                                            $avatar = get_avatar($user->ID, 64, '', $user->display_name, ['class' => 'rounded-circle shadow-sm border border-secondary']);
+                                            
+                                            echo '<a href="' . esc_url($profile_url) . '" class="text-decoration-none" data-bs-toggle="tooltip" title="' . esc_attr($user->display_name) . '">';
+                                            echo $avatar;
+                                            echo '</a>';
+                                        }
+                                    } else {
+                                        echo '<p class="text-white-50 fst-italic">' . esc_html__('No one has unlocked this yet. Be the first!', 'lpdh') . '</p>';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </article>

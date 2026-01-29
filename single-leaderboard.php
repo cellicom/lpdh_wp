@@ -210,7 +210,7 @@ get_header(); ?>
                                                     $pos = $index + 1;
                                                     $name = isset($rank['name']) ? $rank['name'] : '';
                                                     $points = isset($rank['points']) ? $rank['points'] : 0;
-                                                    $elo = isset($rank['elo']) ? $rank['elo'] : 1200;
+                                                    $elo = isset($rank['elo']) ? $rank['elo'] : LPDH_DEFAULT_ELO;
                                                     $win = isset($rank['win']) ? $rank['win'] : 0;
                                                     $draw = isset($rank['draw']) ? $rank['draw'] : 0;
                                                     $lose = isset($rank['lose']) ? $rank['lose'] : 0;
