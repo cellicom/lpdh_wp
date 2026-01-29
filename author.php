@@ -111,13 +111,23 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                             $total_ach = count($user_achievements);
                             $visible_ach = array_slice($user_achievements, 0, 5);
                             $hidden_count = $total_ach - 5;
+
+                            // Visibility Logic: If current user hasn't unlocked it, mask it
+                            $current_user_id = get_current_user_id();
+                            $visitor_unlocked = get_user_meta($current_user_id, 'lpdh_unlocked_achievements', true);
+                            if (!is_array($visitor_unlocked)) {
+                                $visitor_unlocked = [];
+                            }
                             ?>
                             <div class="author-achievements mt-4">
                                 <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
                                 <div class="d-flex justify-content-center flex-wrap gap-3 align-items-center">
-                                    <?php foreach ($visible_ach as $badge): ?>
+                                    <?php foreach ($visible_ach as $badge):
+                                        $is_unlocked_by_visitor = ($current_user_id == $author_id) || array_key_exists($badge['id'], $visitor_unlocked);
+                                        $display_title = $is_unlocked_by_visitor ? $badge['title'] : 'Secret Achievement';
+                                        ?>
                                         <div class="achievement-badge" data-bs-toggle="tooltip"
-                                            title="<?php echo esc_attr($badge['title']); ?>">
+                                            title="<?php echo esc_attr($display_title); ?>">
                                             <?php echo lpdh_render_achievement_icon($badge); ?>
                                         </div>
                                     <?php endforeach; ?>
@@ -144,7 +154,11 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                         </div>
                                         <div class="modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
                                             <div class="list-group list-group-flush">
-                                                <?php foreach ($user_achievements as $badge): ?>
+                                                <?php foreach ($user_achievements as $badge):
+                                                    $is_unlocked_by_visitor = ($current_user_id == $author_id) || array_key_exists($badge['id'], $visitor_unlocked);
+                                                    $display_title = $is_unlocked_by_visitor ? $badge['title'] : 'Secret Achievement';
+                                                    $display_desc = $is_unlocked_by_visitor ? $badge['description'] : 'You haven\'t unlocked this achievement yet. Keep playing to discover its secrets!';
+                                                    ?>
                                                     <div
                                                         class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
                                                         <div class="me-3">
@@ -154,13 +168,15 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                                             <div
                                                                 class="d-flex w-100 justify-content-between align-items-center mb-0">
                                                                 <h6 class="mb-0 text-warning small fw-bold">
-                                                                    <?php echo esc_html($badge['title']); ?></h6>
+                                                                    <?php echo esc_html($display_title); ?>
+                                                                </h6>
                                                                 <small class="text-info text-nowrap ms-2"
                                                                     style="font-size: 0.75rem;"><?php echo esc_html($badge['date_unlocked']); ?></small>
                                                             </div>
                                                             <p class="mb-0 text-white-50"
                                                                 style="font-size: 0.8rem; line-height: 1.2;">
-                                                                <?php echo esc_html($badge['description']); ?></p>
+                                                                <?php echo esc_html($display_desc); ?>
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 <?php endforeach; ?>
