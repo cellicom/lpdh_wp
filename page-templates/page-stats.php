@@ -334,15 +334,14 @@ get_header(); ?>
                             <input type="hidden" name="user_id" value="<?php echo intval($_GET['user_id']); ?>">
                         <?php endif; ?>
                         <label for="stats_year" class="me-3 fw-bold text-nowrap">Year:</label>
-                            <select name="stats_year" id="stats_year" class="form-select" onchange="this.form.submit()">
-                                <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
-                                <?php foreach ($available_years as $y): ?>
-                                    <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
-                                        <?php echo esc_html($y); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+                        <select name="stats_year" id="stats_year" class="form-select" onchange="this.form.submit()" style="background-color: var(--bs-body-bg); color: var(--bs-body-color); border-color: var(--bs-border-color);">
+                            <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
+                            <?php foreach ($available_years as $y): ?>
+                                <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
+                                    <?php echo esc_html($y); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </form>
                 </div>
             </div>
