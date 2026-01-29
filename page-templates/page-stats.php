@@ -305,11 +305,7 @@ $total_player_events = count($player_events);
 $total_event_pages = ceil($total_player_events / $items_per_page);
 $paged_player_events = array_slice($player_events, ($paged_events - 1) * $items_per_page, $items_per_page);
 
-// Enqueue Select2 for Admin Stats functionality
-if (current_user_can('editor') || current_user_can('administrator')) {
-    wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
-    wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
-}
+
 
 get_header(); ?>
 
@@ -326,35 +322,18 @@ get_header(); ?>
 
             <!-- Filters -->
             <div class="row justify-content-center mb-5">
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <form method="get" action="<?php echo esc_url(get_permalink()); ?>"
-                        class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+                        class="d-flex align-items-center mb-0">
                         
                         <?php if (isset($_GET['page_id'])): ?>
                             <input type="hidden" name="page_id" value="<?php echo intval($_GET['page_id']); ?>">
                         <?php endif; ?>
 
-                        <!-- User Select for Admins -->
-                        <?php if (current_user_can('editor') || current_user_can('administrator')): 
-                            $all_users = get_users(['orderby' => 'display_name']);
-                        ?>
-                            <div class="d-flex align-items-center">
-                                <label for="user_id" class="me-2 fw-bold text-nowrap">Player:</label>
-                                <select name="user_id" id="user_id" class="form-select lpdh-select2" onchange="this.form.submit()" style="min-width: 200px;">
-                                    <?php foreach ($all_users as $u): ?>
-                                        <option value="<?php echo $u->ID; ?>" <?php selected($user_id, $u->ID); ?>>
-                                            <?php echo esc_html($u->display_name); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        <?php else: ?>
-                            <!-- Non-admin just sees their own stats (or url param if allowed by logic above but protected) -->
-                            <input type="hidden" name="user_id" value="<?php echo intval($user_id); ?>">
+                        <?php if (isset($_GET['user_id'])): ?>
+                            <input type="hidden" name="user_id" value="<?php echo intval($_GET['user_id']); ?>">
                         <?php endif; ?>
-
-                        <div class="d-flex align-items-center">
-                            <label for="stats_year" class="me-2 fw-bold text-nowrap">Year:</label>
+                        <label for="stats_year" class="me-3 fw-bold text-nowrap">Year:</label>
                             <select name="stats_year" id="stats_year" class="form-select" onchange="this.form.submit()">
                                 <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
                                 <?php foreach ($available_years as $y): ?>
@@ -642,14 +621,6 @@ get_header(); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Init Select2 if present (jQuery required for Select2)
-        if (typeof jQuery !== 'undefined' && jQuery('.lpdh-select2').length > 0) {
-            jQuery('.lpdh-select2').select2({
-                placeholder: "Select a Player",
-                allowClear: false
-            });
-        }
-
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -776,12 +747,7 @@ get_header(); ?>
 </script>
 
 <style>
-    /* Select2 Styling */
-    .select2-container { width: 300px !important; max-width: 100%; }
-    @media screen and (max-width: 782px) {
-        .select2-container { width: 100% !important; }
-    }
-    .select2-dropdown { z-index: 9999; }
+
 
     .bg-gold {
         background-color: #ffd700 !important;
