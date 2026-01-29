@@ -1105,6 +1105,15 @@ function lpdh_render_manage_achievements_page() {
                                 <div class="date-display" style="font-size: 0.85em; color: #888; margin-top: 5px; text-align: right;">
                                     <?php echo $is_unlocked ? $unlock_date : '-'; ?>
                                 </div>
+                                <?php if (!$is_unlocked && $cond_type !== 'manual'): ?>
+                                    <div style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px;">
+                                        <button type="button" class="button button-small lpdh-ach-check" 
+                                                data-ach-id="<?php echo $post->ID; ?>" 
+                                                data-user-id="<?php echo $selected_user_id; ?>">
+                                            <i class="fas fa-microscope"></i> Check
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -1169,6 +1178,55 @@ function lpdh_render_manage_achievements_page() {
                     $card.css('opacity', 1);
                     alert('Request failed');
                     $checkbox.prop('checked', !isChecked); // Revert
+                }
+            });
+        });
+
+        // Check Condition AJAX
+        $('.lpdh-ach-check').on('click', function() {
+            var $btn = $(this);
+            var achId = $btn.data('ach-id');
+            var userId = $btn.data('user-id');
+            var originalText = $btn.html();
+
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'lpdh_check_achievement_condition',
+                    ach_id: achId,
+                    user_id: userId,
+                    security: '<?php echo wp_create_nonce("lpdh_ach_nonce"); ?>'
+                },
+                success: function(response) {
+                    $btn.prop('disabled', false).html(originalText);
+                    if (response.success) {
+                        var data = response.data;
+                        console.log("--- ACHIEVEMENT CHECK ---");
+                        console.log("Post ID: " + achId);
+                        console.log("Condition: " + data.condition_label);
+                        console.log("Context: " + data.year_context);
+                        console.log("User Value: " + data.user_value);
+                        console.log("Operator: " + data.operator);
+                        console.log("Target Value: " + data.target_value);
+                        console.log("Is Met: " + (data.is_met ? "TRUE \u2705" : "FALSE \u274C"));
+                        console.log("--------------------------");
+
+                        if (data.is_met) {
+                            alert("Result: TRUE \u2705\nThe user meets the requirements for this achievement!");
+                        } else {
+                            alert("Result: FALSE \u274C\nThe user DOES NOT meet the requirements for this achievement yet.\n\n" + 
+                                  "Current: " + data.user_value + " | Target: " + data.target_value);
+                        }
+                    } else {
+                        alert('Error: ' + response.data);
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false).html(originalText);
+                    alert('Request failed.');
                 }
             });
         });
@@ -1286,6 +1344,72 @@ function lpdh_ajax_delete_all_user_achievements() {
     wp_send_json_success();
 }
 add_action('wp_ajax_lpdh_delete_all_user_achievements', 'lpdh_ajax_delete_all_user_achievements');
+
+/**
+ * AJAX Handler: Check Achievement Condition for a specific user
+ */
+function lpdh_ajax_check_achievement_condition() {
+    check_ajax_referer('lpdh_ach_nonce', 'security');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Permission denied');
+    }
+
+    $ach_id = intval($_POST['ach_id']);
+    $user_id = intval($_POST['user_id']);
+
+    if (!$ach_id || !$user_id) {
+        wp_send_json_error('Invalid ID');
+    }
+
+    $post = get_post($ach_id);
+    if (!$post) wp_send_json_error('Achievement not found');
+
+    $cond_type = get_field('condition_type', $ach_id);
+    $is_yearly = get_field('yearly', $ach_id);
+    $year = ($is_yearly && $cond_type !== 'spinned_wheel_count') ? get_field('year', $ach_id) : 'global';
+
+    $stats = lpdh_get_user_stats($user_id, $year);
+
+    $operator = get_field('operator', $ach_id);
+    $target_val = get_field('value', $ach_id);
+    $user_val = 0;
+
+    // Special Check: Deck with Commander/Partner
+    if ($cond_type === 'deck_commander_partner') {
+        $target_name = get_field('value', $ach_id);
+        $operator = get_field('operator', $ach_id);
+        $is_met = lpdh_check_deck_commander($user_id, $target_name, $operator, $year);
+        $user_val = $is_met ? 1 : 0;
+        $target_val = 1;
+    } else {
+        $user_val = isset($stats[$cond_type]) ? $stats[$cond_type] : 0;
+        $is_met = lpdh_check_achievement_condition($user_val, $operator, $target_val);
+    }
+
+    $labels = [
+        'manual' => 'Manual',
+        'win_count' => 'Wins',
+        'clown_count' => 'Last Places',
+        'event_count' => 'Events',
+        'deck_count' => 'Decks',
+        'days_registered' => 'Registration',
+        'elo' => 'Elo',
+        'deck_with_banned' => 'Banned',
+        'deck_commander_partner' => 'Cmdr/Part',
+        'spinned_wheel_count' => 'Spins'
+    ];
+
+    wp_send_json_success([
+        'user_value' => $user_val,
+        'target_value' => $target_val,
+        'operator' => $operator,
+        'is_met' => $is_met,
+        'condition_label' => isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type,
+        'year_context' => $year
+    ]);
+}
+add_action('wp_ajax_lpdh_check_achievement_condition', 'lpdh_ajax_check_achievement_condition');
 
 /**
  * Add "Duplicate for next year" to Bulk Actions for Achievements
