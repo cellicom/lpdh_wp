@@ -107,11 +107,11 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                         <!-- Achievements -->
                         <?php
                         $user_achievements = lpdh_get_user_achievements($author_id);
-                        if (!empty($user_achievements)): 
+                        if (!empty($user_achievements)):
                             $total_ach = count($user_achievements);
                             $visible_ach = array_slice($user_achievements, 0, 5);
                             $hidden_count = $total_ach - 5;
-                        ?>
+                            ?>
                             <div class="author-achievements mt-4">
                                 <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
                                 <div class="d-flex justify-content-center flex-wrap gap-3 align-items-center">
@@ -123,37 +123,46 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                     <?php endforeach; ?>
 
                                     <?php if ($hidden_count > 0): ?>
-                                        <button type="button" class="btn btn-outline-secondary rounded-circle lpdh-achievement-icon" 
-                                                data-bs-toggle="modal" data-bs-target="#achievementsModal">
+                                        <button type="button" class="btn btn-outline-secondary rounded-circle lpdh-achievement-icon"
+                                            data-bs-toggle="modal" data-bs-target="#achievementsModal">
                                             <small>+<?php echo $hidden_count; ?></small>
                                         </button>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            
+
                             <!-- Achievements Modal -->
-                            <div class="modal fade" id="achievementsModal" tabindex="-1" aria-labelledby="achievementsModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="achievementsModal" tabindex="-1"
+                                aria-labelledby="achievementsModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                                     <div class="modal-content bg-dark text-light border-secondary">
                                         <div class="modal-header border-secondary py-2">
-                                            <h5 class="modal-title fs-6" id="achievementsModalLabel">Unlocked Achievements (<?php echo $total_ach; ?>)</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title fs-6" id="achievementsModalLabel">Unlocked Achievements
+                                                (<?php echo $total_ach; ?>)</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body p-0">
+                                        <div class="modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
                                             <div class="list-group list-group-flush">
                                                 <?php foreach ($user_achievements as $badge): ?>
-                                                <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
-                                                    <div class="me-3">
-                                                        <?php echo lpdh_render_achievement_icon($badge, 'icon-compact'); ?>
-                                                    </div>
-                                                    <div class="flex-grow-1 text-start">
-                                                        <div class="d-flex w-100 justify-content-between align-items-center mb-0">
-                                                            <h6 class="mb-0 text-warning small fw-bold"><?php echo esc_html($badge['title']); ?></h6>
-                                                            <small class="text-info text-nowrap ms-2" style="font-size: 0.75rem;"><?php echo esc_html($badge['date_unlocked']); ?></small>
+                                                    <div
+                                                        class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
+                                                        <div class="me-3">
+                                                            <?php echo lpdh_render_achievement_icon($badge, 'icon-compact'); ?>
                                                         </div>
-                                                        <p class="mb-0 text-white-50" style="font-size: 0.8rem; line-height: 1.2;"><?php echo esc_html($badge['description']); ?></p>
+                                                        <div class="flex-grow-1 text-start">
+                                                            <div
+                                                                class="d-flex w-100 justify-content-between align-items-center mb-0">
+                                                                <h6 class="mb-0 text-warning small fw-bold">
+                                                                    <?php echo esc_html($badge['title']); ?></h6>
+                                                                <small class="text-info text-nowrap ms-2"
+                                                                    style="font-size: 0.75rem;"><?php echo esc_html($badge['date_unlocked']); ?></small>
+                                                            </div>
+                                                            <p class="mb-0 text-white-50"
+                                                                style="font-size: 0.8rem; line-height: 1.2;">
+                                                                <?php echo esc_html($badge['description']); ?></p>
+                                                        </div>
                                                     </div>
-                                                </div>
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
