@@ -4270,14 +4270,23 @@ function ajax_update_leaderboard_rankings()
         )
     );
 
-    $events = get_posts($args);
+    $all_events = get_posts($args);
 
-    // 1. Calcolo Classifica Attuale
-    $result = lpdh_calculate_rankings_data($events);
+    // Filter events to only include those that actually happened (have rankings)
+    $valid_events = array();
+    foreach ($all_events as $e) {
+        $rank_data = get_field('event_ranking', $e->ID);
+        if (!empty($rank_data) && is_array($rank_data)) {
+            $valid_events[] = $e;
+        }
+    }
+
+    // 1. Calcolo Classifica Attuale (Basata solo sui tornei validi)
+    $result = lpdh_calculate_rankings_data($valid_events);
 
     // 2. Calcolo Classifica Precedente (per il trend)
-    // Escludiamo l'ultimo torneo per vedere come è cambiata la classifica dopo l'ultimo evento
-    $previous_events = $events;
+    // Escludiamo l'ultimo torneo VALIDO per vedere come è cambiata la classifica dopo l'ultimo evento reale
+    $previous_events = $valid_events;
     if (count($previous_events) > 0) {
         array_pop($previous_events);
     }
