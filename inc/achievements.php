@@ -59,6 +59,85 @@ function lpdh_achievement_archive_order($query) {
     }
 }
 add_action('pre_get_posts', 'lpdh_achievement_archive_order');
+ 
+/**
+ * Define custom columns for Achievement List
+ */
+function lpdh_achievement_posts_columns($columns) {
+    $new_columns = [];
+    foreach ($columns as $key => $value) {
+        $new_columns[$key] = $value;
+        if ($key === 'title') {
+            $new_columns['ach_condition'] = 'Condition';
+            $new_columns['ach_secret']    = 'Secret';
+            $new_columns['ach_year']      = 'Year';
+        }
+    }
+    return $new_columns;
+}
+add_filter('manage_achievement_posts_columns', 'lpdh_achievement_posts_columns');
+
+/**
+ * Display content for custom columns
+ */
+function lpdh_achievement_posts_custom_column($column, $post_id) {
+    switch ($column) {
+        case 'ach_condition':
+            $type = get_field('condition_type', $post_id);
+            $oper = get_field('operator', $post_id);
+            $val  = get_field('value', $post_id);
+            
+            $labels = [
+                'manual' => 'Manual',
+                'win_count' => 'Wins',
+                'clown_count' => 'Clowns',
+                'event_count' => 'Attendance',
+                'deck_count' => 'Decks',
+                'days_registered' => 'Registration',
+                'global_elo' => 'Elo',
+                'deck_with_banned' => 'Banned',
+                'deck_commander_partner' => 'Cmdr/Part',
+                'spinned_wheel_count' => 'Spins',
+            ];
+
+            if ($type === 'manual') {
+                echo 'Manual';
+            } else {
+                $type_label = isset($labels[$type]) ? $labels[$type] : $type;
+                echo '<strong>' . esc_html($type_label) . '</strong> ' . esc_html($oper) . ' ' . esc_html($val);
+            }
+            break;
+
+        case 'ach_secret':
+            $is_secret = get_field('is_secret', $post_id);
+            if ($is_secret) {
+                echo '<span class="dashicons dashicons-visibility" style="color:#d63638;" title="Secret"></span> Yes';
+            } else {
+                echo '<span class="dashicons dashicons-hidden" style="color:#999;" title="Not Secret"></span> No';
+            }
+            break;
+
+        case 'ach_year':
+            $is_yearly = get_field('yearly', $post_id);
+            $year = get_field('year', $post_id);
+            if ($is_yearly && $year) {
+                echo '<strong>' . esc_html($year) . '</strong>';
+            } else {
+                echo '<span style="color:#999;">-</span>';
+            }
+            break;
+    }
+}
+add_action('manage_achievement_posts_custom_column', 'lpdh_achievement_posts_custom_column', 10, 2);
+
+/**
+ * Make custom columns sortable
+ */
+function lpdh_achievement_sortable_columns($columns) {
+    $columns['ach_year'] = 'ach_year';
+    return $columns;
+}
+add_filter('manage_edit-achievement_sortable_columns', 'lpdh_achievement_sortable_columns');
 
 
 // -----------------------------------------------------------------------------
@@ -682,16 +761,9 @@ function lpdh_format_achievement($post, $date_timestamp = null)
         $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
     }
 
-    $title = $post->post_title;
-    $is_yearly = get_field('yearly', $post->ID);
-    $year = get_field('year', $post->ID);
-    if ($is_yearly && $year) {
-        $title .= ' (' . $year . ')';
-    }
-
     return [
         'id' => $post->ID,
-        'title' => $title,
+        'title' => $post->post_title,
         'description' => $post->post_content,
         'icon' => $icon,
         'icon_color' => get_field('icon_color', $post->ID),
@@ -1274,10 +1346,12 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
         // Regex to find 4-digit year 20XX
         $title = $original_post->post_title;
         $year_found = false;
+        $detected_next_year = false;
         
-        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found) {
+        $new_title = preg_replace_callback('/\b(20[2-9][0-9])\b/', function($matches) use (&$year_found, &$detected_next_year) {
             $year_found = true;
-            return intval($matches[1]) + 1;
+            $detected_next_year = intval($matches[1]) + 1;
+            return $detected_next_year;
         }, $title);
 
         if (!$year_found) {
@@ -1315,8 +1389,6 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
                 
                 foreach ($values as $value) {
                      // ACF Unserialization handled by add_post_meta automatically if we pass raw?
-                     // get_post_meta returns unserialized by default for single=false? No, returns array of values.
-                     // IMPORTANT: If we use add_post_meta, we should pass the raw value.
                      // get_post_meta($id) returns [ key => [val1, val2] ]
                      
                      // Use simpler approach: Loop specific ACF fields we know
@@ -1325,6 +1397,23 @@ function lpdh_achievement_handle_bulk_actions($redirect_to, $doaction, $post_ids
                      
                      // Let's use get_post_meta duplication which is standard for clones
                      add_post_meta($new_post_id, $key, maybe_unserialize($value));
+                }
+            }
+
+            // --- Update Year Field ---
+            $is_yearly = get_post_meta($post_id, 'yearly', true);
+            if ($is_yearly) {
+                $old_year = get_post_meta($post_id, 'year', true);
+                $new_year = false;
+
+                if ($old_year) {
+                    $new_year = intval($old_year) + 1;
+                } elseif ($detected_next_year) {
+                    $new_year = $detected_next_year;
+                }
+
+                if ($new_year) {
+                    update_post_meta($new_post_id, 'year', $new_year);
                 }
             }
         }

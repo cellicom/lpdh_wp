@@ -73,12 +73,6 @@ if (is_user_logged_in()) {
                                         if ($is_secret && !$is_unlocked) {
                                             $title_text = "Secret Achievement";
                                             $desc_text = "This achievement is secret. It can be unlocked in a specific mode.";
-                                        } else {
-                                            $is_yearly = get_field('yearly', $id);
-                                            $year = get_field('year', $id);
-                                            if ($is_yearly && $year) {
-                                                $title_text .= ' (' . $year . ')';
-                                            }
                                         }
                                         ?>
                                         
