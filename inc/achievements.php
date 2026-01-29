@@ -80,7 +80,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Which stat determines this achievement?',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '100',
                 ),
                 'choices' => array(
                     'manual' => 'Manual Achievement',
@@ -103,7 +103,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Choose how to compare the user stat with the threshold value.',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'choices' => array(
                     '>' => 'Greater than (>)',
@@ -133,7 +133,7 @@ if (function_exists('acf_add_local_field_group')):
                 'instructions' => 'Numeric or user text value.',
                 'required' => 1,
                 'wrapper' => array(
-                    'width' => '33',
+                    'width' => '50',
                 ),
                 'default_value' => '0',
                 'conditional_logic' => array(
@@ -682,9 +682,16 @@ function lpdh_format_achievement($post, $date_timestamp = null)
         $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
     }
 
+    $title = $post->post_title;
+    $is_yearly = get_field('yearly', $post->ID);
+    $year = get_field('year', $post->ID);
+    if ($is_yearly && $year) {
+        $title .= ' (' . $year . ')';
+    }
+
     return [
         'id' => $post->ID,
-        'title' => $post->post_title,
+        'title' => $title,
         'description' => $post->post_content,
         'icon' => $icon,
         'icon_color' => get_field('icon_color', $post->ID),
@@ -995,7 +1002,16 @@ function lpdh_render_manage_achievements_page() {
                             </div>
                             <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                    <h3 style="margin: 0; font-size: 1.1em;">
+                                        <?php echo esc_html($post->post_title); ?>
+                                        <?php 
+                                        $is_yearly = get_field('yearly', $post->ID);
+                                        $year = get_field('year', $post->ID);
+                                        if ($is_yearly && $year): ?>
+                                            <i class="fa-solid fa-calendar-days" style="margin-left: 5px; opacity: 0.7; font-size: 0.8em;" title="Yearly Achievement"></i>
+                                            <span style="font-size: 0.8em; opacity: 0.8;">(<?php echo esc_html($year); ?>)</span>
+                                        <?php endif; ?>
+                                    </h3>
                                     <?php if (current_user_can('edit_post', $post->ID)): ?>
                                         <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
                                             <i class="fas fa-edit"></i>
