@@ -9,6 +9,11 @@
 defined('ABSPATH') || exit;
 
 /**
+ * Global Constants
+ */
+define('LPDH_DEFAULT_ELO', 1200);
+
+/**
  * Dependency Check: Advanced Custom Fields PRO
  * This theme requires ACF Pro to function correctly.
  */
@@ -3323,10 +3328,14 @@ function render_player_stats_page()
 
     // --- Optimization: Filter main query if not global ---
     if ($selected_year !== 'global') {
+        $sel_y = intval($selected_year);
+        $prev_y = $sel_y - 1;
+        $next_y = $sel_y + 1;
+
         $event_args['meta_query'] = array(
             array(
                 'key' => 'event_date',
-                'value' => array($selected_year . '-01-01', $selected_year . '-12-31'),
+                'value' => array($prev_y . '-01-01', $next_y . '-12-31'),
                 'compare' => 'BETWEEN',
                 'type' => 'DATE'
             )
@@ -3339,6 +3348,7 @@ function render_player_stats_page()
     $elo_history_labels = array();
     $elo_history_data = array();
     $last_processed_year = '';
+    $elo_starts_added = array();
 
     if ($events_query->have_posts()) {
         while ($events_query->have_posts()) {
@@ -3351,7 +3361,7 @@ function render_player_stats_page()
 
             // --- Yearly ELO Reset ---
             if ($event_year && $event_year !== $last_processed_year) {
-                $player_elos = array(); // Reset all to 1200
+                $player_elos = array(); // Reset all to LPDH_DEFAULT_ELO
                 $last_processed_year = $event_year;
             }
 
@@ -3382,12 +3392,12 @@ function render_player_stats_page()
                         continue;
 
                     if (!isset($player_elos[$name])) {
-                        $player_elos[$name] = 1200;
+                        $player_elos[$name] = LPDH_DEFAULT_ELO;
                     }
                     $event_participants_names[] = $name;
                     $total_event_elo += $player_elos[$name];
                 }
-                $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : 1200;
+                $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : LPDH_DEFAULT_ELO;
 
                 // Process Rankings for Stats & ELO Update
                 $user_found_in_event = false;
@@ -3437,19 +3447,35 @@ function render_player_stats_page()
                         // Found the user
                         $user_found_in_event = true;
 
-                        // Collect Yearly Stats (Global)
+                        // --- Yearly Stats (for Win Rate Trend) ---
                         if ($event_year) {
-                            if (!isset($yearly_stats[$event_year])) {
-                                $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
+                            $y_val = intval($event_year);
+                            // If not global, only collect for prev, current, next
+                            if ($selected_year === 'global' || ($y_val >= $prev_y && $y_val <= $next_y)) {
+                                if (!isset($yearly_stats[$event_year])) {
+                                    $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
+                                }
+                                $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
+                                $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                                $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                                $yearly_stats[$event_year]['wins'] += $m_win;
+                                $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
                             }
-                            $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
-                            $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                            $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                            $yearly_stats[$event_year]['wins'] += $m_win;
-                            $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
                         }
 
-                        // Filter for main stats
+                        // Add to raw history for Elo Chart
+                        if (!empty($name)) {
+                            // First tournament of the year injection
+                            if ($event_year && !isset($elo_starts_added[$event_year])) {
+                                $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
+                                $elo_history_data[] = LPDH_DEFAULT_ELO;
+                                $elo_starts_added[$event_year] = true;
+                            }
+                            $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
+                            $elo_history_data[] = round($player_elos[$name]);
+                        }
+
+                        // Filter for main summary stats
                         if ($selected_year !== 'global' && $event_year !== $selected_year) {
                             continue;
                         }
@@ -3494,24 +3520,32 @@ function render_player_stats_page()
                             $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
                         }
 
-                        // Add to events list
+                        // Add to events list (for the table)
                         $player_events[] = array(
                             'event_post' => get_post($event_id),
                             'ranking' => $rank,
                             'event_date' => $event_date_raw,
                             'total_players' => $total_players
                         );
-
-                        // Track ELO history for chart
-                        if (!empty($name)) {
-                            $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
-                            $elo_history_data[] = round($player_elos[$name]);
-                        }
                     }
                 }
             }
         }
         wp_reset_postdata();
+    }
+
+    // --- Global ELO Aggregation by Year ---
+    if ($selected_year === 'global' && !empty($elo_history_data)) {
+        $year_points = array();
+        foreach($elo_history_labels as $idx => $label) {
+            $parts = explode('/', $label);
+            if (count($parts) === 3) {
+                $y = '20' . $parts[2];
+                $year_points[$y] = $elo_history_data[$idx];
+            }
+        }
+        $elo_history_labels = array_keys($year_points);
+        $elo_history_data = array_values($year_points);
     }
 
     // Reverse events for display (Newest first)
@@ -4136,13 +4170,13 @@ function lpdh_calculate_rankings_data($events)
                     continue;
 
                 if (!isset($player_elos[$name])) {
-                    $player_elos[$name] = 1200; // ELO Base
+                    $player_elos[$name] = LPDH_DEFAULT_ELO; // ELO Base
                 }
                 $event_participants_names[] = $name;
                 $total_event_elo += $player_elos[$name];
             }
 
-            $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : 1200;
+            $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : LPDH_DEFAULT_ELO;
 
             foreach ($rankings as $rank) {
                 $name = isset($rank['name']) ? trim($rank['name']) : '';
@@ -4178,7 +4212,7 @@ function lpdh_calculate_rankings_data($events)
                         'count' => 0,
                         'first' => 0,
                         'last' => 0,
-                        'elo' => 1200
+                        'elo' => LPDH_DEFAULT_ELO
                     );
                 } else {
                     // Update user_id if it was missing and now we have it
