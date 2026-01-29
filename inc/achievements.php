@@ -55,6 +55,7 @@ function lpdh_achievement_archive_order($query) {
     if (!is_admin() && $query->is_main_query() && $query->is_post_type_archive('achievement')) {
         $query->set('orderby', 'date'); // Date Published
         $query->set('order', 'DESC');   // Newest First
+        $query->set('posts_per_page', -1); // Show all achievements
     }
 }
 add_action('pre_get_posts', 'lpdh_achievement_archive_order');
@@ -89,6 +90,9 @@ if (function_exists('acf_add_local_field_group')):
                     'deck_count' => 'Number of Decks Created',
                     'days_registered' => 'Days Since Registration',
                     'global_elo' => 'Global Elo (Future Check)',
+                    'deck_with_banned' => 'Deck with Banned Card',
+                    'deck_commander_partner' => 'Deck with Commander/Partner',
+                    'spinned_wheel_count' => 'Spinned the Wheel (Count)',
                 ),
             ),
             array(
@@ -268,7 +272,12 @@ function lpdh_get_user_stats($user_id)
                         }
                     }
                 }
-            }
+                    }
+        }
+    }
+
+    // 2.2 Spinned the Wheel
+    $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
         }
     }
 
@@ -349,6 +358,7 @@ function lpdh_get_user_stats($user_id)
         'event_count' => $events_attended,
         'clown_count' => $clown_count,
         'deck_with_banned' => $deck_with_banned,
+        'spinned_wheel_count' => $spinned_wheel_count,
         'days_registered' => $days_since_reg,
         'global_elo' => 0 // Future implementation
     ];
@@ -371,6 +381,66 @@ function lpdh_check_achievement_condition($user_val, $operator, $target_val)
         case '<=': return $user_val <= $target_val;
         case '<': return $user_val < $target_val;
         default: return false;
+    }
+}
+
+
+/**
+ * Checks if user has a deck with a specific Commander or Partner.
+ * 
+ * @param int    $user_id
+ * @param string $target_name
+ * @param string $operator ('CONTAINS', 'EQUALS', etc)
+ * @return bool
+ */
+function lpdh_check_deck_commander($user_id, $target_name, $operator = 'CONTAINS') {
+    if (empty($target_name)) return false;
+
+    $user_decks = get_posts([
+        'post_type' => 'deck',
+        'author' => $user_id,
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'fields' => 'ids'
+    ]);
+
+    foreach ($user_decks as $d_id) {
+        // ACF Fields for Commander/Partner
+        // Assuming they are text fields or post objects? usually text or relation.
+        // Based on previous context, they might be text names or IDs. 
+        // Let's assume text for names as per request "nome preciso".
+        $commander = get_field('commander', $d_id); // Returns string or object
+        $partner = get_field('partner', $d_id);
+
+        if (is_object($commander)) $commander = $commander->post_title;
+        if (is_object($partner)) $partner = $partner->post_title;
+
+        $commander = is_string($commander) ? $commander : '';
+        $partner = is_string($partner) ? $partner : '';
+
+        // Check Logic
+        if (lpdh_compare_string($commander, $target_name, $operator) || 
+            lpdh_compare_string($partner, $target_name, $operator)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * String comparison helper
+ */
+function lpdh_compare_string($haystack, $needle, $operator) {
+    if (empty($haystack) || empty($needle)) return false;
+    
+    $haystack = strtolower(trim($haystack));
+    $needle = strtolower(trim($needle));
+
+    if ($operator === 'EQUALS' || $operator === '=') {
+        return $haystack === $needle;
+    } else {
+        // Default to CONTAINS
+        return strpos($haystack, $needle) !== false;
     }
 }
 
@@ -451,6 +521,21 @@ function lpdh_get_user_achievements($user_id)
             // Skip Manual achievements
             if ($cond_type === 'manual') {
                 continue;
+            }
+
+            // Special Check: Deck with Commander/Partner
+            if ($cond_type === 'deck_commander_partner') {
+                $target_name = get_field('value', $post->ID);
+                $operator = get_field('operator', $post->ID);
+                
+                if (lpdh_check_deck_commander($user_id, $target_name, $operator)) {
+                    // Unlocked!
+                    $unlock_date = time();
+                    $unlocked_data[$post->ID] = $unlock_date;
+                    $final_list[] = lpdh_format_achievement($post, $unlock_date);
+                    $newly_unlocked = true;
+                }
+                continue; // Skip standard stat check
             }
 
             // Lazy load stats only if needed
