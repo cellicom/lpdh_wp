@@ -391,6 +391,7 @@ function lpdh_get_user_achievements($user_id)
     // Retrieve stored achievements
     // Expected Format: [ ID => 'timestamp_or_date_string', ... ]
     $unlocked_data = get_user_meta($user_id, 'lpdh_unlocked_achievements', true);
+    $migrated = false;
 
     // STRICT VALIDATION (New Plan)
     // We do not guess. We only accept [ID => Timestamp].
@@ -803,8 +804,39 @@ function lpdh_render_manage_achievements_page() {
                                 <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
                             </div>
                             <div style="flex-grow: 1;">
-                                <h3 style="margin: 0 0 5px; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
-                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_trim_words($post->post_content, 10); ?></p>
+                                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                    <h3 style="margin: 0; font-size: 1.1em;"><?php echo esc_html($post->post_title); ?></h3>
+                                    <?php if (current_user_can('edit_post', $post->ID)): ?>
+                                        <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank" style="margin-left: 10px; color: #666; font-size: 0.9em;" title="Edit Achievement">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                                <p style="margin: 0 0 10px; color: #666; font-size: 0.9em;"><?php echo wp_kses_post($post->post_content); ?></p>
+                                
+                                <?php 
+                                    // Condition Display
+                                    $cond_type = get_field('condition_type', $post->ID);
+                                    $labels = [
+                                        'manual' => 'Manual',
+                                        'win_count' => 'Wins',
+                                        'clown_count' => 'Last Places',
+                                        'event_count' => 'Events',
+                                        'deck_count' => 'Decks',
+                                        'days_registered' => 'Days Registered',
+                                        'global_elo' => 'Elo',
+                                        'deck_with_banned' => 'Banned Decks',
+                                    ];
+                                    $label = isset($labels[$cond_type]) ? $labels[$cond_type] : $cond_type;
+                                    
+                                    if ($cond_type !== 'manual') {
+                                        $operator = get_field('operator', $post->ID);
+                                        $value = get_field('value', $post->ID);
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>' . esc_html($label) . ' ' . esc_html($operator) . ' ' . esc_html($value) . '</strong></p>';
+                                    } else {
+                                        echo '<p style="margin: 0 0 5px; font-size: 0.85em; color: #888;">Condition: <strong>Manual Grant</strong></p>';
+                                    }
+                                ?>
                                 
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
                                     <label class="switch">
