@@ -115,26 +115,10 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                             <div class="author-achievements mt-4">
                                 <h5 class="text-uppercase text-warning small mb-3">Achievements</h5>
                                 <div class="d-flex justify-content-center flex-wrap gap-3 align-items-center">
-                                    <?php foreach ($visible_ach as $badge): 
-                                        $bg_style = '';
-                                        $bg_class = 'bg-primary'; 
-                                        
-                                        if (!empty($badge['color_hex'])) {
-                                            $darker = lpdh_adjust_brightness($badge['color_hex'], -40);
-                                            $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($badge['color_hex']) . ', ' . esc_attr($darker) . ');"';
-                                            $bg_class = ''; 
-                                        } elseif (!empty($badge['color_class'])) {
-                                            $bg_class = 'bg-' . esc_attr($badge['color_class']);
-                                        } elseif (!empty($badge['color'])) {
-                                             $bg_class = 'bg-' . esc_attr($badge['color']);
-                                        }
-                                    ?>
+                                    <?php foreach ($visible_ach as $badge): ?>
                                         <div class="achievement-badge" data-bs-toggle="tooltip"
                                             title="<?php echo esc_attr($badge['title']); ?>">
-                                            <?php $icon_col = isset($badge['icon_color']) && $badge['icon_color'] ? $badge['icon_color'] : '#ffffff'; ?>
-                                            <div class="lpdh-achievement-icon <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
-                                                <i class="<?php echo esc_attr($badge['icon']); ?>" style="color: <?php echo esc_attr($icon_col); ?>;"></i>
-                                            </div>
+                                            <?php echo lpdh_render_achievement_icon($badge); ?>
                                         </div>
                                     <?php endforeach; ?>
 
@@ -157,23 +141,10 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                                         </div>
                                         <div class="modal-body p-0">
                                             <div class="list-group list-group-flush">
-                                                <?php foreach ($user_achievements as $badge):
-                                                    $bg_style = '';
-                                                    $bg_class = 'bg-primary';
-                                                    if (!empty($badge['color_hex'])) {
-                                                        $darker = lpdh_adjust_brightness($badge['color_hex'], -40);
-                                                        $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($badge['color_hex']) . ', ' . esc_attr($darker) . ');"';
-                                                        $bg_class = '';
-                                                    } elseif (!empty($badge['color_class'])) {
-                                                        $bg_class = 'bg-' . esc_attr($badge['color_class']);
-                                                    }
-                                                ?>
+                                                <?php foreach ($user_achievements as $badge): ?>
                                                 <div class="list-group-item bg-dark text-light border-secondary d-flex align-items-center p-2">
                                                     <div class="me-3">
-                                                        <?php $icon_col = isset($badge['icon_color']) && $badge['icon_color'] ? $badge['icon_color'] : '#ffffff'; ?>
-                                                        <div class="lpdh-achievement-icon icon-compact <?php echo $bg_class; ?> shadow-sm" <?php echo $bg_style; ?>>
-                                                            <i class="<?php echo esc_attr($badge['icon']); ?>" style="color: <?php echo esc_attr($icon_col); ?>;"></i>
-                                                        </div>
+                                                        <?php echo lpdh_render_achievement_icon($badge, 'icon-compact'); ?>
                                                     </div>
                                                     <div class="flex-grow-1 text-start">
                                                         <div class="d-flex w-100 justify-content-between align-items-center mb-0">

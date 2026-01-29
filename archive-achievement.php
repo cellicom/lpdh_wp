@@ -34,36 +34,16 @@ if (is_user_logged_in()) {
                         $is_unlocked = in_array($id, $user_unlocked_ids);
                         $opacity_class = $is_unlocked ? '' : 'opacity-50 grayscale';
                         $border_class = $is_unlocked ? 'border-warning' : 'border-secondary';
-                        
-                        $icon = get_field('icon', $id);
-                        if (is_string($icon) && strpos($icon, '<i') !== false) {
-                            preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
-                            $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
-                        }
-                        
-                        $color_hex = get_field('color_hex', $id);
-                        $color_class = get_field('color_class', $id);
-                        
-                        $bg_style = '';
-                        $bg_class = 'bg-primary';
-                        if (!empty($color_hex)) {
-                            $darker = lpdh_adjust_brightness($color_hex, -40);
-                            $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($color_hex) . ', ' . esc_attr($darker) . ');"';
-                            $bg_class = '';
-                        } elseif (!empty($color_class)) {
-                            $bg_class = 'bg-' . esc_attr($color_class);
-                        }
                     ?>
                         <div class="col">
                             <a href="<?php the_permalink(); ?>" class="text-decoration-none">
                                 <div class="card h-100 bg-dark text-light shadow-sm <?php echo $border_class; ?> achievement-card">
                                     <div class="card-body text-center py-4 <?php echo $opacity_class; ?>">
                                         
-                                        <?php $icon_color = get_field('icon_color', $id) ?: '#ffffff'; ?>
-                                        <div class="lpdh-achievement-icon icon-lg <?php echo $bg_class; ?> shadow-sm mb-3 mx-auto" 
-                                             <?php echo $bg_style; ?>>
-                                            <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
-                                        </div>
+                                        <?php 
+                                        $badge_data = lpdh_format_achievement(get_post($id), $is_unlocked ? time() : null);
+                                        echo lpdh_render_achievement_icon($badge_data, 'icon-lg mb-3 mx-auto'); 
+                                        ?>
                                         
                                         <?php
                                         $title_text = get_the_title();

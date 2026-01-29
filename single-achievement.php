@@ -16,58 +16,37 @@ get_header();
                 
                 // data
                 $id = get_the_ID();
-                $icon = get_field('icon', $id);
-                $color_hex = get_field('color_hex', $id);
-                $color_class = get_field('color_class', $id);
                 
-                // Icon Sanitization (shared logic, ideally helper function but inline ok for template)
-                if (is_string($icon) && strpos($icon, '<i') !== false) {
-                    preg_match('/class=["\']([^"\']+)["\']/', $icon, $matches);
-                    $icon = isset($matches[1]) ? $matches[1] : trim(strip_tags($icon));
+                // Check Status (Done early for display logic and title masking)
+                $is_unlocked_check = false;
+                $unlock_date_val = '';
+                if (is_user_logged_in()) {
+                    $uid_check = get_current_user_id();
+                    $list_check = lpdh_get_user_achievements($uid_check);
+                    foreach ($list_check as $item_check) {
+                        if ($item_check['id'] == $id) {
+                            $is_unlocked_check = true;
+                            $unlock_date_val = $item_check['date_unlocked'];
+                            break;
+                        }
+                    }
                 }
-
-                $bg_style = '';
-                $bg_class = 'bg-primary';
-                if (!empty($color_hex)) {
-                    $darker = lpdh_adjust_brightness($color_hex, -40);
-                    $bg_style = 'style="background: linear-gradient(135deg, ' . esc_attr($color_hex) . ', ' . esc_attr($darker) . ');"';
-                    $bg_class = '';
-                } elseif (!empty($color_class)) {
-                    $bg_class = 'bg-' . esc_attr($color_class);
-                }
-            ?>
+                ?>
 
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     <div class="text-center py-5">
                         <div class="container" style="max-width: 800px;">
                             
                             <!-- Icon -->
-                            <?php $icon_color = get_field('icon_color', get_the_ID()) ?: '#ffffff'; ?>
-                            <div class="lpdh-achievement-icon icon-xl <?php echo $bg_class; ?> shadow-sm mb-4 mx-auto" 
-                                 <?php echo $bg_style; ?>>
-                                <i class="<?php echo esc_attr($icon); ?>" style="color: <?php echo esc_attr($icon_color); ?>;"></i>
-                            </div>
+                            <?php 
+                            $badge_data = lpdh_format_achievement(get_post($id), $is_unlocked_check ? time() : null);
+                            echo lpdh_render_achievement_icon($badge_data, 'icon-xl mb-4 mx-auto'); 
+                            ?>
 
                             <?php
                             // Secret Check
                             $is_secret = get_field('is_secret', $id);
                             
-                            // Check Status (Done early for display logic)
-                            // Note: Logic duplicated from below slightly, but necessary for title masking
-                            $is_unlocked_check = false;
-                            $unlock_date_val = '';
-                            if (is_user_logged_in()) {
-                                $uid_check = get_current_user_id();
-                                $list_check = lpdh_get_user_achievements($uid_check);
-                                foreach ($list_check as $item_check) {
-                                    if ($item_check['id'] == $id) {
-                                        $is_unlocked_check = true;
-                                        $unlock_date_val = $item_check['date_unlocked'];
-                                        break;
-                                    }
-                                }
-                            }
-
                             $title_text = get_the_title();
                             $content_text = get_the_content();
 
