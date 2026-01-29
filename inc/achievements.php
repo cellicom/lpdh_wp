@@ -111,9 +111,9 @@ function lpdh_achievement_posts_custom_column($column, $post_id) {
         case 'ach_secret':
             $is_secret = get_field('is_secret', $post_id);
             if ($is_secret) {
-                echo '<span class="dashicons dashicons-visibility" style="color:#d63638;" title="Secret"></span> Yes';
+                echo '<span class="dashicons dashicons-hidden" style="color:#d63638;" title="Secret"></span> Yes';
             } else {
-                echo '<span class="dashicons dashicons-hidden" style="color:#999;" title="Not Secret"></span> No';
+                echo '<span class="dashicons dashicons-visibility" style="color:#999;" title="Not Secret"></span> No';
             }
             break;
 
