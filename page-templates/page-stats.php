@@ -348,83 +348,24 @@ get_header(); ?>
 
             <!-- Summary Cards -->
             <?php
-            // --- Prepare Additional Stats ---
-
-            // 1. Elo
-            // If year is selected, use the last recorded Elo in history for that year
-            // Otherwise use final calculated Elo
-            $user_display_name = $target_user->display_name;
-            $current_elo = isset($player_elos[$user_display_name]) ? round($player_elos[$user_display_name]) : 1200;
+            // --- Prepare Centralized Stats ---
+            $player_stats = lpdh_get_player_stats($user_id, $selected_year);
             
-            $display_elo = $current_elo;
+            // Override local loop variables with official values from Leaderboard CPT
+            $total_attendance   = $player_stats['event_count'];
+            $total_wins         = $player_stats['win_count'];
+            $total_last_places   = $player_stats['clown_count'];
+            $display_elo        = $player_stats['elo'];
             
-            // IF YEAR SELECTED: Attempt to fetch finalized Elo from Leaderboard CPT
-            if ($selected_year !== 'global') {
-                $leaderboard_args = array(
-                    'post_type' => 'leaderboard',
-                    'posts_per_page' => 1,
-                    'meta_key' => 'year',
-                    'meta_value' => $selected_year
-                );
-                $leaderboard_query = new WP_Query($leaderboard_args);
-                $found_leaderboard_elo = false;
-
-                if ($leaderboard_query->have_posts()) {
-                    $lid = $leaderboard_query->posts[0]->ID;
-                    $json = get_field('rankings_json', $lid);
-                    if ($json) {
-                        $data = json_decode($json, true);
-                        if (is_array($data)) {
-                            foreach ($data as $entry) {
-                                // Check by ID first if available, then Name
-                                $entry_id = isset($entry['id']) ? $entry['id'] : (isset($entry['player_id']) ? $entry['player_id'] : 0);
-                                $entry_name = isset($entry['name']) ? $entry['name'] : '';
-                                
-                                if ( ($entry_id && $entry_id == $user_id) || ($entry_name && strcasecmp($entry_name, $target_user->display_name) === 0) ) {
-                                    if (isset($entry['elo'])) {
-                                        $display_elo = round($entry['elo']);
-                                        $found_leaderboard_elo = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Fallback to calculated history if no leaderboard entry found
-                if (!$found_leaderboard_elo && !empty($elo_history_data)) {
-                    $display_elo = end($elo_history_data);
-                }
-            }
-
             // 2. Achievements
             $total_achievements = wp_count_posts('achievement')->publish;
             $unlocked_achievements_count = 0;
             if (function_exists('lpdh_get_user_achievements')) {
                 $unlocked_list = lpdh_get_user_achievements($user_id);
-                // Filter by year if selected
                 if ($selected_year !== 'global') {
                     foreach ($unlocked_list as $item) {
-                        // Assuming date_unlocked is "d/m/Y H:i" OR timestamp? 
-                        // In achievements.php line 527: $unlock_date = time(); then lpdh_format_achievement uses date(..., $unlock_date)
-                        // It stores TIMESTAMP in array? No, get_user_achievements returns formatted array. 
-                        // Let's check lpdh_format_achievement return. Usually formatted string. 
-                        // If formatted "d/m/Y", we parse it.
-                        // Wait, lpdh_get_user_achievements returns array of arrays with 'date_unlocked'.
-                        // Let's safe check date parsing.
-                        $u_date = $item['date_unlocked']; 
-                        // Try strtotime. If "29/01/2026", strtotime might fail with slashes if assumed US format.
-                        // Standard lpdh date format seems to be d M Y or something. 
-                        // Actually, let's just use the timestamp if available? 
-                        // lpdh_get_user_achievements returns formatted date. 
-                        // Let's try to parse year from string.
-                        // If d/m/Y, substr(-4) works.
-                        $u_year = '';
-                        if (preg_match('/\d{4}/', $u_date, $matches)) {
-                            $u_year = $matches[0];
-                        }
-                        if ($u_year === $selected_year) {
+                        $u_date = isset($item['date_unlocked_ts']) ? date('Y', $item['date_unlocked_ts']) : '';
+                        if ($u_date === $selected_year) {
                             $unlocked_achievements_count++;
                         }
                     }
@@ -436,26 +377,11 @@ get_header(); ?>
                 $unlocked_achievements_count = is_array($unlocked_meta) ? count($unlocked_meta) : 0;
             }
 
-            // 3. Roulette (Global Only - No timestamp log available)
+            // 3. Roulette (Global Only)
             $lifetime_spins = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
 
             // 4. Decks (Published Year)
-            $deck_args = array(
-                'post_type' => 'deck',
-                'author' => $user_id,
-                'post_status' => 'publish',
-                'posts_per_page' => -1,
-                'fields' => 'ids'
-            );
-            if ($selected_year !== 'global') {
-                $deck_args['date_query'] = array(
-                    array(
-                        'year'  => $selected_year,
-                    ),
-                );
-            }
-            $decks_query_count = new WP_Query($deck_args);
-            $count_user_decks = $decks_query_count->found_posts;
+            $count_user_decks = $player_stats['deck_count'];
             ?>
 
             <div class="row g-4 mb-5">

@@ -360,167 +360,7 @@ endif;
  * @param string $year 'global' or 'YYYY'
  * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'elo', ...]
  */
-function lpdh_get_user_stats($user_id, $year = 'global')
-{
-    static $stats_cache = [];
-    $cache_key = $user_id . '_' . $year;
-    if (isset($stats_cache[$cache_key])) {
-        return $stats_cache[$cache_key];
-    }
 
-    // 1. Days Registered
-    $user_data = get_userdata($user_id);
-    $registered = $user_data ? strtotime($user_data->user_registered) : time();
-    $comparison_time = time();
-    
-    if ($year !== 'global') {
-        $end_of_year = strtotime($year . '-12-31 23:59:59');
-        if ($end_of_year < $comparison_time) {
-            $comparison_time = $end_of_year;
-        }
-    }
-    
-    $days_since_reg = floor(($comparison_time - $registered) / (60 * 60 * 24));
-    if ($days_since_reg < 0) $days_since_reg = 0;
-
-    // 2. Decks Count
-    $deck_args = [
-        'post_type' => 'deck',
-        'author' => $user_id,
-        'post_status' => 'publish',
-        'posts_per_page' => -1,
-        'fields' => 'ids'
-    ];
-    if ($year !== 'global') {
-        $deck_args['date_query'] = [['year' => $year]];
-    }
-    $user_decks = get_posts($deck_args);
-    $deck_count = count($user_decks);
-
-    // 2.1 Deck with Banned Cards
-    $deck_with_banned = 0;
-    if (function_exists('lpdh_get_banned_card_names')) {
-        $banned_cards = lpdh_get_banned_card_names();
-        if (!empty($banned_cards) && !empty($user_decks)) {
-            foreach ($user_decks as $d_id) {
-                $list_text = get_field('decklist_text', $d_id);
-                $commander = get_field('commander', $d_id);
-                $partner = get_field('partner', $d_id);
-
-                if (is_object($commander)) $commander = $commander->post_title;
-                if (is_object($partner)) $partner = $partner->post_title;
-
-                $full_check_text = strtolower($list_text . ' ' . $commander . ' ' . $partner);
-
-                if (!empty($full_check_text)) {
-                    foreach ($banned_cards as $card) {
-                        if (strpos($full_check_text, $card) !== false) {
-                            $deck_with_banned++;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 2.2 Spinned the Wheel (Ignore year filter for Roulette)
-    $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
-
-
-    // 3. Events, Wins, Clowns & Elo from Leaderboard(s)
-    $events_attended = 0;
-    $win_count = 0;
-    $clown_count = 0;
-    $final_elo = 0;
-
-    $leaderboard_args = [
-        'post_type' => 'leaderboard',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-    ];
-
-    if ($year !== 'global') {
-        $leaderboard_args['meta_query'] = [
-            [
-                'key' => 'year',
-                'value' => $year
-            ]
-        ];
-    }
-
-    $lb_posts = get_posts($leaderboard_args);
-
-    if (!empty($lb_posts)) {
-        foreach ($lb_posts as $lb_post) {
-            $json = get_field('rankings_json', $lb_post->ID);
-            if (!$json) continue;
-
-            $lb_data = json_decode($json, true);
-            if (!is_array($lb_data)) continue;
-
-            foreach ($lb_data as $entry) {
-                $e_id = isset($entry['user_id']) ? $entry['user_id'] : (isset($entry['id']) ? $entry['id'] : 0);
-                $e_name = isset($entry['name']) ? $entry['name'] : '';
-                
-                // Match by ID primarily, fallback to Name
-                if (($e_id && $e_id == $user_id) || ($e_name && $user_data && strcasecmp($e_name, $user_data->display_name) === 0)) {
-                    
-                    // Sum up stats
-                    $events_attended += isset($entry['count']) ? intval($entry['count']) : 0;
-                    $win_count += isset($entry['first']) ? intval($entry['first']) : 0;
-                    $clown_count += isset($entry['last']) ? intval($entry['last']) : 0;
-                    
-                    // Elo: MaximumReached if global, literal if yearly
-                    $current_entry_elo = isset($entry['elo']) ? round($entry['elo']) : 0;
-                    if ($year === 'global') {
-                        if ($current_entry_elo > $final_elo) {
-                            $final_elo = $current_entry_elo;
-                        }
-                    } else {
-                        $final_elo = $current_entry_elo;
-                    }
-                    
-                    break; // Found user in this leaderboard, move to next year
-                }
-            }
-        }
-    }
-
-    $res = [
-        'deck_count' => $deck_count,
-        'win_count' => $win_count,
-        'event_count' => $events_attended,
-        'clown_count' => $clown_count,
-        'deck_with_banned' => $deck_with_banned,
-        'spinned_wheel_count' => $spinned_wheel_count,
-        'days_registered' => $days_since_reg,
-        'elo' => $final_elo
-    ];
-    
-    $stats_cache[$cache_key] = $res;
-    return $res;
-}
-
-/**
- * Checks a single condition against a value.
- */
-function lpdh_check_achievement_condition($user_val, $operator, $target_val)
-{
-    if (is_numeric($user_val) && is_numeric($target_val)) {
-        $user_val = floatval($user_val);
-        $target_val = floatval($target_val);
-    }
-
-    switch ($operator) {
-        case '>': return $user_val > $target_val;
-        case '>=': return $user_val >= $target_val;
-        case '=': return $user_val == $target_val;
-        case '<=': return $user_val <= $target_val;
-        case '<': return $user_val < $target_val;
-        default: return false;
-    }
-}
 
 
 /**
@@ -691,13 +531,13 @@ function lpdh_get_user_achievements($user_id)
             }
 
             // Fetch stats for this achievement's year context
-            $stats = lpdh_get_user_stats($user_id, $year);
+            $stats = lpdh_get_player_stats($user_id, $year);
 
             $operator = get_field('operator', $post->ID);
             $target_val = get_field('value', $post->ID);
             $user_val = isset($stats[$cond_type]) ? $stats[$cond_type] : 0;
 
-            if (lpdh_check_achievement_condition($user_val, $operator, $target_val)) {
+            if (lpdh_check_stat_condition($user_val, $operator, $target_val)) {
                 // Unlocked!
                 $unlock_date = time();
                 $unlocked_data[$post->ID] = $unlock_date;
@@ -1106,7 +946,7 @@ function lpdh_render_manage_achievements_page() {
                                     <?php echo $is_unlocked ? $unlock_date : '-'; ?>
                                 </div>
                                 <?php if (!$is_unlocked && $cond_type !== 'manual'): ?>
-                                    <div style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px;">
+                                    <div style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: right;">
                                         <button type="button" class="button button-small lpdh-ach-check" 
                                                 data-ach-id="<?php echo $post->ID; ?>" 
                                                 data-user-id="<?php echo $selected_user_id; ?>">
@@ -1369,7 +1209,7 @@ function lpdh_ajax_check_achievement_condition() {
     $is_yearly = get_field('yearly', $ach_id);
     $year = ($is_yearly && $cond_type !== 'spinned_wheel_count') ? get_field('year', $ach_id) : 'global';
 
-    $stats = lpdh_get_user_stats($user_id, $year);
+    $stats = lpdh_get_player_stats($user_id, $year);
 
     $operator = get_field('operator', $ach_id);
     $target_val = get_field('value', $ach_id);
@@ -1384,7 +1224,7 @@ function lpdh_ajax_check_achievement_condition() {
         $target_val = 1;
     } else {
         $user_val = isset($stats[$cond_type]) ? $stats[$cond_type] : 0;
-        $is_met = lpdh_check_achievement_condition($user_val, $operator, $target_val);
+        $is_met = lpdh_check_stat_condition($user_val, $operator, $target_val);
     }
 
     $labels = [
