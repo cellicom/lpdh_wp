@@ -39,19 +39,20 @@ $player_events = array();
 $yearly_stats = array(); // year => [wins, total]
 
 // Get all events
-$events_query = new WP_Query(array(
+$event_args = array(
     'post_type' => 'event',
     'posts_per_page' => -1,
     'post_status' => 'publish',
     'meta_key' => 'event_date',
     'orderby' => 'meta_value',
     'order' => 'ASC' // Chronological for ELO calc
-));
+);
 
-// Collect available years
+// Collect available years (needed for filter UI)
+$events_years_query = new WP_Query($event_args);
 $available_years = array();
-if ($events_query->have_posts()) {
-    foreach ($events_query->posts as $p) {
+if ($events_years_query->have_posts()) {
+    foreach ($events_years_query->posts as $p) {
         $d = get_field('event_date', $p->ID);
         if ($d) {
             $y = date('Y', strtotime($d));
@@ -71,10 +72,24 @@ if (!in_array($current_year, $available_years)) {
 
 $selected_year = isset($_GET['stats_year']) ? $_GET['stats_year'] : $current_year;
 
+// --- Optimization: Filter main query if not global ---
+if ($selected_year !== 'global') {
+    $event_args['meta_query'] = array(
+        array(
+            'key' => 'event_date',
+            'value' => array($selected_year . '-01-01', $selected_year . '-12-31'),
+            'compare' => 'BETWEEN',
+            'type' => 'DATE'
+        )
+    );
+}
+$events_query = new WP_Query($event_args);
+
 // ELO Tracking
 $player_elos = array();
 $elo_history_labels = array();
 $elo_history_data = array();
+$last_processed_year = '';
 
 if ($events_query->have_posts()) {
     while ($events_query->have_posts()) {
@@ -84,6 +99,12 @@ if ($events_query->have_posts()) {
         // Filter by year
         $event_date_raw = get_field('event_date', $event_id);
         $event_year = $event_date_raw ? date('Y', strtotime($event_date_raw)) : '';
+
+        // --- Yearly ELO Reset ---
+        if ($event_year && $event_year !== $last_processed_year) {
+            $player_elos = array(); // Reset all to 1200
+            $last_processed_year = $event_year;
+        }
 
         $rankings = get_field('event_ranking', $event_id);
 
