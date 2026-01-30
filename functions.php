@@ -4272,6 +4272,8 @@ function lpdh_calculate_rankings_data($events)
                     $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
                     $expected_score = $expected_score_rate * $games_played;
                     $k_factor = 32 / $games_played; // K-factor standard / Game Played
+                    //$k_factor = 32; // K-factor standard 
+
 
                     $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score);
 
