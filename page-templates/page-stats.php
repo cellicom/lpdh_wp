@@ -172,16 +172,9 @@ if ($events_query->have_posts()) {
                     $games_played = $wins + $draws + $losses;
 
                     if ($games_played > 0) {
-                        $actual_score = $wins + ($draws * 0.5);
-                        $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
-                        $expected_score = $expected_score_rate * $games_played;
-                        $k_factor = 32;
-
                         $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
-                        $position_adjustment = 20 * ($rank_score - 0.5);
-
-                        $player_elos[$name] = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;
+                        $elo_data = lpdh_calculate_elo($current_elo, $wins, $draws, $losses, $avg_elo, $pos, $total_players);
+                        $player_elos[$name] = $elo_data['new_elo'];
                     }
                 }
 

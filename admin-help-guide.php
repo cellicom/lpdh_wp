@@ -404,24 +404,42 @@ function render_help_guide_page()
                 <h4 style="margin-top: 25px; margin-bottom: 10px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
                     ranking:</p>
-                <div
-                    style="background: #2d333b; padding: 20px; border-radius: 8px; border: 1px solid #444c56; margin-top: 15px;">
-                    <pre
-                        style="margin: 0; color: #adbac7; font-size: 13px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; overflow-x: auto;">
-                                        // Core Calculation Snippet
-                                        $actual_score = $wins + ($draws * 0.5);
-                                        $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
-                                        $expected_score = $expected_score_rate * $games_played;
-                                        $k_factor = 32 / ($games_played);
+                <pre
+                    style="margin: 0; color: #adbac7; font-size: 13px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; overflow-x: auto;">
+                                                // Centralized ELO Calculation logic in functions.php
+                                                function lpdh_calculate_elo($current_elo, $wins, $draws, $losses, $avg_elo, $pos, $total_players) {
+                                                    $games_played = $wins + $draws + $losses;
+                                            
+                                                    if ($games_played <= 0) {
+                                                        return array(
+                                                            'new_elo' => $current_elo,
+                                                            'k_factor' => 0,
+                                                            'expected_score' => 0,
+                                                            'position_adjustment' => 0
+                                                        );
+                                                    }
 
-                                        // Position Adjustment
-                                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                                        $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
-                                        $position_adjustment = 20 * ($rank_score - 0.5);
+                                                    $actual_score = $wins + ($draws * 0.5);
+                                                    $expected_score_rate = 1 / (1 + pow(10, ($avg_elo - $current_elo) / 400));
+                                                    $expected_score = $expected_score_rate * $games_played;
 
-                                        // New ELO Result
-                                        $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;</pre>
-                </div>
+                                                    // K-factor logic based on theme setting
+                                                    $k_factor_divide = get_option('lpdh_elo_k_factor_divide_by_game', 1);
+                                                    $k_factor = ($k_factor_divide) ? 32 / $games_played : 32;
+
+                                                    // Position Adjustment (rewarding top finishes)
+                                                    $rank_score = ($total_players > 1) ? ($total_players - $pos) / ($total_players - 1) : 1;
+                                                    $position_adjustment = 20 * ($rank_score - 0.5);
+
+                                                    $new_elo = $current_elo + $k_factor * ($actual_score - $expected_score) + $position_adjustment;
+
+                                                    return array(
+                                                        'new_elo' => $new_elo,
+                                                        'k_factor' => $k_factor,
+                                                        'expected_score' => $expected_score,
+                                                        'position_adjustment' => $position_adjustment
+                                                    );
+                                                }</pre>
             </section>
 
             <!-- SECTION: PROFILES -->
@@ -479,6 +497,11 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Social Links</strong></td>
                             <td>Configure Instagram, Discord, Facebook, and X links for the footer.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Calculate ELO: K Factor</strong></td>
+                            <td>Toggle whether to divide the K-factor by the number of games played (32 / games) or use a
+                                flat value (32).</td>
                         </tr>
                     </tbody>
                 </table>
