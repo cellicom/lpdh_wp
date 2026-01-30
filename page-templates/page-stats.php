@@ -207,13 +207,6 @@ if ($events_query->have_posts()) {
                         }
                     }
 
-                    $player_events[] = array(
-                        'event_id' => $event_id,
-                        'ranking' => $rank,
-                        'event_date' => $event_date_raw,
-                        'total_players' => $total_players
-                    );
-
                     // --- ELO History ---
                     if (!empty($name)) {
                         // Only add to Elo chart if global OR if it matches the selected year
@@ -236,6 +229,13 @@ if ($events_query->have_posts()) {
                     if ($selected_year !== 'global' && $event_year !== $selected_year) {
                         continue;
                     }
+
+                    $player_events[] = array(
+                        'event_id' => $event_id,
+                        'ranking' => $rank,
+                        'event_date' => $event_date_raw,
+                        'total_players' => $total_players
+                    );
 
                     $total_attendance++;
                     $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
