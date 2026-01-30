@@ -77,7 +77,7 @@ if ($selected_year !== 'global') {
     $sel_y = intval($selected_year);
     $prev_y = $sel_y - 1;
     $next_y = $sel_y + 1;
-    
+
     $event_args['meta_query'] = array(
         array(
             'key' => 'event_date',
@@ -94,7 +94,7 @@ $player_elos = array();
 $elo_history_labels = array();
 $elo_history_data = array();
 $last_processed_year = '';
-$elo_starts_added = array(); // track if we added the 1200 start for a year
+$elo_starts_added = array(); // track if we added the 1500 start for a year
 
 if ($events_query->have_posts()) {
     while ($events_query->have_posts()) {
@@ -185,85 +185,85 @@ if ($events_query->have_posts()) {
                     }
                 }
 
-                    if ($p_id == $user_id) {
-                        // Found the user
-                        
-                        // Capture stats for global calculation OR for the 3-year range
-                        // (Note: we already filtered the query to 3 years if not global)
-                        
-                        // --- Yearly Stats (for Win Rate Trend) ---
-                        if ($event_year) {
-                            $y_val = intval($event_year);
-                            // If not global, only collect for prev, current, next
-                            if ($selected_year === 'global' || ($y_val >= $prev_y && $y_val <= $next_y)) {
-                                if (!isset($yearly_stats[$event_year])) {
-                                    $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
-                                }
-                                $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
-                                $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                                $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                                $yearly_stats[$event_year]['wins'] += $m_win;
-                                $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
+                if ($p_id == $user_id) {
+                    // Found the user
+
+                    // Capture stats for global calculation OR for the 3-year range
+                    // (Note: we already filtered the query to 3 years if not global)
+
+                    // --- Yearly Stats (for Win Rate Trend) ---
+                    if ($event_year) {
+                        $y_val = intval($event_year);
+                        // If not global, only collect for prev, current, next
+                        if ($selected_year === 'global' || ($y_val >= $prev_y && $y_val <= $next_y)) {
+                            if (!isset($yearly_stats[$event_year])) {
+                                $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
                             }
+                            $m_win = intval(isset($rank['win']) ? $rank['win'] : 0);
+                            $m_draw = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                            $m_lose = intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                            $yearly_stats[$event_year]['wins'] += $m_win;
+                            $yearly_stats[$event_year]['total'] += ($m_win + $m_draw + $m_lose);
                         }
+                    }
 
-                        $player_events[] = array(
-                            'event_id' => $event_id,
-                            'ranking' => $rank,
-                            'event_date' => $event_date_raw,
-                            'total_players' => $total_players
-                        );
+                    $player_events[] = array(
+                        'event_id' => $event_id,
+                        'ranking' => $rank,
+                        'event_date' => $event_date_raw,
+                        'total_players' => $total_players
+                    );
 
-                        // --- ELO History ---
-                        if (!empty($name)) {
-                            // Only add to Elo chart if global OR if it matches the selected year
-                            if ($selected_year === 'global' || $event_year === $selected_year) {
-                                // If this is the first tournament of the year, inject the 1200 start point if not present
-                                if ($event_year && !isset($elo_starts_added[$event_year])) {
-                                    // For chart continuity, we add a point at Jan 1st
-                                    $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
-                                    $elo_history_data[] = LPDH_DEFAULT_ELO;
-                                    $elo_starts_added[$event_year] = true;
-                                }
-                                
-                                $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
-                                $elo_history_data[] = round($player_elos[$name]);
+                    // --- ELO History ---
+                    if (!empty($name)) {
+                        // Only add to Elo chart if global OR if it matches the selected year
+                        if ($selected_year === 'global' || $event_year === $selected_year) {
+                            // If this is the first tournament of the year, inject the 1500 start point if not present
+                            if ($event_year && !isset($elo_starts_added[$event_year])) {
+                                // For chart continuity, we add a point at Jan 1st
+                                $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
+                                $elo_history_data[] = LPDH_DEFAULT_ELO;
+                                $elo_starts_added[$event_year] = true;
                             }
-                        }
 
-                        // Filter for main stats and charts (Attendance, Wins, etc.)
-                        // Only count for the SELECTED year
-                        if ($selected_year !== 'global' && $event_year !== $selected_year) {
-                            continue;
+                            $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
+                            $elo_history_data[] = round($player_elos[$name]);
                         }
+                    }
 
-                        $total_attendance++;
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                    // Filter for main stats and charts (Attendance, Wins, etc.)
+                    // Only count for the SELECTED year
+                    if ($selected_year !== 'global' && $event_year !== $selected_year) {
+                        continue;
+                    }
+
+                    $total_attendance++;
+                    $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                    if ($pos === 1)
+                        $total_wins++;
+                    if ($index === $total_players - 1)
+                        $total_last_places++;
+
+                    $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
+                    if ($deck_id) {
+                        if (!isset($deck_usage_counts[$deck_id]))
+                            $deck_usage_counts[$deck_id] = 0;
+                        $deck_usage_counts[$deck_id]++;
+
+                        if (!isset($deck_performance[$deck_id])) {
+                            $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                        }
+                        $deck_performance[$deck_id]['attendance']++;
                         if ($pos === 1)
-                            $total_wins++;
-                        if ($index === $total_players - 1)
-                            $total_last_places++;
-
-                        $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
-                        if ($deck_id) {
-                            if (!isset($deck_usage_counts[$deck_id]))
-                                $deck_usage_counts[$deck_id] = 0;
-                            $deck_usage_counts[$deck_id]++;
-
-                            if (!isset($deck_performance[$deck_id])) {
-                                $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
-                            }
-                            $deck_performance[$deck_id]['attendance']++;
-                            if ($pos === 1)
-                                $deck_performance[$deck_id]['wins']++;
-                            $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
-                            $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                            $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                        }
+                            $deck_performance[$deck_id]['wins']++;
+                        $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
+                        $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                        $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
                     }
                 }
             }
         }
+    }
     wp_reset_postdata();
 }
 
@@ -274,11 +274,11 @@ if ($selected_year === 'global' && !empty($elo_history_data)) {
     // Since events are ASC, we just take the last point of each year
     $temp_elo_labels = array();
     $temp_elo_data = array();
-    
+
     // player_events is chronological ASC in the loop above
     // Let's use a mapping approach
     $year_points = array();
-    foreach($elo_history_labels as $idx => $label) {
+    foreach ($elo_history_labels as $idx => $label) {
         // Label is dd/mm/yy
         $parts = explode('/', $label);
         if (count($parts) === 3) {
@@ -286,7 +286,7 @@ if ($selected_year === 'global' && !empty($elo_history_data)) {
             $year_points[$y] = $elo_history_data[$idx];
         }
     }
-    
+
     $elo_history_labels = array_keys($year_points);
     $elo_history_data = array_values($year_points);
 }
@@ -398,7 +398,7 @@ get_header(); ?>
                 <div class="col-md-4">
                     <form method="get" action="<?php echo esc_url(get_permalink()); ?>"
                         class="d-flex align-items-center mb-0">
-                        
+
                         <?php if (isset($_GET['page_id'])): ?>
                             <input type="hidden" name="page_id" value="<?php echo intval($_GET['page_id']); ?>">
                         <?php endif; ?>
@@ -407,7 +407,8 @@ get_header(); ?>
                             <input type="hidden" name="user_id" value="<?php echo intval($_GET['user_id']); ?>">
                         <?php endif; ?>
                         <label for="stats_year" class="me-3 fw-bold text-nowrap">Year:</label>
-                        <select name="stats_year" id="stats_year" class="form-select select-year" onchange="this.form.submit()">
+                        <select name="stats_year" id="stats_year" class="form-select select-year"
+                            onchange="this.form.submit()">
                             <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
                             <?php foreach ($available_years as $y): ?>
                                 <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
@@ -423,13 +424,13 @@ get_header(); ?>
             <?php
             // --- Prepare Centralized Stats ---
             $player_stats = lpdh_get_player_stats($user_id, $selected_year);
-            
+
             // Override local loop variables with official values from Leaderboard CPT
-            $total_attendance   = $player_stats['event_count'];
-            $total_wins         = $player_stats['win_count'];
-            $total_last_places   = $player_stats['clown_count'];
-            $display_elo        = $player_stats['elo'];
-            
+            $total_attendance = $player_stats['event_count'];
+            $total_wins = $player_stats['win_count'];
+            $total_last_places = $player_stats['clown_count'];
+            $display_elo = $player_stats['elo'];
+
             // 2. Achievements
             $total_achievements = wp_count_posts('achievement')->publish;
             $unlocked_achievements_count = 0;
@@ -907,8 +908,6 @@ get_header(); ?>
 </script>
 
 <style>
-
-
     .bg-gold {
         background-color: #ffd700 !important;
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
