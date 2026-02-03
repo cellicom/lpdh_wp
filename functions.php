@@ -100,6 +100,20 @@ function lpdh_check_dependencies()
             <?php
         });
     }
+
+    // Check for ACF Font Awesome
+    // We check for the version constant which is reliable for this plugin
+    if (!defined('ACFFA_VERSION')) {
+        add_action('admin_notices', function () {
+            ?>
+            <div class="notice notice-error is-dismissible">
+                <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
+                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons. Please <a href="https://wordpress.org/plugins/advanced-custom-fields-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
+                </p>
+            </div>
+            <?php
+        });
+    }
 }
 add_action('admin_init', 'lpdh_check_dependencies');
 
@@ -169,22 +183,6 @@ add_filter('acf/settings/show_admin', function($show) {
     }
     return $show;
 });
-
-    // Check for ACF Font Awesome
-    // We check for the version constant which is reliable for this plugin
-    if (!defined('ACFFA_VERSION')) {
-        add_action('admin_notices', function () {
-            ?>
-            <div class="notice notice-error is-dismissible">
-                <p><strong><?php _e('LPDH Theme Warning:', 'text_domain'); ?></strong>
-                    <?php _e('ACF Font Awesome is NOT active. This theme requires this plugin for achievement icons. Please <a href="https://wordpress.org/plugins/advanced-custom-fields-font-awesome/" target="_blank">install and activate it</a>.', 'text_domain'); ?>
-                </p>
-            </div>
-            <?php
-        });
-    }
-}
-add_action('after_setup_theme', 'lpdh_check_dependencies');
 
 /**
  * Helper function to retrieve banned card names
