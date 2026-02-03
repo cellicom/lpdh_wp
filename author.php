@@ -23,7 +23,7 @@ $profile_editor_url = lpdh_get_profile_editor_url();
 
             <?php
             $is_private = get_user_meta($author_id, 'private_profile', true);
-            $can_view = !$is_private || (is_user_logged_in() && (get_current_user_id() == $author_id || current_user_can('administrator')));
+            $can_view = !$is_private || (is_user_logged_in() && (get_current_user_id() == $author_id || lpdh_can_manage_content()));
 
             if (!$can_view): ?>
                 <div class="row justify-content-center my-5">

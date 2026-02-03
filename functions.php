@@ -158,6 +158,7 @@ function lpdh_register_co_administrator_role() {
 
     // Add specific custom caps for LPDH features
     $caps['view_lpdh_help_guide'] = true;
+    $caps['manage_lpdh_content'] = true;
 
     add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
 }
@@ -186,6 +187,14 @@ add_filter('acf/settings/show_admin', function($show) {
     }
     return $show;
 });
+
+/**
+ * Centered Helper Function to check if user can manage LPDH content
+ * (Administrators and Co-Administrators)
+ */
+function lpdh_can_manage_content() {
+    return current_user_can('administrator') || current_user_can('manage_lpdh_content');
+}
 
 /**
  * Helper function to retrieve banned card names
@@ -478,10 +487,9 @@ function add_leaderboard_caps_to_admin()
                 'edit_published_leaderboards',
             );
 
-            // Also ensure Administrator has the help guide cap
-            if ($role_slug === 'administrator') {
-                $caps[] = 'view_lpdh_help_guide';
-            }
+            // Also ensure both have the new custom LPDH caps
+            $caps[] = 'view_lpdh_help_guide';
+            $caps['manage_lpdh_content'] = true;
 
             foreach ($caps as $cap) {
                 if (!$role->has_cap($cap)) {
@@ -977,7 +985,7 @@ add_filter('manage_users_custom_column', 'lpdh_populate_user_decks_column', 10, 
 function restrict_admin_menu_for_players()
 {
     // If user is admin, show everything
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1417,7 +1425,7 @@ add_action('pre_get_posts', 'restrict_deck_list_query_for_players');
 function redirect_players_to_deck_list()
 {
     // If user is admin, do nothing (admin sees normal dashboard)
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -3425,7 +3433,7 @@ function render_player_stats_page()
     $user_id = get_current_user_id();
 
     // Admin override: allow viewing other users' stats
-    if (current_user_can('administrator') && isset($_GET['stats_user_id'])) {
+    if (lpdh_can_manage_content() && isset($_GET['stats_user_id'])) {
         $user_id = intval($_GET['stats_user_id']);
     }
 

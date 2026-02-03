@@ -14,6 +14,7 @@ defined('ABSPATH') || exit;
  */
 function register_help_guide_admin_page()
 {
+    add_menu_page(
         __('Help Guide', 'text_domain'),
         __('Help Guide', 'text_domain'),
         'view_lpdh_help_guide',

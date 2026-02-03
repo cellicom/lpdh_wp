@@ -11,7 +11,7 @@
 defined('ABSPATH') || exit;
 
 // Access control: Only administrators
-if (!current_user_can('administrator')) {
+if (!lpdh_can_manage_content()) {
     wp_redirect(home_url());
     exit;
 }

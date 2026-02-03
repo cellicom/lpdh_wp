@@ -19,7 +19,7 @@ if (!is_user_logged_in()) {
 $user_id = get_current_user_id();
 
 // Admin/Moderator override: allow viewing other users' stats via URL
-if ((current_user_can('administrator') || current_user_can('editor')) && isset($_GET['user_id'])) {
+if ((lpdh_can_manage_content() || current_user_can('editor')) && isset($_GET['user_id'])) {
     $user_id = intval($_GET['user_id']);
 }
 

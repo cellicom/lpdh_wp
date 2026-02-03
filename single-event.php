@@ -236,7 +236,7 @@ get_header(); ?>
                                         </table>
                                     </div>
 
-                                    <?php if (current_user_can('administrator')):
+                                    <?php if (lpdh_can_manage_content()):
                                         $ig_url = lpdh_get_instagram_generator_url(get_the_ID());
                                         if ($ig_url): ?>
                                             <div class="text-center mt-3">
