@@ -18,30 +18,32 @@ if (!isset($players_data) || empty($players_data)) {
         $first = $players_data[0];
         $has_partner = !empty($first['partner_img']);
     ?>
-        <!-- First Place (Large) -->
-        <div class="first-place">
-            <div class="first-place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
-                <?php if ($first['commander_img']): ?>
-                    <div class="first-place-card">
-                        <img src="<?php echo esc_attr($first['commander_img']); ?>" alt="Commander">
-                    </div>
-                    <?php if ($has_partner && $first['partner_img']): ?>
-                        <div class="first-place-card">
-                            <img src="<?php echo esc_attr($first['partner_img']); ?>" alt="Partner">
+        <!-- First Place (Now Medium) -->
+        <div class="top8-first-section">
+            <div class="place-item gold">
+                <div class="place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
+                    <?php if ($first['commander_img']): ?>
+                        <div class="place-card">
+                            <img src="<?php echo esc_attr($first['commander_img']); ?>" alt="Commander">
                         </div>
+                        <?php if ($has_partner && $first['partner_img']): ?>
+                            <div class="place-card">
+                                <img src="<?php echo esc_attr($first['partner_img']); ?>" alt="Partner">
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </div>
-            <div class="first-place-info">
-                <div class="first-place-position">1ST PLACE</div>
-                <div class="first-place-player"><?php echo esc_html($first['player_name']); ?></div>
-                <div class="first-place-commanders">
-                    <?php 
-                    echo esc_html($first['commander_name']);
-                    if ($first['partner_name']) {
-                        echo ' / ' . esc_html($first['partner_name']);
-                    }
-                    ?>
+                </div>
+                <div class="place-info">
+                    <div class="place-position">1ST PLACE</div>
+                    <div class="place-player"><?php echo esc_html($first['player_name']); ?></div>
+                    <div class="place-commanders">
+                        <?php 
+                        echo esc_html($first['commander_name']);
+                        if ($first['partner_name']) {
+                            echo ' / ' . esc_html($first['partner_name']);
+                        }
+                        ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,14 +144,34 @@ if (!isset($players_data) || empty($players_data)) {
     height: 100%;
 }
 
-.top8-podium .first-place {
-    margin-bottom: 30px;
+.top8-first-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
 }
 
 .top8-medium-row {
-    margin-bottom: 35px !important;
+    margin-bottom: 30px !important;
     justify-content: center !important;
     gap: 50px !important;
+}
+
+/* Gold Theme for shrunken 1st place */
+.gold.place-item .place-card::before {
+    background: linear-gradient(145deg, #FFD700 0%, #B8860B 25%, #FFD700 50%, #B8860B 75%, #FFD700 100%);
+    box-shadow: 
+        0 0 40px rgba(255, 215, 0, 0.6),
+        0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.gold.place-item .place-card::after {
+    border: 3px solid #FFD700;
+    box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.gold.place-item .place-position {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .top8-footer-row {
