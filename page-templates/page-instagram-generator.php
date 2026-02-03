@@ -727,7 +727,10 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         /* === VAPORWAVE THEME === */
         .instagram-vaporwave {
-            background: linear-gradient(180deg, #05001e 0%, #1a0033 50%, #05001e 100%);
+            background-image: url('<?php echo get_stylesheet_directory_uri(); ?>/assets/img/bg/vaporwave.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .instagram-vaporwave::before {
@@ -735,6 +738,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             position: absolute;
             inset: 0;
             background: 
+                linear-gradient(180deg, rgba(5, 0, 30, 0.4) 0%, rgba(26, 0, 51, 0.2) 50%, rgba(5, 0, 30, 0.4) 100%),
                 radial-gradient(circle at 30% 40%, rgba(255, 113, 206, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 70% 60%, rgba(1, 205, 254, 0.15) 0%, transparent 50%),
                 repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 113, 206, 0.03) 2px, rgba(255, 113, 206, 0.03) 4px);
@@ -810,7 +814,10 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         /* === VAPORWAVE GREEN THEME === */
         .instagram-vaporwave-green {
-            background: linear-gradient(180deg, #07241B 0%, #0a2d23 50%, #07241B 100%);
+            background-image: url('<?php echo get_stylesheet_directory_uri(); ?>/assets/img/bg/vaporwave-green.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .instagram-vaporwave-green::before {
@@ -818,6 +825,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             position: absolute;
             inset: 0;
             background: 
+                linear-gradient(180deg, rgba(7, 36, 27, 0.4) 0%, rgba(10, 45, 35, 0.2) 50%, rgba(7, 36, 27, 0.4) 100%),
                 radial-gradient(circle at 30% 40%, rgba(177, 198, 114, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 70% 60%, rgba(33, 186, 69, 0.1) 0%, transparent 50%);
             z-index: 1;

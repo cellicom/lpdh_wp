@@ -212,7 +212,7 @@ if (!isset($players_data) || empty($players_data)) {
 
 /* Small frames consistent with larger ones but scaled and WHITE */
 .top8-footer-row .place-card::before {
-    background: #ffffff !important;
+    background: rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
 }
 
