@@ -1027,11 +1027,11 @@ $place_name = $event_place ? $event_place->post_title : '';
 
 <body>
     <div class="container">
-        <!-- Selectors (Moved to top) -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="theme-selector">
-                    <label for="ig-theme-select" class="form-label fw-bold">🎨 Select Theme:</label>
+        <!-- Selectors Area -->
+        <div class="selectors-container mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-md-6">
+                    <label for="ig-theme-select" class="form-label fw-bold">🎨 Select Theme</label>
                     <select id="ig-theme-select" class="form-select form-select-lg">
                         <option value="instagram-fantasy" selected>🏰 Epic Fantasy</option>
                         <option value="instagram-vaporwave">🌸 Vaporwave</option>
@@ -1040,10 +1040,8 @@ $place_name = $event_place ? $event_place->post_title : '';
                         <option value="instagram-bootscore">📘 Bootstrap Classic</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="type-selector">
-                    <label for="ig-type-select" class="form-label fw-bold">🏆 Select Type:</label>
+                <div class="col-md-6">
+                    <label for="ig-type-select" class="form-label fw-bold">🏆 Select Type</label>
                     <select id="ig-type-select" class="form-select form-select-lg">
                         <option value="top3" <?php selected($ig_type, 'top3'); ?>>Top 3</option>
                         <option value="top4" <?php selected($ig_type, 'top4'); ?>>Top 4 (Default)</option>
