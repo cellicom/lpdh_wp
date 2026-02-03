@@ -40,10 +40,10 @@ $rankings = get_field('field_event_ranking', $event_id);
 $primary_color = get_option('lpdh_theme_primary_color', '#6a1b9a');
 $secondary_color = get_option('lpdh_theme_secondary_color', '#00bcd4');
 
-// Extract top 3
-$top3 = array();
-if (is_array($rankings) && count($rankings) >= 3) {
-    for ($i = 0; $i < 3 && $i < count($rankings); $i++) {
+// Extract top 4
+$top4 = array();
+if (is_array($rankings) && count($rankings) > 0) {
+    for ($i = 0; $i < 4 && $i < count($rankings); $i++) {
         $rank = $rankings[$i];
         $player_deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : '';
 
@@ -66,6 +66,8 @@ if (is_array($rankings) && count($rankings) >= 3) {
         $deck_name = isset($rank['deck']) ? $rank['deck'] : '';
         $commander_img = '';
         $partner_img = '';
+        $commander_name = '';
+        $partner_name = '';
 
         if ($player_deck_id) {
             $deck_post = get_post($player_deck_id);
@@ -73,15 +75,21 @@ if (is_array($rankings) && count($rankings) >= 3) {
                 $deck_name = $deck_post->post_title;
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
+                
+                // Get commander and partner names
+                $commander_name = get_field('commander', $player_deck_id);
+                $partner_name = get_field('partner', $player_deck_id);
             }
         }
 
-        $top3[] = array(
+        $top4[] = array(
             'position' => $i + 1,
             'player_name' => $player_name,
             'deck_name' => $deck_name,
             'commander_img' => $commander_img,
-            'partner_img' => $partner_img
+            'partner_img' => $partner_img,
+            'commander_name' => $commander_name,
+            'partner_name' => $partner_name
         );
     }
 }
@@ -129,24 +137,62 @@ $place_name = $event_place ? $event_place->post_title : '';
         .instagram-image {
             width: 1080px;
             height: 1350px;
-            background: linear-gradient(135deg, <?php echo esc_attr($primary_color); ?> 0%, <?php echo esc_attr($secondary_color); ?> 100%);
+            background: #1a1a1a;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
 
-        /* Decorative Background Pattern */
+        /* Epic Fantasy Background */
         .instagram-image::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-            opacity: 0.3;
-            transform: rotate(20deg);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            z-index: 1;
+        }
+
+        /* Parchment Border Effect */
+        .instagram-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 40px solid transparent;
+            border-image: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.6) 0%, 
+                rgba(210, 180, 140, 0.4) 25%,
+                rgba(139, 69, 19, 0.6) 50%,
+                rgba(210, 180, 140, 0.4) 75%,
+                rgba(139, 69, 19, 0.6) 100%) 40;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Red Crack Effects */
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, transparent 48%, rgba(139, 0, 0, 0.3) 49%, rgba(139, 0, 0, 0.3) 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, rgba(139, 0, 0, 0.3) 49%, rgba(139, 0, 0, 0.3) 51%, transparent 52%);
+            background-size: 800px 800px;
+            background-position: -200px -200px, 600px -200px;
+            opacity: 0.4;
+            z-index: 1;
+            pointer-events: none;
         }
 
         /* Content Wrapper */
@@ -156,41 +202,56 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 60px;
+            padding: 80px 60px 60px;
         }
 
         /* Header Section */
         .header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
+            z-index: 3;
         }
 
         .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 56px;
+            font-size: 48px;
             font-weight: 900;
             color: #ffffff;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            margin-bottom: 20px;
+            letter-spacing: 3px;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.5),
+                0 4px 20px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(255, 215, 0, 0.3);
+            margin-bottom: 15px;
             line-height: 1.2;
+        }
+
+        .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
         }
 
         .event-meta {
             display: flex;
             justify-content: center;
             gap: 30px;
-            font-size: 24px;
-            color: rgba(255, 255, 255, 0.95);
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.85);
             font-weight: 500;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
         .event-meta span {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         /* Podium Section */
@@ -198,141 +259,249 @@ $place_name = $event_place ? $event_place->post_title : '';
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 40px;
-        }
-
-        .rank-item {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px 40px;
-            display: flex;
-            align-items: center;
+            justify-content: space-between;
             gap: 30px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
+            z-index: 3;
         }
 
-        .rank-item::before {
+        /* First Place - Large and Central */
+        .first-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .first-place-card {
+            position: relative;
+            width: 320px;
+            height: 450px;
+            margin-bottom: 25px;
+        }
+
+        /* Ornate Golden Frame */
+        .first-place-card::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 8px;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+            border-radius: 20px;
+            z-index: 1;
+            box-shadow: 
+                0 0 40px rgba(255, 215, 0, 0.6),
+                0 0 80px rgba(255, 215, 0, 0.4),
+                inset 0 0 30px rgba(255, 215, 0, 0.3);
         }
 
-        .rank-item.gold::before {
-            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+        /* Ornate Frame Pattern */
+        .first-place-card::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            background: linear-gradient(135deg, transparent 0%, rgba(139, 69, 19, 0.4) 50%, transparent 100%);
+            border: 5px solid rgba(139, 69, 19, 0.6);
+            border-radius: 18px;
+            z-index: 2;
+            box-shadow: 
+                inset 0 0 20px rgba(255, 215, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
-        .rank-item.silver::before {
-            background: linear-gradient(180deg, #C0C0C0 0%, #808080 100%);
-        }
-
-        .rank-item.bronze::before {
-            background: linear-gradient(180deg, #CD7F32 0%, #8B4513 100%);
-        }
-
-        .rank-item.gold {
-            transform: scale(1.05);
-        }
-
-        /* Position Badge */
-        .position {
-            flex-shrink: 0;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 42px;
-            font-weight: 900;
-            color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .gold .position {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        }
-
-        .silver .position {
-            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
-        }
-
-        .bronze .position {
-            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
-        }
-
-        /* Commander Images */
-        .commander-images {
-            flex-shrink: 0;
+        .first-place-card img {
             position: relative;
-            width: 120px;
-            height: 120px;
-        }
-
-        .commander-images img {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            z-index: 3;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
         }
 
-        .commander-images.dual {
+        /* Dual Commander Layout for First Place */
+        .first-place-card.dual {
             display: flex;
-            gap: 5px;
+            gap: 10px;
         }
 
-        .commander-images.dual img {
-            width: 57px;
+        .first-place-card.dual img {
+            width: calc(50% - 5px);
         }
 
-        /* Player Info */
-        .player-info {
-            flex: 1;
-            min-width: 0;
+        .first-place-info {
+            text-align: center;
+            max-width: 400px;
         }
 
-        .player-name {
+        .first-place-position {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.8),
+                0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .first-place-player {
             font-family: 'Montserrat', sans-serif;
             font-size: 36px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #ffffff;
             margin-bottom: 8px;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.7);
+        }
+
+        .first-place-commanders {
+            font-size: 22px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+            font-style: italic;
+            line-height: 1.4;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Bottom Three Places */
+        .bottom-three {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: auto;
+        }
+
+        .place-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 0 0 280px;
+        }
+
+        .place-card {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 15px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* Circular Metallic Frames */
+        .place-card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .place-item.silver .place-card::before {
+            background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #A8A8A8 100%);
+        }
+
+        .place-item.bronze .place-card::before {
+            background: linear-gradient(135deg, #E39A5C 0%, #CD7F32 50%, #B8743C 100%);
+        }
+
+        .place-card img {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Dual Commander for Bottom Three */
+        .place-card.dual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .place-card.dual img {
+            width: 48%;
+            height: 95%;
+            border-radius: 10px;
+        }
+
+        .place-info {
+            text-align: center;
+            max-width: 280px;
+        }
+
+        .place-position {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .place-item.silver .place-position {
+            color: #C0C0C0;
+            text-shadow: 
+                0 0 15px rgba(192, 192, 192, 0.6),
+                0 3px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .place-item.bronze .place-position {
+            color: #CD7F32;
+            text-shadow: 
+                0 0 15px rgba(205, 127, 50, 0.6),
+                0 3px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .place-player {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .deck-name {
-            font-size: 26px;
+        .place-commanders {
+            font-size: 16px;
             font-weight: 500;
-            color: #555;
+            color: rgba(255, 255, 255, 0.8);
             font-style: italic;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.3;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: auto;
-            padding-top: 40px;
+            margin-top: 20px;
+            z-index: 3;
         }
 
         .footer-text {
             font-family: 'Montserrat', sans-serif;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
         /* Instructions */
@@ -397,6 +566,7 @@ $place_name = $event_place ? $event_place->post_title : '';
                     <div class="event-title">
                         <?php echo esc_html($event_title); ?>
                     </div>
+                    <div class="subtitle">TOP 4 DECKLISTS</div>
                     <div class="event-meta">
                         <?php if ($formatted_date): ?>
                             <span>📅
@@ -413,39 +583,76 @@ $place_name = $event_place ? $event_place->post_title : '';
 
                 <!-- Podium -->
                 <div class="podium">
-                    <?php foreach ($top3 as $index => $player):
-                        $rank_class = '';
-                        if ($index === 0)
-                            $rank_class = 'gold';
-                        elseif ($index === 1)
-                            $rank_class = 'silver';
-                        elseif ($index === 2)
-                            $rank_class = 'bronze';
-                        ?>
-                        <div class="rank-item <?php echo esc_attr($rank_class); ?>">
-                            <div class="position">
-                                <?php echo $player['position']; ?>
-                            </div>
-
-                            <?php if ($player['commander_img']): ?>
-                                <div class="commander-images <?php echo $player['partner_img'] ? 'dual' : ''; ?>">
-                                    <img src="<?php echo esc_url($player['commander_img']); ?>" alt="Commander">
-                                    <?php if ($player['partner_img']): ?>
-                                        <img src="<?php echo esc_url($player['partner_img']); ?>" alt="Partner">
+                    <?php if (isset($top4[0])): 
+                        $first = $top4[0];
+                        $has_partner = !empty($first['partner_img']);
+                    ?>
+                        <!-- First Place -->
+                        <div class="first-place">
+                            <div class="first-place-card <?php echo $has_partner ? 'dual' : ''; ?>">
+                                <?php if ($first['commander_img']): ?>
+                                    <img src="<?php echo esc_url($first['commander_img']); ?>" alt="Commander">
+                                    <?php if ($has_partner): ?>
+                                        <img src="<?php echo esc_url($first['partner_img']); ?>" alt="Partner">
                                     <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="player-info">
-                                <div class="player-name">
-                                    <?php echo esc_html($player['player_name']); ?>
-                                </div>
-                                <div class="deck-name">
-                                    <?php echo esc_html($player['deck_name']); ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="first-place-info">
+                                <div class="first-place-position">1ST PLACE</div>
+                                <div class="first-place-player"><?php echo esc_html($first['player_name']); ?></div>
+                                <div class="first-place-commanders">
+                                    <?php 
+                                    echo esc_html($first['commander_name']);
+                                    if ($first['partner_name']) {
+                                        echo ' / ' . esc_html($first['partner_name']);
+                                    }
+                                    ?>
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <!-- Bottom Three Places -->
+                    <div class="bottom-three">
+                        <?php 
+                        $positions = array(
+                            1 => array('class' => 'silver', 'label' => '2ND PLACE'),
+                            2 => array('class' => 'bronze', 'label' => '3RD PLACE'),
+                            3 => array('class' => 'bronze', 'label' => '4TH PLACE')
+                        );
+                        
+                        for ($i = 1; $i <= 3; $i++):
+                            if (isset($top4[$i])):
+                                $player = $top4[$i];
+                                $has_partner = !empty($player['partner_img']);
+                        ?>
+                            <div class="place-item <?php echo $positions[$i]['class']; ?>">
+                                <div class="place-card <?php echo $has_partner ? 'dual' : ''; ?>">
+                                    <?php if ($player['commander_img']): ?>
+                                        <img src="<?php echo esc_url($player['commander_img']); ?>" alt="Commander">
+                                        <?php if ($has_partner): ?>
+                                            <img src="<?php echo esc_url($player['partner_img']); ?>" alt="Partner">
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="place-info">
+                                    <div class="place-position"><?php echo $positions[$i]['label']; ?></div>
+                                    <div class="place-player"><?php echo esc_html($player['player_name']); ?></div>
+                                    <div class="place-commanders">
+                                        <?php 
+                                        echo esc_html($player['commander_name']);
+                                        if ($player['partner_name']) {
+                                            echo ' / ' . esc_html($player['partner_name']);
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php 
+                            endif;
+                        endfor; 
+                        ?>
+                    </div>
                 </div>
 
                 <!-- Footer -->
