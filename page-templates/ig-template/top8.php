@@ -144,6 +144,10 @@ if (!isset($players_data) || empty($players_data)) {
     height: 100%;
 }
 
+.top8-podium .place-cards-wrapper {
+    margin-bottom: 20px !important;
+}
+
 .top8-first-section {
     display: flex;
     justify-content: center;
@@ -195,6 +199,10 @@ if (!isset($players_data) || empty($players_data)) {
 .top8-footer-row .place-card {
     width: 60px;
     height: 84px;
+}
+
+.top8-footer-row .place-cards-wrapper {
+    margin-bottom: 20px;
 }
 
 .top8-footer-row .place-cards-wrapper.dual .place-card {
