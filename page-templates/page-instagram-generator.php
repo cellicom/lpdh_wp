@@ -16,6 +16,34 @@ if (!current_user_can('administrator')) {
     exit;
 }
 
+// Function to convert image URL to data URL (bypass CORS)
+function get_image_as_data_url($url) {
+    if (empty($url)) {
+        return '';
+    }
+    
+    // Try to get image data
+    $response = wp_remote_get($url, array(
+        'timeout' => 15,
+        'sslverify' => false
+    ));
+    
+    if (is_wp_error($response)) {
+        return $url; // Return original URL if fetch fails
+    }
+    
+    $image_data = wp_remote_retrieve_body($response);
+    $content_type = wp_remote_retrieve_header($response, 'content-type');
+    
+    if (empty($image_data) || empty($content_type)) {
+        return $url; // Return original URL if data is empty
+    }
+    
+    // Convert to data URL
+    $base64 = base64_encode($image_data);
+    return 'data:' . $content_type . ';base64,' . $base64;
+}
+
 // Get event ID from query parameter
 $event_id = isset($_GET['ig_event_id']) ? intval($_GET['ig_event_id']) : 0;
 
@@ -76,12 +104,20 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
                 
-                // Remove query strings from image URLs to avoid CORS issues with html2canvas
+                // Remove query strings first
                 if ($commander_img) {
                     $commander_img = strtok($commander_img, '?');
                 }
                 if ($partner_img) {
                     $partner_img = strtok($partner_img, '?');
+                }
+                
+                // Convert to data URLs to bypass CORS for download
+                if ($commander_img) {
+                    $commander_img = get_image_as_data_url($commander_img);
+                }
+                if ($partner_img) {
+                    $partner_img = get_image_as_data_url($partner_img);
                 }
                 
                 // Get commander and partner names
