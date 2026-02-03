@@ -147,7 +147,7 @@ if (!isset($players_data) || empty($players_data)) {
 .top8-first-section {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 60px;
 }
 
 .top8-medium-row {
@@ -225,17 +225,24 @@ if (!isset($players_data) || empty($players_data)) {
 }
 
 .top8-footer-row .place-position {
-    font-size: 8px !important;
+    font-size: 11px !important;
     font-weight: 800;
     letter-spacing: 0.05em;
-    margin-top: 1px;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* Adjust colors for 1st place in 3+5 row */
-.gold.place-item .place-position { color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+.gold.place-item .place-position { color: #FFD700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
 .silver.place-item .place-position { color: #c0c0c0; }
 .bronze.place-item .place-position { color: #cd7f32; }
 
 /* Theme fixes */
-.instagram-vaporwave .top8-footer-row .place-player { color: #fff; }
+.instagram-vaporwave .top8-footer-row .place-player,
+.instagram-vaporwave .top8-footer-row .place-position { color: #fff; }
+
+.instagram-fantasy .top8-footer-row .place-position {
+    color: #e2d1a3;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
 </style>
