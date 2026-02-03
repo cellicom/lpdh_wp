@@ -1095,6 +1095,7 @@ function restrict_admin_menu_for_players()
         remove_menu_page('edit.php?post_type=place');
         remove_menu_page('edit.php?post_type=faq');
         remove_menu_page('edit.php?post_type=event');
+        remove_menu_page('edit.php?post_type=achievement');
     }
 }
 add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
@@ -1156,7 +1157,7 @@ function redirect_players_from_restricted_pages()
             }
 
             // Block other custom post types
-            $blocked_cpts = array('leaderboard', 'banned_card', 'place', 'faq', 'event');
+            $blocked_cpts = array('leaderboard', 'banned_card', 'place', 'faq', 'event', 'achievement');
             if (isset($_GET['post_type']) && in_array($_GET['post_type'], $blocked_cpts)) {
                 wp_redirect(admin_url());
                 exit;
