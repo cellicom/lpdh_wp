@@ -16,8 +16,8 @@ if (!current_user_can('administrator')) {
     exit;
 }
 
-// Function to convert Scryfall images to data URL (bypass CORS)
-function convert_scryfall_to_data_url($url) {
+// Function to convert Scryfall images to cached local files
+function cache_scryfall_image($url) {
     if (empty($url)) {
         return '';
     }
@@ -28,7 +28,26 @@ function convert_scryfall_to_data_url($url) {
         return $url; // Return original URL if not Scryfall
     }
     
-    error_log('Converting Scryfall image: ' . $url);
+    // Create cache directory if it doesn't exist
+    $upload_dir = wp_upload_dir();
+    $cache_dir = $upload_dir['basedir'] . '/ig-converted';
+    
+    if (!file_exists($cache_dir)) {
+        wp_mkdir_p($cache_dir);
+    }
+    
+    // Generate filename from URL hash
+    $filename = md5($url) . '.jpg';
+    $cache_file = $cache_dir . '/' . $filename;
+    $cache_url = $upload_dir['baseurl'] . '/ig-converted/' . $filename;
+    
+    // Check if already cached
+    if (file_exists($cache_file)) {
+        error_log('Using cached Scryfall image: ' . $cache_url);
+        return $cache_url;
+    }
+    
+    error_log('Downloading and caching Scryfall image: ' . $url);
     
     // Download image from Scryfall
     $response = wp_remote_get($url, array(
@@ -42,24 +61,23 @@ function convert_scryfall_to_data_url($url) {
     }
     
     $image_data = wp_remote_retrieve_body($response);
-    $content_type = wp_remote_retrieve_header($response, 'content-type');
     
     if (empty($image_data)) {
         error_log('Empty image data from Scryfall: ' . $url);
         return $url;
     }
     
-    // Default to image/jpeg if no content-type
-    if (empty($content_type)) {
-        $content_type = 'image/jpeg';
+    // Save to cache directory
+    $saved = file_put_contents($cache_file, $image_data);
+    
+    if ($saved === false) {
+        error_log('Failed to save cached image: ' . $cache_file);
+        return $url;
     }
     
-    $data_url_length = strlen($image_data);
-    error_log('Successfully converted Scryfall image. Size: ' . $data_url_length . ' bytes. Type: ' . $content_type);
+    error_log('Successfully cached Scryfall image: ' . $cache_url . ' (' . strlen($image_data) . ' bytes)');
     
-    // Convert to data URL
-    $base64 = base64_encode($image_data);
-    return 'data:' . $content_type . ';base64,' . $base64;
+    return $cache_url;
 }
 
 // Get event ID from query parameter
@@ -141,16 +159,16 @@ if (is_array($rankings) && count($rankings) > 0) {
                     error_log("Player {$i} - Partner after strtok: " . $partner_img);
                 }
                 
-                // Convert Scryfall images to data URLs (bypass CORS)
+                // Cache Scryfall images locally
                 if ($commander_img) {
-                    $commander_img = convert_scryfall_to_data_url($commander_img);
+                    $commander_img = cache_scryfall_image($commander_img);
                     $is_data_url = strpos($commander_img, 'data:') === 0;
-                    error_log("Player {$i} - Commander after conversion: " . ($is_data_url ? 'DATA URL (length: ' . strlen($commander_img) . ')' : $commander_img));
+                    error_log("Player {$i} - Commander after caching: " . ($is_data_url ? 'DATA URL (length: ' . strlen($commander_img) . ')' : $commander_img));
                 }
                 if ($partner_img) {
-                    $partner_img = convert_scryfall_to_data_url($partner_img);
+                    $partner_img = cache_scryfall_image($partner_img);
                     $is_data_url = strpos($partner_img, 'data:') === 0;
-                    error_log("Player {$i} - Partner after conversion: " . ($is_data_url ? 'DATA URL (length: ' . strlen($partner_img) . ')' : $partner_img));
+                    error_log("Player {$i} - Partner after caching: " . ($is_data_url ? 'DATA URL (length: ' . strlen($partner_img) . ')' : $partner_img));
                 }
                 
                 // Get commander and partner names
@@ -1156,8 +1174,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
     </div>
 
-    <!-- modern-screenshot Library -->
-    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4.4.39/dist/index.js"></script>
+    <!-- html2canvas Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         // Theme Switcher
@@ -1171,7 +1189,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         });
 
         // Download Image
-        document.getElementById('download-btn').addEventListener('click', async function() {
+        document.getElementById('download-btn').addEventListener('click', function() {
             const button = this;
             const originalText = button.innerHTML;
             
@@ -1181,35 +1199,38 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             const element = document.getElementById('ig-image');
             
-            try {
-                // Use modern-screenshot
-                const blob = await modernScreenshot.domToBlob(element, {
-                    width: 1080,
-                    height: 1350,
-                    scale: 2,
-                    backgroundColor: '#1a1a1a'
-                });
-                
-                // Create download link
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
-                link.href = url;
-                link.click();
-                
-                // Cleanup
-                URL.revokeObjectURL(url);
-                
-                // Reset button
-                button.disabled = false;
-                button.innerHTML = originalText;
-            } catch (error) {
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: null,
+                width: 1080,
+                height: 1350,
+                logging: false
+            }).then(canvas => {
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
+                    link.href = url;
+                    link.click();
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                    
+                    // Reset button
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }, 'image/png');
+            }).catch(function(error) {
                 console.error('Error generating image:', error);
                 console.error('Error details:', error.message, error.stack);
                 alert('Error generating image: ' + (error.message || 'Unknown error') + '\n\nCheck console for details.');
                 button.disabled = false;
                 button.innerHTML = originalText;
-            }
+            });
         });
     </script>
 </body>
