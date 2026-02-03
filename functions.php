@@ -156,6 +156,9 @@ function lpdh_register_co_administrator_role() {
         unset($caps[$cap]);
     }
 
+    // Add specific custom caps for LPDH features
+    $caps['view_lpdh_help_guide'] = true;
+
     add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
 }
 add_action('init', 'lpdh_register_co_administrator_role');
@@ -449,33 +452,41 @@ function register_leaderboard_cpt()
 add_action('init', 'register_leaderboard_cpt', 0);
 
 /**
- * Assegnazione delle capabilities 'leaderboard' solo all'Amministratore.
- * Questo assicura che solo gli admin possano gestire questo CPT.
+ * Assegnazione delle capabilities 'leaderboard' agli Amministratori e Co-Amministratori.
  */
 function add_leaderboard_caps_to_admin()
 {
-    $role = get_role('administrator');
+    $roles = array('administrator', 'co_administrator');
 
-    if ($role) {
-        $caps = array(
-            'edit_leaderboard',
-            'read_leaderboard',
-            'delete_leaderboard',
-            'edit_leaderboards',
-            'edit_others_leaderboards',
-            'publish_leaderboards',
-            'read_private_leaderboards',
-            'delete_leaderboards',
-            'delete_private_leaderboards',
-            'delete_published_leaderboards',
-            'delete_others_leaderboards',
-            'edit_private_leaderboards',
-            'edit_published_leaderboards',
-        );
+    foreach ($roles as $role_slug) {
+        $role = get_role($role_slug);
 
-        foreach ($caps as $cap) {
-            if (!$role->has_cap($cap)) {
-                $role->add_cap($cap);
+        if ($role) {
+            $caps = array(
+                'edit_leaderboard',
+                'read_leaderboard',
+                'delete_leaderboard',
+                'edit_leaderboards',
+                'edit_others_leaderboards',
+                'publish_leaderboards',
+                'read_private_leaderboards',
+                'delete_leaderboards',
+                'delete_private_leaderboards',
+                'delete_published_leaderboards',
+                'delete_others_leaderboards',
+                'edit_private_leaderboards',
+                'edit_published_leaderboards',
+            );
+
+            // Also ensure Administrator has the help guide cap
+            if ($role_slug === 'administrator') {
+                $caps[] = 'view_lpdh_help_guide';
+            }
+
+            foreach ($caps as $cap) {
+                if (!$role->has_cap($cap)) {
+                    $role->add_cap($cap);
+                }
             }
         }
     }
