@@ -1100,11 +1100,12 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             html2canvas(element, {
                 scale: 2,
-                useCORS: true,
-                allowTaint: false,
+                allowTaint: true,
+                useCORS: false,
                 backgroundColor: null,
                 width: 1080,
-                height: 1350
+                height: 1350,
+                logging: false
             }).then(canvas => {
                 // Convert canvas to blob
                 canvas.toBlob(function(blob) {
