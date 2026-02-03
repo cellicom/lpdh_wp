@@ -24,8 +24,11 @@ function convert_scryfall_to_data_url($url) {
     
     // Only convert if it's a Scryfall image
     if (strpos($url, 'scryfall.io') === false) {
+        error_log('Not a Scryfall image, keeping original: ' . $url);
         return $url; // Return original URL if not Scryfall
     }
+    
+    error_log('Converting Scryfall image: ' . $url);
     
     // Download image from Scryfall
     $response = wp_remote_get($url, array(
@@ -34,7 +37,7 @@ function convert_scryfall_to_data_url($url) {
     ));
     
     if (is_wp_error($response)) {
-        error_log('Failed to fetch Scryfall image: ' . $url);
+        error_log('Failed to fetch Scryfall image: ' . $url . ' Error: ' . $response->get_error_message());
         return $url; // Return original URL if fetch fails
     }
     
@@ -50,6 +53,9 @@ function convert_scryfall_to_data_url($url) {
     if (empty($content_type)) {
         $content_type = 'image/jpeg';
     }
+    
+    $data_url_length = strlen($image_data);
+    error_log('Successfully converted Scryfall image. Size: ' . $data_url_length . ' bytes. Type: ' . $content_type);
     
     // Convert to data URL
     $base64 = base64_encode($image_data);
