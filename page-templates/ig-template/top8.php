@@ -204,8 +204,8 @@ if (!isset($players_data) || empty($players_data)) {
 
 /* Small frames consistent with larger ones but scaled and lighter */
 .top8-footer-row .place-card::after {
-    border: 3px solid rgba(255, 255, 255, 0.6);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
     border-radius: 8px;
 }
 

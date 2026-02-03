@@ -193,6 +193,8 @@ $place_name = $event_place ? $event_place->post_title : '';
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&display=swap"
         rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -1147,12 +1149,22 @@ $place_name = $event_place ? $event_place->post_title : '';
                 height: 1350,
                 logging: false
             }).then(canvas => {
+                // Get dynamic filename parts
+                const typeSelect = document.getElementById('ig-type-select');
+                const themeSelect = document.getElementById('ig-theme-select');
+                
+                const typeName = typeSelect.options[typeSelect.selectedIndex].text.replace(/\s*\(Default\)\s*/i, '').replace(/\s+/g, '-').toUpperCase();
+                const themeName = themeSelect.options[themeSelect.selectedIndex].text.replace(/^[^\s]+\s+/, '').replace(/\s+/g, '-').toUpperCase();
+                const eventTitle = "<?php echo sanitize_title($event_title); ?>".toUpperCase();
+                
+                const finalFilename = `IG-${typeName}-${themeName}-${eventTitle}.png`;
+
                 // Convert canvas to blob
                 canvas.toBlob(function(blob) {
                     // Create download link
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
-                    link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
+                    link.download = finalFilename;
                     link.href = url;
                     link.click();
                     
