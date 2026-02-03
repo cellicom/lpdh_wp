@@ -202,9 +202,11 @@ if (!isset($players_data) || empty($players_data)) {
     height: 49px;
 }
 
-/* Small frames consistent with larger ones but scaled */
+/* Small frames consistent with larger ones but scaled and lighter */
 .top8-footer-row .place-card::after {
-    border-width: 3px; 
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
 }
 
 /* Info scaling for footer */
@@ -229,7 +231,8 @@ if (!isset($players_data) || empty($players_data)) {
     font-weight: 800;
     letter-spacing: 0.05em;
     margin-top: 2px;
-    color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 /* Adjust colors for 1st place in 3+5 row */
@@ -242,7 +245,15 @@ if (!isset($players_data) || empty($players_data)) {
 .instagram-vaporwave .top8-footer-row .place-position { color: #fff; }
 
 .instagram-fantasy .top8-footer-row .place-position {
-    color: #e2d1a3;
+    color: #f8f1e5;
     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.instagram-fantasy .top8-footer-row .place-card::after {
+    border-color: rgba(248, 241, 229, 0.5);
+}
+
+.instagram-lostwood .top8-footer-row .place-card::after {
+    border-color: rgba(248, 241, 229, 0.4);
 }
 </style>
