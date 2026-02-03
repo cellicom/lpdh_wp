@@ -283,7 +283,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         .first-place-cards-wrapper.dual {
-            gap: 20px;
+            gap: 35px;
         }
 
         .first-place-card {
@@ -390,7 +390,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-top: auto;
+            margin-top: -40px;
         }
 
         .place-item {
@@ -509,8 +509,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         /* Theme Selector */
         .theme-selector {
             max-width: 1080px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 40px auto;
+            padding: 30px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -527,6 +527,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             padding: 30px;
             border-radius: 12px;
             max-width: 1080px;
+            margin: 40px auto;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
