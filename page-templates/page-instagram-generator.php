@@ -76,6 +76,14 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
                 
+                // Remove query strings from image URLs to avoid CORS issues with html2canvas
+                if ($commander_img) {
+                    $commander_img = strtok($commander_img, '?');
+                }
+                if ($partner_img) {
+                    $partner_img = strtok($partner_img, '?');
+                }
+                
                 // Get commander and partner names
                 $commander_name = get_field('commander', $player_deck_id);
                 $partner_name = get_field('partner', $player_deck_id);
@@ -1125,7 +1133,8 @@ $place_name = $event_place ? $event_place->post_title : '';
                 }, 'image/png');
             }).catch(function(error) {
                 console.error('Error generating image:', error);
-                alert('Error generating image. Please try again.');
+                console.error('Error details:', error.message, error.stack);
+                alert('Error generating image: ' + (error.message || 'Unknown error') + '\n\nCheck console for details.');
                 button.disabled = false;
                 button.innerHTML = originalText;
             });
