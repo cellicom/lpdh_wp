@@ -1081,8 +1081,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
     </div>
 
-    <!-- html2canvas Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- dom-to-image Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
     <script>
         // Theme Switcher
@@ -1106,32 +1106,29 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             const element = document.getElementById('ig-image');
             
-            html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: null,
+            // Use dom-to-image to convert to blob
+            domtoimage.toBlob(element, {
                 width: 1080,
                 height: 1350,
-                logging: false
-            }).then(canvas => {
-                // Convert canvas to blob
-                canvas.toBlob(function(blob) {
-                    // Create download link
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
-                    link.href = url;
-                    link.click();
-                    
-                    // Cleanup
-                    URL.revokeObjectURL(url);
-                    
-                    // Reset button
-                    button.disabled = false;
-                    button.innerHTML = originalText;
-                }, 'image/png');
-            }).catch(function(error) {
+                quality: 1,
+                bgcolor: '#1a1a1a'
+            })
+            .then(function(blob) {
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
+                link.href = url;
+                link.click();
+                
+                // Cleanup
+                URL.revokeObjectURL(url);
+                
+                // Reset button
+                button.disabled = false;
+                button.innerHTML = originalText;
+            })
+            .catch(function(error) {
                 console.error('Error generating image:', error);
                 console.error('Error details:', error.message, error.stack);
                 alert('Error generating image: ' + (error.message || 'Unknown error') + '\n\nCheck console for details.');
