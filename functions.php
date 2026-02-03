@@ -486,6 +486,7 @@ function register_leaderboard_cpt()
 }
 add_action('init', 'register_leaderboard_cpt', 0);
 
+
 /**
  * Assegnazione delle capabilities 'leaderboard' agli Amministratori e Co-Amministratori.
  */
@@ -1088,8 +1089,12 @@ function restrict_admin_menu_for_players()
         remove_menu_page('separator-custom');
         remove_menu_page('separator-last');
 
-        // Banned Card CPT
+        // Custom Post Types
+        remove_menu_page('edit.php?post_type=leaderboard');
         remove_menu_page('edit.php?post_type=banned_card');
+        remove_menu_page('edit.php?post_type=place');
+        remove_menu_page('edit.php?post_type=faq');
+        remove_menu_page('edit.php?post_type=event');
     }
 }
 add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
@@ -1148,6 +1153,20 @@ function redirect_players_from_restricted_pages()
             // Allow deck management
             if (isset($_GET['post_type']) && $_GET['post_type'] === 'deck') {
                 return;
+            }
+
+            // Block other custom post types
+            $blocked_cpts = array('leaderboard', 'banned_card', 'place', 'faq', 'event');
+            if (isset($_GET['post_type']) && in_array($_GET['post_type'], $blocked_cpts)) {
+                wp_redirect(admin_url());
+                exit;
+            }
+            
+            // Also check current screen for direct access
+            $screen = get_current_screen();
+            if ($screen && in_array($screen->post_type, $blocked_cpts)) {
+                wp_redirect(admin_url());
+                exit;
             }
 
             // Redirect to dashboard
@@ -1304,59 +1323,6 @@ function banned_card_custom_columns_data($column, $post_id)
 }
 add_action('manage_banned_card_posts_custom_column', 'banned_card_custom_columns_data', 10, 2);
 
-/**
- * Hide Banned Card menu from non-administrators
- */
-function hide_banned_card_menu_from_players()
-{
-    if (!lpdh_can_manage_content()) {
-        remove_menu_page('edit.php?post_type=banned_card');
-    }
-}
-add_action('admin_menu', 'hide_banned_card_menu_from_players', 999);
-
-/**
- * Restrict access to Banned Card admin pages for non-administrators
- */
-function restrict_banned_card_admin_access()
-{
-    // Check if we're on banned_card post type admin pages
-    if (!lpdh_can_manage_content()) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'banned_card') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_banned_card_admin_access', 999);
-
-/**
- * Hide Banned Card from admin bar for non-administrators
- */
-function hide_banned_card_admin_bar($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        $wp_admin_bar->remove_node('new-banned_card');
-    }
-}
-add_action('admin_bar_menu', 'hide_banned_card_admin_bar', 999);
-
-/**
- * Remove Banned Card from "New" menu in admin bar for non-admins
- */
-function remove_banned_card_from_new_menu($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-banned_card') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_banned_card_from_new_menu', 999);
 
 /**
  * Remove "All" and "Published" tabs for players in deck list
@@ -1679,59 +1645,6 @@ function place_column_orderby($query)
 }
 add_action('pre_get_posts', 'place_column_orderby');
 
-/**
- * Hide Place menu from non-administrators
- */
-function hide_place_menu_from_players()
-{
-    if (!lpdh_can_manage_content()) {
-        remove_menu_page('edit.php?post_type=place');
-    }
-}
-add_action('admin_menu', 'hide_place_menu_from_players', 999);
-
-/**
- * Restrict access to Place admin pages for non-administrators
- */
-function restrict_place_admin_access()
-{
-    // Check if we're on place post type admin pages
-    if (!lpdh_can_manage_content()) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'place') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_place_admin_access', 999);
-
-/**
- * Hide Place from admin bar for non-administrators
- */
-function hide_place_admin_bar($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        $wp_admin_bar->remove_node('new-place');
-    }
-}
-add_action('admin_bar_menu', 'hide_place_admin_bar', 999);
-
-/**
- * Remove Place from "New" menu in admin bar for non-admins
- */
-function remove_place_from_new_menu($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-place') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_place_from_new_menu', 999);
 
 /**
  * Register Custom Post Type "FAQ"
@@ -1796,59 +1709,6 @@ function register_faq_post_type()
 }
 add_action('init', 'register_faq_post_type', 0);
 
-/**
- * Hide FAQ menu from non-administrators
- */
-function hide_faq_menu_from_players()
-{
-    if (!lpdh_can_manage_content()) {
-        remove_menu_page('edit.php?post_type=faq');
-    }
-}
-add_action('admin_menu', 'hide_faq_menu_from_players', 999);
-
-/**
- * Restrict access to FAQ admin pages for non-administrators
- */
-function restrict_faq_admin_access()
-{
-    // Check if we're on faq post type admin pages
-    if (!lpdh_can_manage_content()) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'faq') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_faq_admin_access', 999);
-
-/**
- * Hide FAQ from admin bar for non-administrators
- */
-function hide_faq_admin_bar($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        $wp_admin_bar->remove_node('new-faq');
-    }
-}
-add_action('admin_bar_menu', 'hide_faq_admin_bar', 999);
-
-/**
- * Remove FAQ from "New" menu in admin bar for non-admins
- */
-function remove_faq_from_new_menu($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-faq') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_faq_from_new_menu', 999);
 
 /**
  * Register Custom Post Type "Event"
@@ -2548,32 +2408,6 @@ function restrict_event_admin_access()
     }
 }
 add_action('admin_init', 'restrict_event_admin_access', 999);
-
-/**
- * Hide Event from admin bar for non-administrators
- */
-function hide_event_admin_bar($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        $wp_admin_bar->remove_node('new-event');
-    }
-}
-add_action('admin_bar_menu', 'hide_event_admin_bar', 999);
-
-/**
- * Remove Event from "New" menu in admin bar for non-admins
- */
-function remove_event_from_new_menu($wp_admin_bar)
-{
-    if (!lpdh_can_manage_content()) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-event') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_event_from_new_menu', 999);
 
 /**
  * Auto-fill ranking name field when player is selected
@@ -5029,7 +4863,7 @@ function lpdh_register_theme_settings()
     add_theme_page(
         'LPDH Theme Settings',
         'Theme Settings',
-        'manage_options',
+        'manage_lpdh_content',
         'lpdh-theme-settings',
         'lpdh_theme_settings_render'
     );
@@ -5038,7 +4872,7 @@ add_action('admin_menu', 'lpdh_register_theme_settings');
 
 function lpdh_theme_settings_render()
 {
-    if (!current_user_can('manage_options'))
+    if (!lpdh_can_manage_content())
         return;
 
     // Save Settings
@@ -5095,6 +4929,11 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the aesthetic for the entire platform.</p>
                     </td>
                 </tr>
+            </table>
+
+            <hr>
+            <h2>Pages Configuration</h2>
+            <table class="form-table">
                 <tr>
                     <th scope="row">Select Deck Editor Page</th>
                     <td>
@@ -5167,6 +5006,20 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Select Instagram Generator Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_instagram_generator_page_id',
+                            'selected' => $instagram_generator_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page using the "Instagram Generator" template.</p>
+                    </td>
+                </tr>
             </table>
 
             <hr>
@@ -5216,25 +5069,6 @@ function lpdh_theme_settings_render()
             </table>
 
             <hr>
-            <h2>Instagram Generator</h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row">Instagram Generator Page</th>
-                    <td>
-                        <?php
-                        wp_dropdown_pages(array(
-                            'name' => 'lpdh_instagram_generator_page_id',
-                            'selected' => $instagram_generator_page_id,
-                            'show_option_none' => '-- Select Page --',
-                            'option_none_value' => 0
-                        ));
-                        ?>
-                        <p class="description">Select the page that uses the "Instagram Generator" template for creating
-                            event promotional images.</p>
-                    </td>
-                </tr>
-            </table>
-
             <?php submit_button(); ?>
         </form>
     </div>
