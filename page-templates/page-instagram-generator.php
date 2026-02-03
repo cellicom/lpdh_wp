@@ -204,7 +204,8 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: #f0f0f0;
+            background: #121212;
+            color: #eeeeee;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -215,6 +216,28 @@ $place_name = $event_place ? $event_place->post_title : '';
         .container {
             max-width: 1200px;
             width: 100%;
+        }
+
+        /* Dark Mode Selectors Card */
+        .selectors-card {
+            background: #1e1e1e !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+        }
+
+        .selectors-card .form-label {
+            color: #b0b0b0 !important;
+        }
+
+        .selectors-card .form-select {
+            background-color: #2d2d2d !important;
+            border-color: #444 !important;
+            color: #fff !important;
+        }
+
+        .selectors-card .form-select:focus {
+            border-color: #6a1b9a !important;
+            box-shadow: 0 0 0 0.25rem rgba(106, 27, 154, 0.25) !important;
         }
 
         .instagram-image {
@@ -1035,8 +1058,8 @@ $place_name = $event_place ? $event_place->post_title : '';
 <body>
     <div class="container">
         <!-- Selectors Area -->
-        <div class="card mb-4 shadow-sm border-1 border-light overflow-hidden">
-            <div class="card-body bg-white p-4">
+        <div class="card mb-4 shadow-sm selectors-card overflow-hidden">
+            <div class="card-body p-4">
                 <div class="row align-items-center g-4">
                     <div class="col-md-6">
                         <div class="d-flex flex-column">
