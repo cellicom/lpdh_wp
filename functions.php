@@ -516,7 +516,7 @@ function add_leaderboard_caps_to_admin()
 
             // Also ensure both have the new custom LPDH caps
             $caps[] = 'view_lpdh_help_guide';
-            $caps['manage_lpdh_content'] = true;
+            $caps[] = 'manage_lpdh_content';
 
             foreach ($caps as $cap) {
                 if (!$role->has_cap($cap)) {
