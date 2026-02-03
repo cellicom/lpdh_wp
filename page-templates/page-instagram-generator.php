@@ -262,7 +262,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-evenly;
             gap: 10px;
             z-index: 3;
         }
@@ -279,11 +279,11 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 50px;
         }
 
         .first-place-cards-wrapper.dual {
-            gap: 35px;
+            gap: 60px;
         }
 
         .first-place-card {
@@ -400,16 +400,29 @@ $place_name = $event_place ? $event_place->post_title : '';
             flex: 0 0 280px;
         }
 
-        .place-card {
-            position: relative;
-            width: 150px;
-            height: 150px;
+        .place-cards-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin-bottom: 15px;
-            border-radius: 50%;
-            overflow: hidden;
         }
 
-        /* Circular Metallic Frames */
+        .place-cards-wrapper.dual {
+            gap: 40px;
+        }
+
+        .place-card {
+            position: relative;
+            width: 180px;
+            height: 240px;
+        }
+
+        .place-cards-wrapper.dual .place-card {
+            width: 150px;
+            height: 200px;
+        }
+
+        /* Colored Frames for 2nd-4th Place */
         .place-card::before {
             content: '';
             position: absolute;
@@ -417,19 +430,74 @@ $place_name = $event_place ? $event_place->post_title : '';
             left: -15px;
             right: -15px;
             bottom: -15px;
-            border-radius: 50%;
+            border-radius: 15px;
             z-index: 1;
             box-shadow: 
                 0 0 30px rgba(0, 0, 0, 0.5),
-                inset 0 0 20px rgba(255, 255, 255, 0.3);
+                0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
+        /* Silver - 2nd Place */
         .place-item.silver .place-card::before {
-            background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #A8A8A8 100%);
+            background: linear-gradient(145deg, #E8E8E8 0%, #C0C0C0 25%, #E8E8E8 50%, #C0C0C0 75%, #E8E8E8 100%);
+            box-shadow: 
+                0 0 40px rgba(192, 192, 192, 0.6),
+                0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
+        .place-item.silver .place-card::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid #C0C0C0;
+            border-radius: 12px;
+            z-index: 2;
+            box-shadow: inset 0 0 15px rgba(192, 192, 192, 0.3);
+        }
+
+        /* Bronze - 3rd Place */
         .place-item.bronze .place-card::before {
-            background: linear-gradient(135deg, #E39A5C 0%, #CD7F32 50%, #B8743C 100%);
+            background: linear-gradient(145deg, #E39A5C 0%, #CD7F32 25%, #E39A5C 50%, #CD7F32 75%, #E39A5C 100%);
+            box-shadow: 
+                0 0 40px rgba(205, 127, 50, 0.6),
+                0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .place-item.bronze .place-card::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid #CD7F32;
+            border-radius: 12px;
+            z-index: 2;
+            box-shadow: inset 0 0 15px rgba(205, 127, 50, 0.3);
+        }
+
+        /* Orange - 4th Place */
+        .place-item.fourth .place-card::before {
+            background: linear-gradient(145deg, #FF6347 0%, #FF4500 25%, #FF6347 50%, #FF4500 75%, #FF6347 100%);
+            box-shadow: 
+                0 0 40px rgba(255, 69, 0, 0.6),
+                0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .place-item.fourth .place-card::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid #FF4500;
+            border-radius: 12px;
+            z-index: 2;
+            box-shadow: inset 0 0 15px rgba(255, 69, 0, 0.3);
         }
 
         .place-card img {
@@ -438,23 +506,9 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             object-fit: cover;
             object-position: top;
-            border-radius: 50%;
-            z-index: 2;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Dual Commander for Bottom Three */
-        .place-card.dual {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .place-card.dual img {
-            width: 48%;
-            height: 95%;
             border-radius: 10px;
+            z-index: 3;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
         }
 
         .place-info {
@@ -482,6 +536,13 @@ $place_name = $event_place ? $event_place->post_title : '';
             color: #CD7F32;
             text-shadow: 
                 0 0 15px rgba(205, 127, 50, 0.6),
+                0 3px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .place-item.fourth .place-position {
+            color: #FF4500;
+            text-shadow: 
+                0 0 15px rgba(255, 69, 0, 0.6),
                 0 3px 8px rgba(0, 0, 0, 0.8);
         }
 
@@ -652,6 +713,10 @@ $place_name = $event_place ? $event_place->post_title : '';
             background: linear-gradient(135deg, #b967ff 0%, #8e44ad 50%, #b967ff 100%);
         }
 
+        .instagram-vaporwave .place-item.fourth .place-card::before {
+            background: linear-gradient(135deg, #ff71ce 0%, #ff1493 50%, #ff71ce 100%);
+        }
+
         /* === VAPORWAVE GREEN THEME === */
         .instagram-vaporwave-green {
             background: linear-gradient(180deg, #07241B 0%, #0a2d23 50%, #07241B 100%);
@@ -789,6 +854,10 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-lostwood .place-item.bronze .place-card::before {
             background: linear-gradient(135deg, #6a8f44 0%, #3D694A 50%, #6a8f44 100%);
+        }
+
+        .instagram-lostwood .place-item.fourth .place-card::before {
+            background: linear-gradient(135deg, #8fb657 0%, #7a9e4a 50%, #8fb657 100%);
         }
 
         /* === BOOTSTRAP CLASSIC THEME === */
@@ -932,7 +1001,7 @@ $place_name = $event_place ? $event_place->post_title : '';
                         $positions = array(
                             1 => array('class' => 'silver', 'label' => '2ND PLACE'),
                             2 => array('class' => 'bronze', 'label' => '3RD PLACE'),
-                            3 => array('class' => 'bronze', 'label' => '4TH PLACE')
+                            3 => array('class' => 'fourth', 'label' => '4TH PLACE')
                         );
                         
                         for ($i = 1; $i <= 3; $i++):
@@ -941,11 +1010,15 @@ $place_name = $event_place ? $event_place->post_title : '';
                                 $has_partner = !empty($player['partner_img']);
                         ?>
                             <div class="place-item <?php echo $positions[$i]['class']; ?>">
-                                <div class="place-card <?php echo $has_partner ? 'dual' : ''; ?>">
+                                <div class="place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
                                     <?php if ($player['commander_img']): ?>
-                                        <img src="<?php echo esc_url($player['commander_img']); ?>" alt="Commander">
-                                        <?php if ($has_partner): ?>
-                                            <img src="<?php echo esc_url($player['partner_img']); ?>" alt="Partner">
+                                        <div class="place-card">
+                                            <img src="<?php echo esc_url($player['commander_img']); ?>" alt="Commander">
+                                        </div>
+                                        <?php if ($has_partner && $player['partner_img']): ?>
+                                            <div class="place-card">
+                                                <img src="<?php echo esc_url($player['partner_img']); ?>" alt="Partner">
+                                            </div>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
