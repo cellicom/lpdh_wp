@@ -210,10 +210,15 @@ if (!isset($players_data) || empty($players_data)) {
     height: 49px;
 }
 
-/* Small frames consistent with larger ones but scaled and lighter */
+/* Small frames consistent with larger ones but scaled and WHITE */
+.top8-footer-row .place-card::before {
+    background: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+}
+
 .top8-footer-row .place-card::after {
-    border: 3px solid #ffffff;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    border: 2px solid #ffffff !important;
+    box-shadow: none !important;
     border-radius: 8px;
 }
 
