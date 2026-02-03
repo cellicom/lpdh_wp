@@ -389,7 +389,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         .bottom-three {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 10px;
             margin-top: -40px;
         }
 
@@ -408,7 +408,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         .place-cards-wrapper.dual {
-            gap: 5px;
+            gap: 0px;
         }
 
         .place-card {
