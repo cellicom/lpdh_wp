@@ -4948,6 +4948,9 @@ function lpdh_theme_settings_render()
         // Save ELO Settings
         update_option('lpdh_elo_k_factor_divide_by_game', isset($_POST['lpdh_elo_k_factor_divide_by_game']) ? 1 : 0);
 
+        // Save Instagram Generator Page
+        update_option('lpdh_instagram_generator_page_id', intval($_POST['lpdh_instagram_generator_page_id']));
+
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
@@ -4955,6 +4958,7 @@ function lpdh_theme_settings_render()
     $deck_editor_page_id = get_option('lpdh_deck_editor_page_id', 0);
     $profile_editor_page_id = get_option('lpdh_profile_editor_page_id', 0);
     $stats_page_id = get_option('lpdh_stats_page_id', 0);
+    $instagram_generator_page_id = get_option('lpdh_instagram_generator_page_id', 0);
     ?>
     <div class="wrap">
         <h1>LPDH Theme Settings</h1>
@@ -5095,6 +5099,26 @@ function lpdh_theme_settings_render()
                         <input type="checkbox" name="lpdh_elo_k_factor_divide_by_game" value="1" <?php checked(get_option('lpdh_elo_k_factor_divide_by_game', 1), 1); ?>>
                         <p class="description">If active, the ELO K-factor (32) will be divided by the number of matches
                             played in the tournament.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <hr>
+            <h2>Instagram Generator</h2>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Instagram Generator Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_instagram_generator_page_id',
+                            'selected' => $instagram_generator_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => 0
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Instagram Generator" template for creating
+                            event promotional images.</p>
                     </td>
                 </tr>
             </table>

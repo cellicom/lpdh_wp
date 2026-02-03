@@ -235,6 +235,18 @@ get_header(); ?>
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <?php if (current_user_can('administrator')):
+                                        $ig_page_id = get_option('lpdh_instagram_generator_page_id', 0);
+                                        if ($ig_page_id) {
+                                            $ig_url = add_query_arg(['ig_event_id' => get_the_ID()], get_permalink($ig_page_id));
+                                            ?>
+                                            <div class="text-center mt-3">
+                                                <a href="<?php echo esc_url($ig_url); ?>" class="btn btn-primary" target="_blank">
+                                                    <i class="fab fa-instagram me-2"></i>Generate Instagram Image
+                                                </a>
+                                            </div>
+                                        <?php }endif; ?>
                                 </div>
                             <?php endif; ?>
 
