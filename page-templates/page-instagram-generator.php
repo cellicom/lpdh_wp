@@ -16,6 +16,46 @@ if (!current_user_can('administrator')) {
     exit;
 }
 
+// Function to convert Scryfall images to data URL (bypass CORS)
+function convert_scryfall_to_data_url($url) {
+    if (empty($url)) {
+        return '';
+    }
+    
+    // Only convert if it's a Scryfall image
+    if (strpos($url, 'scryfall.io') === false) {
+        return $url; // Return original URL if not Scryfall
+    }
+    
+    // Download image from Scryfall
+    $response = wp_remote_get($url, array(
+        'timeout' => 15,
+        'sslverify' => false
+    ));
+    
+    if (is_wp_error($response)) {
+        error_log('Failed to fetch Scryfall image: ' . $url);
+        return $url; // Return original URL if fetch fails
+    }
+    
+    $image_data = wp_remote_retrieve_body($response);
+    $content_type = wp_remote_retrieve_header($response, 'content-type');
+    
+    if (empty($image_data)) {
+        error_log('Empty image data from Scryfall: ' . $url);
+        return $url;
+    }
+    
+    // Default to image/jpeg if no content-type
+    if (empty($content_type)) {
+        $content_type = 'image/jpeg';
+    }
+    
+    // Convert to data URL
+    $base64 = base64_encode($image_data);
+    return 'data:' . $content_type . ';base64,' . $base64;
+}
+
 // Get event ID from query parameter
 $event_id = isset($_GET['ig_event_id']) ? intval($_GET['ig_event_id']) : 0;
 
@@ -82,6 +122,14 @@ if (is_array($rankings) && count($rankings) > 0) {
                 }
                 if ($partner_img) {
                     $partner_img = strtok($partner_img, '?');
+                }
+                
+                // Convert Scryfall images to data URLs (bypass CORS)
+                if ($commander_img) {
+                    $commander_img = convert_scryfall_to_data_url($commander_img);
+                }
+                if ($partner_img) {
+                    $partner_img = convert_scryfall_to_data_url($partner_img);
                 }
                 
                 // Get commander and partner names
