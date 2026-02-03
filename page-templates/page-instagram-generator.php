@@ -16,34 +16,6 @@ if (!current_user_can('administrator')) {
     exit;
 }
 
-// Function to convert image URL to data URL (bypass CORS)
-function get_image_as_data_url($url) {
-    if (empty($url)) {
-        return '';
-    }
-    
-    // Try to get image data
-    $response = wp_remote_get($url, array(
-        'timeout' => 15,
-        'sslverify' => false
-    ));
-    
-    if (is_wp_error($response)) {
-        return $url; // Return original URL if fetch fails
-    }
-    
-    $image_data = wp_remote_retrieve_body($response);
-    $content_type = wp_remote_retrieve_header($response, 'content-type');
-    
-    if (empty($image_data) || empty($content_type)) {
-        return $url; // Return original URL if data is empty
-    }
-    
-    // Convert to data URL
-    $base64 = base64_encode($image_data);
-    return 'data:' . $content_type . ';base64,' . $base64;
-}
-
 // Get event ID from query parameter
 $event_id = isset($_GET['ig_event_id']) ? intval($_GET['ig_event_id']) : 0;
 
@@ -104,20 +76,12 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
                 
-                // Remove query strings first
+                // Remove query strings from image URLs
                 if ($commander_img) {
                     $commander_img = strtok($commander_img, '?');
                 }
                 if ($partner_img) {
                     $partner_img = strtok($partner_img, '?');
-                }
-                
-                // Convert to data URLs to bypass CORS for download
-                if ($commander_img) {
-                    $commander_img = get_image_as_data_url($commander_img);
-                }
-                if ($partner_img) {
-                    $partner_img = get_image_as_data_url($partner_img);
                 }
                 
                 // Get commander and partner names
@@ -1117,8 +1081,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
     </div>
 
-    <!-- dom-to-image Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <!-- modern-screenshot Library -->
+    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4.4.39/dist/index.js"></script>
 
     <script>
         // Theme Switcher
@@ -1132,7 +1096,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         });
 
         // Download Image
-        document.getElementById('download-btn').addEventListener('click', function() {
+        document.getElementById('download-btn').addEventListener('click', async function() {
             const button = this;
             const originalText = button.innerHTML;
             
@@ -1142,14 +1106,15 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             const element = document.getElementById('ig-image');
             
-            // Use dom-to-image to convert to blob
-            domtoimage.toBlob(element, {
-                width: 1080,
-                height: 1350,
-                quality: 1,
-                bgcolor: '#1a1a1a'
-            })
-            .then(function(blob) {
+            try {
+                // Use modern-screenshot
+                const blob = await modernScreenshot.domToBlob(element, {
+                    width: 1080,
+                    height: 1350,
+                    scale: 2,
+                    backgroundColor: '#1a1a1a'
+                });
+                
                 // Create download link
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
@@ -1163,14 +1128,13 @@ $place_name = $event_place ? $event_place->post_title : '';
                 // Reset button
                 button.disabled = false;
                 button.innerHTML = originalText;
-            })
-            .catch(function(error) {
+            } catch (error) {
                 console.error('Error generating image:', error);
                 console.error('Error details:', error.message, error.stack);
                 alert('Error generating image: ' + (error.message || 'Unknown error') + '\n\nCheck console for details.');
                 button.disabled = false;
                 button.innerHTML = originalText;
-            });
+            }
         });
     </script>
 </body>
