@@ -6421,3 +6421,48 @@ function lpdh_check_stat_condition($user_val, $operator, $target_val)
             return false;
     }
 }
+
+/**
+ * Get Instagram Generator URL for Event
+ */
+function lpdh_get_instagram_generator_url($event_id)
+{
+    $ig_page_id = get_option('lpdh_instagram_generator_page_id', 0);
+    if (!$ig_page_id) {
+        return '';
+    }
+    return add_query_arg(['ig_event_id' => $event_id], get_permalink($ig_page_id));
+}
+
+/**
+ * Add Instagram Generator Metabox to Events
+ */
+function lpdh_add_instagram_generator_metabox()
+{
+    add_meta_box(
+        'lpdh_instagram_generator',
+        'Instagram Image Generator',
+        'lpdh_render_instagram_generator_metabox',
+        'event',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'lpdh_add_instagram_generator_metabox');
+
+/**
+ * Render Instagram Generator Metabox
+ */
+function lpdh_render_instagram_generator_metabox($post)
+{
+    $ig_url = lpdh_get_instagram_generator_url($post->ID);
+    
+    if ($ig_url) {
+        echo '<p>Generate a promotional Instagram image for this event\'s top 4 players.</p>';
+        echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" target="_blank" style="width: 100%; text-align: center; display: block;">';
+        echo '<span class="dashicons dashicons-instagram" style="margin-top: 3px;"></span> ';
+        echo 'Generate Instagram Image</a>';
+    } else {
+        echo '<p class="description">Instagram generator page not configured.</p>';
+    }
+}

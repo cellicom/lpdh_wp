@@ -119,32 +119,35 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: #1a1a1a;
+            background: #f0f0f0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
         }
 
         .instagram-image {
             width: 1080px;
             height: 1350px;
-            background: #1a1a1a;
             position: relative;
+            margin: 0 auto;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
 
+        /* === EPIC FANTASY THEME === */
+        .instagram-fantasy {
+            background: #1a1a1a;
+        }
+
         /* Epic Fantasy Background */
-        .instagram-image::before {
+        .instagram-fantasy::before {
             content: '';
             position: absolute;
             top: 0;
@@ -159,7 +162,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         /* Parchment Border Effect */
-        .instagram-image::after {
+        .instagram-fantasy::after {
             content: '';
             position: absolute;
             top: 0;
@@ -178,7 +181,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         /* Red Crack Effects */
-        .content::before {
+        .instagram-fantasy .content::before {
             content: '';
             position: absolute;
             top: 0;
@@ -196,7 +199,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         /* Content Wrapper */
-        .content {
+        .instagram-fantasy .content {
             position: relative;
             z-index: 2;
             height: 100%;
@@ -274,8 +277,8 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .first-place-card {
             position: relative;
-            width: 320px;
-            height: 450px;
+            width: 280px;
+            height: 350px;
             margin-bottom: 25px;
         }
 
@@ -287,23 +290,30 @@ $place_name = $event_place ? $event_place->post_title : '';
             left: -20px;
             right: -20px;
             bottom: -20px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
-            border-radius: 20px;
+            background: 
+                radial-gradient(ellipse at center, rgba(255, 215, 0, 0.2) 0%, transparent 70%),
+                linear-gradient(145deg, #FFD700 0%, #FFA500 25%, #FFD700 50%, #FFA500 75%, #FFD700 100%);
+            border-radius: 18px;
             z-index: 1;
             box-shadow: 
-                0 0 40px rgba(255, 215, 0, 0.6),
-                0 0 80px rgba(255, 215, 0, 0.4),
-                inset 0 0 30px rgba(255, 215, 0, 0.3);
+                0 0 50px rgba(255, 215, 0, 0.7),
+                0 0 100px rgba(255, 165, 0, 0.5),
+                0 15px 40px rgba(0, 0, 0, 0.8);
+            animation: goldenGlow 3s ease-in-out infinite;
         }
 
-        /* Ornate Frame Pattern */
+        @keyframes goldenGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
         .first-place-card::after {
             content: '';
             position: absolute;
-            top: -15px;
-            left: -15px;
-            right: -15px;
-            bottom: -15px;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
             background: linear-gradient(135deg, transparent 0%, rgba(139, 69, 19, 0.4) 50%, transparent 100%);
             border: 5px solid rgba(139, 69, 19, 0.6);
             border-radius: 18px;
@@ -318,6 +328,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: top;
             border-radius: 15px;
             z-index: 3;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
@@ -386,8 +397,8 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .place-card {
             position: relative;
-            width: 200px;
-            height: 200px;
+            width: 150px;
+            height: 150px;
             margin-bottom: 15px;
             border-radius: 50%;
             overflow: hidden;
@@ -421,6 +432,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: top;
             border-radius: 50%;
             z-index: 2;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
@@ -489,19 +501,19 @@ $place_name = $event_place ? $event_place->post_title : '';
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            z-index: 3;
+        /* Theme Selector */
+        .theme-selector {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .footer-text {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        .theme-selector label {
+            font-size: 18px;
+            color: #333;
         }
 
         /* Instructions */
@@ -554,12 +566,304 @@ $place_name = $event_place ? $event_place->post_title : '';
             background: <?php echo esc_attr($secondary_color); ?>;
             color: #ffffff;
         }
+
+        /* === VAPORWAVE THEME === */
+        .instagram-vaporwave {
+            background: linear-gradient(180deg, #05001e 0%, #1a0033 50%, #05001e 100%);
+        }
+
+        .instagram-vaporwave::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(255, 113, 206, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(1, 205, 254, 0.15) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 113, 206, 0.03) 2px, rgba(255, 113, 206, 0.03) 4px);
+            z-index: 1;
+        }
+
+        .instagram-vaporwave::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 30px solid transparent;
+            border-image: linear-gradient(135deg, 
+                rgba(255, 113, 206, 0.6) 0%, 
+                rgba(1, 205, 254, 0.4) 50%,
+                rgba(185, 103, 255, 0.6) 100%) 30;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .instagram-vaporwave .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 60px 60px;
+        }
+
+        .instagram-vaporwave .header {
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 3;
+        }
+
+        .instagram-vaporwave .event-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff71ce, #01cdfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 113, 206, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .instagram-vaporwave .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #01cdfe;
+            text-shadow: 0 0 20px rgba(1, 205, 254, 0.8);
+        }
+
+        .instagram-vaporwave .first-place-card::before {
+            background: linear-gradient(145deg, #ff71ce 0%, #b967ff 50%, #ff71ce 100%);
+            box-shadow: 
+                0 0 50px rgba(255, 113, 206, 1),
+                0 0 100px rgba(185, 103, 255, 0.7);
+        }
+
+        .instagram-vaporwave .place-item.silver .place-card::before {
+            background: linear-gradient(135deg, #01cdfe 0%, #0099cc 50%, #01cdfe 100%);
+        }
+
+        .instagram-vaporwave .place-item.bronze .place-card::before {
+            background: linear-gradient(135deg, #b967ff 0%, #8e44ad 50%, #b967ff 100%);
+        }
+
+        /* === VAPORWAVE GREEN THEME === */
+        .instagram-vaporwave-green {
+            background: linear-gradient(180deg, #07241B 0%, #0a2d23 50%, #07241B 100%);
+        }
+
+        .instagram-vaporwave-green::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(177, 198, 114, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(33, 186, 69, 0.1) 0%, transparent 50%);
+            z-index: 1;
+        }
+
+        .instagram-vaporwave-green::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 30px solid transparent;
+            border-image: linear-gradient(135deg, 
+                rgba(177, 198, 114, 0.6) 0%, 
+                rgba(61, 105, 74, 0.4) 50%,
+                rgba(177, 198, 114, 0.6) 100%) 30;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .instagram-vaporwave-green .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 60px 60px;
+        }
+
+        .instagram-vaporwave-green .header {
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 3;
+        }
+
+        .instagram-vaporwave-green .event-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: #B1C672;
+            text-shadow: 0 0 30px rgba(177, 198, 114, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .instagram-vaporwave-green .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #21BA45;
+            text-shadow: 0 0 20px rgba(33, 186, 69, 0.8);
+        }
+
+        .instagram-vaporwave-green .first-place-card::before {
+            background: linear-gradient(145deg, #B1C672 0%, #21BA45 50%, #B1C672 100%);
+            box-shadow: 
+                0 0 50px rgba(177, 198, 114, 1),
+                0 0 100px rgba(33, 186, 69, 0.7);
+        }
+
+        /* === LOST WOOD THEME === */
+        .instagram-lostwood {
+            background: #07241B;
+        }
+
+        .instagram-lostwood::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(61, 105, 74, 0.15) 0%, transparent 70%);
+            z-index: 1;
+        }
+
+        .instagram-lostwood::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 35px solid transparent;
+            border-image: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.5) 0%, 
+                rgba(61, 105, 74, 0.4) 50%,
+                rgba(139, 69, 19, 0.5) 100%) 35;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .instagram-lostwood .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 60px 60px;
+        }
+
+        .instagram-lostwood .header {
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 3;
+        }
+
+        .instagram-lostwood .event-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: #B1C672;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .instagram-lostwood .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #E8F5E9;
+        }
+
+        .instagram-lostwood .first-place-card::before {
+            background: linear-gradient(145deg, #B1C672 0%, #8fb657 50%, #B1C672 100%);
+            box-shadow: 
+                0 0 30px rgba(177, 198, 114, 0.6),
+                0 15px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .instagram-lostwood .place-item.silver .place-card::before {
+            background: linear-gradient(135deg, #8fb657 0%, #6a8f44 50%, #8fb657 100%);
+        }
+
+        .instagram-lostwood .place-item.bronze .place-card::before {
+            background: linear-gradient(135deg, #6a8f44 0%, #3D694A 50%, #6a8f44 100%);
+        }
+
+        /* === BOOTSTRAP CLASSIC THEME === */
+        .instagram-bootscore {
+            background: #ffffff;
+        }
+
+        .instagram-bootscore::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 20px solid #dee2e6;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .instagram-bootscore .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 60px 60px;
+        }
+
+        .instagram-bootscore .header {
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 3;
+        }
+
+        .instagram-bootscore .event-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--bs-primary, #0d6efd);
+            margin-bottom: 15px;
+        }
+
+        .instagram-bootscore .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--bs-secondary, #6c757d);
+        }
+
+        .instagram-bootscore .event-meta {
+            color: #495057;
+        }
+
+        .instagram-bootscore .first-place-card::before {
+            background: linear-gradient(145deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .instagram-bootscore .first-place-position {
+            color: #ffc107 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .instagram-bootscore .first-place-player,
+        .instagram-bootscore .place-player {
+            color: #212529 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .instagram-bootscore .first-place-commanders,
+        .instagram-bootscore .place-commanders {
+            color: #6c757d !important;
+            text-shadow: none;
+        }
+
+        .instagram-bootscore .place-position {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="instagram-image" id="ig-image">
+        <div class="instagram-image instagram-fantasy" id="ig-image">
             <div class="content">
                 <!-- Header -->
                 <div class="header">
@@ -654,12 +958,19 @@ $place_name = $event_place ? $event_place->post_title : '';
                         ?>
                     </div>
                 </div>
-
-                <!-- Footer -->
-                <div class="footer">
-                    <div class="footer-text">LEGA PLAYER DI HOMM</div>
-                </div>
             </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector mt-4">
+            <label for="ig-theme-select" class="form-label fw-bold">Select Theme:</label>
+            <select id="ig-theme-select" class="form-select form-select-lg">
+                <option value="instagram-fantasy" selected>🏰 Epic Fantasy</option>
+                <option value="instagram-vaporwave">🌸 Vaporwave</option>
+                <option value="instagram-vaporwave-green">💚 Vaporwave Green</option>
+                <option value="instagram-lostwood">🌲 Lost Wood</option>
+                <option value="instagram-bootscore">📘 Bootstrap Classic</option>
+            </select>
         </div>
 
         <!-- Instructions -->
@@ -676,6 +987,18 @@ $place_name = $event_place ? $event_place->post_title : '';
             <a href="<?php echo esc_url(get_permalink($event_id)); ?>" class="btn-back">← Back to Event</a>
         </div>
     </div>
+
+    <script>
+        // Theme Switcher
+        document.getElementById('ig-theme-select').addEventListener('change', function() {
+            const container = document.getElementById('ig-image');
+            // Remove all theme classes
+            container.classList.remove('instagram-fantasy', 'instagram-vaporwave', 
+                'instagram-vaporwave-green', 'instagram-lostwood', 'instagram-bootscore');
+            // Add selected theme
+            container.classList.add(this.value);
+        });
+    </script>
 </body>
 
 </html>
