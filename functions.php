@@ -100,6 +100,75 @@ function lpdh_check_dependencies()
             <?php
         });
     }
+}
+add_action('admin_init', 'lpdh_check_dependencies');
+
+/**
+ * Register the Co-Administrator Role
+ * This role has full content management power but cannot touch system-level settings.
+ */
+function lpdh_register_co_administrator_role() {
+    // Only run if the role doesn't exist yet
+    if (get_role('co_administrator')) {
+        return;
+    }
+
+    $admin_role = get_role('administrator');
+    $caps = $admin_role->capabilities;
+
+    // List of capabilities to REMOVE for Co-Admins
+    $blacklisted_caps = array(
+        'switch_themes',
+        'edit_themes',
+        'activate_plugins',
+        'edit_plugins',
+        'manage_options',
+        'import',
+        'export',
+        'manage_acf_options', // ACF specific
+        'update_core',
+        'update_plugins',
+        'update_themes',
+        'install_plugins',
+        'install_themes',
+        'delete_themes',
+        'delete_plugins',
+        'edit_files',
+        'edit_plugins',
+        'edit_themes',
+    );
+
+    foreach ($blacklisted_caps as $cap) {
+        unset($caps[$cap]);
+    }
+
+    add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
+}
+add_action('init', 'lpdh_register_co_administrator_role');
+
+/**
+ * Restrict editable roles for Co-Administrators
+ * This prevents them from promoting anyone (including themselves) to full Administrator.
+ */
+function lpdh_restrict_editable_roles($all_roles) {
+    if (!current_user_can('administrator') && current_user_can('co_administrator')) {
+        if (isset($all_roles['administrator'])) {
+            unset($all_roles['administrator']);
+        }
+    }
+    return $all_roles;
+}
+add_filter('editable_roles', 'lpdh_restrict_editable_roles');
+
+/**
+ * Prevent Co-Administrators from accessing ACF menu specifically
+ */
+add_filter('acf/settings/show_admin', function($show) {
+    if (current_user_can('co_administrator') && !current_user_can('administrator')) {
+        return false;
+    }
+    return $show;
+});
 
     // Check for ACF Font Awesome
     // We check for the version constant which is reliable for this plugin

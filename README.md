@@ -57,8 +57,18 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Image Fallback:** Automatic card scan fetching from Scryfall if no image is uploaded.
 - **Shortcode Generator:** Integration tool to easily insert interactive banned card boxes into posts.
 
-### 8. Frontend Governance & Sync
-- **Profile Privacy:** Player-centric dashboard to manage visibility and account settings.
+### 8. Instagram Image Generator 📸
+- **Social Media Support:** Generate stylized promotion images for event results directly from tournament data.
+- **Dynamic Themes:** Toggle between various aesthetics including *Epic Fantasy*, *Vaporwave*, *Lost Wood*, and more.
+- **Flexible Layouts:** Support for Top 3, Top 4, and a structured Top 8 ranking (1+2+5 hierarchy).
+- **High-Res Export:** Automated PNG generation with intelligent filename syntax (`IG-TYPE-THEME-EVENT.png`).
+
+### 10. Roles & Governance
+- **Administrator:** Full, unrestricted control over the entire system.
+- **Co-Administrator:** Specialized role for content managers. Can manage all tournament data, achievements, and decks, but is restricted from system-level changes (themes, plugins, settings).
+- **Player:** Managed via frontend dashboard for profile updates and deck submissions.
+
+### 11. Custom Sync & Matching
 - **Improved Name Matching:** Robust event synchronization algorithm that handles multi-word surnames and abbreviations.
 
 ## ✨ Easter Eggs & Community Interactions

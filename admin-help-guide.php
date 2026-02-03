@@ -64,10 +64,11 @@ function render_help_guide_page()
                     <a href="#banned">7. Banned Cards</a>
                     <a href="#leaderboards">8. Leaderboards</a>
                     <a href="#stats">9. Statistics & ELO</a>
-                    <a href="#profiles">10. Profiles & Preferences</a>
-                    <a href="#roles">11. Roles & Security</a>
-                    <a href="#settings">12. Theme Settings</a>
-                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">13. Easter Eggs ✨</a>
+                    <a href="#instagram" style="color: #e1306c; font-weight: bold;">10. Instagram Generator 📸</a>
+                    <a href="#profiles">11. Profiles & Preferences</a>
+                    <a href="#roles">12. Roles & Security</a>
+                    <a href="#settings">13. Theme Settings</a>
+                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">14. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -441,12 +442,64 @@ function render_help_guide_page()
 }</pre>
                 </div>
             </section>
+            
+            <!-- SECTION: INSTAGRAM GENERATOR -->
+            <section id="instagram" style="margin-bottom: 60px;">
+                <h2
+                    style="color: #e1306c; background: #fff0f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-instagram"></span> 10. Instagram Generator
+                </h2>
+                <p>Powerful tool to create promotional images for social media directly from event data.</p>
+
+                <h4 style="margin-bottom: 10px;">Accessing the Generator:</h4>
+                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin sidebar or frontend event page.</p>
+
+                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Selector Field</th>
+                            <th>Features & Visual Logic</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Select Theme</strong></td>
+                            <td>
+                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate frames.<br>
+                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow effects.<br>
+                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community branding.<br>
+                                🌲 <strong>Lost Wood:</strong> Forest-themed aesthetic with organic frames.<br>
+                                📘 <strong>Bootstrap Classic:</strong> Clean, minimal professional layout.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Select Type</strong></td>
+                            <td>
+                                🥉 <strong>Top 3:</strong> Focuses on the podium finishers.<br>
+                                🏅 <strong>Top 4:</strong> Default layout for standard local tournaments.<br>
+                                🏆 <strong>Top 8:</strong> Advanced 1+2+5 hierarchy for major competitive events.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-bottom: 10px;">Dynamic Export Logic:</h4>
+                <div style="background: #fdf6ec; border-left: 5px solid #e1306c; padding: 15px; border-radius: 4px;">
+                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a standardized filename:</p>
+                    <code><strong>IG-[TYPE]-[THEME]-[EVENT-NAME].png</strong></code>
+                </div>
+
+                <div
+                    style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 15px; margin-top: 20px; border-radius: 4px;">
+                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card art is rendered quickly without triggering Scryfall rate limits.
+                </div>
+            </section>
 
             <!-- SECTION: PROFILES -->
             <section id="profiles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-users"></span> 10. Profiles & Preferences
+                    <span class="dashicons dashicons-admin-users"></span> 11. Profiles & Preferences
                 </h2>
                 <p>Manage user visibility, achievement privacy, and data settings.</p>
 
@@ -464,17 +517,30 @@ function render_help_guide_page()
             <section id="roles" style="margin-bottom: 60px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-shield"></span> 11. Roles & Security
+                    <span class="dashicons dashicons-shield"></span> 12. Roles & Security
                 </h2>
-                <p><strong>Administrator:</strong> Full access. <br> <strong>Player:</strong> Limited to deck management.
-                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #d63638;"><span class="dashicons dashicons-shield"></span> Administrator</h5>
+                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and code.</p>
+                    </div>
+                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span> Co-Administrator</h5>
+                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks, Pages).<br>
+                        <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System Tools.</p>
+                    </div>
+                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #646970;"><span class="dashicons dashicons-id"></span> Player</h5>
+                        <p class="small">Can manage their personal profile and their own decklists only.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- SECTION: SETTINGS -->
             <section id="settings" style="margin-bottom: 40px;">
                 <h2
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
-                    <span class="dashicons dashicons-admin-generic"></span> 12. Theme Settings
+                    <span class="dashicons dashicons-admin-generic"></span> 13. Theme Settings
                 </h2>
                 <p>Configure aesthetics and mapping under <strong>Appearance > Theme Settings</strong>.</p>
 
