@@ -122,20 +122,35 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
                 
+                error_log("Player {$i} - Commander original: " . ($commander_img ?: 'EMPTY'));
+                error_log("Player {$i} - Partner original: " . ($partner_img ?: 'EMPTY'));
+                
                 // Remove query strings from image URLs
                 if ($commander_img) {
-                    $commander_img = strtok($commander_img, '?');
+                    $commander_img_clean = strtok($commander_img, '?');
+                    if ($commander_img_clean !== false) {
+                        $commander_img = $commander_img_clean;
+                    }
+                    error_log("Player {$i} - Commander after strtok: " . $commander_img);
                 }
                 if ($partner_img) {
-                    $partner_img = strtok($partner_img, '?');
+                    $partner_img_clean = strtok($partner_img, '?');
+                    if ($partner_img_clean !== false) {
+                        $partner_img = $partner_img_clean;
+                    }
+                    error_log("Player {$i} - Partner after strtok: " . $partner_img);
                 }
                 
                 // Convert Scryfall images to data URLs (bypass CORS)
                 if ($commander_img) {
                     $commander_img = convert_scryfall_to_data_url($commander_img);
+                    $is_data_url = strpos($commander_img, 'data:') === 0;
+                    error_log("Player {$i} - Commander after conversion: " . ($is_data_url ? 'DATA URL (length: ' . strlen($commander_img) . ')' : $commander_img));
                 }
                 if ($partner_img) {
                     $partner_img = convert_scryfall_to_data_url($partner_img);
+                    $is_data_url = strpos($partner_img, 'data:') === 0;
+                    error_log("Player {$i} - Partner after conversion: " . ($is_data_url ? 'DATA URL (length: ' . strlen($partner_img) . ')' : $partner_img));
                 }
                 
                 // Get commander and partner names
@@ -153,6 +168,12 @@ if (is_array($rankings) && count($rankings) > 0) {
             'commander_name' => $commander_name,
             'partner_name' => $partner_name
         );
+        
+        // Debug what's being stored
+        $is_cmd_data = $commander_img && strpos($commander_img, 'data:') === 0;
+        $is_part_data = $partner_img && strpos($partner_img, 'data:') === 0;
+        error_log("Stored in top4[$i] - Commander: " . ($is_cmd_data ? "DATA URL (" . strlen($commander_img) . " chars)" : ($commander_img ?: 'EMPTY')));
+        error_log("Stored in top4[$i] - Partner: " . ($is_part_data ? "DATA URL (" . strlen($partner_img) . " chars)" : ($partner_img ?: 'EMPTY')));
     }
 }
 
