@@ -777,10 +777,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             font-family: 'Montserrat', sans-serif;
             font-size: 48px;
             font-weight: 900;
-            background: linear-gradient(135deg, #ff71ce, #01cdfe);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #ff71ce;
             text-shadow: 0 0 30px rgba(255, 113, 206, 0.8);
             margin-bottom: 15px;
         }
@@ -1113,8 +1110,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
     </div>
 
-    <!-- html-to-image Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <!-- html2canvas Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         // Theme Switcher
@@ -1155,24 +1152,32 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             const finalFilename = `IG-${typeName}-${themeName}-${eventTitle}.png`;
 
-            // Using htmlToImage for better CSS rendering (gradients, background-clip, etc)
-            htmlToImage.toPng(element, {
-                quality: 1,
-                pixelRatio: 2,
-                backgroundColor: '#000000',
-                cacheBust: true
-            })
-            .then(function (dataUrl) {
-                const link = document.createElement('a');
-                link.download = finalFilename;
-                link.href = dataUrl;
-                link.click();
-                
-                // Reset button
-                button.disabled = false;
-                button.innerHTML = originalText;
-            })
-            .catch(function (error) {
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: null,
+                width: 1080,
+                height: 1350,
+                logging: false
+            }).then(canvas => {
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = finalFilename;
+                    link.href = url;
+                    link.click();
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                    
+                    // Reset button
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }, 'image/png');
+            }).catch(function(error) {
                 console.error('Error generating image:', error);
                 alert('Error generating image. Try again or check console for details.');
                 button.disabled = false;
