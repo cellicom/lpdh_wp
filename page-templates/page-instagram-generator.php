@@ -1113,8 +1113,8 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
     </div>
 
-    <!-- html2canvas Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- html-to-image Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 
     <script>
         // Theme Switcher
@@ -1129,12 +1129,9 @@ $place_name = $event_place ? $event_place->post_title : '';
         // Type Switcher
         document.getElementById('ig-type-select').addEventListener('change', function() {
             const type = this.value;
-            const theme = document.getElementById('ig-theme-select').value;
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('ig_type', type);
-            // Optionally persist theme in URL if you want it to survive refresh
-            // currentUrl.searchParams.set('ig_theme', theme); 
-            window.location.href = currentUrl.toString();
+            const url = new URL(window.location.href);
+            url.searchParams.set('ig_type', type);
+            window.location.href = url.toString();
         });
 
         // Download Image
@@ -1148,45 +1145,36 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             const element = document.getElementById('ig-image');
             
-            html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: null,
-                width: 1080,
-                height: 1350,
-                logging: false
-            }).then(canvas => {
-                // Get dynamic filename parts
-                const typeSelect = document.getElementById('ig-type-select');
-                const themeSelect = document.getElementById('ig-theme-select');
-                
-                const typeName = typeSelect.options[typeSelect.selectedIndex].text.replace(/\s*\(Default\)\s*/i, '').replace(/\s+/g, '-').toUpperCase();
-                const themeName = themeSelect.options[themeSelect.selectedIndex].text.replace(/^[^\s]+\s+/, '').replace(/\s+/g, '-').toUpperCase();
-                const eventTitle = "<?php echo sanitize_title($event_title); ?>".toUpperCase();
-                
-                const finalFilename = `IG-${typeName}-${themeName}-${eventTitle}.png`;
+            // Get dynamic filename parts
+            const typeSelect = document.getElementById('ig-type-select');
+            const themeSelect = document.getElementById('ig-theme-select');
+            
+            const typeName = typeSelect.options[typeSelect.selectedIndex].text.replace(/\s*\(Default\)\s*/i, '').replace(/\s+/g, '-').toUpperCase();
+            const themeName = themeSelect.options[themeSelect.selectedIndex].text.replace(/^[^\s]+\s+/, '').replace(/\s+/g, '-').toUpperCase();
+            const eventTitle = "<?php echo sanitize_title($event_title); ?>".toUpperCase();
+            
+            const finalFilename = `IG-${typeName}-${themeName}-${eventTitle}.png`;
 
-                // Convert canvas to blob
-                canvas.toBlob(function(blob) {
-                    // Create download link
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = finalFilename;
-                    link.href = url;
-                    link.click();
-                    
-                    // Cleanup
-                    URL.revokeObjectURL(url);
-                    
-                    // Reset button
-                    button.disabled = false;
-                    button.innerHTML = originalText;
-                }, 'image/png');
-            }).catch(function(error) {
+            // Using htmlToImage for better CSS rendering (gradients, background-clip, etc)
+            htmlToImage.toPng(element, {
+                quality: 1,
+                pixelRatio: 2,
+                backgroundColor: '#000000',
+                cacheBust: true
+            })
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+                link.download = finalFilename;
+                link.href = dataUrl;
+                link.click();
+                
+                // Reset button
+                button.disabled = false;
+                button.innerHTML = originalText;
+            })
+            .catch(function (error) {
                 console.error('Error generating image:', error);
-                console.error('Error details:', error.message, error.stack);
-                alert('Error generating image: ' + (error.message || 'Unknown error') + '\n\nCheck console for details.');
+                alert('Error generating image. Try again or check console for details.');
                 button.disabled = false;
                 button.innerHTML = originalText;
             });
