@@ -582,56 +582,62 @@ $place_name = $event_place ? $event_place->post_title : '';
             color: #333;
         }
 
-        /* Instructions */
-        .instructions {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
+        /* Action Buttons */
+        .action-buttons {
             max-width: 1080px;
             margin: 40px auto;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .instructions h2 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: #1a1a1a;
-        }
-
-        .instructions p {
+        .action-buttons .btn {
+            min-width: 200px;
             font-size: 18px;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        .instructions ul {
-            margin: 15px 0;
-            padding-left: 30px;
-        }
-
-        .instructions li {
-            font-size: 16px;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .btn-back {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: <?php echo esc_attr($primary_color); ?>;
-            color: #ffffff;
-            text-decoration: none;
+            font-weight: 600;
+            padding: 15px 30px;
             border-radius: 8px;
-            font-weight: 700;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn-back:hover {
+        .action-buttons .btn-primary {
+            background: <?php echo esc_attr($primary_color); ?>;
+            border: none;
+            color: white;
+        }
+
+        .action-buttons .btn-primary:hover {
             background: <?php echo esc_attr($secondary_color); ?>;
-            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-buttons .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-buttons .btn-secondary {
+            background: #6c757d;
+            border: none;
+            color: white;
+        }
+
+        .action-buttons .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         /* === VAPORWAVE THEME === */
@@ -1056,20 +1062,19 @@ $place_name = $event_place ? $event_place->post_title : '';
             </select>
         </div>
 
-        <!-- Instructions -->
-        <div class="instructions">
-            <h2>📸 How to Use</h2>
-            <p><strong>To save the image for Instagram:</strong></p>
-            <ul>
-                <li><strong>Windows:</strong> Right-click on the image → "Save Image As..."</li>
-                <li><strong>Mac:</strong> Right-click on the image → "Save Image As..." or take a screenshot (Cmd +
-                    Shift + 4)</li>
-                <li><strong>Screenshot Tools:</strong> Use a screenshot tool to capture the exact 1080x1350px area</li>
-            </ul>
-            <p>The image is optimized for Instagram's vertical format (4:5 ratio).</p>
-            <a href="<?php echo esc_url(get_permalink($event_id)); ?>" class="btn-back">← Back to Event</a>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="download-btn" class="btn btn-primary btn-lg">
+                📥 Download Image
+            </button>
+            <a href="<?php echo esc_url(get_permalink($event_id)); ?>" class="btn btn-secondary btn-lg">
+                ← Back to Event
+            </a>
         </div>
     </div>
+
+    <!-- html2canvas Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         // Theme Switcher
@@ -1080,6 +1085,49 @@ $place_name = $event_place ? $event_place->post_title : '';
                 'instagram-vaporwave-green', 'instagram-lostwood', 'instagram-bootscore');
             // Add selected theme
             container.classList.add(this.value);
+        });
+
+        // Download Image
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '⏳ Generating...';
+            
+            const element = document.getElementById('ig-image');
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: null,
+                width: 1080,
+                height: 1350
+            }).then(canvas => {
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = 'instagram-top4-<?php echo sanitize_title($event_title); ?>.png';
+                    link.href = url;
+                    link.click();
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                    
+                    // Reset button
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }, 'image/png');
+            }).catch(function(error) {
+                console.error('Error generating image:', error);
+                alert('Error generating image. Please try again.');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
         });
     </script>
 </body>
