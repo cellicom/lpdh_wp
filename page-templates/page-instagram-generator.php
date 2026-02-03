@@ -1108,8 +1108,8 @@ $place_name = $event_place ? $event_place->post_title : '';
             
             html2canvas(element, {
                 scale: 2,
-                allowTaint: true,
-                useCORS: false,
+                useCORS: true,
+                allowTaint: false,
                 backgroundColor: null,
                 width: 1080,
                 height: 1350,
