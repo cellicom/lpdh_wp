@@ -122,12 +122,11 @@ add_action('admin_init', 'lpdh_check_dependencies');
  * This role has full content management power but cannot touch system-level settings.
  */
 function lpdh_register_co_administrator_role() {
-    // Only run if the role doesn't exist yet
-    if (get_role('co_administrator')) {
+    $admin_role = get_role('administrator');
+    if (!$admin_role) {
         return;
     }
-
-    $admin_role = get_role('administrator');
+    
     $caps = $admin_role->capabilities;
 
     // List of capabilities to REMOVE for Co-Admins
@@ -156,11 +155,38 @@ function lpdh_register_co_administrator_role() {
         unset($caps[$cap]);
     }
 
+    // Ensure they HAVE the basic content management caps explicitly
+    $essential_caps = array(
+        'edit_posts', 'edit_others_posts', 'edit_published_posts', 'edit_private_posts',
+        'publish_posts', 'read_private_posts', 'delete_posts', 'delete_others_posts',
+        'delete_published_posts', 'delete_private_posts',
+        'edit_pages', 'edit_others_pages', 'edit_published_pages', 'edit_private_pages',
+        'publish_pages', 'read_private_pages', 'delete_pages', 'delete_others_pages',
+        'delete_published_pages', 'delete_private_pages',
+        'upload_files', 'unfiltered_html'
+    );
+    
+    foreach ($essential_caps as $ecap) {
+        $caps[$ecap] = true;
+    }
+
     // Add specific custom caps for LPDH features
     $caps['view_lpdh_help_guide'] = true;
     $caps['manage_lpdh_content'] = true;
 
-    add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
+    // Check if role exists to update or create
+    if (get_role('co_administrator')) {
+        $role = get_role('co_administrator');
+        foreach ($caps as $cap => $grant) {
+            if ($grant) {
+                $role->add_cap($cap);
+            } else {
+                $role->remove_cap($cap);
+            }
+        }
+    } else {
+        add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
+    }
 }
 add_action('init', 'lpdh_register_co_administrator_role');
 
@@ -1073,7 +1099,7 @@ add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
  */
 function hide_admin_bar_items_for_players($wp_admin_bar)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1095,7 +1121,7 @@ add_action('admin_bar_menu', 'hide_admin_bar_items_for_players', 999);
  */
 function redirect_players_from_restricted_pages()
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1283,7 +1309,7 @@ add_action('manage_banned_card_posts_custom_column', 'banned_card_custom_columns
  */
 function hide_banned_card_menu_from_players()
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         remove_menu_page('edit.php?post_type=banned_card');
     }
 }
@@ -1295,7 +1321,7 @@ add_action('admin_menu', 'hide_banned_card_menu_from_players', 999);
 function restrict_banned_card_admin_access()
 {
     // Check if we're on banned_card post type admin pages
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $current_screen = get_current_screen();
 
         if ($current_screen && $current_screen->post_type === 'banned_card') {
@@ -1311,7 +1337,7 @@ add_action('admin_init', 'restrict_banned_card_admin_access', 999);
  */
 function hide_banned_card_admin_bar($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $wp_admin_bar->remove_node('new-banned_card');
     }
 }
@@ -1322,7 +1348,7 @@ add_action('admin_bar_menu', 'hide_banned_card_admin_bar', 999);
  */
 function remove_banned_card_from_new_menu($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         foreach ($wp_admin_bar->get_nodes() as $id => $node) {
             if (strpos($id, 'new-banned_card') !== false) {
                 $wp_admin_bar->remove_node($id);
@@ -1344,8 +1370,8 @@ function restrict_deck_list_tabs_for_players($views)
         return $views;
     }
 
-    // If user is admin, show all tabs
-    if (current_user_can('administrator')) {
+    // If user is admin/co-admin, show all tabs
+    if (lpdh_can_manage_content()) {
         return $views;
     }
 
@@ -1378,8 +1404,8 @@ function hide_deck_views_for_players()
         return;
     }
 
-    // If user is admin, do nothing
-    if (current_user_can('administrator')) {
+    // If user is admin/co-admin, do nothing
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1658,7 +1684,7 @@ add_action('pre_get_posts', 'place_column_orderby');
  */
 function hide_place_menu_from_players()
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         remove_menu_page('edit.php?post_type=place');
     }
 }
@@ -1670,7 +1696,7 @@ add_action('admin_menu', 'hide_place_menu_from_players', 999);
 function restrict_place_admin_access()
 {
     // Check if we're on place post type admin pages
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $current_screen = get_current_screen();
 
         if ($current_screen && $current_screen->post_type === 'place') {
@@ -1686,7 +1712,7 @@ add_action('admin_init', 'restrict_place_admin_access', 999);
  */
 function hide_place_admin_bar($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $wp_admin_bar->remove_node('new-place');
     }
 }
@@ -1697,7 +1723,7 @@ add_action('admin_bar_menu', 'hide_place_admin_bar', 999);
  */
 function remove_place_from_new_menu($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         foreach ($wp_admin_bar->get_nodes() as $id => $node) {
             if (strpos($id, 'new-place') !== false) {
                 $wp_admin_bar->remove_node($id);
@@ -1775,7 +1801,7 @@ add_action('init', 'register_faq_post_type', 0);
  */
 function hide_faq_menu_from_players()
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         remove_menu_page('edit.php?post_type=faq');
     }
 }
@@ -1787,7 +1813,7 @@ add_action('admin_menu', 'hide_faq_menu_from_players', 999);
 function restrict_faq_admin_access()
 {
     // Check if we're on faq post type admin pages
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $current_screen = get_current_screen();
 
         if ($current_screen && $current_screen->post_type === 'faq') {
@@ -1803,7 +1829,7 @@ add_action('admin_init', 'restrict_faq_admin_access', 999);
  */
 function hide_faq_admin_bar($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $wp_admin_bar->remove_node('new-faq');
     }
 }
@@ -1814,7 +1840,7 @@ add_action('admin_bar_menu', 'hide_faq_admin_bar', 999);
  */
 function remove_faq_from_new_menu($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         foreach ($wp_admin_bar->get_nodes() as $id => $node) {
             if (strpos($id, 'new-faq') !== false) {
                 $wp_admin_bar->remove_node($id);
@@ -2453,7 +2479,7 @@ add_action('pre_get_posts', 'event_column_orderby');
  */
 function hide_event_menu_from_players()
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         remove_menu_page('edit.php?post_type=event');
     }
 }
@@ -2512,7 +2538,7 @@ add_action('admin_head', 'lpdh_banned_card_list_column_widths');
 function restrict_event_admin_access()
 {
     // Check if we're on event post type admin pages
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $current_screen = get_current_screen();
 
         if ($current_screen && $current_screen->post_type === 'event') {
@@ -2528,7 +2554,7 @@ add_action('admin_init', 'restrict_event_admin_access', 999);
  */
 function hide_event_admin_bar($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $wp_admin_bar->remove_node('new-event');
     }
 }
@@ -2539,7 +2565,7 @@ add_action('admin_bar_menu', 'hide_event_admin_bar', 999);
  */
 function remove_event_from_new_menu($wp_admin_bar)
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         foreach ($wp_admin_bar->get_nodes() as $id => $node) {
             if (strpos($id, 'new-event') !== false) {
                 $wp_admin_bar->remove_node($id);
@@ -4204,7 +4230,7 @@ function render_player_stats_page()
  */
 function add_stats_link_to_user_row($actions, $user)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         $url = add_query_arg(
             array(
                 'page' => 'player-stats',
@@ -6246,7 +6272,7 @@ function lpdh_render_event_ocr_metabox($post)
 add_filter('show_admin_bar', 'lpdh_manage_admin_bar');
 function lpdh_manage_admin_bar($show)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return true;
     }
 
