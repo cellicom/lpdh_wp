@@ -1060,11 +1060,11 @@ $place_name = $event_place ? $event_place->post_title : '';
                             <div class="first-place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
                                 <?php if ($first['commander_img']): ?>
                                     <div class="first-place-card">
-                                        <img src="<?php echo esc_url($first['commander_img']); ?>" alt="Commander">
+                                        <img src="<?php echo esc_attr($first['commander_img']); ?>" alt="Commander">
                                     </div>
                                     <?php if ($has_partner && $first['partner_img']): ?>
                                         <div class="first-place-card">
-                                            <img src="<?php echo esc_url($first['partner_img']); ?>" alt="Partner">
+                                            <img src="<?php echo esc_attr($first['partner_img']); ?>" alt="Partner">
                                         </div>
                                     <?php endif; ?>
                                 <?php endif; ?>
@@ -1102,11 +1102,11 @@ $place_name = $event_place ? $event_place->post_title : '';
                                 <div class="place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
                                     <?php if ($player['commander_img']): ?>
                                         <div class="place-card">
-                                            <img src="<?php echo esc_url($player['commander_img']); ?>" alt="Commander">
+                                            <img src="<?php echo esc_attr($player['commander_img']); ?>" alt="Commander">
                                         </div>
                                         <?php if ($has_partner && $player['partner_img']): ?>
                                             <div class="place-card">
-                                                <img src="<?php echo esc_url($player['partner_img']); ?>" alt="Partner">
+                                                <img src="<?php echo esc_attr($player['partner_img']); ?>" alt="Partner">
                                             </div>
                                         <?php endif; ?>
                                     <?php endif; ?>
