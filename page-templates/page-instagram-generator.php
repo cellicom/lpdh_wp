@@ -408,18 +408,18 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         .place-cards-wrapper.dual {
-            gap: 40px;
+            gap: 5px;
         }
 
         .place-card {
             position: relative;
-            width: 180px;
-            height: 252px;
+            width: 160px;
+            height: 220px;
         }
 
         .place-cards-wrapper.dual .place-card {
-            width: 107px;
-            height: 150px;
+            width: 160px;
+            height: 220px;
         }
 
         /* Colored Frames for 2nd-4th Place */
