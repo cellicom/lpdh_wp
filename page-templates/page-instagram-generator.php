@@ -24,7 +24,6 @@ function cache_scryfall_image($url) {
     
     // Only convert if it's a Scryfall image
     if (strpos($url, 'scryfall.io') === false) {
-        error_log('Not a Scryfall image, keeping original: ' . $url);
         return $url; // Return original URL if not Scryfall
     }
     
@@ -43,11 +42,8 @@ function cache_scryfall_image($url) {
     
     // Check if already cached
     if (file_exists($cache_file)) {
-        error_log('Using cached Scryfall image: ' . $cache_url);
         return $cache_url;
     }
-    
-    error_log('Downloading and caching Scryfall image: ' . $url);
     
     // Download image from Scryfall
     $response = wp_remote_get($url, array(
@@ -56,14 +52,12 @@ function cache_scryfall_image($url) {
     ));
     
     if (is_wp_error($response)) {
-        error_log('Failed to fetch Scryfall image: ' . $url . ' Error: ' . $response->get_error_message());
         return $url; // Return original URL if fetch fails
     }
     
     $image_data = wp_remote_retrieve_body($response);
     
     if (empty($image_data)) {
-        error_log('Empty image data from Scryfall: ' . $url);
         return $url;
     }
     
@@ -71,11 +65,8 @@ function cache_scryfall_image($url) {
     $saved = file_put_contents($cache_file, $image_data);
     
     if ($saved === false) {
-        error_log('Failed to save cached image: ' . $cache_file);
         return $url;
     }
-    
-    error_log('Successfully cached Scryfall image: ' . $cache_url . ' (' . strlen($image_data) . ' bytes)');
     
     return $cache_url;
 }
@@ -104,10 +95,16 @@ $rankings = get_field('field_event_ranking', $event_id);
 $primary_color = get_option('lpdh_theme_primary_color', '#6a1b9a');
 $secondary_color = get_option('lpdh_theme_secondary_color', '#00bcd4');
 
-// Extract top 4
-$top4 = array();
+// Get template type from query parameter
+$ig_type = isset($_GET['ig_type']) ? sanitize_text_field($_GET['ig_type']) : 'top4';
+$max_players = 4;
+if ($ig_type === 'top3') $max_players = 3;
+if ($ig_type === 'top8') $max_players = 8;
+
+// Extract players data
+$players_data = array();
 if (is_array($rankings) && count($rankings) > 0) {
-    for ($i = 0; $i < 4 && $i < count($rankings); $i++) {
+    for ($i = 0; $i < $max_players && $i < count($rankings); $i++) {
         $rank = $rankings[$i];
         $player_deck_id = isset($rank['player_deck_id']) ? $rank['player_deck_id'] : '';
 
@@ -140,35 +137,26 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
                 
-                error_log("Player {$i} - Commander original: " . ($commander_img ?: 'EMPTY'));
-                error_log("Player {$i} - Partner original: " . ($partner_img ?: 'EMPTY'));
-                
                 // Remove query strings from image URLs
                 if ($commander_img) {
                     $commander_img_clean = strtok($commander_img, '?');
                     if ($commander_img_clean !== false) {
                         $commander_img = $commander_img_clean;
                     }
-                    error_log("Player {$i} - Commander after strtok: " . $commander_img);
                 }
                 if ($partner_img) {
                     $partner_img_clean = strtok($partner_img, '?');
                     if ($partner_img_clean !== false) {
                         $partner_img = $partner_img_clean;
                     }
-                    error_log("Player {$i} - Partner after strtok: " . $partner_img);
                 }
                 
                 // Cache Scryfall images locally
                 if ($commander_img) {
                     $commander_img = cache_scryfall_image($commander_img);
-                    $is_data_url = strpos($commander_img, 'data:') === 0;
-                    error_log("Player {$i} - Commander after caching: " . ($is_data_url ? 'DATA URL (length: ' . strlen($commander_img) . ')' : $commander_img));
                 }
                 if ($partner_img) {
                     $partner_img = cache_scryfall_image($partner_img);
-                    $is_data_url = strpos($partner_img, 'data:') === 0;
-                    error_log("Player {$i} - Partner after caching: " . ($is_data_url ? 'DATA URL (length: ' . strlen($partner_img) . ')' : $partner_img));
                 }
                 
                 // Get commander and partner names
@@ -177,7 +165,7 @@ if (is_array($rankings) && count($rankings) > 0) {
             }
         }
 
-        $top4[] = array(
+        $players_data[] = array(
             'position' => $i + 1,
             'player_name' => $player_name,
             'deck_name' => $deck_name,
@@ -186,12 +174,6 @@ if (is_array($rankings) && count($rankings) > 0) {
             'commander_name' => $commander_name,
             'partner_name' => $partner_name
         );
-        
-        // Debug what's being stored
-        $is_cmd_data = $commander_img && strpos($commander_img, 'data:') === 0;
-        $is_part_data = $partner_img && strpos($partner_img, 'data:') === 0;
-        error_log("Stored in top4[$i] - Commander: " . ($is_cmd_data ? "DATA URL (" . strlen($commander_img) . " chars)" : ($commander_img ?: 'EMPTY')));
-        error_log("Stored in top4[$i] - Partner: " . ($is_part_data ? "DATA URL (" . strlen($partner_img) . " chars)" : ($partner_img ?: 'EMPTY')));
     }
 }
 
@@ -1045,6 +1027,33 @@ $place_name = $event_place ? $event_place->post_title : '';
 
 <body>
     <div class="container">
+        <!-- Selectors (Moved to top) -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="theme-selector">
+                    <label for="ig-theme-select" class="form-label fw-bold">🎨 Select Theme:</label>
+                    <select id="ig-theme-select" class="form-select form-select-lg">
+                        <option value="instagram-fantasy" selected>🏰 Epic Fantasy</option>
+                        <option value="instagram-vaporwave">🌸 Vaporwave</option>
+                        <option value="instagram-vaporwave-green">💚 Vaporwave Green</option>
+                        <option value="instagram-lostwood">🌲 Lost Wood</option>
+                        <option value="instagram-bootscore">📘 Bootstrap Classic</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="type-selector">
+                    <label for="ig-type-select" class="form-label fw-bold">🏆 Select Type:</label>
+                    <select id="ig-type-select" class="form-select form-select-lg">
+                        <option value="top3" <?php selected($ig_type, 'top3'); ?>>Top 3</option>
+                        <option value="top4" <?php selected($ig_type, 'top4'); ?>>Top 4 (Default)</option>
+                        <option value="top8" <?php selected($ig_type, 'top8'); ?>>Top 8</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Preview -->
         <div class="instagram-image instagram-fantasy" id="ig-image">
             <div class="content">
                 <!-- Header -->
@@ -1052,7 +1061,7 @@ $place_name = $event_place ? $event_place->post_title : '';
                     <div class="event-title">
                         <?php echo esc_html($event_title); ?>
                     </div>
-                    <div class="subtitle">TOP 4 DECKLISTS</div>
+                    <div class="subtitle"><?php echo strtoupper(str_replace('top', 'TOP ', $ig_type)); ?> DECKLISTS</div>
                     <div class="event-meta">
                         <?php if ($formatted_date): ?>
                             <span>📅
@@ -1067,100 +1076,16 @@ $place_name = $event_place ? $event_place->post_title : '';
                     </div>
                 </div>
 
-                <!-- Podium -->
-                <div class="podium">
-                    <?php if (isset($top4[0])): 
-                        $first = $top4[0];
-                        $has_partner = !empty($first['partner_img']);
-                    ?>
-                        <!-- First Place -->
-                        <div class="first-place">
-                            <div class="first-place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
-                                <?php if ($first['commander_img']): ?>
-                                    <div class="first-place-card">
-                                        <img src="<?php echo esc_attr($first['commander_img']); ?>" alt="Commander">
-                                    </div>
-                                    <?php if ($has_partner && $first['partner_img']): ?>
-                                        <div class="first-place-card">
-                                            <img src="<?php echo esc_attr($first['partner_img']); ?>" alt="Partner">
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </div>
-                            <div class="first-place-info">
-                                <div class="first-place-position">1ST PLACE</div>
-                                <div class="first-place-player"><?php echo esc_html($first['player_name']); ?></div>
-                                <div class="first-place-commanders">
-                                    <?php 
-                                    echo esc_html($first['commander_name']);
-                                    if ($first['partner_name']) {
-                                        echo ' / ' . esc_html($first['partner_name']);
-                                    }
-                                    ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Bottom Three Places -->
-                    <div class="bottom-three">
-                        <?php 
-                        $positions = array(
-                            1 => array('class' => 'silver', 'label' => '2ND PLACE'),
-                            2 => array('class' => 'bronze', 'label' => '3RD PLACE'),
-                            3 => array('class' => 'fourth', 'label' => '4TH PLACE')
-                        );
-                        
-                        for ($i = 1; $i <= 3; $i++):
-                            if (isset($top4[$i])):
-                                $player = $top4[$i];
-                                $has_partner = !empty($player['partner_img']);
-                        ?>
-                            <div class="place-item <?php echo $positions[$i]['class']; ?>">
-                                <div class="place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
-                                    <?php if ($player['commander_img']): ?>
-                                        <div class="place-card">
-                                            <img src="<?php echo esc_attr($player['commander_img']); ?>" alt="Commander">
-                                        </div>
-                                        <?php if ($has_partner && $player['partner_img']): ?>
-                                            <div class="place-card">
-                                                <img src="<?php echo esc_attr($player['partner_img']); ?>" alt="Partner">
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="place-info">
-                                    <div class="place-position"><?php echo $positions[$i]['label']; ?></div>
-                                    <div class="place-player"><?php echo esc_html($player['player_name']); ?></div>
-                                    <div class="place-commanders">
-                                        <?php 
-                                        echo esc_html($player['commander_name']);
-                                        if ($player['partner_name']) {
-                                            echo ' / ' . esc_html($player['partner_name']);
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php 
-                            endif;
-                        endfor; 
-                        ?>
-                    </div>
-                </div>
+                <!-- Dynamic Template Loading -->
+                <?php 
+                $template_file = __DIR__ . "/ig-template/{$ig_type}.php";
+                if (file_exists($template_file)) {
+                    include($template_file);
+                } else {
+                    echo '<p class="text-white text-center">Template not found: ' . esc_html($ig_type) . '</p>';
+                }
+                ?>
             </div>
-        </div>
-
-        <!-- Theme Selector -->
-        <div class="theme-selector mt-4">
-            <label for="ig-theme-select" class="form-label fw-bold">Select Theme:</label>
-            <select id="ig-theme-select" class="form-select form-select-lg">
-                <option value="instagram-fantasy" selected>🏰 Epic Fantasy</option>
-                <option value="instagram-vaporwave">🌸 Vaporwave</option>
-                <option value="instagram-vaporwave-green">💚 Vaporwave Green</option>
-                <option value="instagram-lostwood">🌲 Lost Wood</option>
-                <option value="instagram-bootscore">📘 Bootstrap Classic</option>
-            </select>
         </div>
 
         <!-- Action Buttons -->
@@ -1180,12 +1105,22 @@ $place_name = $event_place ? $event_place->post_title : '';
     <script>
         // Theme Switcher
         document.getElementById('ig-theme-select').addEventListener('change', function() {
+            const theme = this.value;
             const container = document.getElementById('ig-image');
-            // Remove all theme classes
-            container.classList.remove('instagram-fantasy', 'instagram-vaporwave', 
-                'instagram-vaporwave-green', 'instagram-lostwood', 'instagram-bootscore');
-            // Add selected theme
-            container.classList.add(this.value);
+            
+            // Remove existing theme classes
+            container.className = 'instagram-image ' + theme;
+        });
+
+        // Type Switcher
+        document.getElementById('ig-type-select').addEventListener('change', function() {
+            const type = this.value;
+            const theme = document.getElementById('ig-theme-select').value;
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('ig_type', type);
+            // Optionally persist theme in URL if you want it to survive refresh
+            // currentUrl.searchParams.set('ig_theme', theme); 
+            window.location.href = currentUrl.toString();
         });
 
         // Download Image
