@@ -272,7 +272,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 30px;
         }
 
         .first-place-cards-wrapper {
@@ -404,7 +404,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
         }
 
         .place-cards-wrapper.dual {
@@ -414,23 +414,23 @@ $place_name = $event_place ? $event_place->post_title : '';
         .place-card {
             position: relative;
             width: 180px;
-            height: 240px;
+            height: 252px;
         }
 
         .place-cards-wrapper.dual .place-card {
-            width: 150px;
-            height: 200px;
+            width: 107px;
+            height: 150px;
         }
 
         /* Colored Frames for 2nd-4th Place */
         .place-card::before {
             content: '';
             position: absolute;
-            top: -15px;
-            left: -15px;
-            right: -15px;
-            bottom: -15px;
-            border-radius: 15px;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border-radius: 12px;
             z-index: 1;
             box-shadow: 
                 0 0 30px rgba(0, 0, 0, 0.5),
@@ -448,12 +448,12 @@ $place_name = $event_place ? $event_place->post_title : '';
         .place-item.silver .place-card::after {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 4px solid #C0C0C0;
-            border-radius: 12px;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #C0C0C0;
+            border-radius: 10px;
             z-index: 2;
             box-shadow: inset 0 0 15px rgba(192, 192, 192, 0.3);
         }
@@ -469,12 +469,12 @@ $place_name = $event_place ? $event_place->post_title : '';
         .place-item.bronze .place-card::after {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 4px solid #CD7F32;
-            border-radius: 12px;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #CD7F32;
+            border-radius: 10px;
             z-index: 2;
             box-shadow: inset 0 0 15px rgba(205, 127, 50, 0.3);
         }
@@ -490,12 +490,12 @@ $place_name = $event_place ? $event_place->post_title : '';
         .place-item.fourth .place-card::after {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 4px solid #FF4500;
-            border-radius: 12px;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #FF4500;
+            border-radius: 10px;
             z-index: 2;
             box-shadow: inset 0 0 15px rgba(255, 69, 0, 0.3);
         }
