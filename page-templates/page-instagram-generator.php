@@ -263,7 +263,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 30px;
+            gap: 10px;
             z-index: 3;
         }
 
@@ -272,14 +272,29 @@ $place_name = $event_place ? $event_place->post_title : '';
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
+        }
+
+        .first-place-cards-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .first-place-cards-wrapper.dual {
+            gap: 20px;
         }
 
         .first-place-card {
             position: relative;
             width: 280px;
             height: 350px;
-            margin-bottom: 25px;
+        }
+
+        .first-place-cards-wrapper.dual .first-place-card {
+            width: 220px;
+            height: 300px;
         }
 
         /* Ornate Golden Frame */
@@ -332,16 +347,6 @@ $place_name = $event_place ? $event_place->post_title : '';
             border-radius: 15px;
             z-index: 3;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-        }
-
-        /* Dual Commander Layout for First Place */
-        .first-place-card.dual {
-            display: flex;
-            gap: 10px;
-        }
-
-        .first-place-card.dual img {
-            width: calc(50% - 5px);
         }
 
         .first-place-info {
@@ -893,11 +898,15 @@ $place_name = $event_place ? $event_place->post_title : '';
                     ?>
                         <!-- First Place -->
                         <div class="first-place">
-                            <div class="first-place-card <?php echo $has_partner ? 'dual' : ''; ?>">
+                            <div class="first-place-cards-wrapper <?php echo $has_partner ? 'dual' : ''; ?>">
                                 <?php if ($first['commander_img']): ?>
-                                    <img src="<?php echo esc_url($first['commander_img']); ?>" alt="Commander">
-                                    <?php if ($has_partner): ?>
-                                        <img src="<?php echo esc_url($first['partner_img']); ?>" alt="Partner">
+                                    <div class="first-place-card">
+                                        <img src="<?php echo esc_url($first['commander_img']); ?>" alt="Commander">
+                                    </div>
+                                    <?php if ($has_partner && $first['partner_img']): ?>
+                                        <div class="first-place-card">
+                                            <img src="<?php echo esc_url($first['partner_img']); ?>" alt="Partner">
+                                        </div>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>
