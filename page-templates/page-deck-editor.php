@@ -11,7 +11,7 @@
 defined('ABSPATH') || exit;
 
 // Access control: Only logged in players or admins
-if (!is_user_logged_in() || (!current_user_can('player') && !current_user_can('administrator'))) {
+if (!is_user_logged_in() || (!current_user_can('player') && !lpdh_can_manage_content())) {
     wp_redirect(home_url());
     exit;
 }

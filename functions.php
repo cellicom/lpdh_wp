@@ -115,7 +115,112 @@ function lpdh_check_dependencies()
         });
     }
 }
-add_action('after_setup_theme', 'lpdh_check_dependencies');
+add_action('admin_init', 'lpdh_check_dependencies');
+
+/**
+ * Register the Co-Administrator Role
+ * This role has full content management power but cannot touch system-level settings.
+ */
+function lpdh_register_co_administrator_role() {
+    $admin_role = get_role('administrator');
+    if (!$admin_role) {
+        return;
+    }
+    
+    $caps = $admin_role->capabilities;
+
+    // List of capabilities to REMOVE for Co-Admins
+    $blacklisted_caps = array(
+        'switch_themes',
+        'edit_themes',
+        'activate_plugins',
+        'edit_plugins',
+        'manage_options',
+        'import',
+        'export',
+        'manage_acf_options', // ACF specific
+        'update_core',
+        'update_plugins',
+        'update_themes',
+        'install_plugins',
+        'install_themes',
+        'delete_themes',
+        'delete_plugins',
+        'edit_files',
+        'edit_plugins',
+        'edit_themes',
+    );
+
+    foreach ($blacklisted_caps as $cap) {
+        unset($caps[$cap]);
+    }
+
+    // Ensure they HAVE the basic content management caps explicitly
+    $essential_caps = array(
+        'edit_posts', 'edit_others_posts', 'edit_published_posts', 'edit_private_posts',
+        'publish_posts', 'read_private_posts', 'delete_posts', 'delete_others_posts',
+        'delete_published_posts', 'delete_private_posts',
+        'edit_pages', 'edit_others_pages', 'edit_published_pages', 'edit_private_pages',
+        'publish_pages', 'read_private_pages', 'delete_pages', 'delete_others_pages',
+        'delete_published_pages', 'delete_private_pages',
+        'upload_files', 'unfiltered_html'
+    );
+    
+    foreach ($essential_caps as $ecap) {
+        $caps[$ecap] = true;
+    }
+
+    // Add specific custom caps for LPDH features
+    $caps['view_lpdh_help_guide'] = true;
+    $caps['manage_lpdh_content'] = true;
+
+    // Check if role exists to update or create
+    if (get_role('co_administrator')) {
+        $role = get_role('co_administrator');
+        foreach ($caps as $cap => $grant) {
+            if ($grant) {
+                $role->add_cap($cap);
+            } else {
+                $role->remove_cap($cap);
+            }
+        }
+    } else {
+        add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
+    }
+}
+add_action('init', 'lpdh_register_co_administrator_role');
+
+/**
+ * Restrict editable roles for Co-Administrators
+ * This prevents them from promoting anyone (including themselves) to full Administrator.
+ */
+function lpdh_restrict_editable_roles($all_roles) {
+    if (!current_user_can('administrator') && current_user_can('co_administrator')) {
+        if (isset($all_roles['administrator'])) {
+            unset($all_roles['administrator']);
+        }
+    }
+    return $all_roles;
+}
+add_filter('editable_roles', 'lpdh_restrict_editable_roles');
+
+/**
+ * Prevent Co-Administrators from accessing ACF menu specifically
+ */
+add_filter('acf/settings/show_admin', function($show) {
+    if (current_user_can('co_administrator') && !current_user_can('administrator')) {
+        return false;
+    }
+    return $show;
+});
+
+/**
+ * Centered Helper Function to check if user can manage LPDH content
+ * (Administrators and Co-Administrators)
+ */
+function lpdh_can_manage_content() {
+    return current_user_can('administrator') || current_user_can('manage_lpdh_content');
+}
 
 /**
  * Helper function to retrieve banned card names
@@ -381,34 +486,42 @@ function register_leaderboard_cpt()
 }
 add_action('init', 'register_leaderboard_cpt', 0);
 
+
 /**
- * Assegnazione delle capabilities 'leaderboard' solo all'Amministratore.
- * Questo assicura che solo gli admin possano gestire questo CPT.
+ * Assegnazione delle capabilities 'leaderboard' agli Amministratori e Co-Amministratori.
  */
 function add_leaderboard_caps_to_admin()
 {
-    $role = get_role('administrator');
+    $roles = array('administrator', 'co_administrator');
 
-    if ($role) {
-        $caps = array(
-            'edit_leaderboard',
-            'read_leaderboard',
-            'delete_leaderboard',
-            'edit_leaderboards',
-            'edit_others_leaderboards',
-            'publish_leaderboards',
-            'read_private_leaderboards',
-            'delete_leaderboards',
-            'delete_private_leaderboards',
-            'delete_published_leaderboards',
-            'delete_others_leaderboards',
-            'edit_private_leaderboards',
-            'edit_published_leaderboards',
-        );
+    foreach ($roles as $role_slug) {
+        $role = get_role($role_slug);
 
-        foreach ($caps as $cap) {
-            if (!$role->has_cap($cap)) {
-                $role->add_cap($cap);
+        if ($role) {
+            $caps = array(
+                'edit_leaderboard',
+                'read_leaderboard',
+                'delete_leaderboard',
+                'edit_leaderboards',
+                'edit_others_leaderboards',
+                'publish_leaderboards',
+                'read_private_leaderboards',
+                'delete_leaderboards',
+                'delete_private_leaderboards',
+                'delete_published_leaderboards',
+                'delete_others_leaderboards',
+                'edit_private_leaderboards',
+                'edit_published_leaderboards',
+            );
+
+            // Also ensure both have the new custom LPDH caps
+            $caps[] = 'view_lpdh_help_guide';
+            $caps['manage_lpdh_content'] = true;
+
+            foreach ($caps as $cap) {
+                if (!$role->has_cap($cap)) {
+                    $role->add_cap($cap);
+                }
             }
         }
     }
@@ -899,7 +1012,7 @@ add_filter('manage_users_custom_column', 'lpdh_populate_user_decks_column', 10, 
 function restrict_admin_menu_for_players()
 {
     // If user is admin, show everything
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -976,8 +1089,13 @@ function restrict_admin_menu_for_players()
         remove_menu_page('separator-custom');
         remove_menu_page('separator-last');
 
-        // Banned Card CPT
+        // Custom Post Types
+        remove_menu_page('edit.php?post_type=leaderboard');
         remove_menu_page('edit.php?post_type=banned_card');
+        remove_menu_page('edit.php?post_type=place');
+        remove_menu_page('edit.php?post_type=faq');
+        remove_menu_page('edit.php?post_type=event');
+        remove_menu_page('edit.php?post_type=achievement');
     }
 }
 add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
@@ -987,7 +1105,7 @@ add_action('admin_menu', 'restrict_admin_menu_for_players', 999);
  */
 function hide_admin_bar_items_for_players($wp_admin_bar)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1009,7 +1127,7 @@ add_action('admin_bar_menu', 'hide_admin_bar_items_for_players', 999);
  */
 function redirect_players_from_restricted_pages()
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1036,6 +1154,20 @@ function redirect_players_from_restricted_pages()
             // Allow deck management
             if (isset($_GET['post_type']) && $_GET['post_type'] === 'deck') {
                 return;
+            }
+
+            // Block other custom post types
+            $blocked_cpts = array('leaderboard', 'banned_card', 'place', 'faq', 'event', 'achievement');
+            if (isset($_GET['post_type']) && in_array($_GET['post_type'], $blocked_cpts)) {
+                wp_redirect(admin_url());
+                exit;
+            }
+            
+            // Also check current screen for direct access
+            $screen = get_current_screen();
+            if ($screen && in_array($screen->post_type, $blocked_cpts)) {
+                wp_redirect(admin_url());
+                exit;
             }
 
             // Redirect to dashboard
@@ -1192,59 +1324,6 @@ function banned_card_custom_columns_data($column, $post_id)
 }
 add_action('manage_banned_card_posts_custom_column', 'banned_card_custom_columns_data', 10, 2);
 
-/**
- * Hide Banned Card menu from non-administrators
- */
-function hide_banned_card_menu_from_players()
-{
-    if (!current_user_can('administrator')) {
-        remove_menu_page('edit.php?post_type=banned_card');
-    }
-}
-add_action('admin_menu', 'hide_banned_card_menu_from_players', 999);
-
-/**
- * Restrict access to Banned Card admin pages for non-administrators
- */
-function restrict_banned_card_admin_access()
-{
-    // Check if we're on banned_card post type admin pages
-    if (!current_user_can('administrator')) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'banned_card') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_banned_card_admin_access', 999);
-
-/**
- * Hide Banned Card from admin bar for non-administrators
- */
-function hide_banned_card_admin_bar($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        $wp_admin_bar->remove_node('new-banned_card');
-    }
-}
-add_action('admin_bar_menu', 'hide_banned_card_admin_bar', 999);
-
-/**
- * Remove Banned Card from "New" menu in admin bar for non-admins
- */
-function remove_banned_card_from_new_menu($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-banned_card') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_banned_card_from_new_menu', 999);
 
 /**
  * Remove "All" and "Published" tabs for players in deck list
@@ -1258,8 +1337,8 @@ function restrict_deck_list_tabs_for_players($views)
         return $views;
     }
 
-    // If user is admin, show all tabs
-    if (current_user_can('administrator')) {
+    // If user is admin/co-admin, show all tabs
+    if (lpdh_can_manage_content()) {
         return $views;
     }
 
@@ -1292,8 +1371,8 @@ function hide_deck_views_for_players()
         return;
     }
 
-    // If user is admin, do nothing
-    if (current_user_can('administrator')) {
+    // If user is admin/co-admin, do nothing
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1339,7 +1418,7 @@ add_action('pre_get_posts', 'restrict_deck_list_query_for_players');
 function redirect_players_to_deck_list()
 {
     // If user is admin, do nothing (admin sees normal dashboard)
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return;
     }
 
@@ -1567,59 +1646,6 @@ function place_column_orderby($query)
 }
 add_action('pre_get_posts', 'place_column_orderby');
 
-/**
- * Hide Place menu from non-administrators
- */
-function hide_place_menu_from_players()
-{
-    if (!current_user_can('administrator')) {
-        remove_menu_page('edit.php?post_type=place');
-    }
-}
-add_action('admin_menu', 'hide_place_menu_from_players', 999);
-
-/**
- * Restrict access to Place admin pages for non-administrators
- */
-function restrict_place_admin_access()
-{
-    // Check if we're on place post type admin pages
-    if (!current_user_can('administrator')) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'place') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_place_admin_access', 999);
-
-/**
- * Hide Place from admin bar for non-administrators
- */
-function hide_place_admin_bar($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        $wp_admin_bar->remove_node('new-place');
-    }
-}
-add_action('admin_bar_menu', 'hide_place_admin_bar', 999);
-
-/**
- * Remove Place from "New" menu in admin bar for non-admins
- */
-function remove_place_from_new_menu($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-place') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_place_from_new_menu', 999);
 
 /**
  * Register Custom Post Type "FAQ"
@@ -1684,59 +1710,6 @@ function register_faq_post_type()
 }
 add_action('init', 'register_faq_post_type', 0);
 
-/**
- * Hide FAQ menu from non-administrators
- */
-function hide_faq_menu_from_players()
-{
-    if (!current_user_can('administrator')) {
-        remove_menu_page('edit.php?post_type=faq');
-    }
-}
-add_action('admin_menu', 'hide_faq_menu_from_players', 999);
-
-/**
- * Restrict access to FAQ admin pages for non-administrators
- */
-function restrict_faq_admin_access()
-{
-    // Check if we're on faq post type admin pages
-    if (!current_user_can('administrator')) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'faq') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_faq_admin_access', 999);
-
-/**
- * Hide FAQ from admin bar for non-administrators
- */
-function hide_faq_admin_bar($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        $wp_admin_bar->remove_node('new-faq');
-    }
-}
-add_action('admin_bar_menu', 'hide_faq_admin_bar', 999);
-
-/**
- * Remove FAQ from "New" menu in admin bar for non-admins
- */
-function remove_faq_from_new_menu($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-faq') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_faq_from_new_menu', 999);
 
 /**
  * Register Custom Post Type "Event"
@@ -2367,7 +2340,7 @@ add_action('pre_get_posts', 'event_column_orderby');
  */
 function hide_event_menu_from_players()
 {
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         remove_menu_page('edit.php?post_type=event');
     }
 }
@@ -2426,7 +2399,7 @@ add_action('admin_head', 'lpdh_banned_card_list_column_widths');
 function restrict_event_admin_access()
 {
     // Check if we're on event post type admin pages
-    if (!current_user_can('administrator')) {
+    if (!lpdh_can_manage_content()) {
         $current_screen = get_current_screen();
 
         if ($current_screen && $current_screen->post_type === 'event') {
@@ -2436,32 +2409,6 @@ function restrict_event_admin_access()
     }
 }
 add_action('admin_init', 'restrict_event_admin_access', 999);
-
-/**
- * Hide Event from admin bar for non-administrators
- */
-function hide_event_admin_bar($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        $wp_admin_bar->remove_node('new-event');
-    }
-}
-add_action('admin_bar_menu', 'hide_event_admin_bar', 999);
-
-/**
- * Remove Event from "New" menu in admin bar for non-admins
- */
-function remove_event_from_new_menu($wp_admin_bar)
-{
-    if (!current_user_can('administrator')) {
-        foreach ($wp_admin_bar->get_nodes() as $id => $node) {
-            if (strpos($id, 'new-event') !== false) {
-                $wp_admin_bar->remove_node($id);
-            }
-        }
-    }
-}
-add_action('admin_bar_menu', 'remove_event_from_new_menu', 999);
 
 /**
  * Auto-fill ranking name field when player is selected
@@ -3347,7 +3294,7 @@ function render_player_stats_page()
     $user_id = get_current_user_id();
 
     // Admin override: allow viewing other users' stats
-    if (current_user_can('administrator') && isset($_GET['stats_user_id'])) {
+    if (lpdh_can_manage_content() && isset($_GET['stats_user_id'])) {
         $user_id = intval($_GET['stats_user_id']);
     }
 
@@ -4118,7 +4065,7 @@ function render_player_stats_page()
  */
 function add_stats_link_to_user_row($actions, $user)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         $url = add_query_arg(
             array(
                 'page' => 'player-stats',
@@ -4917,7 +4864,7 @@ function lpdh_register_theme_settings()
     add_theme_page(
         'LPDH Theme Settings',
         'Theme Settings',
-        'manage_options',
+        'manage_lpdh_content',
         'lpdh-theme-settings',
         'lpdh_theme_settings_render'
     );
@@ -4926,7 +4873,7 @@ add_action('admin_menu', 'lpdh_register_theme_settings');
 
 function lpdh_theme_settings_render()
 {
-    if (!current_user_can('manage_options'))
+    if (!lpdh_can_manage_content())
         return;
 
     // Save Settings
@@ -4948,6 +4895,9 @@ function lpdh_theme_settings_render()
         // Save ELO Settings
         update_option('lpdh_elo_k_factor_divide_by_game', isset($_POST['lpdh_elo_k_factor_divide_by_game']) ? 1 : 0);
 
+        // Save Instagram Generator Page
+        update_option('lpdh_instagram_generator_page_id', intval($_POST['lpdh_instagram_generator_page_id']));
+
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
@@ -4955,6 +4905,7 @@ function lpdh_theme_settings_render()
     $deck_editor_page_id = get_option('lpdh_deck_editor_page_id', 0);
     $profile_editor_page_id = get_option('lpdh_profile_editor_page_id', 0);
     $stats_page_id = get_option('lpdh_stats_page_id', 0);
+    $instagram_generator_page_id = get_option('lpdh_instagram_generator_page_id', 0);
     ?>
     <div class="wrap">
         <h1>LPDH Theme Settings</h1>
@@ -4979,6 +4930,11 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the aesthetic for the entire platform.</p>
                     </td>
                 </tr>
+            </table>
+
+            <hr>
+            <h2>Pages Configuration</h2>
+            <table class="form-table">
                 <tr>
                     <th scope="row">Select Deck Editor Page</th>
                     <td>
@@ -5051,6 +5007,20 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Select Instagram Generator Page</th>
+                    <td>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => 'lpdh_instagram_generator_page_id',
+                            'selected' => $instagram_generator_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page using the "Instagram Generator" template.</p>
+                    </td>
+                </tr>
             </table>
 
             <hr>
@@ -5099,6 +5069,7 @@ function lpdh_theme_settings_render()
                 </tr>
             </table>
 
+            <hr>
             <?php submit_button(); ?>
         </form>
     </div>
@@ -6136,7 +6107,7 @@ function lpdh_render_event_ocr_metabox($post)
 add_filter('show_admin_bar', 'lpdh_manage_admin_bar');
 function lpdh_manage_admin_bar($show)
 {
-    if (current_user_can('administrator')) {
+    if (lpdh_can_manage_content()) {
         return true;
     }
 
@@ -6395,5 +6366,50 @@ function lpdh_check_stat_condition($user_val, $operator, $target_val)
             return $user_val < $target_val;
         default:
             return false;
+    }
+}
+
+/**
+ * Get Instagram Generator URL for Event
+ */
+function lpdh_get_instagram_generator_url($event_id)
+{
+    $ig_page_id = get_option('lpdh_instagram_generator_page_id', 0);
+    if (!$ig_page_id) {
+        return '';
+    }
+    return add_query_arg(['ig_event_id' => $event_id], get_permalink($ig_page_id));
+}
+
+/**
+ * Add Instagram Generator Metabox to Events
+ */
+function lpdh_add_instagram_generator_metabox()
+{
+    add_meta_box(
+        'lpdh_instagram_generator',
+        'Instagram Image Generator',
+        'lpdh_render_instagram_generator_metabox',
+        'event',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'lpdh_add_instagram_generator_metabox');
+
+/**
+ * Render Instagram Generator Metabox
+ */
+function lpdh_render_instagram_generator_metabox($post)
+{
+    $ig_url = lpdh_get_instagram_generator_url($post->ID);
+    
+    if ($ig_url) {
+        echo '<p>Generate a promotional Instagram image for this event\'s top 4 players.</p>';
+        echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" target="_blank" style="width: 100%; text-align: center; display: block;">';
+        echo '<span class="dashicons dashicons-instagram" style="margin-top: 3px;"></span> ';
+        echo 'Generate Instagram Image</a>';
+    } else {
+        echo '<p class="description">Instagram generator page not configured.</p>';
     }
 }

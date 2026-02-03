@@ -235,6 +235,16 @@ get_header(); ?>
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <?php if (lpdh_can_manage_content()):
+                                        $ig_url = lpdh_get_instagram_generator_url(get_the_ID());
+                                        if ($ig_url): ?>
+                                            <div class="text-center mt-3">
+                                                <a href="<?php echo esc_url($ig_url); ?>" class="btn btn-primary" target="_blank">
+                                                    <i class="fab fa-instagram me-2"></i>Generate Instagram Image
+                                                </a>
+                                            </div>
+                                        <?php endif; endif; ?>
                                 </div>
                             <?php endif; ?>
 

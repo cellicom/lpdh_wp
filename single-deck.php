@@ -11,7 +11,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete_deck' && isset($_POS
     $deck_id = intval($_POST['deck_id']);
     if (wp_verify_nonce($_POST['_wpnonce'], 'delete_deck_' . $deck_id)) {
         $deck = get_post($deck_id);
-        if ($deck && $deck->post_type === 'deck' && (intval($deck->post_author) === get_current_user_id() || current_user_can('administrator'))) {
+        if ($deck && $deck->post_type === 'deck' && (intval($deck->post_author) === get_current_user_id() || lpdh_can_manage_content())) {
             wp_delete_post($deck_id, true);
             wp_redirect(get_author_posts_url($deck->post_author));
             exit;
