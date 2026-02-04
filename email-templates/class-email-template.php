@@ -256,7 +256,7 @@ class LPDH_Email_Template
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>%s</title>
             </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: %s; margin: 0; padding: 0; background-color: %s; %s">
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: %s; margin: 0; padding: 20px 0px; background-color: %s; %s">
                 <div style="max-width: 600px; margin: 20px auto; background: %s; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
                     %s
                     <div style="padding: 30px; color: %s;">
