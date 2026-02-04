@@ -240,6 +240,14 @@ function lpdh_register_co_administrator_role()
     $caps['view_lpdh_help_guide'] = true;
     $caps['manage_lpdh_content'] = true;
 
+    // Ensure Administrator also has these custom caps
+    if (!$admin_role->has_cap('manage_lpdh_content')) {
+        $admin_role->add_cap('manage_lpdh_content');
+    }
+    if (!$admin_role->has_cap('view_lpdh_help_guide')) {
+        $admin_role->add_cap('view_lpdh_help_guide');
+    }
+
     // Check if role exists to update or create
     if (get_role('co_administrator')) {
         $role = get_role('co_administrator');
@@ -5025,7 +5033,7 @@ function register_lpdh_parent_menu()
     add_menu_page(
         'LPDH',
         'LPDH',
-        'read',
+        'manage_lpdh_content', // Restricted to roles with this specific LPDH capability
         'lpdh-main',
         'lpdh_render_main_page',
         'dashicons-admin-generic',
