@@ -168,6 +168,14 @@ function render_help_guide_page()
                         </div>
                     </li>
                 </ul>
+
+                <h4 style="margin-bottom: 10px;">Deck Creation Tools:</h4>
+                <div
+                    style="background: #fffcf5; padding: 15px; border: 1px solid #faecd8; border-radius: 6px; margin-bottom: 15px;">
+                    <strong>🚀 Tool: Admin Autocomplete</strong><br>
+                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck creation, the system suggests official names from Scryfall. Selecting one
+                    **automatically** populates the Scryfall URL and basic card metadata.
+                </div>
             </section>
 
             <!-- SECTION: ACHIEVEMENTS -->
@@ -355,12 +363,6 @@ function render_help_guide_page()
 
                 <h4 style="margin-bottom: 10px;">Managing the List:</h4>
                 <p>Use the <i>Banned Cards</i> CPT. Each entry requires a name and a <strong>Scryfall Link</strong>.</p>
-                <div
-                    style="background: #fffcf5; padding: 15px; border: 1px solid #faecd8; border-radius: 6px; margin-bottom: 15px;">
-                    <strong>🚀 Tool: Admin Autocomplete</strong><br>
-                    When typing a card name in the editor, the system suggests official names from Scryfall. Selecting one
-                    **automatically** populates the Scryfall URL and basic card metadata.
-                </div>
                 <div
                     style="background: #e7f5fe; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #0073aa;">
                     <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload
