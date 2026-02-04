@@ -118,15 +118,66 @@ function lpdh_check_dependencies()
 add_action('admin_init', 'lpdh_check_dependencies');
 
 /**
+ * Theme Setup
+ * Add support for WordPress features
+ */
+function lpdh_theme_setup()
+{
+    // Add custom logo support (manageable via Appearance > Customize > Site Identity)
+    add_theme_support('custom-logo', array(
+        'height' => 100,
+        'width' => 300,
+        'flex-height' => true,
+        'flex-width' => true,
+    ));
+}
+add_action('after_setup_theme', 'lpdh_theme_setup');
+
+/**
+ * Get Logo URL with Priority Logic
+ * 
+ * Returns the logo URL in the following priority order:
+ * 1. Custom logo from Theme Settings (lpdh_custom_logo_id)
+ * 2. WordPress Customizer logo (custom-logo theme mod)
+ * 3. Default hardcoded logo fallback
+ * 
+ * @return string Logo URL
+ */
+function lpdh_get_logo()
+{
+    // Priority 1: Check Theme Settings custom logo
+    $custom_logo_id = get_option('lpdh_custom_logo_id');
+    if ($custom_logo_id) {
+        $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+        if ($logo_url) {
+            return $logo_url;
+        }
+    }
+
+    // Priority 2: Check WordPress Customizer logo
+    $custom_logo_id = get_theme_mod('custom_logo');
+    if ($custom_logo_id) {
+        $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+        if ($logo_url) {
+            return $logo_url;
+        }
+    }
+
+    // Priority 3: Default fallback logo
+    return get_stylesheet_directory_uri() . '/assets/img/logo/logo-lpdh-ext-transparent.png';
+}
+
+/**
  * Register the Co-Administrator Role
  * This role has full content management power but cannot touch system-level settings.
  */
-function lpdh_register_co_administrator_role() {
+function lpdh_register_co_administrator_role()
+{
     $admin_role = get_role('administrator');
     if (!$admin_role) {
         return;
     }
-    
+
     $caps = $admin_role->capabilities;
 
     // List of capabilities to REMOVE for Co-Admins
@@ -157,15 +208,30 @@ function lpdh_register_co_administrator_role() {
 
     // Ensure they HAVE the basic content management caps explicitly
     $essential_caps = array(
-        'edit_posts', 'edit_others_posts', 'edit_published_posts', 'edit_private_posts',
-        'publish_posts', 'read_private_posts', 'delete_posts', 'delete_others_posts',
-        'delete_published_posts', 'delete_private_posts',
-        'edit_pages', 'edit_others_pages', 'edit_published_pages', 'edit_private_pages',
-        'publish_pages', 'read_private_pages', 'delete_pages', 'delete_others_pages',
-        'delete_published_pages', 'delete_private_pages',
-        'upload_files', 'unfiltered_html'
+        'edit_posts',
+        'edit_others_posts',
+        'edit_published_posts',
+        'edit_private_posts',
+        'publish_posts',
+        'read_private_posts',
+        'delete_posts',
+        'delete_others_posts',
+        'delete_published_posts',
+        'delete_private_posts',
+        'edit_pages',
+        'edit_others_pages',
+        'edit_published_pages',
+        'edit_private_pages',
+        'publish_pages',
+        'read_private_pages',
+        'delete_pages',
+        'delete_others_pages',
+        'delete_published_pages',
+        'delete_private_pages',
+        'upload_files',
+        'unfiltered_html'
     );
-    
+
     foreach ($essential_caps as $ecap) {
         $caps[$ecap] = true;
     }
@@ -194,7 +260,8 @@ add_action('init', 'lpdh_register_co_administrator_role');
  * Restrict editable roles for Co-Administrators
  * This prevents them from promoting anyone (including themselves) to full Administrator.
  */
-function lpdh_restrict_editable_roles($all_roles) {
+function lpdh_restrict_editable_roles($all_roles)
+{
     if (!current_user_can('administrator') && current_user_can('co_administrator')) {
         if (isset($all_roles['administrator'])) {
             unset($all_roles['administrator']);
@@ -207,7 +274,7 @@ add_filter('editable_roles', 'lpdh_restrict_editable_roles');
 /**
  * Prevent Co-Administrators from accessing ACF menu specifically
  */
-add_filter('acf/settings/show_admin', function($show) {
+add_filter('acf/settings/show_admin', function ($show) {
     if (current_user_can('co_administrator') && !current_user_can('administrator')) {
         return false;
     }
@@ -218,7 +285,8 @@ add_filter('acf/settings/show_admin', function($show) {
  * Centered Helper Function to check if user can manage LPDH content
  * (Administrators and Co-Administrators)
  */
-function lpdh_can_manage_content() {
+function lpdh_can_manage_content()
+{
     return current_user_can('administrator') || current_user_can('manage_lpdh_content');
 }
 
@@ -367,6 +435,11 @@ function bootscore_child_enqueue_styles()
  */
 function lpdh_admin_enqueue_scripts($hook)
 {
+    // Enqueue media uploader for Theme Settings page
+    if ($hook === 'lpdh_page_lpdh-theme-settings') {
+        wp_enqueue_media();
+    }
+
     global $post_type;
 
     if (in_array($hook, array('post.php', 'post-new.php')) && $post_type === 'deck') {
@@ -457,7 +530,7 @@ function lpdh_ajax_preview_email()
 
     // Temporarily override theme if requested
     if ($theme_override) {
-        add_filter('option_lpdh_active_theme', function() use ($theme_override) {
+        add_filter('option_lpdh_active_theme', function () use ($theme_override) {
             return $theme_override;
         });
     }
@@ -492,7 +565,7 @@ function lpdh_ajax_send_test_email()
 
     // Temporarily override theme if requested
     if ($theme_override) {
-        add_filter('option_lpdh_active_theme', function() use ($theme_override) {
+        add_filter('option_lpdh_active_theme', function () use ($theme_override) {
             return $theme_override;
         });
     }
@@ -1250,7 +1323,7 @@ function redirect_players_from_restricted_pages()
                 wp_redirect(admin_url());
                 exit;
             }
-            
+
             // Also check current screen for direct access
             $screen = get_current_screen();
             if ($screen && in_array($screen->post_type, $blocked_cpts)) {
@@ -4945,11 +5018,240 @@ function lpdh_banned_card_shortcode($atts)
 add_shortcode('banned_card', 'lpdh_banned_card_shortcode');
 
 /**
+ * Register Parent LPDH Admin Menu
+ */
+function register_lpdh_parent_menu()
+{
+    add_menu_page(
+        'LPDH',
+        'LPDH',
+        'read',
+        'lpdh-main',
+        'lpdh_render_main_page',
+        'dashicons-admin-generic',
+        2
+    );
+}
+add_action('admin_menu', 'register_lpdh_parent_menu', 9);
+
+/**
+ * Render LPDH Main Admin Page with README.md content
+ */
+function lpdh_render_main_page()
+{
+    $readme_path = get_stylesheet_directory() . '/README.md';
+
+    echo '<div class="wrap lpdh-readme-wrapper">';
+    echo '<h1 style="margin-bottom: 30px;"><span class="dashicons dashicons-admin-generic" style="font-size: 1.3em; margin-right: 10px;"></span>LPDH - Legendary Pauper Commander</h1>';
+
+    if (file_exists($readme_path)) {
+        $readme_content = file_get_contents($readme_path);
+
+        // Escape for safe JS injection
+        $readme_json = json_encode($readme_content);
+
+        echo '<div id="markdown-content" class="lpdh-readme-content markdown-body" data-color-mode="dark" data-dark-theme="dark"></div>';
+    } else {
+        echo '<div class="notice notice-error"><p>README.md file not found.</p></div>';
+    }
+
+    echo '</div>';
+
+    // Load Marked.js from CDN
+    echo '<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>';
+
+    // Load GitHub Markdown CSS (dark theme)
+    echo '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.5.0/github-markdown-dark.min.css">';
+
+    // Parse and render markdown
+    if (file_exists($readme_path)) {
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const markdownContent = ' . $readme_json . ';
+                
+                // Configure marked options for GFM (GitHub Flavored Markdown)
+                marked.setOptions({
+                    gfm: true,
+                    breaks: true,
+                    headerIds: true,
+                    mangle: false
+                });
+                
+                // Preprocess GitHub Alerts (> [!NOTE], > [!IMPORTANT], etc.)
+                function preprocessGitHubAlerts(markdown) {
+                    const alertTypes = {
+                        "NOTE": { icon: "ℹ️", class: "alert-note", color: "#1f6feb" },
+                        "TIP": { icon: "💡", class: "alert-tip", color: "#238636" },
+                        "IMPORTANT": { icon: "❗", class: "alert-important", color: "#8957e5" },
+                        "WARNING": { icon: "⚠️", class: "alert-warning", color: "#9e6a03" },
+                        "CAUTION": { icon: "🚨", class: "alert-caution", color: "#da3633" }
+                    };
+                    
+                    // Match GitHub alert pattern: > [!TYPE]
+                    const alertPattern = /^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n((?:> .*\n?)*)/gm;
+                    
+                    return markdown.replace(alertPattern, (match, type, content) => {
+                        const alert = alertTypes[type];
+                        // Remove the "> " prefix from each line of content
+                        const cleanContent = content.replace(/^> ?/gm, "").trim();
+                        
+                        return `<div class="markdown-alert markdown-alert-${alert.class}" style="border-left: 3px solid ${alert.color}; padding: 12px 16px; margin: 16px 0; background: rgba(${parseInt(alert.color.slice(1,3), 16)}, ${parseInt(alert.color.slice(3,5), 16)}, ${parseInt(alert.color.slice(5,7), 16)}, 0.1); border-radius: 6px;">
+                            <p class="markdown-alert-title" style="display: flex; align-items: center; margin: 0 0 8px 0; font-weight: 600; color: ${alert.color};">
+                                <span style="margin-right: 8px;">${alert.icon}</span>
+                                ${type}
+                            </p>
+                            <div class="markdown-alert-content">${marked.parse(cleanContent)}</div>
+                        </div>\n\n`;
+                    });
+                }
+                
+                // Preprocess alerts then parse
+                const processedMarkdown = preprocessGitHubAlerts(markdownContent);
+                const htmlContent = marked.parse(processedMarkdown);
+                document.getElementById("markdown-content").innerHTML = htmlContent;
+            });
+        </script>';
+    }
+
+    // Additional styling to match GitHub dark theme
+    echo '<style>
+        .lpdh-readme-wrapper {
+            background: #0d1117;
+            padding: 20px;
+            margin: -10px -20px;
+        }
+        
+        .lpdh-readme-wrapper h1 {
+            color: #c9d1d9;
+        }
+        
+        .lpdh-readme-content.markdown-body {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 40px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.5);
+            max-width: 1200px;
+        }
+        
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4,
+        .markdown-body h5,
+        .markdown-body h6 {
+            color: #c9d1d9;
+        }
+        
+        .markdown-body h1 {
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .markdown-body h2 {
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .markdown-body a {
+            color: #58a6ff;
+        }
+        
+        .markdown-body a:hover {
+            text-decoration: underline;
+        }
+        
+        .markdown-body code {
+            background: #161b22;
+            color: #e6edf3;
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+        }
+        
+        .markdown-body pre {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+        
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .markdown-body blockquote {
+            border-left: 0.25em solid #3b434b;
+            color: #8b949e;
+            padding: 0 1em;
+        }
+        
+        .markdown-body hr {
+            background-color: #21262d;
+            border: 0;
+            height: 0.25em;
+        }
+        
+        .markdown-body table tr {
+            background-color: #0d1117;
+            border-top: 1px solid #21262d;
+        }
+        
+        .markdown-body table tr:nth-child(2n) {
+            background-color: #161b22;
+        }
+        
+        .markdown-body table th,
+        .markdown-body table td {
+            border: 1px solid #30363d;
+            padding: 6px 13px;
+        }
+        
+        /* GitHub alert boxes styling */
+        .markdown-body .note,
+        .markdown-body .tip,
+        .markdown-body .important,
+        .markdown-body .warning,
+        .markdown-body .caution {
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid;
+            border-radius: 6px;
+        }
+        
+        .markdown-body .note {
+            background: rgba(31, 111, 235, 0.1);
+            border-left-color: #1f6feb;
+        }
+        
+        .markdown-body .important {
+            background: rgba(163, 113, 247, 0.1);
+            border-left-color: #a371f7;
+        }
+    </style>';
+}
+
+/**
+ * Basic Markdown to HTML parser
+ * @deprecated Use Marked.js instead
+ */
+function lpdh_parse_markdown($markdown)
+{
+    // This function is deprecated and kept for backward compatibility
+    // The admin page now uses Marked.js library for accurate GitHub-style rendering
+    return htmlspecialchars($markdown, ENT_QUOTES, 'UTF-8');
+}
+
+/**
  * Theme Settings Page for Admin
  */
 function lpdh_register_theme_settings()
 {
-    add_theme_page(
+    add_submenu_page(
+        'lpdh-main',
         'LPDH Theme Settings',
         'Theme Settings',
         'manage_lpdh_content',
@@ -4975,16 +5277,21 @@ function lpdh_theme_settings_render()
         update_option('lpdh_roulette_page_id', intval($_POST['lpdh_roulette_page_id']));
 
         // Save Social Links
-        update_option('lpdh_instagram_link', esc_url_raw($_POST['lpdh_instagram_link']));
-        update_option('lpdh_discord_link', esc_url_raw($_POST['lpdh_discord_link']));
-        update_option('lpdh_facebook_link', esc_url_raw($_POST['lpdh_facebook_link']));
-        update_option('lpdh_x_link', esc_url_raw($_POST['lpdh_x_link']));
+        update_option('lpdh_instagram_link', esc_url($_POST['lpdh_instagram_link']));
+        update_option('lpdh_discord_link', esc_url($_POST['lpdh_discord_link']));
+        update_option('lpdh_facebook_link', esc_url($_POST['lpdh_facebook_link']));
+        update_option('lpdh_x_link', esc_url($_POST['lpdh_x_link']));
+
+        // Save Custom Logo
+        update_option('lpdh_custom_logo_id', intval($_POST['lpdh_custom_logo_id']));
 
         // Save ELO Settings
         update_option('lpdh_elo_k_factor_divide_by_game', isset($_POST['lpdh_elo_k_factor_divide_by_game']) ? 1 : 0);
 
-        // Save Instagram Generator Page
-        update_option('lpdh_instagram_generator_page_id', intval($_POST['lpdh_instagram_generator_page_id']));
+        // Save Custom Logo (if provided)
+        if (isset($_POST['lpdh_custom_logo_id'])) {
+            update_option('lpdh_custom_logo_id', intval($_POST['lpdh_custom_logo_id']));
+        }
 
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
@@ -4993,7 +5300,8 @@ function lpdh_theme_settings_render()
     $deck_editor_page_id = get_option('lpdh_deck_editor_page_id', 0);
     $profile_editor_page_id = get_option('lpdh_profile_editor_page_id', 0);
     $stats_page_id = get_option('lpdh_stats_page_id', 0);
-    $instagram_generator_page_id = get_option('lpdh_instagram_generator_page_id', 0);
+    $custom_logo_id = get_option('lpdh_custom_logo_id', 0);
+
     ?>
     <div class="wrap">
         <h1>LPDH Theme Settings</h1>
@@ -5016,6 +5324,87 @@ function lpdh_theme_settings_render()
                             </option>
                         </select>
                         <p class="description">Select the aesthetic for the entire platform.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Custom Logo</th>
+                    <td>
+                        <?php
+                        $logo_url = '';
+                        if ($custom_logo_id) {
+                            $logo_url = wp_get_attachment_url($custom_logo_id);
+                        }
+                        ?>
+                        <div class="logo-upload-container">
+                            <input type="hidden" name="lpdh_custom_logo_id" id="lpdh_custom_logo_id"
+                                value="<?php echo esc_attr($custom_logo_id); ?>">
+                            <div class="logo-preview" id="logo-preview" style="margin-bottom: 10px;">
+                                <?php if ($logo_url): ?>
+                                    <img src="<?php echo esc_url($logo_url); ?>" alt="Logo Preview"
+                                        style="max-width: 300px; height: auto; display: block;">
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button" id="upload_logo_button">
+                                <?php echo $logo_url ? 'Change Logo' : 'Upload Logo'; ?>
+                            </button>
+                            <?php if ($logo_url): ?>
+                                <button type="button" class="button" id="remove_logo_button">Remove Logo</button>
+                            <?php endif; ?>
+                        </div>
+                        <p class="description">Upload a custom logo for your site. If set, this will override the logo from
+                            Customizer.</p>
+                        <script>
+                            jQuery(document).ready(function ($) {
+                                var mediaUploader;
+
+                                $('#upload_logo_button').click(function (e) {
+                                    e.preventDefault();
+
+                                    if (mediaUploader) {
+                                        mediaUploader.open();
+                                        return;
+                                    }
+
+                                    mediaUploader = wp.media({
+                                        title: 'Choose Logo',
+                                        button: {
+                                            text: 'Use this logo'
+                                        },
+                                        multiple: false,
+                                        library: {
+                                            type: 'image'
+                                        }
+                                    });
+
+                                    mediaUploader.on('select', function () {
+                                        var attachment = mediaUploader.state().get('selection').first().toJSON();
+                                        $('#lpdh_custom_logo_id').val(attachment.id);
+                                        $('#logo-preview').html('<img src="' + attachment.url + '" alt="Logo Preview" style="max-width: 300px; height: auto; display: block;">');
+                                        $('#upload_logo_button').text('Change Logo');
+                                        if ($('#remove_logo_button').length === 0) {
+                                            $('#upload_logo_button').after('<button type="button" class="button" id="remove_logo_button">Remove Logo</button>');
+                                            $('#remove_logo_button').click(function (e) {
+                                                e.preventDefault();
+                                                $('#lpdh_custom_logo_id').val('');
+                                                $('#logo-preview').html('');
+                                                $('#upload_logo_button').text('Upload Logo');
+                                                $(this).remove();
+                                            });
+                                        }
+                                    });
+
+                                    mediaUploader.open();
+                                });
+
+                                $('#remove_logo_button').click(function (e) {
+                                    e.preventDefault();
+                                    $('#lpdh_custom_logo_id').val('');
+                                    $('#logo-preview').html('');
+                                    $('#upload_logo_button').text('Upload Logo');
+                                    $(this).remove();
+                                });
+                            });
+                        </script>
                     </td>
                 </tr>
             </table>
@@ -5095,20 +5484,7 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
-                <tr>
-                    <th scope="row">Select Instagram Generator Page</th>
-                    <td>
-                        <?php
-                        wp_dropdown_pages(array(
-                            'name' => 'lpdh_instagram_generator_page_id',
-                            'selected' => $instagram_generator_page_id,
-                            'show_option_none' => '-- Select Page --',
-                            'option_none_value' => '0'
-                        ));
-                        ?>
-                        <p class="description">Select the page using the "Instagram Generator" template.</p>
-                    </td>
-                </tr>
+
             </table>
 
             <hr>
@@ -5161,6 +5537,306 @@ function lpdh_theme_settings_render()
             <?php submit_button(); ?>
         </form>
     </div>
+    <?php
+}
+
+/**
+ * Register Email Test Admin Page as submenu under LPDH
+ */
+function lpdh_register_email_test_page()
+{
+    add_submenu_page(
+        'lpdh-main',
+        'Email Test',
+        'Email Test',
+        'manage_options',
+        'lpdh-email-test',
+        'lpdh_render_email_test_page'
+    );
+}
+add_action('admin_menu', 'lpdh_register_email_test_page');
+
+/**
+ * Register Instagram Generator Admin Page as submenu under LPDH
+ */
+function lpdh_register_instagram_generator_page()
+{
+    add_submenu_page(
+        'lpdh-main',
+        'Instagram Generator',
+        'Instagram Generator',
+        'manage_options',
+        'lpdh-instagram-generator',
+        'lpdh_render_instagram_generator_page'
+    );
+}
+add_action('admin_menu', 'lpdh_register_instagram_generator_page');
+
+/**
+ * Render Instagram Generator Admin Page
+ */
+function lpdh_render_instagram_generator_page()
+{
+    // Security check - admin only
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to access this page.'));
+    }
+
+    // Check if event ID is provided
+    $event_id = isset($_GET['ig_event_id']) ? intval($_GET['ig_event_id']) : 0;
+
+    if (!$event_id) {
+        echo '<div class="wrap">';
+        echo '<h1>Instagram Generator</h1>';
+        echo '<div class="notice notice-warning"><p>Please select an event to generate Instagram images.</p></div>';
+        echo '<p><a href="' . admin_url('edit.php?post_type=event') . '" class="button button-primary">Go to Events</a></p>';
+        echo '</div>';
+        return;
+    }
+
+    // Validate event
+    $event = get_post($event_id);
+    if (!$event || $event->post_type !== 'event') {
+        echo '<div class="wrap">';
+        echo '<h1>Instagram Generator</h1>';
+        echo '<div class="notice notice-error"><p>Invalid event ID.</p></div>';
+        echo '<p><a href="' . admin_url('edit.php?post_type=event') . '" class="button button-primary">Go to Events</a></p>';
+        echo '</div>';
+        return;
+    }
+
+    // Define admin context to prevent redirects in template
+    if (!defined('LPDH_IG_ADMIN_CONTEXT')) {
+        define('LPDH_IG_ADMIN_CONTEXT', true);
+    }
+
+    // Include the Instagram Generator page template
+    // This page contains all the HTML, CSS, and JavaScript needed
+    $template_path = get_stylesheet_directory() . '/page-templates/page-instagram-generator.php';
+
+    if (file_exists($template_path)) {
+        // The template handles its own output
+        include($template_path);
+    } else {
+        echo '<div class="wrap">';
+        echo '<h1>Instagram Generator</h1>';
+        echo '<div class="notice notice-error"><p>Instagram Generator template not found.</p></div>';
+        echo '</div>';
+    }
+}
+
+
+/**
+ * Render Email Test Admin Page
+ */
+function lpdh_render_email_test_page()
+{
+    // Security check - admin only
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to access this page.'));
+    }
+
+    // Get sample data
+    $sample_data = lpdh_get_sample_email_data(1);
+
+    // Get available templates
+    $templates = array(
+        'new-user-welcome' => 'New User Welcome Email',
+        'admin-new-user-notification' => 'Admin New User Notification',
+    );
+
+    // Get available themes
+    $themes = array(
+        'default' => 'Bootscore (Default)',
+        'vaporwave' => 'Vaporwave',
+        'vaporwave-green' => 'Vaporwave Green',
+        'lost-wood' => 'Lost Wood',
+    );
+
+    // Current selections
+    $selected_template = isset($_GET['template']) ? sanitize_text_field($_GET['template']) : 'new-user-welcome';
+    $selected_theme = isset($_GET['theme_override']) ? sanitize_text_field($_GET['theme_override']) : get_option('lpdh_active_theme', 'default');
+    ?>
+    <div class="wrap">
+        <h1><span class="dashicons dashicons-email"></span> Email Template Testing</h1>
+
+        <!-- Test Controls -->
+        <div class="card" style="max-width: none;">
+            <h2>Template Settings</h2>
+            <form method="get" id="email-test-form">
+                <input type="hidden" name="page" value="lpdh-email-test">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="template">Email Template</label></th>
+                        <td>
+                            <select name="template" id="template" class="regular-text">
+                                <?php foreach ($templates as $key => $label): ?>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected($selected_template, $key); ?>>
+                                        <?php echo esc_html($label); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="theme_override">Theme Override</label></th>
+                        <td>
+                            <select name="theme_override" id="theme_override" class="regular-text">
+                                <?php foreach ($themes as $key => $label): ?>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected($selected_theme, $key); ?>>
+                                        <?php echo esc_html($label); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description">Current active theme:
+                                <strong><?php echo esc_html(ucwords(str_replace('-', ' ', get_option('lpdh_active_theme', 'default')))); ?></strong>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <?php submit_button('Update Preview', 'primary', 'submit', false); ?>
+                <button type="button" class="button" id="reset-btn">Reset</button>
+            </form>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="card" style="max-width: none; margin-top: 20px;">
+            <h2>Email Preview</h2>
+            <div style="border: 1px solid #ddd; background: #f9f9f9; padding: 10px;">
+                <iframe id="email-preview-iframe" style="width: 100%; min-height: 600px; border: none; background: white;"
+                    src="<?php echo esc_url(add_query_arg(array(
+                        'action' => 'lpdh_preview_email',
+                        'template' => $selected_template,
+                        'theme' => $selected_theme,
+                        'nonce' => wp_create_nonce('lpdh_email_preview')
+                    ), admin_url('admin-ajax.php'))); ?>">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- Send Test Email Section -->
+        <div class="card" style="max-width: none; margin-top: 20px;">
+            <h2>Send Test Email</h2>
+            <p>Send the currently previewed email template to a test email address using the current theme override setting.
+            </p>
+            <div id="email-send-result"></div>
+            <form id="send-test-email-form">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="test_email">Recipient Email Address</label></th>
+                        <td>
+                            <input type="email" id="test_email" name="test_email"
+                                value="<?php echo esc_attr(wp_get_current_user()->user_email); ?>" class="regular-text"
+                                required>
+                        </td>
+                    </tr>
+                </table>
+                <input type="hidden" name="template" value="<?php echo esc_attr($selected_template); ?>">
+                <input type="hidden" name="theme" value="<?php echo esc_attr($selected_theme); ?>">
+                <input type="hidden" name="action" value="lpdh_send_test_email">
+                <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('lpdh_send_test_email'); ?>">
+                <?php submit_button('Send Test Email', 'primary', 'submit', false, array('id' => 'send-test-btn')); ?>
+            </form>
+            <p class="description">
+                <span class="dashicons dashicons-info"></span>
+                <strong>Note:</strong> Using sample data from user ID: 1
+                (<?php echo esc_html($sample_data['user_login']); ?>)
+            </p>
+        </div>
+    </div>
+
+    <script>
+        jQuery(document).ready(function ($) {
+            // Reset button
+            $('#reset-btn').on('click', function () {
+                window.location.href = '?page=lpdh-email-test';
+            });
+
+            // Update iframe when form changes
+            $('#email-test-form').on('submit', function (e) {
+                e.preventDefault();
+                const template = $('#template').val();
+                const theme = $('#theme_override').val();
+                const iframeSrc = '<?php echo admin_url('admin-ajax.php'); ?>?' +
+                    'action=lpdh_preview_email&' +
+                    'template=' + template + '&' +
+                    'theme=' + theme + '&' +
+                    'nonce=<?php echo wp_create_nonce('lpdh_email_preview'); ?>';
+
+                $('#email-preview-iframe').attr('src', iframeSrc);
+
+                // Update form action values
+                $('input[name="template"]').val(template);
+                $('input[name="theme"]').val(theme);
+
+                // Update URL
+                window.history.pushState({}, '', '?page=lpdh-email-test&template=' + template + '&theme_override=' + theme);
+            });
+
+            // Send test email
+            $('#send-test-email-form').on('submit', function (e) {
+                e.preventDefault();
+
+                const $btn = $('#send-test-btn');
+                const $result = $('#email-send-result');
+                const formData = $(this).serialize();
+
+                // Disable button
+                $btn.prop('disabled', true).html('<span class="spinner is-active" style="float:none;margin:0 5px 0 0;"></span>Sending...');
+                $result.empty();
+
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            $result.html(
+                                '<div class="notice notice-success"><p><span class="dashicons dashicons-yes"></span> ' + response.data.message + '</p></div>'
+                            );
+                        } else {
+                            $result.html(
+                                '<div class="notice notice-error"><p><span class="dashicons dashicons-warning"></span> ' + response.data.message + '</p></div>'
+                            );
+                        }
+                    },
+                    error: function () {
+                        $result.html(
+                            '<div class="notice notice-error"><p><span class="dashicons dashicons-warning"></span> An error occurred while sending the email.</p></div>'
+                        );
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).html('Send Test Email');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .card {
+            background: white;
+            border: 1px solid #ccd0d4;
+            border-radius: 4px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        #email-send-result .notice {
+            margin: 10px 0;
+        }
+
+        #email-send-result .dashicons {
+            vertical-align: middle;
+        }
+    </style>
     <?php
 }
 
@@ -6462,11 +7138,8 @@ function lpdh_check_stat_condition($user_val, $operator, $target_val)
  */
 function lpdh_get_instagram_generator_url($event_id)
 {
-    $ig_page_id = get_option('lpdh_instagram_generator_page_id', 0);
-    if (!$ig_page_id) {
-        return '';
-    }
-    return add_query_arg(['ig_event_id' => $event_id], get_permalink($ig_page_id));
+    // Return admin page URL instead of frontend page
+    return admin_url('admin.php?page=lpdh-instagram-generator&ig_event_id=' . intval($event_id));
 }
 
 /**
@@ -6491,10 +7164,10 @@ add_action('add_meta_boxes', 'lpdh_add_instagram_generator_metabox');
 function lpdh_render_instagram_generator_metabox($post)
 {
     $ig_url = lpdh_get_instagram_generator_url($post->ID);
-    
+
     if ($ig_url) {
         echo '<p>Generate a promotional Instagram image for this event\'s top 4 players.</p>';
-        echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" target="_blank" style="width: 100%; text-align: center; display: block;">';
+        echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" style="width: 100%; text-align: center; display: block;">';
         echo '<span class="dashicons dashicons-instagram" style="margin-top: 3px;"></span> ';
         echo 'Generate Instagram Image</a>';
     } else {

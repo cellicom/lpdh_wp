@@ -10,79 +10,90 @@
 // Exit if accessed directly
 defined('ABSPATH') || exit;
 
-// Access control: Only administrators
-if (!lpdh_can_manage_content()) {
-    wp_redirect(home_url());
-    exit;
+// Access control: Only administrators (skip redirect if in admin context)
+if (!defined('LPDH_IG_ADMIN_CONTEXT')) {
+    if (!lpdh_can_manage_content()) {
+        wp_redirect(home_url());
+        exit;
+    }
 }
 
 // Function to convert Scryfall images to cached local files
-function cache_scryfall_image($url) {
+function cache_scryfall_image($url)
+{
     if (empty($url)) {
         return '';
     }
-    
+
     // Only convert if it's a Scryfall image
     if (strpos($url, 'scryfall.io') === false) {
         return $url; // Return original URL if not Scryfall
     }
-    
+
     // Create cache directory if it doesn't exist
     $upload_dir = wp_upload_dir();
     $cache_dir = $upload_dir['basedir'] . '/ig-converted';
-    
+
     if (!file_exists($cache_dir)) {
         wp_mkdir_p($cache_dir);
     }
-    
+
     // Generate filename from URL hash
     $filename = md5($url) . '.jpg';
     $cache_file = $cache_dir . '/' . $filename;
     $cache_url = $upload_dir['baseurl'] . '/ig-converted/' . $filename;
-    
+
     // Check if already cached
     if (file_exists($cache_file)) {
         return $cache_url;
     }
-    
+
     // Download image from Scryfall
     $response = wp_remote_get($url, array(
         'timeout' => 15,
         'sslverify' => false
     ));
-    
+
     if (is_wp_error($response)) {
         return $url; // Return original URL if fetch fails
     }
-    
+
     $image_data = wp_remote_retrieve_body($response);
-    
+
     if (empty($image_data)) {
         return $url;
     }
-    
+
     // Save to cache directory
     $saved = file_put_contents($cache_file, $image_data);
-    
+
     if ($saved === false) {
         return $url;
     }
-    
+
     return $cache_url;
 }
 
 // Get event ID from query parameter
 $event_id = isset($_GET['ig_event_id']) ? intval($_GET['ig_event_id']) : 0;
 
-if (!$event_id) {
-    wp_redirect(home_url());
-    exit;
-}
+// Skip validation if in admin context (handled by admin page function)
+if (!defined('LPDH_IG_ADMIN_CONTEXT')) {
+    if (!$event_id) {
+        wp_redirect(home_url());
+        exit;
+    }
 
-$event = get_post($event_id);
-if (!$event || $event->post_type !== 'event') {
-    wp_redirect(home_url());
-    exit;
+    $event = get_post($event_id);
+    if (!$event || $event->post_type !== 'event') {
+        wp_redirect(home_url());
+        exit;
+    }
+} else {
+    // In admin context, event validation is already done
+    if ($event_id) {
+        $event = get_post($event_id);
+    }
 }
 
 // Get event data
@@ -98,8 +109,10 @@ $secondary_color = get_option('lpdh_theme_secondary_color', '#00bcd4');
 // Get template type from query parameter
 $ig_type = isset($_GET['ig_type']) ? sanitize_text_field($_GET['ig_type']) : 'top4';
 $max_players = 4;
-if ($ig_type === 'top3') $max_players = 3;
-if ($ig_type === 'top8') $max_players = 8;
+if ($ig_type === 'top3')
+    $max_players = 3;
+if ($ig_type === 'top8')
+    $max_players = 8;
 
 // Extract players data
 $players_data = array();
@@ -136,7 +149,7 @@ if (is_array($rankings) && count($rankings) > 0) {
                 $deck_name = $deck_post->post_title;
                 $commander_img = get_commander_image($player_deck_id);
                 $partner_img = get_partner_image($player_deck_id);
-                
+
                 // Remove query strings from image URLs
                 if ($commander_img) {
                     $commander_img_clean = strtok($commander_img, '?');
@@ -150,7 +163,7 @@ if (is_array($rankings) && count($rankings) > 0) {
                         $partner_img = $partner_img_clean;
                     }
                 }
-                
+
                 // Cache Scryfall images locally
                 if ($commander_img) {
                     $commander_img = cache_scryfall_image($commander_img);
@@ -158,7 +171,7 @@ if (is_array($rankings) && count($rankings) > 0) {
                 if ($partner_img) {
                     $partner_img = cache_scryfall_image($partner_img);
                 }
-                
+
                 // Get commander and partner names
                 $commander_name = get_field('commander', $player_deck_id);
                 $partner_name = get_field('partner', $player_deck_id);
@@ -262,7 +275,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
+            background:
                 radial-gradient(circle at 20% 50%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
                 linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
@@ -278,12 +291,12 @@ $place_name = $event_place ? $event_place->post_title : '';
             right: 0;
             bottom: 0;
             border: 40px solid transparent;
-            border-image: linear-gradient(135deg, 
-                rgba(139, 69, 19, 0.6) 0%, 
-                rgba(210, 180, 140, 0.4) 25%,
-                rgba(139, 69, 19, 0.6) 50%,
-                rgba(210, 180, 140, 0.4) 75%,
-                rgba(139, 69, 19, 0.6) 100%) 40;
+            border-image: linear-gradient(135deg,
+                    rgba(139, 69, 19, 0.6) 0%,
+                    rgba(210, 180, 140, 0.4) 25%,
+                    rgba(139, 69, 19, 0.6) 50%,
+                    rgba(210, 180, 140, 0.4) 75%,
+                    rgba(139, 69, 19, 0.6) 100%) 40;
             z-index: 5;
             pointer-events: none;
         }
@@ -296,7 +309,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(45deg, transparent 48%, rgba(139, 0, 0, 0.3) 49%, rgba(139, 0, 0, 0.3) 51%, transparent 52%),
                 linear-gradient(-45deg, transparent 48%, rgba(139, 0, 0, 0.3) 49%, rgba(139, 0, 0, 0.3) 51%, transparent 52%);
             background-size: 800px 800px;
@@ -330,7 +343,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 3px;
-            text-shadow: 
+            text-shadow:
                 0 0 10px rgba(255, 215, 0, 0.5),
                 0 4px 20px rgba(0, 0, 0, 0.8),
                 0 0 30px rgba(255, 215, 0, 0.3);
@@ -413,12 +426,12 @@ $place_name = $event_place ? $event_place->post_title : '';
             left: -20px;
             right: -20px;
             bottom: -20px;
-            background: 
+            background:
                 radial-gradient(ellipse at center, rgba(255, 215, 0, 0.2) 0%, transparent 70%),
                 linear-gradient(145deg, #FFD700 0%, #FFA500 25%, #FFD700 50%, #FFA500 75%, #FFD700 100%);
             border-radius: 18px;
             z-index: 1;
-            box-shadow: 
+            box-shadow:
                 0 0 50px rgba(255, 215, 0, 0.7),
                 0 0 100px rgba(255, 165, 0, 0.5),
                 0 15px 40px rgba(0, 0, 0, 0.8);
@@ -426,8 +439,15 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         @keyframes goldenGlow {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.2); }
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.2);
+            }
         }
 
         .first-place-card::after {
@@ -441,7 +461,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             border: 5px solid rgba(139, 69, 19, 0.6);
             border-radius: 18px;
             z-index: 2;
-            box-shadow: 
+            box-shadow:
                 inset 0 0 20px rgba(255, 215, 0, 0.4),
                 0 5px 15px rgba(0, 0, 0, 0.5);
         }
@@ -470,7 +490,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 10px;
-            text-shadow: 
+            text-shadow:
                 0 0 20px rgba(255, 215, 0, 0.8),
                 0 4px 10px rgba(0, 0, 0, 0.8);
         }
@@ -540,7 +560,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             bottom: -8px;
             border-radius: 12px;
             z-index: 1;
-            box-shadow: 
+            box-shadow:
                 0 0 30px rgba(0, 0, 0, 0.5),
                 0 10px 30px rgba(0, 0, 0, 0.6);
         }
@@ -548,7 +568,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         /* Silver - 2nd Place */
         .place-item.silver .place-card::before {
             background: linear-gradient(145deg, #E8E8E8 0%, #C0C0C0 25%, #E8E8E8 50%, #C0C0C0 75%, #E8E8E8 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(192, 192, 192, 0.6),
                 0 10px 30px rgba(0, 0, 0, 0.6);
         }
@@ -569,7 +589,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         /* Bronze - 3rd Place */
         .place-item.bronze .place-card::before {
             background: linear-gradient(145deg, #E39A5C 0%, #CD7F32 25%, #E39A5C 50%, #CD7F32 75%, #E39A5C 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(205, 127, 50, 0.6),
                 0 10px 30px rgba(0, 0, 0, 0.6);
         }
@@ -590,7 +610,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         /* Orange - 4th Place */
         .place-item.fourth .place-card::before {
             background: linear-gradient(145deg, #FF6347 0%, #FF4500 25%, #FF6347 50%, #FF4500 75%, #FF6347 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(255, 69, 0, 0.6),
                 0 10px 30px rgba(0, 0, 0, 0.6);
         }
@@ -635,21 +655,21 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .place-item.silver .place-position {
             color: #C0C0C0;
-            text-shadow: 
+            text-shadow:
                 0 0 15px rgba(192, 192, 192, 0.6),
                 0 3px 8px rgba(0, 0, 0, 0.8);
         }
 
         .place-item.bronze .place-position {
             color: #CD7F32;
-            text-shadow: 
+            text-shadow:
                 0 0 15px rgba(205, 127, 50, 0.6),
                 0 3px 8px rgba(0, 0, 0, 0.8);
         }
 
         .place-item.fourth .place-position {
             color: #FF4500;
-            text-shadow: 
+            text-shadow:
                 0 0 15px rgba(255, 69, 0, 0.6),
                 0 3px 8px rgba(0, 0, 0, 0.8);
         }
@@ -719,13 +739,17 @@ $place_name = $event_place ? $event_place->post_title : '';
         }
 
         .action-buttons .btn-primary {
-            background: <?php echo esc_attr($primary_color); ?>;
+            background:
+                <?php echo esc_attr($primary_color); ?>
+            ;
             border: none;
             color: white;
         }
 
         .action-buttons .btn-primary:hover {
-            background: <?php echo esc_attr($secondary_color); ?>;
+            background:
+                <?php echo esc_attr($secondary_color); ?>
+            ;
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
@@ -760,7 +784,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             content: '';
             position: absolute;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(180deg, rgba(5, 0, 30, 0.4) 0%, rgba(26, 0, 51, 0.2) 50%, rgba(5, 0, 30, 0.4) 100%),
                 radial-gradient(circle at 30% 40%, rgba(255, 113, 206, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 70% 60%, rgba(1, 205, 254, 0.15) 0%, transparent 50%),
@@ -773,10 +797,10 @@ $place_name = $event_place ? $event_place->post_title : '';
             position: absolute;
             inset: 0;
             border: 30px solid transparent;
-            border-image: linear-gradient(135deg, 
-                rgba(255, 113, 206, 0.6) 0%, 
-                rgba(1, 205, 254, 0.4) 50%,
-                rgba(185, 103, 255, 0.6) 100%) 30;
+            border-image: linear-gradient(135deg,
+                    rgba(255, 113, 206, 0.6) 0%,
+                    rgba(1, 205, 254, 0.4) 50%,
+                    rgba(185, 103, 255, 0.6) 100%) 30;
             z-index: 5;
             pointer-events: none;
         }
@@ -815,7 +839,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-vaporwave .first-place-card::before {
             background: linear-gradient(145deg, #ff71ce 0%, #b967ff 50%, #ff71ce 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 50px rgba(255, 113, 206, 1),
                 0 0 100px rgba(185, 103, 255, 0.7);
         }
@@ -844,7 +868,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             content: '';
             position: absolute;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(180deg, rgba(7, 36, 27, 0.4) 0%, rgba(10, 45, 35, 0.2) 50%, rgba(7, 36, 27, 0.4) 100%),
                 radial-gradient(circle at 30% 40%, rgba(177, 198, 114, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 70% 60%, rgba(33, 186, 69, 0.1) 0%, transparent 50%);
@@ -856,10 +880,10 @@ $place_name = $event_place ? $event_place->post_title : '';
             position: absolute;
             inset: 0;
             border: 30px solid transparent;
-            border-image: linear-gradient(135deg, 
-                rgba(177, 198, 114, 0.6) 0%, 
-                rgba(61, 105, 74, 0.4) 50%,
-                rgba(177, 198, 114, 0.6) 100%) 30;
+            border-image: linear-gradient(135deg,
+                    rgba(177, 198, 114, 0.6) 0%,
+                    rgba(61, 105, 74, 0.4) 50%,
+                    rgba(177, 198, 114, 0.6) 100%) 30;
             z-index: 5;
             pointer-events: none;
         }
@@ -898,7 +922,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-vaporwave-green .first-place-card::before {
             background: linear-gradient(145deg, #B1C672 0%, #21BA45 50%, #B1C672 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 50px rgba(177, 198, 114, 1),
                 0 0 100px rgba(33, 186, 69, 0.7);
         }
@@ -921,10 +945,10 @@ $place_name = $event_place ? $event_place->post_title : '';
             position: absolute;
             inset: 0;
             border: 35px solid transparent;
-            border-image: linear-gradient(135deg, 
-                rgba(139, 69, 19, 0.5) 0%, 
-                rgba(61, 105, 74, 0.4) 50%,
-                rgba(139, 69, 19, 0.5) 100%) 35;
+            border-image: linear-gradient(135deg,
+                    rgba(139, 69, 19, 0.5) 0%,
+                    rgba(61, 105, 74, 0.4) 50%,
+                    rgba(139, 69, 19, 0.5) 100%) 35;
             z-index: 5;
             pointer-events: none;
         }
@@ -962,7 +986,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-lostwood .first-place-card::before {
             background: linear-gradient(145deg, #B1C672 0%, #8fb657 50%, #B1C672 100%);
-            box-shadow: 
+            box-shadow:
                 0 0 30px rgba(177, 198, 114, 0.6),
                 0 15px 40px rgba(0, 0, 0, 0.8);
         }
@@ -1095,7 +1119,8 @@ $place_name = $event_place ? $event_place->post_title : '';
                     <div class="event-title">
                         <?php echo esc_html($event_title); ?>
                     </div>
-                    <div class="subtitle"><?php echo strtoupper(str_replace('top', 'TOP ', $ig_type)); ?> DECKLISTS</div>
+                    <div class="subtitle"><?php echo strtoupper(str_replace('top', 'TOP ', $ig_type)); ?> DECKLISTS
+                    </div>
                     <div class="event-meta">
                         <?php if ($formatted_date): ?>
                             <span>📅
@@ -1111,7 +1136,7 @@ $place_name = $event_place ? $event_place->post_title : '';
                 </div>
 
                 <!-- Dynamic Template Loading -->
-                <?php 
+                <?php
                 $template_file = __DIR__ . "/ig-template/{$ig_type}.php";
                 if (file_exists($template_file)) {
                     include($template_file);
@@ -1138,16 +1163,16 @@ $place_name = $event_place ? $event_place->post_title : '';
 
     <script>
         // Theme Switcher
-        document.getElementById('ig-theme-select').addEventListener('change', function() {
+        document.getElementById('ig-theme-select').addEventListener('change', function () {
             const theme = this.value;
             const container = document.getElementById('ig-image');
-            
+
             // Remove existing theme classes
             container.className = 'instagram-image ' + theme;
         });
 
         // Type Switcher
-        document.getElementById('ig-type-select').addEventListener('change', function() {
+        document.getElementById('ig-type-select').addEventListener('change', function () {
             const type = this.value;
             const url = new URL(window.location.href);
             url.searchParams.set('ig_type', type);
@@ -1155,24 +1180,24 @@ $place_name = $event_place ? $event_place->post_title : '';
         });
 
         // Download Image
-        document.getElementById('download-btn').addEventListener('click', function() {
+        document.getElementById('download-btn').addEventListener('click', function () {
             const button = this;
             const originalText = button.innerHTML;
-            
+
             // Show loading state
             button.disabled = true;
             button.innerHTML = '⏳ Generating...';
-            
+
             const element = document.getElementById('ig-image');
-            
+
             // Get dynamic filename parts
             const typeSelect = document.getElementById('ig-type-select');
             const themeSelect = document.getElementById('ig-theme-select');
-            
+
             const typeName = typeSelect.options[typeSelect.selectedIndex].text.replace(/\s*\(Default\)\s*/i, '').replace(/\s+/g, '-').toUpperCase();
             const themeName = themeSelect.options[themeSelect.selectedIndex].text.replace(/^[^\s]+\s+/, '').replace(/\s+/g, '-').toUpperCase();
             const eventTitle = "<?php echo sanitize_title($event_title); ?>".toUpperCase();
-            
+
             const finalFilename = `IG-${typeName}-${themeName}-${eventTitle}.png`;
 
             html2canvas(element, {
@@ -1185,22 +1210,22 @@ $place_name = $event_place ? $event_place->post_title : '';
                 logging: false
             }).then(canvas => {
                 // Convert canvas to blob
-                canvas.toBlob(function(blob) {
+                canvas.toBlob(function (blob) {
                     // Create download link
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.download = finalFilename;
                     link.href = url;
                     link.click();
-                    
+
                     // Cleanup
                     URL.revokeObjectURL(url);
-                    
+
                     // Reset button
                     button.disabled = false;
                     button.innerHTML = originalText;
                 }, 'image/png');
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error('Error generating image:', error);
                 alert('Error generating image. Try again or check console for details.');
                 button.disabled = false;

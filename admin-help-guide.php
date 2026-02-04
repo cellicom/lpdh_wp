@@ -10,21 +10,20 @@
 defined('ABSPATH') || exit;
 
 /**
- * Register the Help Guide admin page
+ * Register the Help Guide admin page as submenu under LPDH
  */
 function register_help_guide_admin_page()
 {
-    add_menu_page(
+    add_submenu_page(
+        'lpdh-main',
         __('Help Guide', 'text_domain'),
         __('Help Guide', 'text_domain'),
         'view_lpdh_help_guide',
-        'help-guide',
-        'render_help_guide_page',
-        'dashicons-editor-help',
-        2
+        'lpdh-help-guide',
+        'render_help_guide_page'
     );
 }
-add_action('admin_menu', 'register_help_guide_admin_page');
+add_action('admin_menu', 'register_help_guide_admin_page', 10);
 
 /**
  * Render the Help Guide page content
@@ -173,7 +172,8 @@ function render_help_guide_page()
                 <div
                     style="background: #fffcf5; padding: 15px; border: 1px solid #faecd8; border-radius: 6px; margin-bottom: 15px;">
                     <strong>🚀 Tool: Admin Autocomplete</strong><br>
-                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck creation, the system suggests official names from Scryfall. Selecting one
+                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck
+                    creation, the system suggests official names from Scryfall. Selecting one
                     **automatically** populates the Scryfall URL and basic card metadata.
                 </div>
             </section>
@@ -408,43 +408,44 @@ function render_help_guide_page()
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
                     ranking:</p>
                 <div style="background: #000; padding: 20px; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
-                    <pre style="margin: 0; color: #d4d4d4; font-size: 13px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6;"><span style="color: #6a9955;">// Centralized ELO Calculation logic in functions.php</span>
-<span style="color: #c586c0;">function</span> <span style="color: #dcdcaa;">lpdh_calculate_elo</span>(<span style="color: #9cdcfe;">$current_elo</span>, <span style="color: #9cdcfe;">$wins</span>, <span style="color: #9cdcfe;">$draws</span>, <span style="color: #9cdcfe;">$losses</span>, <span style="color: #9cdcfe;">$avg_elo</span>, <span style="color: #9cdcfe;">$pos</span>, <span style="color: #9cdcfe;">$total_players</span>) {
-    <span style="color: #9cdcfe;">$games_played</span> = <span style="color: #9cdcfe;">$wins</span> + <span style="color: #9cdcfe;">$draws</span> + <span style="color: #9cdcfe;">$losses</span>;
+                    <pre
+                        style="margin: 0; color: #d4d4d4; font-size: 13px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6;"><span style="color: #6a9955;">// Centralized ELO Calculation logic in functions.php</span>
+            <span style="color: #c586c0;">function</span> <span style="color: #dcdcaa;">lpdh_calculate_elo</span>(<span style="color: #9cdcfe;">$current_elo</span>, <span style="color: #9cdcfe;">$wins</span>, <span style="color: #9cdcfe;">$draws</span>, <span style="color: #9cdcfe;">$losses</span>, <span style="color: #9cdcfe;">$avg_elo</span>, <span style="color: #9cdcfe;">$pos</span>, <span style="color: #9cdcfe;">$total_players</span>) {
+                <span style="color: #9cdcfe;">$games_played</span> = <span style="color: #9cdcfe;">$wins</span> + <span style="color: #9cdcfe;">$draws</span> + <span style="color: #9cdcfe;">$losses</span>;
     
-    <span style="color: #c586c0;">if</span> (<span style="color: #9cdcfe;">$games_played</span> <= <span style="color: #b5cea8;">0</span>) {
-        <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
-            <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$current_elo</span>,
-            <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #b5cea8;">0</span>,
-            <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #b5cea8;">0</span>,
-            <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #b5cea8;">0</span>
-        );
-    }
+                <span style="color: #c586c0;">if</span> (<span style="color: #9cdcfe;">$games_played</span> <= <span style="color: #b5cea8;">0</span>) {
+                    <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
+                        <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$current_elo</span>,
+                        <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #b5cea8;">0</span>,
+                        <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #b5cea8;">0</span>,
+                        <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #b5cea8;">0</span>
+                    );
+                }
 
-    <span style="color: #9cdcfe;">$actual_score</span> = <span style="color: #9cdcfe;">$wins</span> + (<span style="color: #9cdcfe;">$draws</span> * <span style="color: #b5cea8;">0.5</span>);
-    <span style="color: #9cdcfe;">$expected_score_rate</span> = <span style="color: #b5cea8;">1</span> / (<span style="color: #b5cea8;">1</span> + <span style="color: #dcdcaa;">pow</span>(<span style="color: #b5cea8;">10</span>, (<span style="color: #9cdcfe;">$avg_elo</span> - <span style="color: #9cdcfe;">$current_elo</span>) / <span style="color: #b5cea8;">400</span>));
-    <span style="color: #9cdcfe;">$expected_score</span> = <span style="color: #9cdcfe;">$expected_score_rate</span> * <span style="color: #9cdcfe;">$games_played</span>;
+                <span style="color: #9cdcfe;">$actual_score</span> = <span style="color: #9cdcfe;">$wins</span> + (<span style="color: #9cdcfe;">$draws</span> * <span style="color: #b5cea8;">0.5</span>);
+                <span style="color: #9cdcfe;">$expected_score_rate</span> = <span style="color: #b5cea8;">1</span> / (<span style="color: #b5cea8;">1</span> + <span style="color: #dcdcaa;">pow</span>(<span style="color: #b5cea8;">10</span>, (<span style="color: #9cdcfe;">$avg_elo</span> - <span style="color: #9cdcfe;">$current_elo</span>) / <span style="color: #b5cea8;">400</span>));
+                <span style="color: #9cdcfe;">$expected_score</span> = <span style="color: #9cdcfe;">$expected_score_rate</span> * <span style="color: #9cdcfe;">$games_played</span>;
 
-    <span style="color: #6a9955;">// K-factor logic based on theme setting</span>
-    <span style="color: #9cdcfe;">$k_factor_divide</span> = <span style="color: #dcdcaa;">get_option</span>(<span style="color: #ce9178;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #b5cea8;">1</span>);
-    <span style="color: #9cdcfe;">$k_factor</span> = (<span style="color: #9cdcfe;">$k_factor_divide</span>) ? <span style="color: #b5cea8;">32</span> / <span style="color: #9cdcfe;">$games_played</span> : <span style="color: #b5cea8;">32</span>;
+                <span style="color: #6a9955;">// K-factor logic based on theme setting</span>
+                <span style="color: #9cdcfe;">$k_factor_divide</span> = <span style="color: #dcdcaa;">get_option</span>(<span style="color: #ce9178;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #b5cea8;">1</span>);
+                <span style="color: #9cdcfe;">$k_factor</span> = (<span style="color: #9cdcfe;">$k_factor_divide</span>) ? <span style="color: #b5cea8;">32</span> / <span style="color: #9cdcfe;">$games_played</span> : <span style="color: #b5cea8;">32</span>;
 
-    <span style="color: #6a9955;">// Position Adjustment (rewarding top finishes)</span>
-    <span style="color: #9cdcfe;">$rank_score</span> = (<span style="color: #9cdcfe;">$total_players</span> > <span style="color: #b5cea8;">1</span>) ? (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #9cdcfe;">$pos</span>) / (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #b5cea8;">1</span>) : <span style="color: #b5cea8;">1</span>;
-    <span style="color: #9cdcfe;">$position_adjustment</span> = <span style="color: #b5cea8;">20</span> * (<span style="color: #9cdcfe;">$rank_score</span> - <span style="color: #b5cea8;">0.5</span>);
+                <span style="color: #6a9955;">// Position Adjustment (rewarding top finishes)</span>
+                <span style="color: #9cdcfe;">$rank_score</span> = (<span style="color: #9cdcfe;">$total_players</span> > <span style="color: #b5cea8;">1</span>) ? (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #9cdcfe;">$pos</span>) / (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #b5cea8;">1</span>) : <span style="color: #b5cea8;">1</span>;
+                <span style="color: #9cdcfe;">$position_adjustment</span> = <span style="color: #b5cea8;">20</span> * (<span style="color: #9cdcfe;">$rank_score</span> - <span style="color: #b5cea8;">0.5</span>);
 
-    <span style="color: #9cdcfe;">$new_elo</span> = <span style="color: #9cdcfe;">$current_elo</span> + <span style="color: #9cdcfe;">$k_factor</span> * (<span style="color: #9cdcfe;">$actual_score</span> - <span style="color: #9cdcfe;">$expected_score</span>) + <span style="color: #9cdcfe;">$position_adjustment</span>;
+                <span style="color: #9cdcfe;">$new_elo</span> = <span style="color: #9cdcfe;">$current_elo</span> + <span style="color: #9cdcfe;">$k_factor</span> * (<span style="color: #9cdcfe;">$actual_score</span> - <span style="color: #9cdcfe;">$expected_score</span>) + <span style="color: #9cdcfe;">$position_adjustment</span>;
 
-    <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
-        <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$new_elo</span>,
-        <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #9cdcfe;">$k_factor</span>,
-        <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #9cdcfe;">$expected_score</span>,
-        <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #9cdcfe;">$position_adjustment</span>
-    );
-}</pre>
+                <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
+                    <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$new_elo</span>,
+                    <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #9cdcfe;">$k_factor</span>,
+                    <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #9cdcfe;">$expected_score</span>,
+                    <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #9cdcfe;">$position_adjustment</span>
+                );
+            }</pre>
                 </div>
             </section>
-            
+
             <!-- SECTION: INSTAGRAM GENERATOR -->
             <section id="instagram" style="margin-bottom: 60px;">
                 <h2
@@ -454,7 +455,8 @@ function render_help_guide_page()
                 <p>Powerful tool to create promotional images for social media directly from event data.</p>
 
                 <h4 style="margin-bottom: 10px;">Accessing the Generator:</h4>
-                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin sidebar or frontend event page.</p>
+                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin
+                    sidebar or frontend event page.</p>
 
                 <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
                     <thead>
@@ -467,9 +469,12 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Select Theme</strong></td>
                             <td>
-                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate frames.<br>
-                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow effects.<br>
-                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community branding.<br>
+                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate
+                                frames.<br>
+                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow
+                                effects.<br>
+                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community
+                                branding.<br>
                                 🌲 <strong>Lost Wood:</strong> Forest-themed aesthetic with organic frames.<br>
                                 📘 <strong>Bootstrap Classic:</strong> Clean, minimal professional layout.
                             </td>
@@ -487,13 +492,15 @@ function render_help_guide_page()
 
                 <h4 style="margin-bottom: 10px;">Dynamic Export Logic:</h4>
                 <div style="background: #fdf6ec; border-left: 5px solid #e1306c; padding: 15px; border-radius: 4px;">
-                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a standardized filename:</p>
+                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a
+                        standardized filename:</p>
                     <code><strong>IG-[TYPE]-[THEME]-[EVENT-NAME].png</strong></code>
                 </div>
 
                 <div
                     style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 15px; margin-top: 20px; border-radius: 4px;">
-                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card art is rendered quickly without triggering Scryfall rate limits.
+                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card
+                    art is rendered quickly without triggering Scryfall rate limits.
                 </div>
             </section>
 
@@ -523,13 +530,19 @@ function render_help_guide_page()
                 </h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                     <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #d63638;"><span class="dashicons dashicons-shield"></span> Administrator</h5>
-                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and code.</p>
+                        <h5 style="margin-top: 0; color: #d63638;"><span class="dashicons dashicons-shield"></span>
+                            Administrator</h5>
+                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and
+                            code.</p>
                     </div>
                     <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span> Co-Administrator</h5>
-                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks, Pages).<br>
-                        <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System Tools.</p>
+                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span>
+                            Co-Administrator</h5>
+                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks,
+                            Pages).<br>
+                            <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System
+                            Tools.
+                        </p>
                     </div>
                     <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
                         <h5 style="margin-top: 0; color: #646970;"><span class="dashicons dashicons-id"></span> Player</h5>
@@ -544,7 +557,7 @@ function render_help_guide_page()
                     style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
                     <span class="dashicons dashicons-admin-generic"></span> 13. Theme Settings
                 </h2>
-                <p>Configure aesthetics and mapping under <strong>Appearance > Theme Settings</strong>.</p>
+                <p>Configure aesthetics and mapping under <strong>LPDH > Theme Settings</strong>.</p>
 
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
@@ -556,20 +569,56 @@ function render_help_guide_page()
                     <tbody>
                         <tr>
                             <td><strong>Active Theme</strong></td>
-                            <td>Switches global design (Default, Vaporwave, Lost Wood, etc.).</td>
+                            <td>Switches global design (Bootscore Default, Vaporwave, Vaporwave Green, Lost Wood).</td>
                         </tr>
                         <tr>
-                            <td><strong>Cookie Consent</strong></td>
-                            <td>Configure the "Cookie Bar" text and branding for GDPR/privacy compliance.</td>
+                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Pages
+                                Configuration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deck Editor Page</strong></td>
+                            <td>Select the page using the "Deck Editor" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profile Editor Page</strong></td>
+                            <td>Select the page using the "User Profile Editor" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Statistics Page</strong></td>
+                            <td>Select the page using the "User Statistics" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Login/Register Page</strong></td>
+                            <td>Select the page using the "Registration Page" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Commander Roulette Page</strong></td>
+                            <td>Select the page using the "Commander Roulette" template.</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Branding</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custom Logo</strong></td>
+                            <td>Upload a custom logo for your site. If set, this logo takes priority over the logo
+                                configured in <strong>Appearance > Customize > Site Identity</strong>. Leave empty to use
+                                the WordPress Customizer logo.</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Socials</td>
                         </tr>
                         <tr>
                             <td><strong>Social Links</strong></td>
                             <td>Configure Instagram, Discord, Facebook, and X links for the footer.</td>
                         </tr>
                         <tr>
-                            <td><strong>Calculate ELO: K Factor</strong></td>
-                            <td>Toggle whether to divide the K-factor by the number of games played (32 / games) or use a
-                                flat value (32).</td>
+                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">ELO Settings
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>K Factor / Game Played</strong></td>
+                            <td>Toggle whether to divide the K-factor (32) by the number of games played in the tournament,
+                                or use a flat value (32).</td>
                         </tr>
                     </tbody>
                 </table>
