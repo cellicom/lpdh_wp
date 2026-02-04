@@ -2955,7 +2955,7 @@ function ajax_get_user_decks()
 }
 add_action('wp_ajax_get_user_decks', 'ajax_get_user_decks');
 
-require_once get_stylesheet_directory() . '/function-schema-color.php';
+require_once get_stylesheet_directory() . '/inc/function-schema-color.php';
 
 /**
  * Add AJAX handler for populating player_deck based on player_id selection
@@ -6969,7 +6969,7 @@ function lpdh_save_private_profile_field($user_id)
 add_action('personal_options_update', 'lpdh_save_private_profile_field');
 add_action('edit_user_profile_update', 'lpdh_save_private_profile_field');
 
-require_once get_stylesheet_directory() . '/admin-help-guide.php';
+require_once get_stylesheet_directory() . '/inc/admin-help-guide.php';
 
 
 /**
@@ -7182,3 +7182,35 @@ function lpdh_render_instagram_generator_metabox($post)
         echo '<p class="description">Instagram generator page not configured.</p>';
     }
 }
+
+/**
+ * Load Custom Post Type templates from "templates" subdirectory.
+ */
+function lpdh_load_cpt_templates($template)
+{
+    // Check for Single CPT
+    if (is_single()) {
+        global $post;
+        $type = $post->post_type;
+        $custom_template = get_stylesheet_directory() . '/templates/single-' . $type . '.php';
+        if (file_exists($custom_template)) {
+            return $custom_template;
+        }
+    }
+
+    // Check for CPT Archive
+    if (is_post_type_archive()) {
+        $type = get_query_var('post_type');
+        if (is_array($type)) {
+            $type = reset($type);
+        }
+        $custom_template = get_stylesheet_directory() . '/templates/archive-' . $type . '.php';
+        if (file_exists($custom_template)) {
+            return $custom_template;
+        }
+    }
+
+    return $template;
+}
+add_filter('template_include', 'lpdh_load_cpt_templates', 99);
+
