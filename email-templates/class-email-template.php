@@ -99,6 +99,11 @@ class LPDH_Email_Template
         if ($custom_logo_id) {
             $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
             if ($logo_url) {
+                // Ensure absolute URL for email compatibility
+                if (strpos($logo_url, 'http') !== 0) {
+                    $logo_url = home_url($logo_url);
+                }
+                
                 return sprintf(
                     '<img src="%s" alt="%s" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">',
                     esc_url($logo_url),
@@ -218,6 +223,31 @@ class LPDH_Email_Template
             ? $this->colors['text']
             : '#333333';
 
+        // Vaporwave background images
+        $body_bg = '#f4f4f4';
+        $body_extra_styles = '';
+        
+        if ($this->theme === 'vaporwave') {
+            $body_bg = '#1a0033';
+            $bg_image_url = get_stylesheet_directory_uri() . '/assets/img/bg/vaporwave.jpg';
+            $body_extra_styles = sprintf(
+                'background-image: url(%s); background-size: cover; background-position: center; background-attachment: fixed;',
+                esc_url($bg_image_url)
+            );
+        } elseif ($this->theme === 'vaporwave-green') {
+            $body_bg = '#0a0a0a';
+            $bg_image_url = get_stylesheet_directory_uri() . '/assets/img/bg/vaporwave-green.jpg';
+            $body_extra_styles = sprintf(
+                'background-image: url(%s); background-size: cover; background-position: center; background-attachment: fixed;',
+                esc_url($bg_image_url)
+            );
+        }
+
+        // Card background for vaporwave themes
+        $card_bg = ($this->theme === 'vaporwave' || $this->theme === 'vaporwave-green') 
+            ? 'rgba(26, 0, 51, 0.9)' 
+            : 'white';
+
         return sprintf(
             '<!DOCTYPE html>
             <html lang="en">
@@ -226,8 +256,8 @@ class LPDH_Email_Template
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>%s</title>
             </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: %s; margin: 0; padding: 0; background-color: #f4f4f4;">
-                <div style="max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: %s; margin: 0; padding: 0; background-color: %s; %s">
+                <div style="max-width: 600px; margin: 20px auto; background: %s; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
                     %s
                     <div style="padding: 30px; color: %s;">
                         %s
@@ -238,6 +268,9 @@ class LPDH_Email_Template
             </html>',
             esc_html($header_title),
             $text_color,
+            $body_bg,
+            $body_extra_styles,
+            $card_bg,
             $this->get_header($header_title),
             $text_color,
             $content,
