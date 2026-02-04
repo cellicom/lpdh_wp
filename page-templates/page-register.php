@@ -27,117 +27,53 @@ function bootscore_send_new_user_email($user_id, $password)
         return false;
     }
 
-    $user_login = $user->user_login;
-    $user_email = $user->user_email;
     $site_name = get_bloginfo('name');
-    $site_url = home_url();
 
-    // Subject
+    // Prepare data for user welcome email
+    $user_data = array(
+        'user_login' => $user->user_login,
+        'user_email' => $user->user_email,
+        'password' => $password,
+        'login_url' => lpdh_get_login_register_url(),
+    );
+
+    // Send welcome email to user
     $subject = sprintf(
         /* translators: %s: Site name */
         __('[%s] Your account credentials', 'bootscore'),
         $site_name
     );
 
-    // Message for user
-    $login_url_email = lpdh_get_login_register_url();
-    $message = <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{$subject}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #007bff, #0056b3); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">{$site_name}</h1>
-    </div>
-    
-    <div style="background: #fff; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #007bff; margin-top: 0;">Welcome to {$site_name}!</h2>
-        
-        <p>Thank you for registering. Here are your access credentials:</p>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Username:</strong> {$user_login}</p>
-            <p style="margin: 5px 0;"><strong>Password:</strong> {$password}</p>
-        </div>
-        
-        <p><strong>To access your account:</strong></p>
-        <p>
-            <a href="{$login_url_email}" style="display: inline-block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-                Log in now
-            </a>
-        </p>
-        
-        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-        
-        <p style="font-size: 12px; color: #666;">
-            After your first login, we recommend changing your password for better security.
-        </p>
-    </div>
-    
-    <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
-        <p>This is an automated email, please do not reply to this message.</p>
-    </div>
-</body>
-</html>
-HTML;
-
-    // Headers
-    $headers = array(
-        'Content-Type: text/html; charset=UTF-8',
-        'From: ' . $site_name . ' <noreply@' . $_SERVER['HTTP_HOST'] . '>',
+    $sent = lpdh_send_templated_email(
+        $user->user_email,
+        $subject,
+        'new-user-welcome',
+        $user_data
     );
 
-    // Send email
-    $sent = wp_mail($user_email, $subject, $message, $headers);
-    $current = current_time('mysql');
-
-    // Also send admin notification
+    // Send admin notification
     $admin_email = get_option('admin_email');
-    if ($admin_email && $admin_email !== $user_email) {
+    if ($admin_email && $admin_email !== $user->user_email) {
+        $admin_data = array(
+            'user_login' => $user->user_login,
+            'user_email' => $user->user_email,
+            'user_id' => $user_id,
+            'registration_time' => current_time('mysql'),
+        );
+
         $admin_subject = sprintf(
             /* translators: %s: New user username */
             __('[%s] New user registered: %s', 'bootscore'),
             $site_name,
-            $user_login
+            $user->user_login
         );
 
-        $admin_message = <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{$admin_subject}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: #28a745; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0;">New user registered</h1>
-    </div>
-    
-    <div style="background: #fff; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
-        <p>A new user just registered on <strong>{$site_name}</strong>.</p>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Username:</strong> {$user_login}</p>
-            <p style="margin: 5px 0;"><strong>Email:</strong> {$user_email}</p>
-            <p style="margin: 5px 0;"><strong>Registration date:</strong> {$current}</p>
-        </div>
-        
-        <p>
-            <a href="{$site_url}/wp-admin/user-edit.php?user_id={$user_id}" style="display: inline-block; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-                View User
-            </a>
-        </p>
-    </div>
-</body>
-</html>
-HTML;
-
-        wp_mail($admin_email, $admin_subject, $admin_message, $headers);
+        lpdh_send_templated_email(
+            $admin_email,
+            $admin_subject,
+            'admin-new-user-notification',
+            $admin_data
+        );
     }
 
     return $sent;

@@ -282,6 +282,11 @@ function lpdh_adjust_brightness($hex, $steps)
 // Include Achievements System
 require_once get_stylesheet_directory() . '/inc/achievements.php';
 
+// Include Email Template System
+require_once get_stylesheet_directory() . '/email-templates/class-email-template.php';
+require_once get_stylesheet_directory() . '/email-templates/functions-email.php';
+
+
 /**
  * Enqueue scripts and styles
  */
@@ -435,6 +440,89 @@ function lpdh_ajax_check_search_results()
 }
 add_action('wp_ajax_check_search_results', 'lpdh_ajax_check_search_results');
 add_action('wp_ajax_nopriv_check_search_results', 'lpdh_ajax_check_search_results');
+
+/**
+ * AJAX handler for email preview
+ */
+function lpdh_ajax_preview_email()
+{
+    check_ajax_referer('lpdh_email_preview', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to access this feature.'));
+    }
+
+    $template_type = isset($_GET['template']) ? sanitize_text_field($_GET['template']) : 'new-user-welcome';
+    $theme_override = isset($_GET['theme']) ? sanitize_text_field($_GET['theme']) : '';
+
+    // Temporarily override theme if requested
+    if ($theme_override) {
+        add_filter('option_lpdh_active_theme', function() use ($theme_override) {
+            return $theme_override;
+        });
+    }
+
+    // Get sample data
+    $sample_data = lpdh_get_sample_email_data(1);
+
+    // Render template
+    lpdh_render_email_preview($template_type, $sample_data, true);
+    exit;
+}
+add_action('wp_ajax_lpdh_preview_email', 'lpdh_ajax_preview_email');
+
+/**
+ * AJAX handler for sending test email
+ */
+function lpdh_ajax_send_test_email()
+{
+    check_ajax_referer('lpdh_send_test_email', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'You do not have permission to send test emails.'));
+    }
+
+    $recipient = isset($_POST['test_email']) ? sanitize_email($_POST['test_email']) : '';
+    $template_type = isset($_POST['template']) ? sanitize_text_field($_POST['template']) : 'new-user-welcome';
+    $theme_override = isset($_POST['theme']) ? sanitize_text_field($_POST['theme']) : '';
+
+    if (empty($recipient) || !is_email($recipient)) {
+        wp_send_json_error(array('message' => 'Please provide a valid email address.'));
+    }
+
+    // Temporarily override theme if requested
+    if ($theme_override) {
+        add_filter('option_lpdh_active_theme', function() use ($theme_override) {
+            return $theme_override;
+        });
+    }
+
+    // Get sample data
+    $sample_data = lpdh_get_sample_email_data(1);
+
+    // Define subject based on template type
+    $subjects = array(
+        'new-user-welcome' => '[TEST] Your Account Credentials',
+        'admin-new-user-notification' => '[TEST] New User Registered',
+    );
+
+    $subject = isset($subjects[$template_type]) ? $subjects[$template_type] : '[TEST] Email Template';
+
+    // Send email
+    $sent = lpdh_send_templated_email($recipient, $subject, $template_type, $sample_data);
+
+    if ($sent) {
+        wp_send_json_success(array(
+            'message' => 'Test email sent successfully to ' . $recipient . '!'
+        ));
+    } else {
+        wp_send_json_error(array(
+            'message' => 'Failed to send test email. Please check your email configuration.'
+        ));
+    }
+}
+add_action('wp_ajax_lpdh_send_test_email', 'lpdh_ajax_send_test_email');
+
 
 /**
  * Registrazione Custom Post Type: Leaderboard
