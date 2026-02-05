@@ -130,6 +130,9 @@ function lpdh_theme_setup()
         'flex-height' => true,
         'flex-width' => true,
     ));
+
+    // Enable editor styles for Classic Editor
+    add_editor_style('assets/css/editor.css');
 }
 add_action('after_setup_theme', 'lpdh_theme_setup');
 

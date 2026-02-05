@@ -201,7 +201,10 @@ function ensure_admin_color_css_exists() {
     foreach ($color_schemes as $scheme_name => $colors) {
         $css_file_path = $css_dir . '/admin-colors-' . $scheme_name . '.css';
         
-        // Only create if file doesn't exist
+        // Versioning for regeneration
+        $version = '1.0.1'; // Bump this to force regeneration
+        
+        // Only create if file doesn't exist OR version mismatch (commented out for production usually, but we need it now)
         if (!file_exists($css_file_path)) {
             $css_content = generate_admin_color_css($scheme_name, $colors);
             file_put_contents($css_file_path, $css_content);
@@ -238,94 +241,98 @@ function generate_admin_color_css($scheme_name, $colors) {
     --{$scheme_name}-text: {$text};
 }
 
-/* Admin Bar */
-#wpadminbar {
+/* 
+ * Apply theme colors ONLY if WP Dark Mode is NOT active 
+ * We use a higher specificity selector or wrap in a way that allows the plugin to override.
+ */
+
+body:not(.wp-dark-mode-active) #wpadminbar {
     background-color: {$base} !important;
 }
 
-#wpadminbar .ab-top-menu > li > a,
-#wpadminbar .ab-top-menu > li > .ab-item {
+body:not(.wp-dark-mode-active) #wpadminbar .ab-top-menu > li > a,
+body:not(.wp-dark-mode-active) #wpadminbar .ab-top-menu > li > .ab-item {
     color: {$text} !important;
 }
 
-#wpadminbar .ab-top-menu > li.hover > .ab-item,
-#wpadminbar .ab-top-menu > li > a:focus,
-#wpadminbar .ab-top-menu > li:hover > .ab-item {
+body:not(.wp-dark-mode-active) #wpadminbar .ab-top-menu > li.hover > .ab-item,
+body:not(.wp-dark-mode-active) #wpadminbar .ab-top-menu > li > a:focus,
+body:not(.wp-dark-mode-active) #wpadminbar .ab-top-menu > li:hover > .ab-item {
     background-color: {$darker} !important;
 }
 
 /* Admin Menu */
-#adminmenu,
-#adminmenu .wp-submenu,
-#adminmenuback,
-#adminmenuwrap {
+body:not(.wp-dark-mode-active) #adminmenu,
+body:not(.wp-dark-mode-active) #adminmenu .wp-submenu,
+body:not(.wp-dark-mode-active) #adminmenuback,
+body:not(.wp-dark-mode-active) #adminmenuwrap {
     background-color: {$base} !important;
 }
 
-#adminmenu li.menu-top {
+body:not(.wp-dark-mode-active) #adminmenu li.menu-top {
     border-bottom: 1px solid {$light}20 !important;
 }
 
-#adminmenu .wp-menu-name {
+body:not(.wp-dark-mode-active) #adminmenu .wp-menu-name {
     color: {$text} !important;
 }
 
-#adminmenu .wp-menu-image img {
+body:not(.wp-dark-mode-active) #adminmenu .wp-menu-image img {
     filter: brightness(0) invert(1);
 }
 
 /* Menu hover and active states */
-#adminmenu li.menu-top:hover,
-#adminmenu li.opensub > a.menu-top,
-#adminmenu li > a.menu-top:focus {
+body:not(.wp-dark-mode-active) #adminmenu li.menu-top:hover,
+body:not(.wp-dark-mode-active) #adminmenu li.opensub > a.menu-top,
+body:not(.wp-dark-mode-active) #adminmenu li > a.menu-top:focus {
     background-color: {$darker} !important;
 }
 
-#adminmenu li.current a.menu-top,
-#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
-#adminmenu li.wp-has-current-submenu a.menu-top,
-#adminmenu li.current .menu-item-top {
+body:not(.wp-dark-mode-active) #adminmenu li.current a.menu-top,
+body:not(.wp-dark-mode-active) #adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+body:not(.wp-dark-mode-active) #adminmenu li.wp-has-current-submenu a.menu-top,
+body:not(.wp-dark-mode-active) #adminmenu li.current .menu-item-top {
     background-color: {$light} !important;
 }
 
-#adminmenu li.current .menu-item-top .menu-item-icon {
+body:not(.wp-dark-mode-active) #adminmenu li.current .menu-item-top .menu-item-icon {
     background-color: {$light} !important;
 }
 
 /* Submenu */
-#adminmenu .wp-submenu {
+body:not(.wp-dark-mode-active) #adminmenu .wp-submenu {
     border-left: 3px solid {$light} !important;
 }
 
-#adminmenu .wp-submenu a {
+body:not(.wp-dark-mode-active) #adminmenu .wp-submenu a {
     color: {$text}99 !important;
 }
 
-#adminmenu .wp-submenu a:hover,
-#adminmenu .wp-submenu a:focus {
+body:not(.wp-dark-mode-active) #adminmenu .wp-submenu a:hover,
+body:not(.wp-dark-mode-active) #adminmenu .wp-submenu a:focus {
     color: {$text} !important;
 }
 
 /* Buttons */
-.button-primary {
+body:not(.wp-dark-mode-active) .button-primary {
     background-color: {$base} !important;
     border-color: {$darker} !important;
     color: {$text} !important;
 }
 
-.button-primary:hover,
-.button-primary:focus {
+body:not(.wp-dark-mode-active) .button-primary:hover,
+body:not(.wp-dark-mode-active) .button-primary:focus {
     background-color: {$darker} !important;
     border-color: {$base} !important;
 }
 
 /* Misc admin elements */
-.wp-color-result {
+body:not(.wp-dark-mode-active) .wp-color-result {
     background-color: {$base} !important;
     border-color: {$darker} !important;
 }
 
-.wp-color-result-text {
+body:not(.wp-dark-mode-active) .wp-color-result-text {
     color: {$text} !important;
 }
 
@@ -336,32 +343,32 @@ function generate_admin_color_css($scheme_name, $colors) {
 }
 
 /* Focus states */
-input:focus,
-select:focus,
-textarea:focus {
+body:not(.wp-dark-mode-active) input:focus,
+body:not(.wp-dark-mode-active) select:focus,
+body:not(.wp-dark-mode-active) textarea:focus {
     border-color: {$base} !important;
     box-shadow: 0 0 0 1px {$base} !important;
 }
 
 /* Links */
-#adminmenu a:hover,
-#adminmenu a:focus {
+body:not(.wp-dark-mode-active) #adminmenu a:hover,
+body:not(.wp-dark-mode-active) #adminmenu a:focus {
     color: {$light} !important;
 }
 
 /* Tabs */
-.wp-ui-text-icon {
+body:not(.wp-dark-mode-active) .wp-ui-text-icon {
     color: {$base} !important;
 }
 
 /* Notifications */
-.update-plugins {
+body:not(.wp-dark-mode-active) .update-plugins {
     background-color: {$light} !important;
     color: {$darker} !important;
 }
 
 /* Quicktags */
-.quicktags-toolbar {
+body:not(.wp-dark-mode-active) .quicktags-toolbar {
     background-color: {$base} !important;
 }
 CSS;
