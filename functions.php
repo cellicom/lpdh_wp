@@ -7188,7 +7188,7 @@ add_action('add_meta_boxes', 'lpdh_add_event_share_metabox', 9);
  */
 function lpdh_render_event_share_metabox($post)
 {
-    $title = get_the_title($post->ID);
+    $title = html_entity_decode(get_the_title($post->ID), ENT_QUOTES, 'UTF-8');
     $date = get_field('event_date', $post->ID);
     $place_obj = get_field('event_place', $post->ID);
     $place_name = $place_obj ? $place_obj->post_title : 'TBA';
@@ -7205,7 +7205,7 @@ function lpdh_render_event_share_metabox($post)
 
     echo '<div class="lpdh-share-box">';
     echo '<p class="description" style="margin-bottom: 8px;">Copy this text to share the event on social media or groups:</p>';
-    echo '<textarea id="lpdh-share-text" readonly style="width: 100%; height: 85px; margin-bottom: 10px; font-family: monospace; font-size: 12px; background: #f9f9f9; border: 1px solid #ddd; padding: 8px; border-radius: 4px; resize: none;">' . esc_textarea($share_text) . '</textarea>';
+    echo '<textarea id="lpdh-share-text" readonly data-permalink="' . esc_attr($permalink) . '" style="width: 100%; height: 85px; margin-bottom: 10px; font-family: monospace; font-size: 12px; background: #f9f9f9; border: 1px solid #ddd; padding: 8px; border-radius: 4px; resize: none;">' . esc_textarea($share_text) . '</textarea>';
     echo '<button type="button" class="button button-secondary" style="width: 100%;" onclick="lpdhCopyShareText(event)">';
     echo '<span class="dashicons dashicons-clipboard" style="margin-top: 5px; font-size: 16px;"></span> ';
     echo 'Copy Text</button>';
@@ -7226,6 +7226,68 @@ function lpdh_render_event_share_metabox($post)
             }, 2000);
         });
     }
+
+    (function($) {
+        $(document).ready(function() {
+            var $textarea = $('#lpdh-share-text');
+            var permalink = $textarea.data('permalink');
+
+            function updateShareText() {
+                var title = htmlEntityDecode($('#title').val() || '');
+                
+                // Get Date from ACF
+                var date = 'TBA';
+                if (typeof acf !== 'undefined') {
+                    var dateField = acf.getField('field_event_date');
+                    if (dateField && dateField.val()) {
+                        // dateField.val() might be Y-m-d H:i:s or the formatted display depending on implementation
+                        // Let's try to get the display value if possible or just parse the value
+                        var rawDate = dateField.val();
+                        if (rawDate) {
+                            // ACF date time picker value is usually Y-m-d H:i:s
+                            var d = new Date(rawDate.replace(/-/g, "/"));
+                            if (!isNaN(d.getTime())) {
+                                var day = ("0" + d.getDate()).slice(-2);
+                                var month = ("0" + (d.getMonth() + 1)).slice(-2);
+                                var year = d.getFullYear();
+                                var hours = ("0" + d.getHours()).slice(-2);
+                                var mins = ("0" + d.getMinutes()).slice(-2);
+                                date = day + "/" + month + "/" + year + " " + hours + ":" + mins;
+                            }
+                        }
+                    }
+                    
+                    // Get Place from ACF
+                    var place = 'TBA';
+                    var placeField = acf.getField('field_event_place');
+                    if (placeField) {
+                        var selection = placeField.$el.find('.select2-selection__rendered').attr('title');
+                        if (!selection) selection = placeField.$el.find('.acf-selection').text();
+                        if (selection) place = selection.replace('Remove', '').trim();
+                    }
+                }
+
+                var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
+                $textarea.val(newText);
+            }
+
+            function htmlEntityDecode(str) {
+                return $('<textarea/>').html(str).text();
+            }
+
+            // Listen for title changes
+            $('#title').on('input', updateShareText);
+
+            // Listen for ACF changes
+            if (typeof acf !== 'undefined') {
+                acf.addAction('change', function(field) {
+                    if (field.data.key === 'field_event_date' || field.data.key === 'field_event_place') {
+                        updateShareText();
+                    }
+                });
+            }
+        });
+    })(jQuery);
     </script>
     <style>
         .lpdh-share-box textarea:focus { outline: none; border-color: #ddd; box-shadow: none; }
