@@ -60,7 +60,8 @@ function render_help_guide_page()
                     <a href="#profiles">11. Profiles & Preferences</a>
                     <a href="#roles">12. Roles & Security</a>
                     <a href="#settings">13. Theme Settings</a>
-                    <a href="#easter-eggs" class="hg-red">14. Easter Eggs ✨</a>
+                    <a href="#emails">14. Email System 📧</a>
+                    <a href="#easter-eggs" class="hg-red">15. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -566,45 +567,6 @@ function render_help_guide_page()
                 </table>
             </section>
 
-             <!-- SECTION: EASTER EGGS -->
-             <section id="easter-eggs" class="hg-section">
-                <h2 class="hg-section-title hg-title-red">
-                    <span class="dashicons dashicons-admin-appearance"></span> 13. Easter Eggs & Hidden Features
-                </h2>
-                <p>Curated secret animations and interactions for the LPDH community.</p>
-
-                <details class="hg-details">
-                    <summary class="hg-summary">
-                        <span>Click to view Easter Eggs (Spoiler Warning!)</span>
-                        <span class="dashicons dashicons-arrow-down-alt2"></span>
-                    </summary>
-                    <div class="hg-details-content">
-                        <div class="hg-grid-2">
-                             <div class="hg-card-mini">
-                                <h5 class="hg-text-blue">1. Counterspell Search</h5>
-                                <p class="small">Searching for <strong>"counterspell"</strong> triggers a blue burst visual effect.</p>
-                            </div>
-                            <div class="hg-card-mini">
-                                <h5 class="hg-text-red">2. Daybound / Nightbound</h5>
-                                <p class="small">Pressing <strong>"D"</strong> then <strong>"N"</strong> toggles the theme.</p>
-                            </div>
-                            <div class="hg-card-mini">
-                                <h5 class="hg-text-red">3. Forbidden Cards</h5>
-                                <p class="small">Searching for "expensive" cards triggers a rejection screen.</p>
-                            </div>
-                            <div class="hg-card-mini">
-                                <h5 class="hg-text-white">4. Console Lives</h5>
-                                <p class="small">Browser's <strong>Inspect Console</strong> reveals a greeting.</p>
-                            </div>
-                            <div class="hg-card-mini">
-                                <h5 class="hg-text-yellow">5. Commander Tax</h5>
-                                <p class="small">Clicking <strong>User Avatar</strong> adds +2 "Commander Tax".</p>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-            </section>
-            
             <!-- SECTION: EMAIL SYSTEM -->
             <section id="emails" class="hg-section">
                 <h2 class="hg-section-title">
@@ -632,6 +594,45 @@ function render_help_guide_page()
                 <div class="hg-tip hg-mt-20">
                     <strong>Admin Tip:</strong> To use the tester, create a page with the <strong>Email Test Page</strong> template and visit it while logged in as an Administrator.
                 </div>
+            </section>
+
+             <!-- SECTION: EASTER EGGS -->
+             <section id="easter-eggs" class="hg-section">
+                <h2 class="hg-section-title hg-title-red">
+                    <span class="dashicons dashicons-admin-appearance"></span> 15. Easter Eggs & Hidden Features
+                </h2>
+                <p>Curated secret animations and interactions for the LPDH community.</p>
+
+                <details class="hg-details">
+                    <summary class="hg-summary">
+                        <span>Click to view Easter Eggs (Spoiler Warning!)</span>
+                        <span class="dashicons dashicons-arrow-down-alt2"></span>
+                    </summary>
+                    <div class="hg-details-content">
+                        <div class="hg-grid-2">
+                             <div class="hg-card-mini">
+                                <h5 class="hg-text-blue">1. Counterspell Search</h5>
+                                <p class="small">Searching for <strong>"counterspell"</strong> triggers a blue burst visual effect.</p>
+                            </div>
+                             <div class="hg-card-mini">
+                                <h5 class="hg-text-red">2. Daybound / Nightbound</h5>
+                                <p class="small">Pressing <strong>"D"</strong> then <strong>"N"</strong> toggles the theme.</p>
+                            </div>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-red">3. Forbidden Cards</h5>
+                                <p class="small">Searching for "expensive" cards triggers a rejection screen.</p>
+                            </div>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-white">4. Console Lives</h5>
+                                <p class="small">Browser's <strong>Inspect Console</strong> reveals a greeting.</p>
+                            </div>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-yellow">5. Commander Tax</h5>
+                                <p class="small">Clicking <strong>User Avatar</strong> adds +2 "Commander Tax".</p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
             </section>
 
             <footer class="hg-footer">
