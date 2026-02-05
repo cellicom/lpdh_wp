@@ -127,3 +127,23 @@ body.login.lpdh-custom-login #backtoblog {
         padding: 20px !important;
     }
 }
+
+/* Language Switcher Positioning */
+body.login.lpdh-custom-login .language-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    clear: none !important;
+}
+
+body.login.lpdh-custom-login .language-switcher form {
+    margin-top: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
+}
