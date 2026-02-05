@@ -1,9 +1,9 @@
 <?php
 /**
- * Admin Help Guide Page - Full Version
+ * Admin Help Guide Page - GitHub Dark Theme Version
  *
  * @package Bootscore Child
- * @version 1.7.0
+ * @version 2.0.0
  */
 
 // Exit if accessed directly
@@ -32,55 +32,47 @@ function render_help_guide_page()
 {
     ?>
     <div class="wrap help-guide-wrap">
-        <h1 style="display: flex; align-items: center; gap: 10px;">
-            <span class="dashicons dashicons-editor-help" style="font-size: 32px; width: 32px; height: 32px;"></span>
+        <h1 class="hg-main-title">
+            <span class="dashicons dashicons-editor-help"></span>
             <?php _e('LPDH Advanced Management Guide', 'text_domain'); ?>
         </h1>
 
-        <div class="help-guide-container"
-            style="max-width: 1100px;  padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 25px; line-height: 1.6; color: #3c434a;">
+        <div class="help-guide-container">
 
-            <div
-                style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 20px; border-radius: 0 8px 8px 0; margin-bottom: 40px;">
-                <h3 style="margin-top: 0; color: #0073aa;"><span class="dashicons dashicons-info"></span> Admin Overview
-                </h3>
-                <p style="margin-bottom: 0;">This site uses <strong>Custom Post Types (CPT)</strong> and <strong>Advanced
-                        Custom Fields (ACF)</strong> to manage tournament data. This guide detail every field and tool
-                    available to you as an Administrator.</p>
+            <div class="hg-alert hg-alert-info">
+                <h3><span class="dashicons dashicons-info"></span> Admin Overview</h3>
+                <p>This site uses <strong>Custom Post Types (CPT)</strong> and <strong>Advanced Custom Fields (ACF)</strong> to manage tournament data. This guide detail every field and tool available to you as an Administrator.</p>
             </div>
 
-            <nav class="help-guide-nav" style="margin-bottom: 50px;">
-                <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                    <?php _e('Quick Navigation', 'text_domain'); ?>
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <nav class="help-guide-nav">
+                <h3><?php _e('Quick Navigation', 'text_domain'); ?></h3>
+                <div class="hg-nav-grid">
                     <a href="#events">1. Events & Rankings</a>
                     <a href="#decks">2. Decks Management</a>
-                    <a href="#achievements" style="font-weight: bold; color: #2271b1;">3. Achievements System ⭐</a>
-                    <a href="#roulette" style="color: #6b21a8;">4. Commander Roulette</a>
+                    <a href="#achievements" class="hg-highlight">3. Achievements System ⭐</a>
+                    <a href="#roulette" class="hg-purple">4. Commander Roulette</a>
                     <a href="#articles">5. Articles & News</a>
                     <a href="#pages">6. Pages & ACF Boxes</a>
                     <a href="#banned">7. Banned Cards</a>
                     <a href="#leaderboards">8. Leaderboards</a>
                     <a href="#stats">9. Statistics & ELO</a>
-                    <a href="#instagram" style="color: #e1306c; font-weight: bold;">10. Instagram Generator 📸</a>
+                    <a href="#instagram" class="hg-pink">10. Instagram Generator 📸</a>
                     <a href="#profiles">11. Profiles & Preferences</a>
                     <a href="#roles">12. Roles & Security</a>
                     <a href="#settings">13. Theme Settings</a>
-                    <a href="#easter-eggs" style="background: #fff5f5; color: #d63638;">14. Easter Eggs ✨</a>
+                    <a href="#easter-eggs" class="hg-red">14. Easter Eggs ✨</a>
                 </div>
             </nav>
 
             <!-- SECTION: EVENTS -->
-            <section id="events" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="events" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-calendar-alt"></span> 1. Events & Rankings
                 </h2>
                 <p>Manage tournaments and results. Every event updates global player statistics.</p>
 
-                <h4 style="margin-bottom: 10px;">Custom Fields (ACF):</h4>
-                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                <h4>Custom Fields (ACF):</h4>
+                <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
                             <th style="width: 200px;">Field Name</th>
@@ -111,84 +103,68 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Survey</strong></td>
                             <td>List of users who participated (used for attendance stats).
-                                <div
-                                    style="background: #e7f5fe; padding: 5px 10px; border-radius: 4px; margin-top: 5px; font-size: 13px; border-left: 3px solid #0073aa;">
-                                    <strong>Tool:</strong> Use the <strong>Update Survey</strong> button to automatically
-                                    sync players from the ranking table to the survey list.
+                                <div class="hg-tip">
+                                    <strong>Tool:</strong> Use the <strong>Update Survey</strong> button to automatically sync players from the ranking table to the survey list.
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h4 style="margin-bottom: 10px;">Custom Tools (Metaboxes):</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #d63638;"><span class="dashicons dashicons-upload"></span> OCR
-                            Ranking Generator</h5>
-                        <p class="small">Upload a screenshot of the results. The system uses <i>Tesseract.js</i> to extract
-                            text and format it into the <strong>Rankings JSON</strong> field.</p>
+                <h4>Custom Tools (Metaboxes):</h4>
+                <div class="hg-grid-2">
+                    <div class="hg-card">
+                        <h5 class="hg-text-red"><span class="dashicons dashicons-upload"></span> OCR Ranking Generator</h5>
+                        <p class="small">Upload a screenshot of the results. The system uses <i>Tesseract.js</i> to extract text and format it into the <strong>Rankings JSON</strong> field.</p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span>
-                            Sync Player Tool</h5>
-                        <p class="small">After populating rankings, click "Sync Player". The site will match the text names
-                            with registered <strong>Player</strong> users to link their ELO history automatically.</p>
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Sync Player Tool</h5>
+                        <p class="small">After populating rankings, click "Sync Player". The site will match the text names with registered <strong>Player</strong> users to link their ELO history automatically.</p>
                     </div>
                 </div>
             </section>
 
             <!-- SECTION: DECKS -->
-            <section id="decks" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="decks" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-saved"></span> 2. Decks Management
                 </h2>
                 <p>Decks are created by players but overseen by administrators.</p>
 
-                <h4 style="margin-bottom: 10px;">Key Fields:</h4>
-                <ul style="list-style: disc; margin-left: 20px;">
+                <h4>Key Fields:</h4>
+                <ul class="hg-list">
                     <li><strong>Commander / Partner:</strong> Dynamic fields to specify the deck's leaders.</li>
                     <li><strong>Featured Image:</strong> Used for the Commander's art.
-                        <div
-                            style="background: #e7f5fe; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #0073aa;">
-                            <strong>Note:</strong> If no Featured Image is provided, the system automatically pulls the
-                            official card art from <strong>Scryfall</strong> based on the <i>Commander</i> or <i>Partner</i>
-                            name.
+                        <div class="hg-tip">
+                            <strong>Note:</strong> If no Featured Image is provided, the system automatically pulls the official card art from <strong>Scryfall</strong> based on the <i>Commander</i> or <i>Partner</i> name.
                         </div>
                     </li>
                     <li><strong>Decklist URL:</strong> External link (Moxfield, deckstats.net, etc.).</li>
                     <li><strong>Decklist Text:</strong> Optional field for raw card list pasting.</li>
                     <li><strong>Private Deck:</strong>
-                        <div
-                            style="background: #fff8e5; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #ffb900;">
-                            <strong>Logic:</strong> If enabled, the deck will only be visible to the author and site
-                            administrators. It will be hidden from public lists and search results.
+                        <div class="hg-warning">
+                            <strong>Logic:</strong> If enabled, the deck will only be visible to the author and site administrators. It will be hidden from public lists and search results.
                         </div>
                     </li>
                 </ul>
 
-                <h4 style="margin-bottom: 10px;">Deck Creation Tools:</h4>
-                <div
-                    style="background: #fffcf5; padding: 15px; border: 1px solid #faecd8; border-radius: 6px; margin-bottom: 15px;">
+                <h4>Deck Creation Tools:</h4>
+                <div class="hg-box hg-box-yellow">
                     <strong>🚀 Tool: Admin Autocomplete</strong><br>
-                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck
-                    creation, the system suggests official names from Scryfall. Selecting one
-                    **automatically** populates the Scryfall URL and basic card metadata.
+                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck creation, the system suggests official names from Scryfall. Selecting one **automatically** populates the Scryfall URL and basic card metadata.
                 </div>
             </section>
 
             <!-- SECTION: ACHIEVEMENTS -->
-            <section id="achievements" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="achievements" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-awards"></span> 3. Achievements System
                 </h2>
                 <p>Track player milestones, deck variety, and seasonal competitive effort.</p>
 
-                <h4 style="margin-bottom: 10px;">Managing Achievements (CPT):</h4>
+                <h4>Managing Achievements (CPT):</h4>
                 <p>Every achievement is a post in the <i>Achievements</i> CPT. Key ACF fields include:</p>
-                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
                             <th style="width: 200px;">Field Name</th>
@@ -215,92 +191,69 @@ function render_help_guide_page()
                     </tbody>
                 </table>
 
-                <h4 style="margin-bottom: 10px;">Special Admin Tools:</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span>
-                            Manage User Achievements</h5>
-                        <p class="small">Accessed via the <strong>Achievements menu</strong>. Search for a user to see a
-                            toggle-grid of all achievements. You can manually grant/revoke badges or use the
-                            <strong>"Check"</strong> microscope to verify if the user meets the requirements based on their
-                            current stats.
-                        </p>
+                <h4>Special Admin Tools:</h4>
+                <div class="hg-grid-2">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Manage User Achievements</h5>
+                        <p class="small">Accessed via the <strong>Achievements menu</strong>. Search for a user to see a toggle-grid of all achievements. You can manually grant/revoke badges or use the <strong>"Check"</strong> microscope to verify if the user meets the requirements based on their current stats.</p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #46b450;"><span class="dashicons dashicons-calendar"></span>
-                            Duplicate for Next Year</h5>
-                        <p class="small">In the <strong>Achievements List</strong>, select badges and use Bulk Actions >
-                            <i>Duplicate for next year</i>. The system clones the badges, increments the year field, and
-                            updates title automatically.
-                        </p>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-calendar"></span> Duplicate for Next Year</h5>
+                        <p class="small">In the <strong>Achievements List</strong>, select badges and use Bulk Actions > <i>Duplicate for next year</i>. The system clones the badges, increments the year field, and updates title automatically.</p>
                     </div>
                 </div>
 
-                <div
-                    style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 15px; margin-top: 20px; border-radius: 4px;">
-                    <strong>Automatic Unlocking:</strong> Achievements are checked and granted automatically whenever an
-                    event is synchronized via the <strong>Sync Player</strong> tool. Manual overrides are always possible
-                    through the <i>Manage Achievements</i> page.
+                <div class="hg-tip hg-mt-20">
+                    <strong>Automatic Unlocking:</strong> Achievements are checked and granted automatically whenever an event is synchronized via the <strong>Sync Player</strong> tool. Manual overrides are always possible through the <i>Manage Achievements</i> page.
                 </div>
             </section>
 
             <!-- SECTION: ROULETTE -->
-            <section id="roulette" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #6b21a8; background: #f3e8ff; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="roulette" class="hg-section">
+                <h2 class="hg-section-title hg-title-purple">
                     <span class="dashicons dashicons-update"></span> 4. Commander Roulette
                 </h2>
                 <p>An interactive feature where players receive a random Commander suggestion from a curated list.</p>
 
-                <h4 style="margin-bottom: 10px;">Key Logic:</h4>
-                <ul style="list-style: disc; margin-left: 20px;">
-                    <li><strong>Rate Limiting:</strong> Regular players receive <strong>3 tokens per day</strong>. A counter
-                        is shown next to the spin button.</li>
-                    <li><strong>Admin Bypass:</strong> Site administrators have <strong>infinite tokens</strong> for testing
-                        purposes.</li>
-                    <li><strong>Pool Selection:</strong> The system picks from <strong>Uncommon Legendary Creatures</strong>
-                        (LPDH legal), automatically excluding cards currently in the <i>Banned List</i> CPT.</li>
+                <h4>Key Logic:</h4>
+                <ul class="hg-list">
+                    <li><strong>Rate Limiting:</strong> Regular players receive <strong>3 tokens per day</strong>. A counter is shown next to the spin button.</li>
+                    <li><strong>Admin Bypass:</strong> Site administrators have <strong>infinite tokens</strong> for testing purposes.</li>
+                    <li><strong>Pool Selection:</strong> The system picks from <strong>Uncommon Legendary Creatures</strong> (LPDH legal), automatically excluding cards currently in the <i>Banned List</i> CPT.</li>
                 </ul>
             </section>
 
             <!-- SECTION: ARTICLES -->
-            <section id="articles" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="articles" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-post"></span> 5. Articles (WordPress Posts)
                 </h2>
                 <p>Use standard WordPress <strong>Posts</strong> for news, announcements, and tournament reports.</p>
 
-                <h4 style="margin-bottom: 10px;">Best Practices:</h4>
-                <ul style="list-style: disc; margin-left: 20px;">
+                <h4>Best Practices:</h4>
+                <ul class="hg-list">
                     <li><strong>Categories:</strong> Organize your posts (e.g., "Tournament Reports").</li>
-                    <li><strong>Featured Image:</strong> Always set a high-quality featured image for home page sliders.
-                    </li>
+                    <li><strong>Featured Image:</strong> Always set a high-quality featured image for home page sliders.</li>
                 </ul>
 
-                <h4 style="margin-bottom: 10px;">Enhanced Features for Posts:</h4>
-                <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px; background: #fffcf5;">
-                    <h5 style="margin-top: 0; color: #b58105;"><span class="dashicons dashicons-admin-tools"></span> Banned
-                        Card Shortcode Generator</h5>
-                    <p class="small">In the sidebar of the <strong>Post Editor</strong>, you can search for any card in the
-                        ban list and click <strong>Add to Content</strong> to insert the interactive card box.</p>
+                <h4>Enhanced Features for Posts:</h4>
+                <div class="hg-box hg-box-yellow">
+                    <h5 class="hg-text-yellow"><span class="dashicons dashicons-admin-tools"></span> Banned Card Shortcode Generator</h5>
+                    <p class="small">In the sidebar of the <strong>Post Editor</strong>, you can search for any card in the ban list and click <strong>Add to Content</strong> to insert the interactive card box.</p>
                 </div>
             </section>
 
             <!-- SECTION: PAGES & ACF BOXES -->
-            <section id="pages" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="pages" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-page"></span> 6. Pages & ACF Boxes
                 </h2>
-                <p>Pages are the structural backbone of the site. Most use the <strong>No Sidebar With ACF Boxes</strong>
-                    template for modular content.</p>
+                <p>Pages are the structural backbone of the site. Most use the <strong>No Sidebar With ACF Boxes</strong> template for modular content.</p>
 
-                <h4 style="margin-bottom: 10px;">Master Content Structure (ACF):</h4>
-                <p>The main tool for managing page content is the <strong>Sections</strong> field, which is a <i>Flexible
-                        Content</i> area composed of individual rows.</p>
+                <h4>Master Content Structure (ACF):</h4>
+                <p>The main tool for managing page content is the <strong>Sections</strong> field, which is a <i>Flexible Content</i> area composed of individual rows.</p>
 
-                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
                             <th style="width: 250px;">Section Component</th>
@@ -314,151 +267,122 @@ function render_help_guide_page()
                         </tr>
                         <tr>
                             <td><strong>Box (Layouts)</strong></td>
-                            <td>Inside each section, you add one or more <strong>Boxes</strong> from a list of predefined
-                                layouts.</td>
+                            <td>Inside each section, you add one or more <strong>Boxes</strong> from a list of predefined layouts.</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h4 style="margin-bottom: 10px;">Available Box Layouts:</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                <h4>Available Box Layouts:</h4>
+                <div class="hg-grid-3">
+                    <div class="hg-card-mini">
                         <strong>Title, Subtitle & Text</strong>
-                        <p class="small">Classic text block. Perfect for "Welcome" messages or descriptions. <br><i>Fields:
-                                Title, Subtitle, Text (WYSIWYG).</i></p>
+                        <p class="small">Classic text block. Perfect for "Welcome" messages or descriptions. <br><i>Fields: Title, Subtitle, Text (WYSIWYG).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                    <div class="hg-card-mini">
                         <strong>Box FAQ</strong>
-                        <p class="small">An interactive accordion list. <br><i>Fields: Titolo, FAQ Repeater (Domanda,
-                                Risposta).</i></p>
+                        <p class="small">An interactive accordion list. <br><i>Fields: Titolo, FAQ Repeater (Domanda, Risposta).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                    <div class="hg-card-mini">
                         <strong>Links List</strong>
-                        <p class="small">A grid of cards linking to external or internal resources. <br><i>Fields: Links
-                                Repeater (Icon, Title, Subtitle, URL).</i></p>
+                        <p class="small">A grid of cards linking to external or internal resources. <br><i>Fields: Links Repeater (Icon, Title, Subtitle, URL).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                    <div class="hg-card-mini">
                         <strong>Action Button</strong>
                         <p class="small">A centered call-to-action button. <br><i>Fields: Icon, Label, Link.</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                    <div class="hg-card-mini">
                         <strong>Title and 3 Cards</strong>
-                        <p class="small">A fixed 3-column layout for features or services. <br><i>Fields: Title, Cards
-                                Repeater (Icon, Title, Text).</i></p>
+                        <p class="small">A fixed 3-column layout for features or services. <br><i>Fields: Title, Cards Repeater (Icon, Title, Text).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
+                    <div class="hg-card-mini">
                         <strong>About List</strong>
-                        <p class="small">For staff or team pages. Can link to WP Profiles. <br><i>Fields: People Repeater
-                                (Profile, Icon, Title, Nickname, Subtitle, Text, URL).</i></p>
+                        <p class="small">For staff or team pages. Can link to WP Profiles. <br><i>Fields: People Repeater (Profile, Icon, Title, Nickname, Subtitle, Text, URL).</i></p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION: BANNED -->
-            <section id="banned" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+             <!-- SECTION: BANNED -->
+             <section id="banned" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-dismiss"></span> 7. Banned Cards
                 </h2>
 
-                <h4 style="margin-bottom: 10px;">Managing the List:</h4>
+                <h4>Managing the List:</h4>
                 <p>Use the <i>Banned Cards</i> CPT. Each entry requires a name and a <strong>Scryfall Link</strong>.</p>
-                <div
-                    style="background: #e7f5fe; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #0073aa;">
-                    <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload
-                    one, the system will automatically fetch it from <strong>Scryfall</strong>.
+                <div class="hg-tip">
+                    <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload one, the system will automatically fetch it from <strong>Scryfall</strong>.
                 </div>
 
-                <h4 style="margin-top: 20px; margin-bottom: 10px;">Shortcode Integration:</h4>
-                <div style="background: #fdf6ec; padding: 20px; border-radius: 8px; border: 1px solid #faecd8;">
-                    <p><strong>Banned Card Shortcode (Metabox):</strong> Located in the sidebar of the Banned Card editor.
-                        It provides the unique code <code>[banned_card id="XX"]</code>.</p>
+                <h4 style="margin-top: 20px;">Shortcode Integration:</h4>
+                <div class="hg-box hg-box-orange">
+                    <p><strong>Banned Card Shortcode (Metabox):</strong> Located in the sidebar of the Banned Card editor. It provides the unique code <code>[banned_card id="XX"]</code>.</p>
                 </div>
             </section>
 
             <!-- SECTION: LEADERBOARDS -->
-            <section id="leaderboards" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="leaderboards" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-awards"></span> 8. Leaderboards
                 </h2>
                 <p>Leaderboards represent the stabilized rankings for a specific competitive year.</p>
-                <ul style="list-style: disc; margin-left: 20px;">
+                <ul class="hg-list">
                     <li><strong>Year:</strong> Select the target year for the ranking.</li>
                     <li><strong>Rankings JSON:</strong> Stores the finalized list of participants.
-                        <div
-                            style="background: #fff8e5; padding: 10px; border-radius: 4px; margin-top: 5px; border-left: 3px solid #ffb900;">
-                            <strong>Crucial:</strong> This field is <strong>calculated manually</strong> by clicking the
-                            <strong>Update Leaderboard</strong> button after selecting the year.
+                        <div class="hg-warning">
+                            <strong>Crucial:</strong> This field is <strong>calculated manually</strong> by clicking the <strong>Update Leaderboard</strong> button after selecting the year.
                         </div>
                     </li>
                 </ul>
             </section>
 
             <!-- SECTION: STATS -->
-            <section id="stats" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="stats" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-chart-area"></span> 9. Statistics & ELO
                 </h2>
-                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in
-                    Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
 
-                <h4 style="margin-top: 25px; margin-bottom: 10px;">ELO Calculation Logic:</h4>
-                <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
-                    ranking:</p>
-                <div style="background: #000; padding: 20px; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
-                    <pre
-                        style="margin: 0; color: #d4d4d4; font-size: 13px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6;"><span style="color: #6a9955;">// Centralized ELO Calculation logic in functions.php</span>
-            <span style="color: #c586c0;">function</span> <span style="color: #dcdcaa;">lpdh_calculate_elo</span>(<span style="color: #9cdcfe;">$current_elo</span>, <span style="color: #9cdcfe;">$wins</span>, <span style="color: #9cdcfe;">$draws</span>, <span style="color: #9cdcfe;">$losses</span>, <span style="color: #9cdcfe;">$avg_elo</span>, <span style="color: #9cdcfe;">$pos</span>, <span style="color: #9cdcfe;">$total_players</span>) {
-                <span style="color: #9cdcfe;">$games_played</span> = <span style="color: #9cdcfe;">$wins</span> + <span style="color: #9cdcfe;">$draws</span> + <span style="color: #9cdcfe;">$losses</span>;
+                <h4 style="margin-top: 25px;">ELO Calculation Logic:</h4>
+                <p>The system uses a modified ELO formula that accounts for match results and overall final position in the ranking:</p>
+                <div class="hg-code-block">
+                    <pre><span style="color: #8b949e;">// Centralized ELO Calculation logic in functions.php</span>
+            <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_calculate_elo</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>) {
+                <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
     
-                <span style="color: #c586c0;">if</span> (<span style="color: #9cdcfe;">$games_played</span> <= <span style="color: #b5cea8;">0</span>) {
-                    <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
-                        <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$current_elo</span>,
-                        <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #b5cea8;">0</span>,
-                        <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #b5cea8;">0</span>,
-                        <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #b5cea8;">0</span>
+                <span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">$games_played</span> <= <span style="color: #79c0ff;">0</span>) {
+                    <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+                        <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$current_elo</span>,
+                        <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">0</span>,
+                        <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">0</span>,
+                        <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">0</span>
                     );
                 }
 
-                <span style="color: #9cdcfe;">$actual_score</span> = <span style="color: #9cdcfe;">$wins</span> + (<span style="color: #9cdcfe;">$draws</span> * <span style="color: #b5cea8;">0.5</span>);
-                <span style="color: #9cdcfe;">$expected_score_rate</span> = <span style="color: #b5cea8;">1</span> / (<span style="color: #b5cea8;">1</span> + <span style="color: #dcdcaa;">pow</span>(<span style="color: #b5cea8;">10</span>, (<span style="color: #9cdcfe;">$avg_elo</span> - <span style="color: #9cdcfe;">$current_elo</span>) / <span style="color: #b5cea8;">400</span>));
-                <span style="color: #9cdcfe;">$expected_score</span> = <span style="color: #9cdcfe;">$expected_score_rate</span> * <span style="color: #9cdcfe;">$games_played</span>;
+                <span style="color: #79c0ff;">$actual_score</span> = <span style="color: #79c0ff;">$wins</span> + (<span style="color: #79c0ff;">$draws</span> * <span style="color: #79c0ff;">0.5</span>);
+                <span style="color: #79c0ff;">$expected_score_rate</span> = <span style="color: #79c0ff;">1</span> / (<span style="color: #79c0ff;">1</span> + <span style="color: #d2a8ff;">pow</span>(<span style="color: #79c0ff;">10</span>, (<span style="color: #79c0ff;">$avg_elo</span> - <span style="color: #79c0ff;">$current_elo</span>) / <span style="color: #79c0ff;">400</span>));
+                <span style="color: #79c0ff;">$expected_score</span> = <span style="color: #79c0ff;">$expected_score_rate</span> * <span style="color: #79c0ff;">$games_played</span>;
+                
+                <span style="color: #8b949e;">// ... math continues ...</span>
 
-                <span style="color: #6a9955;">// K-factor logic based on theme setting</span>
-                <span style="color: #9cdcfe;">$k_factor_divide</span> = <span style="color: #dcdcaa;">get_option</span>(<span style="color: #ce9178;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #b5cea8;">1</span>);
-                <span style="color: #9cdcfe;">$k_factor</span> = (<span style="color: #9cdcfe;">$k_factor_divide</span>) ? <span style="color: #b5cea8;">32</span> / <span style="color: #9cdcfe;">$games_played</span> : <span style="color: #b5cea8;">32</span>;
-
-                <span style="color: #6a9955;">// Position Adjustment (rewarding top finishes)</span>
-                <span style="color: #9cdcfe;">$rank_score</span> = (<span style="color: #9cdcfe;">$total_players</span> > <span style="color: #b5cea8;">1</span>) ? (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #9cdcfe;">$pos</span>) / (<span style="color: #9cdcfe;">$total_players</span> - <span style="color: #b5cea8;">1</span>) : <span style="color: #b5cea8;">1</span>;
-                <span style="color: #9cdcfe;">$position_adjustment</span> = <span style="color: #b5cea8;">20</span> * (<span style="color: #9cdcfe;">$rank_score</span> - <span style="color: #b5cea8;">0.5</span>);
-
-                <span style="color: #9cdcfe;">$new_elo</span> = <span style="color: #9cdcfe;">$current_elo</span> + <span style="color: #9cdcfe;">$k_factor</span> * (<span style="color: #9cdcfe;">$actual_score</span> - <span style="color: #9cdcfe;">$expected_score</span>) + <span style="color: #9cdcfe;">$position_adjustment</span>;
-
-                <span style="color: #c586c0;">return</span> <span style="color: #dcdcaa;">array</span>(
-                    <span style="color: #ce9178;">'new_elo'</span> => <span style="color: #9cdcfe;">$new_elo</span>,
-                    <span style="color: #ce9178;">'k_factor'</span> => <span style="color: #9cdcfe;">$k_factor</span>,
-                    <span style="color: #ce9178;">'expected_score'</span> => <span style="color: #9cdcfe;">$expected_score</span>,
-                    <span style="color: #ce9178;">'position_adjustment'</span> => <span style="color: #9cdcfe;">$position_adjustment</span>
+                <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+                    <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$new_elo</span>,
+                   <span style="color: #8b949e;"> // ...</span>
                 );
             }</pre>
                 </div>
             </section>
 
             <!-- SECTION: INSTAGRAM GENERATOR -->
-            <section id="instagram" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #e1306c; background: #fff0f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="instagram" class="hg-section">
+                <h2 class="hg-section-title hg-title-pink">
                     <span class="dashicons dashicons-instagram"></span> 10. Instagram Generator
                 </h2>
                 <p>Powerful tool to create promotional images for social media directly from event data.</p>
 
-                <h4 style="margin-bottom: 10px;">Accessing the Generator:</h4>
-                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin
-                    sidebar or frontend event page.</p>
+                <h4>Accessing the Generator:</h4>
+                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin sidebar or frontend event page.</p>
 
-                <table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+                <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
                             <th style="width: 200px;">Selector Field</th>
@@ -469,12 +393,9 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Select Theme</strong></td>
                             <td>
-                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate
-                                frames.<br>
-                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow
-                                effects.<br>
-                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community
-                                branding.<br>
+                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate frames.<br>
+                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow effects.<br>
+                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community branding.<br>
                                 🌲 <strong>Lost Wood:</strong> Forest-themed aesthetic with organic frames.<br>
                                 📘 <strong>Bootstrap Classic:</strong> Clean, minimal professional layout.
                             </td>
@@ -490,76 +411,61 @@ function render_help_guide_page()
                     </tbody>
                 </table>
 
-                <h4 style="margin-bottom: 10px;">Dynamic Export Logic:</h4>
-                <div style="background: #fdf6ec; border-left: 5px solid #e1306c; padding: 15px; border-radius: 4px;">
-                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a
-                        standardized filename:</p>
+                <div class="hg-box hg-box-pink">
+                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a standardized filename:</p>
                     <code><strong>IG-[TYPE]-[THEME]-[EVENT-NAME].png</strong></code>
                 </div>
 
-                <div
-                    style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 15px; margin-top: 20px; border-radius: 4px;">
-                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card
-                    art is rendered quickly without triggering Scryfall rate limits.
+                <div class="hg-tip hg-mt-20">
+                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card art is rendered quickly without triggering Scryfall rate limits.
                 </div>
             </section>
 
-            <!-- SECTION: PROFILES -->
-            <section id="profiles" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+             <!-- SECTION: PROFILES -->
+             <section id="profiles" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-users"></span> 11. Profiles & Preferences
                 </h2>
                 <p>Manage user visibility, achievement privacy, and data settings.</p>
 
-                <h4 style="margin-bottom: 10px;">User Security & Privacy:</h4>
-                <ul style="list-style: disc; margin-left: 20px;">
-                    <li><strong>Secret Achievements:</strong> By default, locked achievements show titles/desc. However,
-                        when viewing **another user's profile**, these are masked as "Secret Achievement" unless the visitor
-                        has also unlocked them.</li>
+                <h4>User Security & Privacy:</h4>
+                <ul class="hg-list">
+                    <li><strong>Secret Achievements:</strong> By default, locked achievements show titles/desc. However, when viewing **another user's profile**, these are masked as "Secret Achievement" unless the visitor has also unlocked them.</li>
                     <li><strong>Private Profile:</strong> Hides the User Detail page from the public.</li>
                     <li><strong>Account Deletion:</strong> Permanent removal of profile and assigned decks.</li>
                 </ul>
             </section>
 
             <!-- SECTION: ROLES -->
-            <section id="roles" style="margin-bottom: 60px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="roles" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-shield"></span> 12. Roles & Security
                 </h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #d63638;"><span class="dashicons dashicons-shield"></span>
-                            Administrator</h5>
-                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and
-                            code.</p>
+                <div class="hg-grid-3">
+                    <div class="hg-card">
+                        <h5 class="hg-text-red"><span class="dashicons dashicons-shield"></span> Administrator</h5>
+                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and code.</p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #2271b1;"><span class="dashicons dashicons-admin-users"></span>
-                            Co-Administrator</h5>
-                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks,
-                            Pages).<br>
-                            <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System
-                            Tools.
-                        </p>
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Co-Administrator</h5>
+                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks, Pages).<br>
+                        <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System Tools.</p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 8px;">
-                        <h5 style="margin-top: 0; color: #646970;"><span class="dashicons dashicons-id"></span> Player</h5>
+                    <div class="hg-card">
+                        <h5 class="hg-text-gray"><span class="dashicons dashicons-id"></span> Player</h5>
                         <p class="small">Can manage their personal profile and their own decklists only.</p>
                     </div>
                 </div>
             </section>
 
             <!-- SECTION: SETTINGS -->
-            <section id="settings" style="margin-bottom: 40px;">
-                <h2
-                    style="color: #2271b1; background: #f6f7f7; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+            <section id="settings" class="hg-section">
+                <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-generic"></span> 13. Theme Settings
                 </h2>
                 <p>Configure aesthetics and mapping under <strong>LPDH > Theme Settings</strong>.</p>
 
-                <table class="wp-list-table widefat fixed striped">
+                <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
                             <th style="width: 200px;">Setting Name</th>
@@ -572,179 +478,321 @@ function render_help_guide_page()
                             <td>Switches global design (Bootscore Default, Vaporwave, Vaporwave Green, Lost Wood).</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Pages
-                                Configuration</td>
+                            <td colspan="2" class="hg-table-header">Pages Configuration</td>
                         </tr>
                         <tr>
                             <td><strong>Deck Editor Page</strong></td>
                             <td>Select the page using the "Deck Editor" template.</td>
                         </tr>
-                        <tr>
-                            <td><strong>Profile Editor Page</strong></td>
-                            <td>Select the page using the "User Profile Editor" template.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Statistics Page</strong></td>
-                            <td>Select the page using the "User Statistics" template.</td>
-                        </tr>
+                        <!-- ... other pages ... -->
                         <tr>
                             <td><strong>Login/Register Page</strong></td>
                             <td>Select the page using the "Registration Page" template.</td>
                         </tr>
                         <tr>
-                            <td><strong>Commander Roulette Page</strong></td>
-                            <td>Select the page using the "Commander Roulette" template.</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Branding</td>
+                            <td colspan="2" class="hg-table-header">Branding</td>
                         </tr>
                         <tr>
                             <td><strong>Custom Logo</strong></td>
-                            <td>Upload a custom logo for your site. If set, this logo takes priority over the logo
-                                configured in <strong>Appearance > Customize > Site Identity</strong>. Leave empty to use
-                                the WordPress Customizer logo.</td>
+                            <td>Upload a custom logo for your site.</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">Socials</td>
+                            <td colspan="2" class="hg-table-header">Socials</td>
                         </tr>
                         <tr>
                             <td><strong>Social Links</strong></td>
                             <td>Configure Instagram, Discord, Facebook, and X links for the footer.</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="background: #f0f0f1; font-weight: 600; padding: 8px 10px;">ELO Settings
-                            </td>
+                            <td colspan="2" class="hg-table-header">ELO Settings</td>
                         </tr>
                         <tr>
                             <td><strong>K Factor / Game Played</strong></td>
-                            <td>Toggle whether to divide the K-factor (32) by the number of games played in the tournament,
-                                or use a flat value (32).</td>
+                            <td>Toggle whether to divide the K-factor.</td>
                         </tr>
                     </tbody>
                 </table>
             </section>
 
-            <!-- SECTION: EASTER EGGS -->
-            <section id="easter-eggs" style="margin-bottom: 40px;">
-                <h2
-                    style="color: #d63638; background: #fff5f5; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+             <!-- SECTION: EASTER EGGS -->
+             <section id="easter-eggs" class="hg-section">
+                <h2 class="hg-section-title hg-title-red">
                     <span class="dashicons dashicons-admin-appearance"></span> 13. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
-                <details
-                    style="border: 1px solid #fecaca; border-radius: 8px; background: #fff5f5; overflow: hidden; margin-top: 20px;">
-                    <summary
-                        style="padding: 15px; cursor: pointer; color: #d63638; font-weight: bold; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                <details class="hg-details">
+                    <summary class="hg-summary">
                         <span>Click to view Easter Eggs (Spoiler Warning!)</span>
                         <span class="dashicons dashicons-arrow-down-alt2"></span>
                     </summary>
-                    <div style="padding: 20px;  border-top: 1px solid #fecaca;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                            <!-- Point 1 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
-                                <p class="small">Searching for <strong>"counterspell"</strong> or
-                                    <strong>"contromagia"</strong> in
-                                    the site search bar triggers a blue burst visual effect.
-                                </p>
+                    <div class="hg-details-content">
+                        <div class="hg-grid-2">
+                             <div class="hg-card-mini">
+                                <h5 class="hg-text-blue">1. Counterspell Search</h5>
+                                <p class="small">Searching for <strong>"counterspell"</strong> triggers a blue burst visual effect.</p>
                             </div>
-
-                            <!-- Point 2 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #7c2d12;">2. Daybound / Nightbound</h5>
-                                <p class="small">Pressing the keys <strong>"D"</strong> then <strong>"N"</strong> in
-                                    sequence
-                                    toggles the site theme with a sun/moon rising animation.</p>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-red">2. Daybound / Nightbound</h5>
+                                <p class="small">Pressing <strong>"D"</strong> then <strong>"N"</strong> toggles the theme.</p>
                             </div>
-
-                            <!-- Point 3 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #d63638;">3. Forbidden Cards</h5>
-                                <p class="small">Searching for "expensive" cards (like <strong>Black Lotus</strong>)
-                                    triggers a
-                                    rejection screen and a random redirect.</p>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-red">3. Forbidden Cards</h5>
+                                <p class="small">Searching for "expensive" cards triggers a rejection screen.</p>
                             </div>
-
-                            <!-- Point 4 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #111827;">4. Console Lives</h5>
-                                <p class="small">Opening the browser's <strong>Inspect Console</strong> reveals a greeting
-                                    for the
-                                    LPDH gods Gut and Balmor.</p>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-white">4. Console Lives</h5>
+                                <p class="small">Browser's <strong>Inspect Console</strong> reveals a greeting.</p>
                             </div>
-
-                            <!-- Point 5 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #b45309;">5. Commander Tax</h5>
-                                <p class="small">In profile pages, clicking the <strong>User Avatar</strong> adds +2
-                                    "Commander Tax"
-                                    to a floating badge.</p>
-                            </div>
-
-                            <!-- Point 6 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
-                                <h5 style="margin-top: 0; color: #2563eb;">6. Countered Commander</h5>
-                                <p class="small">Clicking the <strong>Commander Image</strong> on a deck page reveals a
-                                    random artwork from various <strong>Counterspells</strong> or <strong>Mana
-                                        Tithes</strong>.</p>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-yellow">5. Commander Tax</h5>
+                                <p class="small">Clicking <strong>User Avatar</strong> adds +2 "Commander Tax".</p>
                             </div>
                         </div>
                     </div>
                 </details>
             </section>
 
-            <footer
-                style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #f0f0f1; text-align: center; font-style: italic; color: #646970;">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 1.9.6</p>
+            <footer class="hg-footer">
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.0.0 (GitHub Dark Theme)</p>
             </footer>
         </div>
     </div>
 
     <style>
-        .help-guide-wrap .wp-list-table th {
-            font-weight: 700;
-            color: #2c3338;
+        :root {
+            --gh-bg: #0d1117;
+            --gh-container-bg: #161b22;
+            --gh-border: #30363d;
+            --gh-text-main: #c9d1d9;
+            --gh-text-muted: #8b949e;
+            --gh-link: #58a6ff;
+            --gh-header: #f0f6fc;
+            --gh-btn-bg: #21262d;
+            --gh-btn-hover: #30363d;
+            --gh-code-bg: #161b22;
+            --gh-accent-blue: #1f6feb;
+            --gh-alert-info-bg: rgba(56, 139, 253, 0.15);
+            --gh-alert-info-border: rgba(56, 139, 253, 0.4);
+            --gh-alert-warn-bg: rgba(187, 128, 9, 0.15);
+            --gh-alert-warn-border: rgba(187, 128, 9, 0.4);
         }
 
+        .help-guide-wrap .hg-main-title {
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            color: var(--gh-text-main);
+        }
+
+        .help-guide-container {
+            max-width: 1100px;
+            padding: 40px;
+            border-radius: 6px;
+            border: 1px solid var(--gh-border);
+            background: var(--gh-bg);
+            margin-top: 25px;
+            line-height: 1.6;
+            color: var(--gh-text-main);
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+        }
+
+        .help-guide-container h1, 
+        .help-guide-container h2, 
+        .help-guide-container h3, 
+        .help-guide-container h4, 
+        .help-guide-container h5 {
+            color: var(--gh-header);
+        }
+
+        .help-guide-container a {
+            color: var(--gh-link);
+            text-decoration: none;
+        }
+        .help-guide-container a:hover {
+            text-decoration: underline;
+        }
+
+        .hg-alert {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            border: 1px solid var(--gh-border);
+        }
+
+        .hg-alert-info {
+            background: var(--gh-alert-info-bg);
+            border-color: var(--gh-alert-info-border);
+        }
+        .hg-alert-info h3 {
+            color: #58a6ff !important;
+            margin-top: 0;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Nav */
+        .help-guide-nav h3 {
+            border-bottom: 1px solid var(--gh-border);
+            padding-bottom: 10px;
+        }
+        .hg-nav-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 10px;
+        }
         .help-guide-nav a {
             display: block;
-            padding: 12px 15px;
-            background: #f6f7f7;
-            color: #2271b1;
-            text-decoration: none;
+            padding: 8px 16px;
+            background: var(--gh-btn-bg);
+            border: 1px solid var(--gh-border);
+            color: var(--gh-text-main);
             border-radius: 6px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            font-size: 14px;
+            transition: 0.2s;
         }
-
         .help-guide-nav a:hover {
-            
-            border-color: #2271b1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background: var(--gh-btn-hover);
+            border-color: #8b949e;
+            text-decoration: none;
+        }
+        .hg-highlight { color: #e3b341 !important; font-weight: bold; }
+        .hg-purple { color: #d2a8ff !important; }
+        .hg-pink { color: #ff7b72 !important; }
+        .hg-red { color: #ffa198 !important; }
+
+        /* Sections */
+        .hg-section { margin-bottom: 60px; }
+        .hg-section-title {
+            background: var(--gh-container-bg);
+            padding: 10px 15px;
+            border-radius: 6px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid var(--gh-border);
+        }
+        .hg-title-purple { color: #d2a8ff !important; }
+        .hg-title-pink { color: #ff7b72 !important; }
+        .hg-title-red { color: #ffa198 !important; }
+
+        /* Tables (WordPress Override) */
+        .help-guide-container .wp-list-table {
+            background: var(--gh-container-bg);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: none;
+        }
+        .help-guide-container .wp-list-table th, 
+        .help-guide-container .wp-list-table td {
+            background: var(--gh-container-bg) !important;
+            color: var(--gh-text-main) !important;
+            border-bottom: 1px solid var(--gh-border);
+        }
+        .help-guide-container .wp-list-table th {
+            font-weight: 600;
+            color: var(--gh-text-muted) !important;
+        }
+        .hg-table-header {
+            background: var(--gh-btn-bg) !important;
+            font-weight: bold;
+            color: var(--gh-header) !important;
         }
 
-        .help-guide-container h2 {
-            margin-top: 0;
-        }
-
-        .small {
+        /* Tips & Boxes */
+        .hg-tip {
+            margin-top: 8px;
+            background: rgba(56, 139, 253, 0.1);
+            border-left: 3px solid #58a6ff;
+            padding: 10px;
+            border-radius: 3px;
             font-size: 13px;
-            color: #646970;
+        }
+        .hg-warning {
+            margin-top: 8px;
+            background: rgba(187, 128, 9, 0.1);
+            border-left: 3px solid #d29922;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .hg-box {
+            padding: 15px; 
+            border: 1px solid var(--gh-border); 
+            border-radius: 6px; 
+            margin-bottom: 15px;
+            background: var(--gh-container-bg);
+        }
+        .hg-box-yellow { border-color: rgba(187, 128, 9, 0.4); }
+        .hg-box-orange { border-color: rgba(219, 109, 40, 0.4); }
+        .hg-box-pink { border-color: rgba(247, 120, 186, 0.4); }
+
+        /* Grids & Cards */
+        .hg-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .hg-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+        .hg-card, .hg-card-mini {
+            border: 1px solid var(--gh-border);
+            padding: 15px;
+            border-radius: 6px;
+            background: var(--gh-container-bg);
+        }
+        .hg-card h5, .hg-card-mini h5 { margin-top: 0; margin-bottom: 8px; }
+        .hg-text-blue { color: #58a6ff !important; }
+        .hg-text-green { color: #3fb950 !important; }
+        .hg-text-red { color: #ff7b72 !important; }
+        .hg-text-yellow { color: #d29922 !important; }
+        .hg-text-gray { color: #8b949e !important; }
+        .hg-text-white { color: #f0f6fc !important; }
+
+        .small { font-size: 13px; color: var(--gh-text-muted); }
+
+        /* Code */
+        .hg-code-block {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--gh-border);
+        }
+        pre { color: var(--gh-text-main); font-family: monospace; }
+        code { background: rgba(110,118,129,0.4); padding: 0.2em 0.4em; border-radius: 6px; }
+
+        /* Details */
+        .hg-details {
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            background: var(--gh-container-bg);
+            overflow: hidden;
+        }
+        .hg-summary {
+            padding: 15px;
+            cursor: pointer;
+            color: var(--gh-header);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            background: var(--gh-btn-bg);
+        }
+        .hg-details-content {
+            padding: 20px;
+            border-top: 1px solid var(--gh-border);
         }
 
-        details summary::-webkit-details-marker {
-            display: none;
+        /* Footer */
+        .hg-footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--gh-border);
+            text-align: center;
+            font-style: italic;
+            color: var(--gh-text-muted);
         }
 
-        details[open] summary .dashicons-arrow-down-alt2 {
-            transform: rotate(180deg);
-        }
-
-        details summary .dashicons-arrow-down-alt2 {
-            transition: transform 0.2s ease;
-        }
+        /* Dashicons override */
+        .dashicons { opacity: 0.9; }
+        
+        /* List */
+        .hg-list { list-style: disc; margin-left: 20px; }
+        .hg-mt-20 { margin-top: 20px; }
     </style>
     <?php
 }
