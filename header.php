@@ -59,11 +59,9 @@ defined('ABSPATH') || exit;
           <!-- Navbar Brand -->
           <a class="<?= esc_attr(apply_filters('bootscore/class/header/navbar-brand', 'navbar-brand')); ?>"
             href="<?= esc_url(home_url()); ?>">
-            <img
-              src="<?= esc_url(apply_filters('bootscore/logo', get_stylesheet_directory_uri() . '/assets/img/logo/logo-lpdh-ext-transparent.png', 'default')); ?>"
+            <img src="<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'default')); ?>"
               alt="<?= esc_attr(get_bloginfo('name')); ?> Legendary Pauper Commander" class="d-td-none">
-            <img
-              src="<?= esc_url(apply_filters('bootscore/logo', get_stylesheet_directory_uri() . '/assets/img/logo/logo-lpdh-ext-transparent.png', 'theme-dark')); ?>"
+            <img src="<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'theme-dark')); ?>"
               alt="<?= esc_attr(get_bloginfo('name')); ?> Legendary Pauper Commander" class="d-tl-none">
           </a>
 

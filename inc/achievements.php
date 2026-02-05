@@ -1072,7 +1072,7 @@ function lpdh_render_manage_achievements_page()
         <div id="lpdh-delete-modal"
             style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
             <div
-                style="background:#fff; width:400px; padding:20px; margin:15% auto; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px; text-align:center;">
+                style="width:400px; padding:20px; margin:15% auto; box-shadow:0 0 10px rgba(0,0,0,0.5); border-radius:5px; text-align:center;">
                 <h2 style="margin-top:0; color:#dc3232;">⚠ Warning</h2>
                 <p>Are you sure you want to delete <strong>ALL</strong> achievements for this user?</p>
                 <p>This action cannot be undone.</p>
@@ -1108,7 +1108,7 @@ function lpdh_render_manage_achievements_page()
                     $badge_data = lpdh_format_achievement($post, $unlock_ts);
                     ?>
                     <div class="card ach-card" data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>"
-                        style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04); display: flex; flex-direction: column;">
+                        style="border: 1px solid #ccd0d4; padding: 15px; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04); display: flex; flex-direction: column;">
                         <div style="display: flex; align-items: start; gap: 15px; flex-grow: 1;">
                             <?php echo lpdh_render_achievement_icon($badge_data); ?>
                             <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
