@@ -112,22 +112,6 @@ body.login.lpdh-custom-login #backtoblog {
     text-align: center;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    body.login.lpdh-custom-login {
-        flex-direction: column !important;
-    }
-
-    body.login.lpdh-custom-login::before {
-        display: none !important;
-    }
-
-    body.login.lpdh-custom-login #login {
-        width: 100% !important;
-        padding: 20px !important;
-    }
-}
-
 /* Language Switcher Positioning */
 body.login.lpdh-custom-login .language-switcher {
     position: absolute;
@@ -146,4 +130,28 @@ body.login.lpdh-custom-login .language-switcher form {
     box-shadow: none !important;
     background: transparent !important;
     border: none !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body.login.lpdh-custom-login {
+        flex-direction: column !important;
+    }
+
+    body.login.lpdh-custom-login::before {
+        display: none !important;
+    }
+
+    body.login.lpdh-custom-login #login {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+
+    /* Reset Language Switcher for Mobile */
+    body.login.lpdh-custom-login .language-switcher {
+        position: static !important;
+        width: 100% !important;
+        text-align: center;
+        margin-bottom: 20px !important;
+    }
 }
