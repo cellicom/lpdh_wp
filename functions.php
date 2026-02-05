@@ -3860,7 +3860,7 @@ function render_player_stats_page()
 
             <?php if (current_user_can('administrator')): ?>
                 <div
-                    style="margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block; width: 100%; box-sizing: border-box;">
+                    style="margin-bottom: 15px; padding: 15px; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; display: inline-block; width: 100%; box-sizing: border-box;">
                     <label for="stats_user_id"
                         style="font-weight: bold; margin-right: 10px; display: block; margin-bottom: 5px;">Select Player
                         (Admin):</label>
@@ -6430,7 +6430,7 @@ function lpdh_render_post_shortcode_metabox($post)
     <style>
         .ui-autocomplete {
             z-index: 100000 !important;
-            background: #fff;
+            /* background: #fff; */
             border: 1px solid #ccd0d4;
             max-height: 200px;
             overflow-y: auto;
@@ -6478,13 +6478,13 @@ function lpdh_render_event_ocr_metabox($post)
     ?>
     <div style="padding: 15px;">
         <div
-            style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
+            style="margin-bottom: 15px; padding: 12px; border-left: 4px solid #ffb300; border-radius: 4px; font-size: 14px; line-height: 1.4; color: #856404;">
             <strong><span class="dashicons dashicons-warning" style="vertical-align: text-top; margin-right: 5px;"></span>
                 Warning:</strong> The OCR recognition system may not be 100% accurate. Please carefully verify the generated
             data in the table below before applying it to the ranking JSON.
         </div>
         <div
-            style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
+            style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; padding: 10px; border: 1px solid #ccd0d4; border-radius: 4px;">
             <span style="font-weight: 600;">Device Type:</span>
             <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                 <input type="radio" name="lpdh_ocr_device" value="automatic" checked> Automatic
@@ -6518,7 +6518,7 @@ function lpdh_render_event_ocr_metabox($post)
             <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
                 Candidates</h4>
             <div class="table-responsive"
-                style="max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ddd;">
+                style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
                 <table class="wp-list-table widefat fixed striped" style="border: none;">
                     <thead>
                         <tr>
