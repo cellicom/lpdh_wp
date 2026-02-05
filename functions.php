@@ -7228,22 +7228,25 @@ function lpdh_render_event_share_metabox($post)
     }
 
     (function($) {
-        $(document).ready(function() {
-            var $textarea = $('#lpdh-share-text');
-            var permalink = $textarea.data('permalink');
+        function htmlEntityDecode(str) {
+            return $('<textarea/>').html(str).text();
+        }
 
-            function updateShareText() {
-                var title = htmlEntityDecode($('#title').val() || '');
-                
-                // Get Date from ACF
-                var date = 'TBA';
-                if (typeof acf !== 'undefined') {
-                    var dateField = acf.getField('field_event_date');
-                    if (dateField && dateField.val()) {
-                        // dateField.val() might be Y-m-d H:i:s or the formatted display depending on implementation
-                        // Let's try to get the display value if possible or just parse the value
-                        var rawDate = dateField.val();
-                        if (rawDate) {
+        function updateShareText() {
+            var $textarea = $('#lpdh-share-text');
+            if (!$textarea.length) return;
+
+            var permalink = $textarea.data('permalink');
+            var title = htmlEntityDecode($('#title').val() || '');
+            
+            // Get Date from ACF
+            var date = 'TBA';
+            if (typeof acf !== 'undefined') {
+                var dateField = acf.getField('field_event_date');
+                if (dateField) {
+                    var rawDate = dateField.val();
+                    if (rawDate) {
+                        try {
                             // ACF date time picker value is usually Y-m-d H:i:s
                             var d = new Date(rawDate.replace(/-/g, "/"));
                             if (!isNaN(d.getTime())) {
@@ -7254,38 +7257,58 @@ function lpdh_render_event_share_metabox($post)
                                 var mins = ("0" + d.getMinutes()).slice(-2);
                                 date = day + "/" + month + "/" + year + " " + hours + ":" + mins;
                             }
-                        }
-                    }
-                    
-                    // Get Place from ACF
-                    var place = 'TBA';
-                    var placeField = acf.getField('field_event_place');
-                    if (placeField) {
-                        var selection = placeField.$el.find('.select2-selection__rendered').attr('title');
-                        if (!selection) selection = placeField.$el.find('.acf-selection').text();
-                        if (selection) place = selection.replace('Remove', '').trim();
+                        } catch(e) {}
                     }
                 }
-
-                var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
-                $textarea.val(newText);
+                
+                // Get Place from ACF
+                var place = 'TBA';
+                var placeField = acf.getField('field_event_place');
+                if (placeField) {
+                    // Try to get selection text from select2
+                    var selection = placeField.$el.find('.select2-selection__rendered').attr('title');
+                    if (!selection) selection = placeField.$el.find('.acf-selection').text();
+                    if (!selection) selection = placeField.$el.find('span.select2-selection__rendered').text();
+                    
+                    if (selection) {
+                        place = selection.replace('Remove', '').trim();
+                        // If it still says "Select event place" or similar, use TBA
+                        if (place.toLowerCase().indexOf('select') !== -1) place = 'TBA';
+                    }
+                }
             }
 
-            function htmlEntityDecode(str) {
-                return $('<textarea/>').html(str).text();
-            }
+            var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
+            $textarea.val(newText);
+        }
 
+        $(document).ready(function() {
             // Listen for title changes
-            $('#title').on('input', updateShareText);
+            $('#title').on('input change', updateShareText);
 
-            // Listen for ACF changes
+            // Listen for any change in the ACF metabox for events
+            $('#acf-group_event_details').on('change', 'input, select, textarea', function() {
+                setTimeout(updateShareText, 100); // Slight delay for ACF to update internal values
+            });
+
+            // Specific ACF JS listeners
             if (typeof acf !== 'undefined') {
                 acf.addAction('change', function(field) {
                     if (field.data.key === 'field_event_date' || field.data.key === 'field_event_place') {
                         updateShareText();
                     }
                 });
+                
+                // Also trigger on select2 change specifically for Place
+                acf.addAction('select2_change', function($select, data, field, post_id) {
+                    if (field.data.key === 'field_event_place') {
+                        updateShareText();
+                    }
+                });
             }
+            
+            // Initial trigger
+            setTimeout(updateShareText, 500);
         });
     })(jQuery);
     </script>
