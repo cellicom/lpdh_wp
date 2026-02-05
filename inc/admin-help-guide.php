@@ -591,9 +591,6 @@ function render_help_guide_page()
                     <li><strong>Admin Notification:</strong> Alerts administrators when a new player joins the league.</li>
                 </ul>
 
-                <div class="hg-tip hg-mt-20">
-                    <strong>Admin Tip:</strong> To use the tester, create a page with the <strong>Email Test Page</strong> template and visit it while logged in as an Administrator.
-                </div>
             </section>
 
              <!-- SECTION: EASTER EGGS -->
@@ -630,13 +627,17 @@ function render_help_guide_page()
                                 <h5 class="hg-text-yellow">5. Commander Tax</h5>
                                 <p class="small">Clicking <strong>User Avatar</strong> adds +2 "Commander Tax".</p>
                             </div>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-green">6. Counter Commander Cast</h5>
+                                <p class="small">Clicking a Deck's Commander image triggers a <strong>Counterspell</strong> or <strong>Mana Tithe</strong> animation. <i>Note:</i> Wilson, Refined Grizzly cannot be countered!</p>
+                            </div>
                         </div>
                     </div>
                 </details>
             </section>
 
             <footer class="hg-footer">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.0.0 (GitHub Dark Theme)</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.0.0</p>
             </footer>
         </div>
     </div>
