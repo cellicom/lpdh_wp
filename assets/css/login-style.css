@@ -1,0 +1,106 @@
+/**
+ * LPDH Custom Login Styles
+ */
+
+/* Base Variables - Will be overridden by inline styles if necessary */
+:root {
+    --lpdh-login-brand: #00733e;
+    --lpdh-login-brand-hover: #004d29;
+    --lpdh-login-bg: #f0f2f1;
+}
+
+/* Always active: Logo replacement */
+body.login h1 a {
+    background-image: var(--lpdh-login-logo) !important;
+    background-size: contain !important;
+    background-position: center !important;
+    width: 100% !important;
+    height: 100px !important;
+    margin-bottom: 20px !important;
+}
+
+/* Custom Split Layout (Active only if toggle is on) */
+body.login.lpdh-custom-login {
+    display: flex !important;
+    flex-direction: row;
+    min-height: 100vh;
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.login.lpdh-custom-login #login {
+    width: 50% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 40px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* Visual wrapper for the form area */
+body.login.lpdh-custom-login .lpdh-login-form-wrapper {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* The background side */
+body.login.lpdh-custom-login::before {
+    content: "";
+    flex: 1;
+    background-image: var(--lpdh-login-bg-img);
+    background-size: cover;
+    background-position: center;
+    background-color: var(--lpdh-login-brand);
+    z-index: 1;
+}
+
+/* Standard WP Login components adjustments */
+body.login.lpdh-custom-login form {
+    box-shadow: none !important;
+    border: 1px solid #e5e5e5 !important;
+    padding: 30px !important;
+    background: #fff !important;
+    border-radius: 8px !important;
+}
+
+body.login.lpdh-custom-login .wp-core-ui .button-primary {
+    background-color: var(--lpdh-login-brand) !important;
+    border-color: var(--lpdh-login-brand) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+body.login.lpdh-custom-login .wp-core-ui .button-primary:hover {
+    background-color: var(--lpdh-login-brand-hover) !important;
+    border-color: var(--lpdh-login-brand-hover) !important;
+}
+
+body.login.lpdh-custom-login #nav,
+body.login.lpdh-custom-login #backtoblog {
+    margin: 20px 0 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body.login.lpdh-custom-login {
+        flex-direction: column !important;
+    }
+
+    body.login.lpdh-custom-login::before {
+        display: none !important;
+    }
+
+    body.login.lpdh-custom-login #login {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+}

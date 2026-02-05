@@ -367,6 +367,9 @@ require_once get_stylesheet_directory() . '/email-templates/functions-email.php'
  * Enqueue scripts and styles
  */
 add_action('wp_enqueue_scripts', 'bootscore_child_enqueue_styles');
+
+// Include Login Customizer
+require_once get_stylesheet_directory() . '/inc/login-customizer.php';
 function bootscore_child_enqueue_styles()
 {
 
@@ -5301,6 +5304,9 @@ function lpdh_theme_settings_render()
             update_option('lpdh_custom_logo_id', intval($_POST['lpdh_custom_logo_id']));
         }
 
+        // Save Login Customization Toggle
+        update_option('lpdh_enable_custom_login', isset($_POST['lpdh_enable_custom_login']) ? 1 : 0);
+
         echo '<div class="updated"><p>Theme settings saved!</p></div>';
     }
 
@@ -5332,6 +5338,16 @@ function lpdh_theme_settings_render()
                             </option>
                         </select>
                         <p class="description">Select the aesthetic for the entire platform.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Custom Login Page</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="lpdh_enable_custom_login" value="1" <?php checked(get_option('lpdh_enable_custom_login', 0), 1); ?>>
+                            Enable Admin custom login
+                        </label>
+                        <p class="description">Activate the split-screen design with background image for the login page.</p>
                     </td>
                 </tr>
                 <tr>
