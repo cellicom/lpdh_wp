@@ -42,10 +42,30 @@ body.login.lpdh-custom-login #login {
     box-sizing: border-box;
 }
 
-/* Visual wrapper for the form area */
-body.login.lpdh-custom-login .lpdh-login-form-wrapper {
+/* Ensure logo has width in the flex column */
+body.login.lpdh-custom-login h1 {
+    width: 100%;
+    max-width: 450px;
+    /* Slightly wider than form to allow logo storage */
+    text-align: center;
+    margin-bottom: 20px !important;
+}
+
+body.login.lpdh-custom-login h1 a {
+    width: 100% !important;
+    height: 120px !important;
+    /* Restore height */
+    background-size: contain !important;
+    background-position: center bottom !important;
+    background-repeat: no-repeat !important;
+    margin: 0 auto !important;
+}
+
+/* Visual wrapper for the form area - ensuring form matches width */
+body.login.lpdh-custom-login form {
     width: 100%;
     max-width: 400px;
+    margin: 0 auto !important;
 }
 
 /* The background side */
