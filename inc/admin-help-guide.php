@@ -345,30 +345,63 @@ function render_help_guide_page()
                 <h4 style="margin-top: 25px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the ranking:</p>
                 <div class="hg-code-block">
-                    <pre><span style="color: #8b949e;">// Centralized ELO Calculation logic in functions.php</span>
-            <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_calculate_elo</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>) {
-                <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
-    
-                <span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">$games_played</span> <= <span style="color: #79c0ff;">0</span>) {
-                    <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
-                        <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$current_elo</span>,
-                        <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">0</span>,
-                        <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">0</span>,
-                        <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">0</span>
-                    );
-                }
+                    <pre><span style="color: #8b949e;">/**
+ * Calculate ELO for a player based on match results and tournament position.
+ *
+ * @param float $current_elo Current ELO of the player.
+ * @param int $wins Number of wins in the event.
+ * @param int $draws Number of draws in the event.
+ * @param int $losses Number of losses in the event.
+ * @param float $avg_elo Average ELO of the event participants.
+ * @param int $pos Final position of the player in the event.
+ * @param int $total_players Total number of players in the event.
+ * @return array Array containing 'new_elo', 'k_factor', 'expected_score', and 'position_adjustment'.
+ */</span>
+<span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_calculate_elo</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
+{
+    <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
 
-                <span style="color: #79c0ff;">$actual_score</span> = <span style="color: #79c0ff;">$wins</span> + (<span style="color: #79c0ff;">$draws</span> * <span style="color: #79c0ff;">0.5</span>);
-                <span style="color: #79c0ff;">$expected_score_rate</span> = <span style="color: #79c0ff;">1</span> / (<span style="color: #79c0ff;">1</span> + <span style="color: #d2a8ff;">pow</span>(<span style="color: #79c0ff;">10</span>, (<span style="color: #79c0ff;">$avg_elo</span> - <span style="color: #79c0ff;">$current_elo</span>) / <span style="color: #79c0ff;">400</span>));
-                <span style="color: #79c0ff;">$expected_score</span> = <span style="color: #79c0ff;">$expected_score_rate</span> * <span style="color: #79c0ff;">$games_played</span>;
-                
-                <span style="color: #8b949e;">// ... math continues ...</span>
+    <span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">$games_played</span> <= <span style="color: #79c0ff;">0</span>) {
+        <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+            <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$current_elo</span>,
+            <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">0</span>,
+            <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">0</span>,
+            <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">0</span>
+        );
+    }
 
-                <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
-                    <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$new_elo</span>,
-                   <span style="color: #8b949e;"> // ...</span>
-                );
-            }</pre>
+    <span style="color: #79c0ff;">$elo_result</span> = <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>);
+
+    <span style="color: #ff7b72;">return</span> <span style="color: #79c0ff;">$elo_result</span>;
+}
+
+<span style="color: #8b949e;">/**
+ * Internal helper for ELO math to keep lpdh_calculate_elo clean.
+ */</span>
+<span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
+{
+    <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
+    <span style="color: #79c0ff;">$actual_score</span> = <span style="color: #79c0ff;">$wins</span> + (<span style="color: #79c0ff;">$draws</span> * <span style="color: #79c0ff;">0.5</span>);
+    <span style="color: #79c0ff;">$expected_score_rate</span> = <span style="color: #79c0ff;">1</span> / (<span style="color: #79c0ff;">1</span> + <span style="color: #d2a8ff;">pow</span>(<span style="color: #79c0ff;">10</span>, (<span style="color: #79c0ff;">$avg_elo</span> - <span style="color: #79c0ff;">$current_elo</span>) / <span style="color: #79c0ff;">400</span>));
+    <span style="color: #79c0ff;">$expected_score</span> = <span style="color: #79c0ff;">$expected_score_rate</span> * <span style="color: #79c0ff;">$games_played</span>;
+
+    <span style="color: #8b949e;">// K-factor logic based on theme setting</span>
+    <span style="color: #79c0ff;">$k_factor_divide</span> = <span style="color: #d2a8ff;">get_option</span>(<span style="color: #a5d6ff;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #79c0ff;">1</span>);
+    <span style="color: #79c0ff;">$k_factor</span> = (<span style="color: #79c0ff;">$k_factor_divide</span>) ? <span style="color: #79c0ff;">32</span> / <span style="color: #79c0ff;">$games_played</span> : <span style="color: #79c0ff;">32</span>;
+
+    <span style="color: #8b949e;">// Position Adjustment (rewarding top finishes)</span>
+    <span style="color: #79c0ff;">$rank_score</span> = (<span style="color: #79c0ff;">$total_players</span> > <span style="color: #79c0ff;">1</span>) ? (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">$pos</span>) / (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">1</span>) : <span style="color: #79c0ff;">1</span>;
+    <span style="color: #79c0ff;">$position_adjustment</span> = <span style="color: #79c0ff;">20</span> * (<span style="color: #79c0ff;">$rank_score</span> - <span style="color: #79c0ff;">0.5</span>);
+
+    <span style="color: #79c0ff;">$new_elo</span> = <span style="color: #79c0ff;">$current_elo</span> + <span style="color: #79c0ff;">$k_factor</span> * (<span style="color: #79c0ff;">$actual_score</span> - <span style="color: #79c0ff;">$expected_score</span>) + <span style="color: #79c0ff;">$position_adjustment</span>;
+
+    <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+        <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$new_elo</span>,
+        <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">$k_factor</span>,
+        <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">$expected_score</span>,
+        <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">$position_adjustment</span>
+    );
+}</pre>
                 </div>
             </section>
 
