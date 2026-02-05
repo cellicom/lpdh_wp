@@ -513,24 +513,24 @@ function lpdh_get_user_achievements($user_id)
     if (!is_array($unlocked_data)) {
         $unlocked_data = [];
     } else {
-        $valid_data = [];
+        $migrated_data = [];
         $has_changes = false;
 
         foreach ($unlocked_data as $key => $val) {
-            // Check if Value is a valid Timestamp (> 100000)
-            if (is_numeric($val) && $val > 100000) {
-                // Good data
-                $valid_data[$key] = $val;
-            } else {
-                // Bad data (Old format, index, or corrupt)
-                // Discard it.
+            // New Format: [ID (int) => Timestamp (int > 100000)]
+            if (is_numeric($key) && $key > 100 && is_numeric($val) && $val > 100000) {
+                $migrated_data[intval($key)] = intval($val);
+            } 
+            // Old Format: [Index (int) => ID (int)]
+            elseif (is_numeric($val) && $val > 100) {
+                $migrated_data[intval($val)] = time(); 
                 $has_changes = true;
             }
         }
 
-        if ($has_changes || count($valid_data) !== count($unlocked_data)) {
-            $unlocked_data = $valid_data;
-            $migrated = true; // Trigger save
+        if ($has_changes || count($migrated_data) !== count($unlocked_data)) {
+            $unlocked_data = $migrated_data;
+            $migrated = true;
         }
     }
 
@@ -764,14 +764,13 @@ function lpdh_save_user_achievements_admin($user_id)
     if (!is_array($current_data))
         $current_data = [];
 
-    // Normalize current data to [ID => Date] if old format
-    // (This is same logic as lpdh_get_user_achievements migration, localized here for saving safety)
+    // Normalize current data to [ID => Date] 
     $normalized_current = [];
     foreach ($current_data as $k => $v) {
-        if (is_int($k) && is_numeric($v) && $k < 100000) { // assumption index vs ID
-            $normalized_current[$v] = time(); // assign date if missing
-        } else {
-            $normalized_current[$k] = $v;
+        if (is_numeric($k) && $k > 100 && is_numeric($v) && $v > 100000) {
+            $normalized_current[intval($k)] = intval($v);
+        } elseif (is_numeric($v) && $v > 100) {
+            $normalized_current[intval($v)] = time();
         }
     }
 
@@ -1358,14 +1357,14 @@ function lpdh_ajax_toggle_user_achievement()
     if (!is_array($current_data))
         $current_data = [];
 
-    // STRICT Normalization (Abandon old data if format matches old style)
+    // STRICT Normalization (Migrate instead of Purge)
     $normalized = [];
-    foreach ($current_data as $k => $valid_ts) {
-        // Enforce: Value > 100000 (Timestamp)
-        if (is_numeric($valid_ts) && $valid_ts > 100000) {
-            $normalized[$k] = $valid_ts;
+    foreach ($current_data as $key => $val) {
+        if (is_numeric($key) && $key > 100 && is_numeric($val) && $val > 100000) {
+            $normalized[intval($key)] = intval($val);
+        } elseif (is_numeric($val) && $val > 100) {
+            $normalized[intval($val)] = time();
         }
-        // Else: Old format or garbage -> Discard
     }
 
     $date_string = '-';

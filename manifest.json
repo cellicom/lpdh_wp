@@ -1,0 +1,17 @@
+{
+    "name": "LPDH - Legendary Pauper Commander",
+    "short_name": "LPDH",
+    "description": "Magic: The Gathering - Legendary Pauper Commander (LPDH) League Management",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0d1117",
+    "theme_color": "#0d1117",
+    "icons": [
+        {
+            "src": "wp-content/themes/lpdh_wp/assets/img/logo/logo-lpdh-transparent.png",
+            "sizes": "1000x1000",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}
