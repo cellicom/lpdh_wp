@@ -38,7 +38,7 @@ function render_help_guide_page()
         </h1>
 
         <div class="help-guide-container"
-            style="max-width: 1100px; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 25px; line-height: 1.6; color: #3c434a;">
+            style="max-width: 1100px;  padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 25px; line-height: 1.6; color: #3c434a;">
 
             <div
                 style="background: #e7f5fe; border-left: 5px solid #0073aa; padding: 20px; border-radius: 0 8px 8px 0; margin-bottom: 40px;">
@@ -322,31 +322,31 @@ function render_help_guide_page()
 
                 <h4 style="margin-bottom: 10px;">Available Box Layouts:</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>Title, Subtitle & Text</strong>
                         <p class="small">Classic text block. Perfect for "Welcome" messages or descriptions. <br><i>Fields:
                                 Title, Subtitle, Text (WYSIWYG).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>Box FAQ</strong>
                         <p class="small">An interactive accordion list. <br><i>Fields: Titolo, FAQ Repeater (Domanda,
                                 Risposta).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>Links List</strong>
                         <p class="small">A grid of cards linking to external or internal resources. <br><i>Fields: Links
                                 Repeater (Icon, Title, Subtitle, URL).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>Action Button</strong>
                         <p class="small">A centered call-to-action button. <br><i>Fields: Icon, Label, Link.</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>Title and 3 Cards</strong>
                         <p class="small">A fixed 3-column layout for features or services. <br><i>Fields: Title, Cards
                                 Repeater (Icon, Title, Text).</i></p>
                     </div>
-                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; background: #fff;">
+                    <div style="border: 1px solid #ccd0d4; padding: 12px; border-radius: 6px; ">
                         <strong>About List</strong>
                         <p class="small">For staff or team pages. Can link to WP Profiles. <br><i>Fields: People Repeater
                                 (Profile, Icon, Title, Nickname, Subtitle, Text, URL).</i></p>
@@ -639,10 +639,10 @@ function render_help_guide_page()
                         <span>Click to view Easter Eggs (Spoiler Warning!)</span>
                         <span class="dashicons dashicons-arrow-down-alt2"></span>
                     </summary>
-                    <div style="padding: 20px; background: #fff; border-top: 1px solid #fecaca;">
+                    <div style="padding: 20px;  border-top: 1px solid #fecaca;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                             <!-- Point 1 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #1e40af;">1. Counterspell Search</h5>
                                 <p class="small">Searching for <strong>"counterspell"</strong> or
                                     <strong>"contromagia"</strong> in
@@ -651,7 +651,7 @@ function render_help_guide_page()
                             </div>
 
                             <!-- Point 2 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #7c2d12;">2. Daybound / Nightbound</h5>
                                 <p class="small">Pressing the keys <strong>"D"</strong> then <strong>"N"</strong> in
                                     sequence
@@ -659,7 +659,7 @@ function render_help_guide_page()
                             </div>
 
                             <!-- Point 3 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #d63638;">3. Forbidden Cards</h5>
                                 <p class="small">Searching for "expensive" cards (like <strong>Black Lotus</strong>)
                                     triggers a
@@ -667,7 +667,7 @@ function render_help_guide_page()
                             </div>
 
                             <!-- Point 4 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #111827;">4. Console Lives</h5>
                                 <p class="small">Opening the browser's <strong>Inspect Console</strong> reveals a greeting
                                     for the
@@ -675,7 +675,7 @@ function render_help_guide_page()
                             </div>
 
                             <!-- Point 5 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #b45309;">5. Commander Tax</h5>
                                 <p class="small">In profile pages, clicking the <strong>User Avatar</strong> adds +2
                                     "Commander Tax"
@@ -683,7 +683,7 @@ function render_help_guide_page()
                             </div>
 
                             <!-- Point 6 -->
-                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; background: #fff;">
+                            <div style="border: 1px solid #fecaca; padding: 15px; border-radius: 8px; ">
                                 <h5 style="margin-top: 0; color: #2563eb;">6. Countered Commander</h5>
                                 <p class="small">Clicking the <strong>Commander Image</strong> on a deck page reveals a
                                     random artwork from various <strong>Counterspells</strong> or <strong>Mana
@@ -719,7 +719,7 @@ function render_help_guide_page()
         }
 
         .help-guide-nav a:hover {
-            background: #fff;
+            
             border-color: #2271b1;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);

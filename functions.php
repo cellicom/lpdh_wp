@@ -6498,7 +6498,7 @@ function lpdh_render_event_ocr_metabox($post)
         </div>
 
         <div id="lpdh-ocr-container"
-            style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; background: #f9f9f9; cursor: pointer; border-radius: 4px;">
+            style="border: 2px dashed #ccd0d4; padding: 30px; text-align: center; cursor: pointer; border-radius: 4px;">
             <span class="dashicons dashicons-upload"
                 style="font-size: 40px; width: 40px; height: 40px; color: #2271b1;"></span>
             <p style="margin: 10px 0; font-size: 14px;"><strong>Drag & Drop</strong> ranking screenshot here or <a href="#"
@@ -6566,7 +6566,7 @@ function lpdh_render_event_ocr_metabox($post)
                     const files = e.originalEvent.dataTransfer.files;
                     if (files.length) processFile(files[0]);
                 }
-                $(this).css({ background: '#f9f9f9', borderColor: '#ccd0d4' });
+                $(this).css({ borderColor: '#ccd0d4' });
             });
 
             $browse.click(e => { e.preventDefault(); $input.click(); });
