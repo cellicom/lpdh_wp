@@ -7382,3 +7382,24 @@ function lpdh_load_cpt_templates($template)
 }
 add_filter('template_include', 'lpdh_load_cpt_templates', 99);
 
+/**
+ * PWA Service Worker Registration
+ */
+function lpdh_register_sw()
+{
+    ?>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('<?php echo get_stylesheet_directory_uri(); ?>/sw.js')
+                    .then(function(registration) {
+                        console.log('PWA: ServiceWorker registration successful with scope: ', registration.scope);
+                    }, function(err) {
+                        console.log('PWA: ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+    <?php
+}
+add_action('wp_footer', 'lpdh_register_sw');

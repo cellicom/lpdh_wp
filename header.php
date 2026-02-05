@@ -21,6 +21,9 @@ defined('ABSPATH') || exit;
 <head>
   <meta charset="<?= esc_attr(get_bloginfo('charset')); ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="manifest" href="<?= get_stylesheet_directory_uri(); ?>/manifest.json">
+  <link rel="apple-touch-icon" href="<?= get_stylesheet_directory_uri(); ?>/assets/img/logo/logo-lpdh-transparent.png">
   <link rel="profile" href="https://gmpg.org/xfn/11">
   <?php wp_head(); ?>
 </head>
