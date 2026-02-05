@@ -668,7 +668,7 @@ function render_help_guide_page()
         }
 
         .help-guide-container {
-            max-width: 1100px;
+            /*max-width: 1100px;*/
             padding: 40px;
             border-radius: 6px;
             border: 1px solid var(--gh-border);
