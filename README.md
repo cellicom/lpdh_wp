@@ -63,7 +63,19 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Flexible Layouts:** Support for Top 3, Top 4, and a structured Top 8 ranking (1+2+5 hierarchy).
 - **High-Res Export:** Automated PNG generation with intelligent filename syntax (`IG-TYPE-THEME-EVENT.png`).
 
-### 10. Roles & Governance
+### 9. Custom Login Page
+- **Split-Screen Design:** Modern dual-pane layout with a dynamic background on the left and login form on the right.
+- **Theme Integration:** Automatically inherits the active theme's brand colors and background images (Vaporwave, Lost Wood, etc.).
+- **Mobile Responsive:** Adapts to a single-column layout on smaller screens.
+- **Toggleable:** Can be enabled/disabled via **Theme Settings**.
+
+### 10. Email System
+- **Theme-Aware Styling:** Emails automatically adapt their design (colors, gradients, logos) to the active site theme.
+- **Responsive Templates:** Built-in templates for welcome messages and admin notifications.
+- **Testing Dashboard:** Dedicated admin interface to preview templates with sample data and send test emails.
+- **Brand Consistency:** Uses the site logo and custom typography even in player inboxes.
+
+### 11. Roles & Governance
 - **Administrator:** Full, unrestricted control over the entire system.
 - **Co-Administrator:** Specialized role for content managers. Can manage all tournament data, achievements, and decks, but is restricted from system-level changes (themes, plugins, settings).
 - **Player:** Managed via frontend dashboard for profile updates and deck submissions.
@@ -79,8 +91,8 @@ The theme includes several interactive "secrets" to engage the community. Found 
 This is a **Bootscore Child Theme**. 
 
 ### Requirements
-- **WordPress 6.4+**
-- **Bootscore Parent Theme** (v6.x)
+- **[WordPress](https://wordpress.org/) 6.4+**
+- **[Bootscore Parent Theme](https://bootscore.me/)** (v6.x)
 - **Advanced Custom Fields PRO (v6.x)** - [Download](https://www.advancedcustomfields.com/pro/) - Mandatory for data management and modular boxes.
 - **bs Cookie Settings (v.5.6.x)** - [Download](https://bootscore.me/documentation/bs-cookie-settings/) - Mandatory for GDPR/CCPA compliance and user consents.
 - **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/advanced-custom-fields-font-awesome/) - Mandatory for selecting achievement icons.

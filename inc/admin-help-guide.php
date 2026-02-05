@@ -517,10 +517,29 @@ function render_help_guide_page()
                             <td><strong>Deck Editor Page</strong></td>
                             <td>Select the page using the "Deck Editor" template.</td>
                         </tr>
-                        <!-- ... other pages ... -->
+                        <tr>
+                            <td><strong>Events Archive Page</strong></td>
+                            <td>Select the page using the "Events" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Roulette Page</strong></td>
+                            <td>Select the page using the "Roulette" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Player Stats Page</strong></td>
+                            <td>Select the page using the "Player Stats" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profile Editor Page</strong></td>
+                            <td>Select the page using the "Profile Editor" template.</td>
+                        </tr>
                         <tr>
                             <td><strong>Login/Register Page</strong></td>
                             <td>Select the page using the "Registration Page" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enable Admin custom login</strong></td>
+                            <td>Toggle to activate the custom split-screen login page styling (replaces default wp-login).</td>
                         </tr>
                         <tr>
                             <td colspan="2" class="hg-table-header">Branding</td>
@@ -584,6 +603,35 @@ function render_help_guide_page()
                         </div>
                     </div>
                 </details>
+            </section>
+            
+            <!-- SECTION: EMAIL SYSTEM -->
+            <section id="emails" class="hg-section">
+                <h2 class="hg-section-title">
+                    <span class="dashicons dashicons-email-alt"></span> 14. Email System & Testing
+                </h2>
+                <p>The theme includes a custom-styled email system that adapts to your active theme's aesthetic.</p>
+
+                <div class="hg-grid-2">
+                    <div class="hg-card">
+                        <h5><span class="dashicons dashicons-art"></span> Dynamic Styling</h5>
+                        <p class="small">Emails automatically inherit colors, logos, and backgrounds from the active theme (e.g., Vaporwave emails feature neon gradients and grid backgrounds).</p>
+                    </div>
+                    <div class="hg-card">
+                        <h5><span class="dashicons dashicons-admin-settings"></span> Testing Dashboard</h5>
+                        <p class="small">Access the <strong>Email Test Page</strong> to preview templates and send test emails to your inbox before they go live.</p>
+                    </div>
+                </div>
+
+                <h4>Available Templates:</h4>
+                <ul class="hg-list">
+                    <li><strong>New User Welcome:</strong> Sent to players upon registration. Includes personalized greetings and platform links.</li>
+                    <li><strong>Admin Notification:</strong> Alerts administrators when a new player joins the league.</li>
+                </ul>
+
+                <div class="hg-tip hg-mt-20">
+                    <strong>Admin Tip:</strong> To use the tester, create a page with the <strong>Email Test Page</strong> template and visit it while logged in as an Administrator.
+                </div>
             </section>
 
             <footer class="hg-footer">
