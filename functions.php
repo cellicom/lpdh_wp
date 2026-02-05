@@ -5923,6 +5923,7 @@ function lpdh_get_extra_attributions()
 {
     $attributions = [
         'Made with <span style="color: red !important; cursor: pointer;">&hearts;</span> by <a class="fw-bold" href="https://linktr.ee/cellicom" target="_blank">cellicom</a>',
+        '<a href="https://github.com/cellicom/lpdh_wp" target="_blank" rel="noopener">View this project on Github</a>',
         '<a href="https://www.vecteezy.com/free-vector/vaporwave-grid" target="_blank" rel="noopener">Vaporwave Grid Vectors by Vecteezy</a>'
     ];
 
@@ -7174,7 +7175,7 @@ function lpdh_render_instagram_generator_metabox($post)
     $ig_url = lpdh_get_instagram_generator_url($post->ID);
 
     if ($ig_url) {
-        echo '<p>Generate a promotional Instagram image for this event\'s top 4 players.</p>';
+        echo '<p>Generate a promotional Instagram image for this event\'s top players.</p>';
         echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" style="width: 100%; text-align: center; display: block;">';
         echo '<span class="dashicons dashicons-instagram" style="margin-top: 3px;"></span> ';
         echo 'Generate Instagram Image</a>';
