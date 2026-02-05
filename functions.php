@@ -7168,6 +7168,72 @@ function lpdh_get_instagram_generator_url($event_id)
 }
 
 /**
+ * Add Share Event Metabox to Events
+ */
+function lpdh_add_event_share_metabox()
+{
+    add_meta_box(
+        'lpdh_event_share',
+        'Share Event',
+        'lpdh_render_event_share_metabox',
+        'event',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'lpdh_add_event_share_metabox', 9);
+
+/**
+ * Render Share Event Metabox
+ */
+function lpdh_render_event_share_metabox($post)
+{
+    $title = get_the_title($post->ID);
+    $date = get_field('event_date', $post->ID);
+    $place_obj = get_field('event_place', $post->ID);
+    $place_name = $place_obj ? $place_obj->post_title : 'TBA';
+    $permalink = get_permalink($post->ID);
+
+    // Format date if it exists
+    if ($date) {
+        $date_formatted = date('d/m/Y H:i', strtotime($date));
+    } else {
+        $date_formatted = 'TBA';
+    }
+
+    $share_text = $title . "\n" . $date_formatted . " @ " . $place_name . "\n" . $permalink;
+
+    echo '<div class="lpdh-share-box">';
+    echo '<p class="description" style="margin-bottom: 8px;">Copy this text to share the event on social media or groups:</p>';
+    echo '<textarea id="lpdh-share-text" readonly style="width: 100%; height: 85px; margin-bottom: 10px; font-family: monospace; font-size: 12px; background: #f9f9f9; border: 1px solid #ddd; padding: 8px; border-radius: 4px; resize: none;">' . esc_textarea($share_text) . '</textarea>';
+    echo '<button type="button" class="button button-secondary" style="width: 100%;" onclick="lpdhCopyShareText(event)">';
+    echo '<span class="dashicons dashicons-clipboard" style="margin-top: 5px; font-size: 16px;"></span> ';
+    echo 'Copy Text</button>';
+    echo '</div>';
+
+    ?>
+    <script>
+    function lpdhCopyShareText(e) {
+        var copyText = document.getElementById("lpdh-share-text");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value).then(function() {
+            var btn = e.currentTarget;
+            var originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="dashicons dashicons-yes" style="margin-top: 5px; font-size: 16px;"></span> Copied!';
+            setTimeout(function() {
+                btn.innerHTML = originalHtml;
+            }, 2000);
+        });
+    }
+    </script>
+    <style>
+        .lpdh-share-box textarea:focus { outline: none; border-color: #ddd; box-shadow: none; }
+    </style>
+    <?php
+}
+
+/**
  * Add Instagram Generator Metabox to Events
  */
 function lpdh_add_instagram_generator_metabox()
