@@ -358,6 +358,9 @@ function lpdh_adjust_brightness($hex, $steps)
 // Include Achievements System
 require_once get_stylesheet_directory() . '/inc/achievements.php';
 
+// Include ACF Field Groups
+require_once get_stylesheet_directory() . '/inc/acfbox.php';
+
 // Include Email Template System
 require_once get_stylesheet_directory() . '/email-templates/class-email-template.php';
 require_once get_stylesheet_directory() . '/email-templates/functions-email.php';
@@ -5347,7 +5350,8 @@ function lpdh_theme_settings_render()
                             <input type="checkbox" name="lpdh_enable_custom_login" value="1" <?php checked(get_option('lpdh_enable_custom_login', 0), 1); ?>>
                             Enable Admin custom login
                         </label>
-                        <p class="description">Activate the split-screen design with background image for the login page.</p>
+                        <p class="description">Activate the split-screen design with background image for the login page.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -6517,8 +6521,7 @@ function lpdh_render_event_ocr_metabox($post)
         <div id="lpdh-ocr-results" style="display: none; margin-top: 20px; text-align: left;">
             <h4 id="lpdh-ocr-title" style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">OCR
                 Candidates</h4>
-            <div class="table-responsive"
-                style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
                 <table class="wp-list-table widefat fixed striped" style="border: none;">
                     <thead>
                         <tr>
@@ -7213,107 +7216,87 @@ function lpdh_render_event_share_metabox($post)
 
     ?>
     <script>
-    function lpdhCopyShareText(e) {
-        var copyText = document.getElementById("lpdh-share-text");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value).then(function() {
-            var btn = e.currentTarget;
-            var originalHtml = btn.innerHTML;
-            btn.innerHTML = '<span class="dashicons dashicons-yes" style="margin-top: 5px; font-size: 16px;"></span> Copied!';
-            setTimeout(function() {
-                btn.innerHTML = originalHtml;
-            }, 2000);
-        });
-    }
 
-    (function($) {
-        function htmlEntityDecode(str) {
-            return $('<textarea/>').html(str).text();
-        }
 
-        function updateShareText() {
-            var $textarea = $('#lpdh-share-text');
-            if (!$textarea.length) return;
-
-            var permalink = $textarea.data('permalink');
-            var title = htmlEntityDecode($('#title').val() || '');
-            
-            // Get Date from ACF
-            var date = 'TBA';
-            if (typeof acf !== 'undefined') {
-                var dateField = acf.getField('field_event_date');
-                if (dateField) {
-                    var rawDate = dateField.val();
-                    if (rawDate) {
-                        try {
-                            // ACF date time picker value is usually Y-m-d H:i:s
-                            var d = new Date(rawDate.replace(/-/g, "/"));
-                            if (!isNaN(d.getTime())) {
-                                var day = ("0" + d.getDate()).slice(-2);
-                                var month = ("0" + (d.getMonth() + 1)).slice(-2);
-                                var year = d.getFullYear();
-                                var hours = ("0" + d.getHours()).slice(-2);
-                                var mins = ("0" + d.getMinutes()).slice(-2);
-                                date = day + "/" + month + "/" + year + " " + hours + ":" + mins;
-                            }
-                        } catch(e) {}
-                    }
-                }
-                
-                // Get Place from ACF
-                var place = 'TBA';
-                var placeField = acf.getField('field_event_place');
-                if (placeField) {
-                    // Try to get selection text from select2
-                    var selection = placeField.$el.find('.select2-selection__rendered').attr('title');
-                    if (!selection) selection = placeField.$el.find('.acf-selection').text();
-                    if (!selection) selection = placeField.$el.find('span.select2-selection__rendered').text();
-                    
-                    if (selection) {
-                        place = selection.replace('Remove', '').trim();
-                        // If it still says "Select event place" or similar, use TBA
-                        if (place.toLowerCase().indexOf('select') !== -1) place = 'TBA';
-                    }
-                }
+        (function ($) {
+            function htmlEntityDecode(str) {
+                return $('<textarea/>').html(str).text();
             }
 
-            var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
-            $textarea.val(newText);
-        }
+            function updateShareText() {
+                var $textarea = $('#lpdh-share-text');
+                if (!$textarea.length) return;
 
-        $(document).ready(function() {
-            // Listen for title changes
-            $('#title').on('input change', updateShareText);
+                var permalink = $textarea.data('permalink');
+                var title = htmlEntityDecode($('#title').val() || '');
 
-            // Listen for any change in the ACF metabox for events
-            $('#acf-group_event_details').on('change', 'input, select, textarea', function() {
-                setTimeout(updateShareText, 100); // Slight delay for ACF to update internal values
-            });
-
-            // Specific ACF JS listeners
-            if (typeof acf !== 'undefined') {
-                acf.addAction('change', function(field) {
-                    if (field.data.key === 'field_event_date' || field.data.key === 'field_event_place') {
-                        updateShareText();
+                // Get Date from ACF
+                var date = 'TBA';
+                if (typeof acf !== 'undefined') {
+                    var dateField = acf.getField('field_event_date');
+                    if (dateField) {
+                        var rawDate = dateField.val();
+                        if (rawDate) {
+                            try {
+                                // ACF date time picker value is usually Y-m-d H:i:s
+                                var d = new Date(rawDate.replace(/-/g, "/"));
+                                if (!isNaN(d.getTime())) {
+                                    var day = ("0" + d.getDate()).slice(-2);
+                                    var month = ("0" + (d.getMonth() + 1)).slice(-2);
+                                    var year = d.getFullYear();
+                                    var hours = ("0" + d.getHours()).slice(-2);
+                                    var mins = ("0" + d.getMinutes()).slice(-2);
+                                    date = day + "/" + month + "/" + year + " " + hours + ":" + mins;
+                                }
+                            } catch (e) { }
+                        }
                     }
-                });
-                
-                // Also trigger on select2 change specifically for Place
-                acf.addAction('select2_change', function($select, data, field, post_id) {
-                    if (field.data.key === 'field_event_place') {
-                        updateShareText();
+
+                    // Get Place from ACF
+                    var place = 'TBA';
+                    var placeField = acf.getField('field_event_place');
+                    if (placeField) {
+                        // Try to get selection text from select2
+                        var selection = placeField.$el.find('.select2-selection__rendered').attr('title');
+                        if (!selection) selection = placeField.$el.find('.acf-selection').text();
+                        if (!selection) selection = placeField.$el.find('span.select2-selection__rendered').text();
+
+                        if (selection) {
+                            place = selection.replace('Remove', '').trim();
+                            // If it still says "Select event place" or similar, use TBA
+                            if (place.toLowerCase().indexOf('select') !== -1) place = 'TBA';
+                        }
                     }
-                });
+                }
+
+                var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
+                $textarea.val(newText);
             }
-            
-            // Initial trigger
-            setTimeout(updateShareText, 500);
-        });
-    })(jQuery);
+
+            window.lpdhCopyShareText = function (e) {
+                // Update text before copying
+                updateShareText();
+
+                var copyText = document.getElementById("lpdh-share-text");
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(copyText.value).then(function () {
+                    var btn = e.currentTarget;
+                    var originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<span class="dashicons dashicons-yes" style="margin-top: 5px; font-size: 16px;"></span> Copied!';
+                    setTimeout(function () {
+                        btn.innerHTML = originalHtml;
+                    }, 2000);
+                });
+            };
+        })(jQuery);
     </script>
     <style>
-        .lpdh-share-box textarea:focus { outline: none; border-color: #ddd; box-shadow: none; }
+        .lpdh-share-box textarea:focus {
+            outline: none;
+            border-color: #ddd;
+            box-shadow: none;
+        }
     </style>
     <?php
 }
@@ -7390,11 +7373,11 @@ function lpdh_register_sw()
     ?>
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
+            window.addEventListener('load', function () {
                 navigator.serviceWorker.register('<?php echo get_stylesheet_directory_uri(); ?>/sw.js')
-                    .then(function(registration) {
+                    .then(function (registration) {
                         console.log('PWA: ServiceWorker registration successful with scope: ', registration.scope);
-                    }, function(err) {
+                    }, function (err) {
                         console.log('PWA: ServiceWorker registration failed: ', err);
                     });
             });
