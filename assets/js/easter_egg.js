@@ -40,7 +40,7 @@ jQuery(function ($) {
                         const randomMsg = rejectionMessages[Math.floor(Math.random() * rejectionMessages.length)];
 
                         // Create a "Burn" effect overlay
-                        const $burnOverlay = $('<div class="burn-easter-egg"><div class="burn-content"><h1>' + randomMsg + '</h1><p>Redirecting to a real LPDH deck...</p></div></div>');
+                        const $burnOverlay = $('<div class="burn-easter-egg"><div class="burn-content"><h1>' + randomMsg + '</h1><p>Redirecting to a real LPDH content...</p></div></div>');
                         $('body').append($burnOverlay);
 
                         // Hide search overlay

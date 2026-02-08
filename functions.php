@@ -361,6 +361,9 @@ require_once get_stylesheet_directory() . '/inc/achievements.php';
 // Include ACF Field Groups
 require_once get_stylesheet_directory() . '/inc/acfbox.php';
 
+// Include Easter Eggs
+require_once get_stylesheet_directory() . '/inc/easter-eggs.php';
+
 // Include Email Template System
 require_once get_stylesheet_directory() . '/email-templates/class-email-template.php';
 require_once get_stylesheet_directory() . '/email-templates/functions-email.php';
@@ -393,13 +396,6 @@ function bootscore_child_enqueue_styles()
     $modificated_CustomJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/custom.js'));
     wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), $modificated_CustomJS, false);
 
-    // Easter Egg
-    $modified_EasterEggJS = date('YmdHi', filemtime(get_stylesheet_directory() . '/assets/js/easter_egg.js'));
-    wp_enqueue_script('easter-egg-js', get_stylesheet_directory_uri() . '/assets/js/easter_egg.js', array('jquery'), $modified_EasterEggJS, true);
-    wp_localize_script('easter-egg-js', 'lpdh_objects', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('lpdh_easter_egg_nonce')
-    ));
 
 
     // Select2
@@ -499,34 +495,6 @@ function lpdh_admin_enqueue_scripts($hook)
     }
 }
 add_action('admin_enqueue_scripts', 'lpdh_admin_enqueue_scripts');
-
-/**
- * AJAX handler for checking search results existence (Easter Egg)
- */
-function lpdh_ajax_check_search_results()
-{
-    check_ajax_referer('lpdh_easter_egg_nonce', 'nonce');
-
-    $search_query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
-
-    if (empty($search_query)) {
-        wp_send_json_success(array('has_results' => false));
-    }
-
-    $query = new WP_Query(array(
-        's' => $search_query,
-        'posts_per_page' => 1,
-        'post_status' => 'publish',
-        'fields' => 'ids' // Only need to see if any exist
-    ));
-
-    wp_send_json_success(array(
-        'has_results' => $query->have_posts(),
-        'count' => $query->found_posts
-    ));
-}
-add_action('wp_ajax_check_search_results', 'lpdh_ajax_check_search_results');
-add_action('wp_ajax_nopriv_check_search_results', 'lpdh_ajax_check_search_results');
 
 /**
  * AJAX handler for email preview
