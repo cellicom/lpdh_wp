@@ -1722,3 +1722,13 @@ input[type="file"]::file-selector-button {
 .achievement-card:hover {
     transform: translateY(-5px);
 }
+
+/* Laser Logo Animation */
+
+.homepage-logo {
+    max-width: 90vw;
+
+    @media (min-width: 992px) {
+        max-width: 70vw;
+    }
+}

@@ -31,9 +31,10 @@ get_header();
         if (is_front_page()) {
           $hero_class = 'home-title-hero d-none';
           ?>
-          <div class="text-center mb-4">
+          <div class="text-center mb-4 laser-logo-container position-relative d-inline-block overflow-hidden"
+            style="--logo-url: url('<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'default')); ?>');">
             <img src="<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'default')); ?>"
-              alt="<?= esc_attr(get_bloginfo('name')); ?>" class="img-fluid" style="max-width: 800px;">
+              alt="<?= esc_attr(get_bloginfo('name')); ?>" class="img-fluid homepage-logo">
           </div>
           <?php
         }
