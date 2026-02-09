@@ -59,12 +59,12 @@ function lpdh_get_email_theme_colors()
 function lpdh_get_email_logo_html()
 {
     $custom_logo_id = get_theme_mod('custom_logo');
-    
+
     if ($custom_logo_id) {
         $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
         if ($logo_url) {
             return sprintf(
-                '<img src="%s" alt="%s" style="max-width: 200px; height: auto;">',
+                '<img src="%s" alt="%s" style="max-width: 80%; height: auto;">',
                 esc_url($logo_url),
                 esc_attr(get_bloginfo('name'))
             );
