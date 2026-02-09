@@ -1156,9 +1156,30 @@ acf_add_local_field_group([
                         'layout_6989129bb5e56' => [
                             'key' => 'layout_6989129bb5e56',
                             'name' => 'box_html',
-                            'label' => 'Box Html',
+                            'label' => 'Box HTML',
                             'display' => 'block',
                             'sub_fields' => [
+                                [
+                                    'key' => 'field_698912a0b5e57',
+                                    'label' => 'Visible',
+                                    'name' => 'visible',
+                                    'aria-label' => '',
+                                    'type' => 'true_false',
+                                    'instructions' => '',
+                                    'required' => 0,
+                                    'conditional_logic' => 0,
+                                    'wrapper' => [
+                                        'width' => '',
+                                        'class' => '',
+                                        'id' => '',
+                                    ],
+                                    'message' => '',
+                                    'default_value' => 1,
+                                    'allow_in_bindings' => 0,
+                                    'ui' => 0,
+                                    'ui_on_text' => '',
+                                    'ui_off_text' => '',
+                                ],
                                 [
                                     'key' => 'field_698912a6b5e5a',
                                     'label' => 'html',
