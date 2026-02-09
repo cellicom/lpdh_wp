@@ -105,7 +105,7 @@ class LPDH_Email_Template
                 }
 
                 return sprintf(
-                    '<img src="%s" alt="%s" style="max-width: 80%; height: auto; display: block; margin: 0 auto;">',
+                    '<img src="%s" alt="%s" style="max-width: 80%%; height: auto; display: block; margin: 0 auto;">',
                     esc_url($logo_url),
                     esc_attr(get_bloginfo('name'))
                 );

@@ -41,7 +41,9 @@ function render_help_guide_page()
 
             <div class="hg-alert hg-alert-info">
                 <h3><span class="dashicons dashicons-info"></span> Admin Overview</h3>
-                <p>This site uses <strong>Custom Post Types (CPT)</strong> and <strong>Advanced Custom Fields (ACF)</strong> to manage tournament data. This guide detail every field and tool available to you as an Administrator.</p>
+                <p>This site uses <strong>Custom Post Types (CPT)</strong> and <strong>Advanced Custom Fields (ACF)</strong>
+                    to manage tournament data. This guide detail every field and tool available to you as an Administrator.
+                </p>
             </div>
 
             <nav class="help-guide-nav">
@@ -105,7 +107,8 @@ function render_help_guide_page()
                             <td><strong>Survey</strong></td>
                             <td>List of users who participated (used for attendance stats).
                                 <div class="hg-tip">
-                                    <strong>Tool:</strong> Use the <strong>Update Survey</strong> button to automatically sync players from the ranking table to the survey list.
+                                    <strong>Tool:</strong> Use the <strong>Update Survey</strong> button to automatically
+                                    sync players from the ranking table to the survey list.
                                 </div>
                             </td>
                         </tr>
@@ -116,11 +119,13 @@ function render_help_guide_page()
                 <div class="hg-grid-2">
                     <div class="hg-card">
                         <h5 class="hg-text-red"><span class="dashicons dashicons-upload"></span> OCR Ranking Generator</h5>
-                        <p class="small">Upload a screenshot of the results. The system uses <i>Tesseract.js</i> to extract text and format it into the <strong>Rankings JSON</strong> field.</p>
+                        <p class="small">Upload a screenshot of the results. The system uses <i>Tesseract.js</i> to extract
+                            text and format it into the <strong>Rankings JSON</strong> field.</p>
                     </div>
                     <div class="hg-card">
                         <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Sync Player Tool</h5>
-                        <p class="small">After populating rankings, click "Sync Player". The site will match the text names with registered <strong>Player</strong> users to link their ELO history automatically.</p>
+                        <p class="small">After populating rankings, click "Sync Player". The site will match the text names
+                            with registered <strong>Player</strong> users to link their ELO history automatically.</p>
                     </div>
                 </div>
             </section>
@@ -137,14 +142,17 @@ function render_help_guide_page()
                     <li><strong>Commander / Partner:</strong> Dynamic fields to specify the deck's leaders.</li>
                     <li><strong>Featured Image:</strong> Used for the Commander's art.
                         <div class="hg-tip">
-                            <strong>Note:</strong> If no Featured Image is provided, the system automatically pulls the official card art from <strong>Scryfall</strong> based on the <i>Commander</i> or <i>Partner</i> name.
+                            <strong>Note:</strong> If no Featured Image is provided, the system automatically pulls the
+                            official card art from <strong>Scryfall</strong> based on the <i>Commander</i> or <i>Partner</i>
+                            name.
                         </div>
                     </li>
                     <li><strong>Decklist URL:</strong> External link (Moxfield, deckstats.net, etc.).</li>
                     <li><strong>Decklist Text:</strong> Optional field for raw card list pasting.</li>
                     <li><strong>Private Deck:</strong>
                         <div class="hg-warning">
-                            <strong>Logic:</strong> If enabled, the deck will only be visible to the author and site administrators. It will be hidden from public lists and search results.
+                            <strong>Logic:</strong> If enabled, the deck will only be visible to the author and site
+                            administrators. It will be hidden from public lists and search results.
                         </div>
                     </li>
                 </ul>
@@ -152,7 +160,9 @@ function render_help_guide_page()
                 <h4>Deck Creation Tools:</h4>
                 <div class="hg-box hg-box-yellow">
                     <strong>🚀 Tool: Admin Autocomplete</strong><br>
-                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck creation, the system suggests official names from Scryfall. Selecting one **automatically** populates the Scryfall URL and basic card metadata.
+                    When typing a card name in the <strong>Commander</strong> or <strong>Partner</strong> fields during deck
+                    creation, the system suggests official names from Scryfall. Selecting one **automatically** populates
+                    the Scryfall URL and basic card metadata.
                 </div>
             </section>
 
@@ -195,17 +205,26 @@ function render_help_guide_page()
                 <h4>Special Admin Tools:</h4>
                 <div class="hg-grid-2">
                     <div class="hg-card">
-                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Manage User Achievements</h5>
-                        <p class="small">Accessed via the <strong>Achievements menu</strong>. Search for a user to see a toggle-grid of all achievements. You can manually grant/revoke badges or use the <strong>"Check"</strong> microscope to verify if the user meets the requirements based on their current stats.</p>
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Manage User
+                            Achievements</h5>
+                        <p class="small">Accessed via the <strong>Achievements menu</strong>. Search for a user to see a
+                            toggle-grid of all achievements. You can manually grant/revoke badges or use the
+                            <strong>"Check"</strong> microscope to verify if the user meets the requirements based on their
+                            current stats.</p>
                     </div>
                     <div class="hg-card">
-                        <h5 class="hg-text-green"><span class="dashicons dashicons-calendar"></span> Duplicate for Next Year</h5>
-                        <p class="small">In the <strong>Achievements List</strong>, select badges and use Bulk Actions > <i>Duplicate for next year</i>. The system clones the badges, increments the year field, and updates title automatically.</p>
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-calendar"></span> Duplicate for Next Year
+                        </h5>
+                        <p class="small">In the <strong>Achievements List</strong>, select badges and use Bulk Actions >
+                            <i>Duplicate for next year</i>. The system clones the badges, increments the year field, and
+                            updates title automatically.</p>
                     </div>
                 </div>
 
                 <div class="hg-tip hg-mt-20">
-                    <strong>Automatic Unlocking:</strong> Achievements are checked and granted automatically whenever an event is synchronized via the <strong>Sync Player</strong> tool. Manual overrides are always possible through the <i>Manage Achievements</i> page.
+                    <strong>Automatic Unlocking:</strong> Achievements are checked and granted automatically whenever an
+                    event is synchronized via the <strong>Sync Player</strong> tool. Manual overrides are always possible
+                    through the <i>Manage Achievements</i> page.
                 </div>
             </section>
 
@@ -218,9 +237,12 @@ function render_help_guide_page()
 
                 <h4>Key Logic:</h4>
                 <ul class="hg-list">
-                    <li><strong>Rate Limiting:</strong> Regular players receive <strong>3 tokens per day</strong>. A counter is shown next to the spin button.</li>
-                    <li><strong>Admin Bypass:</strong> Site administrators have <strong>infinite tokens</strong> for testing purposes.</li>
-                    <li><strong>Pool Selection:</strong> The system picks from <strong>Uncommon Legendary Creatures</strong> (LPDH legal), automatically excluding cards currently in the <i>Banned List</i> CPT.</li>
+                    <li><strong>Rate Limiting:</strong> Regular players receive <strong>3 tokens per day</strong>. A counter
+                        is shown next to the spin button.</li>
+                    <li><strong>Admin Bypass:</strong> Site administrators have <strong>infinite tokens</strong> for testing
+                        purposes.</li>
+                    <li><strong>Pool Selection:</strong> The system picks from <strong>Uncommon Legendary Creatures</strong>
+                        (LPDH legal), automatically excluding cards currently in the <i>Banned List</i> CPT.</li>
                 </ul>
             </section>
 
@@ -234,13 +256,16 @@ function render_help_guide_page()
                 <h4>Best Practices:</h4>
                 <ul class="hg-list">
                     <li><strong>Categories:</strong> Organize your posts (e.g., "Tournament Reports").</li>
-                    <li><strong>Featured Image:</strong> Always set a high-quality featured image for home page sliders.</li>
+                    <li><strong>Featured Image:</strong> Always set a high-quality featured image for home page sliders.
+                    </li>
                 </ul>
 
                 <h4>Enhanced Features for Posts:</h4>
                 <div class="hg-box hg-box-yellow">
-                    <h5 class="hg-text-yellow"><span class="dashicons dashicons-admin-tools"></span> Banned Card Shortcode Generator</h5>
-                    <p class="small">In the sidebar of the <strong>Post Editor</strong>, you can search for any card in the ban list and click <strong>Add to Content</strong> to insert the interactive card box.</p>
+                    <h5 class="hg-text-yellow"><span class="dashicons dashicons-admin-tools"></span> Banned Card Shortcode
+                        Generator</h5>
+                    <p class="small">In the sidebar of the <strong>Post Editor</strong>, you can search for any card in the
+                        ban list and click <strong>Add to Content</strong> to insert the interactive card box.</p>
                 </div>
             </section>
 
@@ -249,10 +274,12 @@ function render_help_guide_page()
                 <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-page"></span> 6. Pages & ACF Boxes
                 </h2>
-                <p>Pages are the structural backbone of the site. Most use the <strong>No Sidebar With ACF Boxes</strong> template for modular content.</p>
+                <p>Pages are the structural backbone of the site. Most use the <strong>No Sidebar With ACF Boxes</strong>
+                    template for modular content.</p>
 
                 <h4>Master Content Structure (ACF):</h4>
-                <p>The main tool for managing page content is the <strong>Sections</strong> field, which is a <i>Flexible Content</i> area composed of individual rows.</p>
+                <p>The main tool for managing page content is the <strong>Sections</strong> field, which is a <i>Flexible
+                        Content</i> area composed of individual rows.</p>
 
                 <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
@@ -268,7 +295,8 @@ function render_help_guide_page()
                         </tr>
                         <tr>
                             <td><strong>Box (Layouts)</strong></td>
-                            <td>Inside each section, you add one or more <strong>Boxes</strong> from a list of predefined layouts.</td>
+                            <td>Inside each section, you add one or more <strong>Boxes</strong> from a list of predefined
+                                layouts.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -277,15 +305,18 @@ function render_help_guide_page()
                 <div class="hg-grid-3">
                     <div class="hg-card-mini">
                         <strong>Title, Subtitle & Text</strong>
-                        <p class="small">Classic text block. Perfect for "Welcome" messages or descriptions. <br><i>Fields: Title, Subtitle, Text (WYSIWYG).</i></p>
+                        <p class="small">Classic text block. Perfect for "Welcome" messages or descriptions. <br><i>Fields:
+                                Title, Subtitle, Text (WYSIWYG).</i></p>
                     </div>
                     <div class="hg-card-mini">
                         <strong>Box FAQ</strong>
-                        <p class="small">An interactive accordion list. <br><i>Fields: Titolo, FAQ Repeater (Domanda, Risposta).</i></p>
+                        <p class="small">An interactive accordion list. <br><i>Fields: Titolo, FAQ Repeater (Domanda,
+                                Risposta).</i></p>
                     </div>
                     <div class="hg-card-mini">
                         <strong>Links List</strong>
-                        <p class="small">A grid of cards linking to external or internal resources. <br><i>Fields: Links Repeater (Icon, Title, Subtitle, URL).</i></p>
+                        <p class="small">A grid of cards linking to external or internal resources. <br><i>Fields: Links
+                                Repeater (Icon, Title, Subtitle, URL).</i></p>
                     </div>
                     <div class="hg-card-mini">
                         <strong>Action Button</strong>
@@ -293,17 +324,24 @@ function render_help_guide_page()
                     </div>
                     <div class="hg-card-mini">
                         <strong>Title and 3 Cards</strong>
-                        <p class="small">A fixed 3-column layout for features or services. <br><i>Fields: Title, Cards Repeater (Icon, Title, Text).</i></p>
+                        <p class="small">A fixed 3-column layout for features or services. <br><i>Fields: Title, Cards
+                                Repeater (Icon, Title, Text).</i></p>
                     </div>
                     <div class="hg-card-mini">
                         <strong>About List</strong>
-                        <p class="small">For staff or team pages. Can link to WP Profiles. <br><i>Fields: People Repeater (Profile, Icon, Title, Nickname, Subtitle, Text, URL).</i></p>
+                        <p class="small">For staff or team pages. Can link to WP Profiles. <br><i>Fields: People Repeater
+                                (Profile, Icon, Title, Nickname, Subtitle, Text, URL).</i></p>
+                    </div>
+                    <div class="hg-card-mini">
+                        <strong>Box HTML</strong>
+                        <p class="small">A flexible container for raw code, custom scripts, or embeds. <br><i>Fields:
+                                Visible, HTML (WYSIWYG/Code).</i></p>
                     </div>
                 </div>
             </section>
 
-             <!-- SECTION: BANNED -->
-             <section id="banned" class="hg-section">
+            <!-- SECTION: BANNED -->
+            <section id="banned" class="hg-section">
                 <h2 class="hg-section-title">
                     <span class="dashicons dashicons-dismiss"></span> 7. Banned Cards
                 </h2>
@@ -311,12 +349,14 @@ function render_help_guide_page()
                 <h4>Managing the List:</h4>
                 <p>Use the <i>Banned Cards</i> CPT. Each entry requires a name and a <strong>Scryfall Link</strong>.</p>
                 <div class="hg-tip">
-                    <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload one, the system will automatically fetch it from <strong>Scryfall</strong>.
+                    <strong>Image Fallback:</strong> The <i>Featured Image</i> should be the card scan. If you don't upload
+                    one, the system will automatically fetch it from <strong>Scryfall</strong>.
                 </div>
 
                 <h4 style="margin-top: 20px;">Shortcode Integration:</h4>
                 <div class="hg-box hg-box-orange">
-                    <p><strong>Banned Card Shortcode (Metabox):</strong> Located in the sidebar of the Banned Card editor. It provides the unique code <code>[banned_card id="XX"]</code>.</p>
+                    <p><strong>Banned Card Shortcode (Metabox):</strong> Located in the sidebar of the Banned Card editor.
+                        It provides the unique code <code>[banned_card id="XX"]</code>.</p>
                 </div>
             </section>
 
@@ -330,7 +370,8 @@ function render_help_guide_page()
                     <li><strong>Year:</strong> Select the target year for the ranking.</li>
                     <li><strong>Rankings JSON:</strong> Stores the finalized list of participants.
                         <div class="hg-warning">
-                            <strong>Crucial:</strong> This field is <strong>calculated manually</strong> by clicking the <strong>Update Leaderboard</strong> button after selecting the year.
+                            <strong>Crucial:</strong> This field is <strong>calculated manually</strong> by clicking the
+                            <strong>Update Leaderboard</strong> button after selecting the year.
                         </div>
                     </li>
                 </ul>
@@ -341,68 +382,70 @@ function render_help_guide_page()
                 <h2 class="hg-section-title">
                     <span class="dashicons dashicons-chart-area"></span> 9. Statistics & ELO
                 </h2>
-                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in
+                    Event rankings.</p>
 
                 <h4 style="margin-top: 25px;">ELO Calculation Logic:</h4>
-                <p>The system uses a modified ELO formula that accounts for match results and overall final position in the ranking:</p>
+                <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
+                    ranking:</p>
                 <div class="hg-code-block">
                     <pre><span style="color: #8b949e;">/**
- * Calculate ELO for a player based on match results and tournament position.
- *
- * @param float $current_elo Current ELO of the player.
- * @param int $wins Number of wins in the event.
- * @param int $draws Number of draws in the event.
- * @param int $losses Number of losses in the event.
- * @param float $avg_elo Average ELO of the event participants.
- * @param int $pos Final position of the player in the event.
- * @param int $total_players Total number of players in the event.
- * @return array Array containing 'new_elo', 'k_factor', 'expected_score', and 'position_adjustment'.
- */</span>
-<span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_calculate_elo</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
-{
-    <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
+     * Calculate ELO for a player based on match results and tournament position.
+     *
+     * @param float $current_elo Current ELO of the player.
+     * @param int $wins Number of wins in the event.
+     * @param int $draws Number of draws in the event.
+     * @param int $losses Number of losses in the event.
+     * @param float $avg_elo Average ELO of the event participants.
+     * @param int $pos Final position of the player in the event.
+     * @param int $total_players Total number of players in the event.
+     * @return array Array containing 'new_elo', 'k_factor', 'expected_score', and 'position_adjustment'.
+     */</span>
+    <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_calculate_elo</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
+    {
+        <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
 
-    <span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">$games_played</span> <= <span style="color: #79c0ff;">0</span>) {
-        <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
-            <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$current_elo</span>,
-            <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">0</span>,
-            <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">0</span>,
-            <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">0</span>
-        );
+        <span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">$games_played</span> <= <span style="color: #79c0ff;">0</span>) {
+            <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+                <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$current_elo</span>,
+                <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">0</span>,
+                <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">0</span>,
+                <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">0</span>
+            );
+        }
+
+        <span style="color: #79c0ff;">$elo_result</span> = <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>);
+
+        <span style="color: #ff7b72;">return</span> <span style="color: #79c0ff;">$elo_result</span>;
     }
 
-    <span style="color: #79c0ff;">$elo_result</span> = <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>);
+    <span style="color: #8b949e;">/**
+     * Internal helper for ELO math to keep lpdh_calculate_elo clean.
+     */</span>
+    <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
+    {
+        <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
+        <span style="color: #79c0ff;">$actual_score</span> = <span style="color: #79c0ff;">$wins</span> + (<span style="color: #79c0ff;">$draws</span> * <span style="color: #79c0ff;">0.5</span>);
+        <span style="color: #79c0ff;">$expected_score_rate</span> = <span style="color: #79c0ff;">1</span> / (<span style="color: #79c0ff;">1</span> + <span style="color: #d2a8ff;">pow</span>(<span style="color: #79c0ff;">10</span>, (<span style="color: #79c0ff;">$avg_elo</span> - <span style="color: #79c0ff;">$current_elo</span>) / <span style="color: #79c0ff;">400</span>));
+        <span style="color: #79c0ff;">$expected_score</span> = <span style="color: #79c0ff;">$expected_score_rate</span> * <span style="color: #79c0ff;">$games_played</span>;
 
-    <span style="color: #ff7b72;">return</span> <span style="color: #79c0ff;">$elo_result</span>;
-}
+        <span style="color: #8b949e;">// K-factor logic based on theme setting</span>
+        <span style="color: #79c0ff;">$k_factor_divide</span> = <span style="color: #d2a8ff;">get_option</span>(<span style="color: #a5d6ff;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #79c0ff;">1</span>);
+        <span style="color: #79c0ff;">$k_factor</span> = (<span style="color: #79c0ff;">$k_factor_divide</span>) ? <span style="color: #79c0ff;">32</span> / <span style="color: #79c0ff;">$games_played</span> : <span style="color: #79c0ff;">32</span>;
 
-<span style="color: #8b949e;">/**
- * Internal helper for ELO math to keep lpdh_calculate_elo clean.
- */</span>
-<span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">lpdh_perform_elo_math</span>(<span style="color: #79c0ff;">$current_elo</span>, <span style="color: #79c0ff;">$wins</span>, <span style="color: #79c0ff;">$draws</span>, <span style="color: #79c0ff;">$losses</span>, <span style="color: #79c0ff;">$avg_elo</span>, <span style="color: #79c0ff;">$pos</span>, <span style="color: #79c0ff;">$total_players</span>)
-{
-    <span style="color: #79c0ff;">$games_played</span> = <span style="color: #79c0ff;">$wins</span> + <span style="color: #79c0ff;">$draws</span> + <span style="color: #79c0ff;">$losses</span>;
-    <span style="color: #79c0ff;">$actual_score</span> = <span style="color: #79c0ff;">$wins</span> + (<span style="color: #79c0ff;">$draws</span> * <span style="color: #79c0ff;">0.5</span>);
-    <span style="color: #79c0ff;">$expected_score_rate</span> = <span style="color: #79c0ff;">1</span> / (<span style="color: #79c0ff;">1</span> + <span style="color: #d2a8ff;">pow</span>(<span style="color: #79c0ff;">10</span>, (<span style="color: #79c0ff;">$avg_elo</span> - <span style="color: #79c0ff;">$current_elo</span>) / <span style="color: #79c0ff;">400</span>));
-    <span style="color: #79c0ff;">$expected_score</span> = <span style="color: #79c0ff;">$expected_score_rate</span> * <span style="color: #79c0ff;">$games_played</span>;
+        <span style="color: #8b949e;">// Position Adjustment (rewarding top finishes)</span>
+        <span style="color: #79c0ff;">$rank_score</span> = (<span style="color: #79c0ff;">$total_players</span> > <span style="color: #79c0ff;">1</span>) ? (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">$pos</span>) / (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">1</span>) : <span style="color: #79c0ff;">1</span>;
+        <span style="color: #79c0ff;">$position_adjustment</span> = <span style="color: #79c0ff;">20</span> * (<span style="color: #79c0ff;">$rank_score</span> - <span style="color: #79c0ff;">0.5</span>);
 
-    <span style="color: #8b949e;">// K-factor logic based on theme setting</span>
-    <span style="color: #79c0ff;">$k_factor_divide</span> = <span style="color: #d2a8ff;">get_option</span>(<span style="color: #a5d6ff;">'lpdh_elo_k_factor_divide_by_game'</span>, <span style="color: #79c0ff;">1</span>);
-    <span style="color: #79c0ff;">$k_factor</span> = (<span style="color: #79c0ff;">$k_factor_divide</span>) ? <span style="color: #79c0ff;">32</span> / <span style="color: #79c0ff;">$games_played</span> : <span style="color: #79c0ff;">32</span>;
+        <span style="color: #79c0ff;">$new_elo</span> = <span style="color: #79c0ff;">$current_elo</span> + <span style="color: #79c0ff;">$k_factor</span> * (<span style="color: #79c0ff;">$actual_score</span> - <span style="color: #79c0ff;">$expected_score</span>) + <span style="color: #79c0ff;">$position_adjustment</span>;
 
-    <span style="color: #8b949e;">// Position Adjustment (rewarding top finishes)</span>
-    <span style="color: #79c0ff;">$rank_score</span> = (<span style="color: #79c0ff;">$total_players</span> > <span style="color: #79c0ff;">1</span>) ? (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">$pos</span>) / (<span style="color: #79c0ff;">$total_players</span> - <span style="color: #79c0ff;">1</span>) : <span style="color: #79c0ff;">1</span>;
-    <span style="color: #79c0ff;">$position_adjustment</span> = <span style="color: #79c0ff;">20</span> * (<span style="color: #79c0ff;">$rank_score</span> - <span style="color: #79c0ff;">0.5</span>);
-
-    <span style="color: #79c0ff;">$new_elo</span> = <span style="color: #79c0ff;">$current_elo</span> + <span style="color: #79c0ff;">$k_factor</span> * (<span style="color: #79c0ff;">$actual_score</span> - <span style="color: #79c0ff;">$expected_score</span>) + <span style="color: #79c0ff;">$position_adjustment</span>;
-
-    <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
-        <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$new_elo</span>,
-        <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">$k_factor</span>,
-        <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">$expected_score</span>,
-        <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">$position_adjustment</span>
-    );
-}</pre>
+        <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">array</span>(
+            <span style="color: #a5d6ff;">'new_elo'</span> => <span style="color: #79c0ff;">$new_elo</span>,
+            <span style="color: #a5d6ff;">'k_factor'</span> => <span style="color: #79c0ff;">$k_factor</span>,
+            <span style="color: #a5d6ff;">'expected_score'</span> => <span style="color: #79c0ff;">$expected_score</span>,
+            <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">$position_adjustment</span>
+        );
+    }</pre>
                 </div>
             </section>
 
@@ -414,7 +457,8 @@ function render_help_guide_page()
                 <p>Powerful tool to create promotional images for social media directly from event data.</p>
 
                 <h4>Accessing the Generator:</h4>
-                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin sidebar or frontend event page.</p>
+                <p>Go to any <strong>Event</strong> post and look for the <i>Instagram Generator</i> button in the admin
+                    sidebar or frontend event page.</p>
 
                 <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
@@ -427,9 +471,12 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Select Theme</strong></td>
                             <td>
-                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate frames.<br>
-                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow effects.<br>
-                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community branding.<br>
+                                🏰 <strong>Epic Fantasy:</strong> Classic template with dark parchment and ornate
+                                frames.<br>
+                                🌸 <strong>Vaporwave:</strong> Retro-neon style with custom backgrounds and glow
+                                effects.<br>
+                                💚 <strong>Vaporwave Green:</strong> Specialized neon-green variant for specific community
+                                branding.<br>
                                 🌲 <strong>Lost Wood:</strong> Forest-themed aesthetic with organic frames.<br>
                                 📘 <strong>Bootstrap Classic:</strong> Clean, minimal professional layout.
                             </td>
@@ -446,17 +493,19 @@ function render_help_guide_page()
                 </table>
 
                 <div class="hg-box hg-box-pink">
-                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a standardized filename:</p>
+                    <p>When clicking <strong>Download Image</strong>, the system generates a high-resolution PNG with a
+                        standardized filename:</p>
                     <code><strong>IG-[TYPE]-[THEME]-[EVENT-NAME].png</strong></code>
                 </div>
 
                 <div class="hg-tip hg-mt-20">
-                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card art is rendered quickly without triggering Scryfall rate limits.
+                    <strong>Tech Note:</strong> The generator uses <i>html2canvas</i> and local image caching to ensure card
+                    art is rendered quickly without triggering Scryfall rate limits.
                 </div>
             </section>
 
-             <!-- SECTION: PROFILES -->
-             <section id="profiles" class="hg-section">
+            <!-- SECTION: PROFILES -->
+            <section id="profiles" class="hg-section">
                 <h2 class="hg-section-title">
                     <span class="dashicons dashicons-admin-users"></span> 11. Profiles & Preferences
                 </h2>
@@ -464,7 +513,9 @@ function render_help_guide_page()
 
                 <h4>User Security & Privacy:</h4>
                 <ul class="hg-list">
-                    <li><strong>Secret Achievements:</strong> By default, locked achievements show titles/desc. However, when viewing **another user's profile**, these are masked as "Secret Achievement" unless the visitor has also unlocked them.</li>
+                    <li><strong>Secret Achievements:</strong> By default, locked achievements show titles/desc. However,
+                        when viewing **another user's profile**, these are masked as "Secret Achievement" unless the visitor
+                        has also unlocked them.</li>
                     <li><strong>Private Profile:</strong> Hides the User Detail page from the public.</li>
                     <li><strong>Account Deletion:</strong> Permanent removal of profile and assigned decks.</li>
                 </ul>
@@ -478,12 +529,16 @@ function render_help_guide_page()
                 <div class="hg-grid-3">
                     <div class="hg-card">
                         <h5 class="hg-text-red"><span class="dashicons dashicons-shield"></span> Administrator</h5>
-                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and code.</p>
+                        <p class="small">Full, unrestricted access to the entire site: themes, plugins, users, settings, and
+                            code.</p>
                     </div>
                     <div class="hg-card">
                         <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Co-Administrator</h5>
-                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks, Pages).<br>
-                        <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System Tools.</p>
+                        <p class="small">Full management of all content types (Events, Rankings, Achievements, Decks,
+                            Pages).<br>
+                            <strong>Restricted from:</strong> Themes, Plugins, Site Settings, ACF configuration, and System
+                            Tools.
+                        </p>
                     </div>
                     <div class="hg-card">
                         <h5 class="hg-text-gray"><span class="dashicons dashicons-id"></span> Player</h5>
@@ -540,7 +595,8 @@ function render_help_guide_page()
                         </tr>
                         <tr>
                             <td><strong>Enable Admin custom login</strong></td>
-                            <td>Toggle to activate the custom split-screen login page styling (replaces default wp-login).</td>
+                            <td>Toggle to activate the custom split-screen login page styling (replaces default wp-login).
+                            </td>
                         </tr>
                         <tr>
                             <td colspan="2" class="hg-table-header">Branding</td>
@@ -577,24 +633,27 @@ function render_help_guide_page()
                 <div class="hg-grid-2">
                     <div class="hg-card">
                         <h5><span class="dashicons dashicons-art"></span> Dynamic Styling</h5>
-                        <p class="small">Emails automatically inherit colors, logos, and backgrounds from the active theme (e.g., Vaporwave emails feature neon gradients and grid backgrounds).</p>
+                        <p class="small">Emails automatically inherit colors, logos, and backgrounds from the active theme
+                            (e.g., Vaporwave emails feature neon gradients and grid backgrounds).</p>
                     </div>
                     <div class="hg-card">
                         <h5><span class="dashicons dashicons-admin-settings"></span> Testing Dashboard</h5>
-                        <p class="small">Access the <strong>Email Test Page</strong> to preview templates and send test emails to your inbox before they go live.</p>
+                        <p class="small">Access the <strong>Email Test Page</strong> to preview templates and send test
+                            emails to your inbox before they go live.</p>
                     </div>
                 </div>
 
                 <h4>Available Templates:</h4>
                 <ul class="hg-list">
-                    <li><strong>New User Welcome:</strong> Sent to players upon registration. Includes personalized greetings and platform links.</li>
+                    <li><strong>New User Welcome:</strong> Sent to players upon registration. Includes personalized
+                        greetings and platform links.</li>
                     <li><strong>Admin Notification:</strong> Alerts administrators when a new player joins the league.</li>
                 </ul>
 
             </section>
 
-             <!-- SECTION: EASTER EGGS -->
-             <section id="easter-eggs" class="hg-section">
+            <!-- SECTION: EASTER EGGS -->
+            <section id="easter-eggs" class="hg-section">
                 <h2 class="hg-section-title hg-title-red">
                     <span class="dashicons dashicons-admin-appearance"></span> 15. Easter Eggs & Hidden Features
                 </h2>
@@ -607,13 +666,15 @@ function render_help_guide_page()
                     </summary>
                     <div class="hg-details-content">
                         <div class="hg-grid-2">
-                             <div class="hg-card-mini">
+                            <div class="hg-card-mini">
                                 <h5 class="hg-text-blue">1. Counterspell Search</h5>
-                                <p class="small">Searching for <strong>"counterspell"</strong> triggers a blue burst visual effect.</p>
+                                <p class="small">Searching for <strong>"counterspell"</strong> triggers a blue burst visual
+                                    effect.</p>
                             </div>
-                             <div class="hg-card-mini">
+                            <div class="hg-card-mini">
                                 <h5 class="hg-text-red">2. Daybound / Nightbound</h5>
-                                <p class="small">Pressing <strong>"D"</strong> then <strong>"N"</strong> toggles the theme.</p>
+                                <p class="small">Pressing <strong>"D"</strong> then <strong>"N"</strong> toggles the theme.
+                                </p>
                             </div>
                             <div class="hg-card-mini">
                                 <h5 class="hg-text-red">3. Forbidden Cards</h5>
@@ -629,7 +690,9 @@ function render_help_guide_page()
                             </div>
                             <div class="hg-card-mini">
                                 <h5 class="hg-text-green">6. Counter Commander Cast</h5>
-                                <p class="small">Clicking a Deck's Commander image triggers a <strong>Counterspell</strong> or <strong>Mana Tithe</strong> animation. <i>Note:</i> Wilson, Refined Grizzly cannot be countered!</p>
+                                <p class="small">Clicking a Deck's Commander image triggers a <strong>Counterspell</strong>
+                                    or <strong>Mana Tithe</strong> animation. <i>Note:</i> Wilson, Refined Grizzly cannot be
+                                    countered!</p>
                             </div>
                         </div>
                     </div>
@@ -662,8 +725,8 @@ function render_help_guide_page()
         }
 
         .help-guide-wrap .hg-main-title {
-            display: flex; 
-            align-items: center; 
+            display: flex;
+            align-items: center;
             gap: 10px;
             color: var(--gh-text-main);
         }
@@ -677,13 +740,13 @@ function render_help_guide_page()
             margin-top: 25px;
             line-height: 1.6;
             color: var(--gh-text-main);
-            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
         }
 
-        .help-guide-container h1, 
-        .help-guide-container h2, 
-        .help-guide-container h3, 
-        .help-guide-container h4, 
+        .help-guide-container h1,
+        .help-guide-container h2,
+        .help-guide-container h3,
+        .help-guide-container h4,
         .help-guide-container h5 {
             color: var(--gh-header);
         }
@@ -692,6 +755,7 @@ function render_help_guide_page()
             color: var(--gh-link);
             text-decoration: none;
         }
+
         .help-guide-container a:hover {
             text-decoration: underline;
         }
@@ -707,10 +771,13 @@ function render_help_guide_page()
             background: var(--gh-alert-info-bg);
             border-color: var(--gh-alert-info-border);
         }
+
         .hg-alert-info h3 {
             color: #58a6ff !important;
             margin-top: 0;
-            display: flex; align-items: center; gap: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* Nav */
@@ -718,11 +785,13 @@ function render_help_guide_page()
             border-bottom: 1px solid var(--gh-border);
             padding-bottom: 10px;
         }
+
         .hg-nav-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
         }
+
         .help-guide-nav a {
             display: block;
             padding: 8px 16px;
@@ -733,28 +802,56 @@ function render_help_guide_page()
             font-size: 14px;
             transition: 0.2s;
         }
+
         .help-guide-nav a:hover {
             background: var(--gh-btn-hover);
             border-color: #8b949e;
             text-decoration: none;
         }
-        .hg-highlight { color: #e3b341 !important; font-weight: bold; }
-        .hg-purple { color: #d2a8ff !important; }
-        .hg-pink { color: #ff7b72 !important; }
-        .hg-red { color: #ffa198 !important; }
+
+        .hg-highlight {
+            color: #e3b341 !important;
+            font-weight: bold;
+        }
+
+        .hg-purple {
+            color: #d2a8ff !important;
+        }
+
+        .hg-pink {
+            color: #ff7b72 !important;
+        }
+
+        .hg-red {
+            color: #ffa198 !important;
+        }
 
         /* Sections */
-        .hg-section { margin-bottom: 60px; }
+        .hg-section {
+            margin-bottom: 60px;
+        }
+
         .hg-section-title {
             background: var(--gh-container-bg);
             padding: 10px 15px;
             border-radius: 6px;
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             border-bottom: 1px solid var(--gh-border);
         }
-        .hg-title-purple { color: #d2a8ff !important; }
-        .hg-title-pink { color: #ff7b72 !important; }
-        .hg-title-red { color: #ffa198 !important; }
+
+        .hg-title-purple {
+            color: #d2a8ff !important;
+        }
+
+        .hg-title-pink {
+            color: #ff7b72 !important;
+        }
+
+        .hg-title-red {
+            color: #ffa198 !important;
+        }
 
         /* Tables (WordPress Override) */
         .help-guide-container .wp-list-table {
@@ -764,16 +861,19 @@ function render_help_guide_page()
             overflow: hidden;
             box-shadow: none;
         }
-        .help-guide-container .wp-list-table th, 
+
+        .help-guide-container .wp-list-table th,
         .help-guide-container .wp-list-table td {
             background: var(--gh-container-bg) !important;
             color: var(--gh-text-main) !important;
             border-bottom: 1px solid var(--gh-border);
         }
+
         .help-guide-container .wp-list-table th {
             font-weight: 600;
             color: var(--gh-text-muted) !important;
         }
+
         .hg-table-header {
             background: var(--gh-btn-bg) !important;
             font-weight: bold;
@@ -789,6 +889,7 @@ function render_help_guide_page()
             border-radius: 3px;
             font-size: 13px;
         }
+
         .hg-warning {
             margin-top: 8px;
             background: rgba(187, 128, 9, 0.1);
@@ -797,36 +898,82 @@ function render_help_guide_page()
             border-radius: 3px;
             font-size: 13px;
         }
+
         .hg-box {
-            padding: 15px; 
-            border: 1px solid var(--gh-border); 
-            border-radius: 6px; 
+            padding: 15px;
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
             margin-bottom: 15px;
             background: var(--gh-container-bg);
         }
-        .hg-box-yellow { border-color: rgba(187, 128, 9, 0.4); }
-        .hg-box-orange { border-color: rgba(219, 109, 40, 0.4); }
-        .hg-box-pink { border-color: rgba(247, 120, 186, 0.4); }
+
+        .hg-box-yellow {
+            border-color: rgba(187, 128, 9, 0.4);
+        }
+
+        .hg-box-orange {
+            border-color: rgba(219, 109, 40, 0.4);
+        }
+
+        .hg-box-pink {
+            border-color: rgba(247, 120, 186, 0.4);
+        }
 
         /* Grids & Cards */
-        .hg-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .hg-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .hg-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
 
-        .hg-card, .hg-card-mini {
+        .hg-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .hg-card,
+        .hg-card-mini {
             border: 1px solid var(--gh-border);
             padding: 15px;
             border-radius: 6px;
             background: var(--gh-container-bg);
         }
-        .hg-card h5, .hg-card-mini h5 { margin-top: 0; margin-bottom: 8px; }
-        .hg-text-blue { color: #58a6ff !important; }
-        .hg-text-green { color: #3fb950 !important; }
-        .hg-text-red { color: #ff7b72 !important; }
-        .hg-text-yellow { color: #d29922 !important; }
-        .hg-text-gray { color: #8b949e !important; }
-        .hg-text-white { color: #f0f6fc !important; }
 
-        .small { font-size: 13px; color: var(--gh-text-muted); }
+        .hg-card h5,
+        .hg-card-mini h5 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .hg-text-blue {
+            color: #58a6ff !important;
+        }
+
+        .hg-text-green {
+            color: #3fb950 !important;
+        }
+
+        .hg-text-red {
+            color: #ff7b72 !important;
+        }
+
+        .hg-text-yellow {
+            color: #d29922 !important;
+        }
+
+        .hg-text-gray {
+            color: #8b949e !important;
+        }
+
+        .hg-text-white {
+            color: #f0f6fc !important;
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--gh-text-muted);
+        }
 
         /* Code */
         .hg-code-block {
@@ -836,8 +983,17 @@ function render_help_guide_page()
             overflow-x: auto;
             border: 1px solid var(--gh-border);
         }
-        pre { color: var(--gh-text-main); font-family: monospace; }
-        code { background: rgba(110,118,129,0.4); padding: 0.2em 0.4em; border-radius: 6px; }
+
+        pre {
+            color: var(--gh-text-main);
+            font-family: monospace;
+        }
+
+        code {
+            background: rgba(110, 118, 129, 0.4);
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+        }
 
         /* Details */
         .hg-details {
@@ -846,6 +1002,7 @@ function render_help_guide_page()
             background: var(--gh-container-bg);
             overflow: hidden;
         }
+
         .hg-summary {
             padding: 15px;
             cursor: pointer;
@@ -855,6 +1012,7 @@ function render_help_guide_page()
             justify-content: space-between;
             background: var(--gh-btn-bg);
         }
+
         .hg-details-content {
             padding: 20px;
             border-top: 1px solid var(--gh-border);
@@ -871,11 +1029,19 @@ function render_help_guide_page()
         }
 
         /* Dashicons override */
-        .dashicons { opacity: 0.9; }
-        
+        .dashicons {
+            opacity: 0.9;
+        }
+
         /* List */
-        .hg-list { list-style: disc; margin-left: 20px; }
-        .hg-mt-20 { margin-top: 20px; }
+        .hg-list {
+            list-style: disc;
+            margin-left: 20px;
+        }
+
+        .hg-mt-20 {
+            margin-top: 20px;
+        }
     </style>
     <?php
 }

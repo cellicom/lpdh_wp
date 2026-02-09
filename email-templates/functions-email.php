@@ -64,7 +64,7 @@ function lpdh_get_email_logo_html()
         $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
         if ($logo_url) {
             return sprintf(
-                '<img src="%s" alt="%s" style="max-width: 80%; height: auto;">',
+                '<img src="%s" alt="%s" style="max-width: 80%%; height: auto;">',
                 esc_url($logo_url),
                 esc_attr(get_bloginfo('name'))
             );
