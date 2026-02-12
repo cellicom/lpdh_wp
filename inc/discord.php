@@ -266,35 +266,12 @@ function ajax_send_discord_event_notification()
         ];
     }
 
-    // Add Poll if requested
+    // Add Poll (Text-Based Fallback) if requested
     if (isset($_POST['create_poll']) && $_POST['create_poll'] == '1') {
-        $payload['poll'] = [
-            'question' => [
-                'text' => "Will you participate?" // English text
-            ],
-            'answers' => [
-                [
-                    'poll_media' => [
-                        'text' => "Yes",
-                        'emoji' => ['id' => null, 'name' => "✅"]
-                    ]
-                ],
-                [
-                    'poll_media' => [
-                        'text' => "No",
-                        'emoji' => ['id' => null, 'name' => "❌"]
-                    ]
-                ],
-                [
-                    'poll_media' => [
-                        'text' => "Maybe",
-                        'emoji' => ['id' => null, 'name' => "🤔"]
-                    ]
-                ]
-            ],
-            'allow_multiselect' => false,
-            'duration' => 24, // Keep 24h for test
-            'layout_type' => 1 // Default
+        $payload['embeds'][0]['fields'][] = [
+            'name' => '📊 Will you participate?',
+            'value' => "React to answer:\n✅ Yes\n❌ No\n🤔 Maybe",
+            'inline' => false
         ];
     }
 
