@@ -30,7 +30,7 @@ $people = $args['people'] ?? [];
                 $nickname = get_user_meta($profile_id, 'nickname', true) ?: $user->user_login;
                 $subtitle = $person['subtitle'] ?? '';
                 $text = $person['text'] ?? '';
-                $href = lpdh_get_stats_url($profile_id);
+                $href = lpdh_get_user_profile_url($profile_id);
                 
                 ?>
                 <div class="col-12">
