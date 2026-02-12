@@ -136,12 +136,17 @@ if (!isset($players_data) || empty($players_data)) {
     </div>
 </div>
 
+
 <style>
 .top8-podium {
     display: flex;
     flex-direction: column;
     justify-content: center;
     height: 100%;
+}
+
+.event-title {
+    font-size: 25px !important;
 }
 
 .top8-podium .place-cards-wrapper {
@@ -158,6 +163,14 @@ if (!isset($players_data) || empty($players_data)) {
     margin-bottom: 30px !important;
     justify-content: center !important;
     gap: 50px !important;
+}
+
+.place-info {
+    max-width: none !important;
+}
+
+.place-item.gold {
+    flex: 0 0 400px;
 }
 
 /* Gold Theme for shrunken 1st place */
