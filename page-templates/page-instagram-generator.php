@@ -274,7 +274,7 @@ $site_logo_url = lpdh_get_logo();
         .ig-site-logo {
             display: block;
             margin: 0 auto 30px;
-            max-width: 250px; /* Increased size since it's now a header element */
+            max-width: 300px; /* Increased size since it's now a header element */
             height: auto;
             z-index: 10;
             opacity: 0.95;
@@ -360,7 +360,7 @@ $site_logo_url = lpdh_get_logo();
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         /* Header Section */
@@ -747,7 +747,7 @@ $site_logo_url = lpdh_get_logo();
         /* Action Buttons */
         .action-buttons {
             max-width: 1080px;
-            margin: 40px auto;
+            margin: 40px auto !important;
             padding: 30px;
             background: white;
             border-radius: 12px;
@@ -845,7 +845,7 @@ $site_logo_url = lpdh_get_logo();
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-vaporwave .header {
@@ -928,7 +928,7 @@ $site_logo_url = lpdh_get_logo();
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-vaporwave-green .header {
@@ -993,7 +993,7 @@ $site_logo_url = lpdh_get_logo();
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-lostwood .header {
@@ -1057,7 +1057,7 @@ $site_logo_url = lpdh_get_logo();
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-bootscore .header {
