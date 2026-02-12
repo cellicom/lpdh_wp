@@ -1367,17 +1367,59 @@ function lpdh_get_user_profile_url($user_id)
     return $user_id ? get_author_posts_url($user_id) : home_url();
 }
 
+/**
+ * Get Stats URL with universal permalink support
+ */
 function lpdh_get_stats_url($user_id = null)
 {
     $page_id = get_option('lpdh_stats_page_id');
-    $url = $page_id ? get_permalink($page_id) : admin_url('admin.php?page=player-stats');
+    $base_url = $page_id ? get_permalink($page_id) : home_url('/user-stats/');
 
-    if ($user_id) {
-        $url = add_query_arg('user_id', $user_id, $url);
+    if (!$user_id) {
+        return $base_url;
     }
 
-    return $url;
+    $user_data = get_userdata($user_id);
+    $slug = ($user_data) ? $user_data->user_nicename : '';
+
+    if (get_option('permalink_structure') && $slug) {
+        // Pretty Permalinks: /user-stats/slug/
+        return user_trailingslashit(trailingslashit($base_url) . $slug);
+    } else {
+        // Plain Permalinks: ?user_id=123 (backwards compatible) or ?player_slug=slug
+        return add_query_arg('user_id', $user_id, $base_url);
+    }
 }
+
+/**
+ * Register Player Slug Query Var
+ */
+function lpdh_register_player_query_vars($vars)
+{
+    $vars[] = 'player_slug';
+    return $vars;
+}
+add_filter('query_vars', 'lpdh_register_player_query_vars');
+
+/**
+ * Add Rewrite Rule for Player Stats Slug
+ */
+function lpdh_add_player_stats_rewrite_rules()
+{
+    $page_id = get_option('lpdh_stats_page_id');
+    if (!$page_id) return;
+
+    $post = get_post($page_id);
+    if (!$post) return;
+
+    $slug = $post->post_name;
+    add_rewrite_rule(
+        '^' . $slug . '/([^/]+)/?$',
+        'index.php?page_id=' . $page_id . '&player_slug=$matches[1]',
+        'top'
+    );
+}
+add_action('init', 'lpdh_add_player_stats_rewrite_rules');
 
 function lpdh_get_login_register_url($section = '')
 {

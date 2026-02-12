@@ -18,9 +18,17 @@ if (!is_user_logged_in()) {
 
 $user_id = get_current_user_id();
 
-// Admin/Moderator override: allow viewing other users' stats via URL
-if ((lpdh_can_manage_content() || current_user_can('editor')) && isset($_GET['user_id'])) {
-    $user_id = intval($_GET['user_id']);
+// Resolve target user from slug (Pretty Permalinks) or ID (Plain/Admin)
+$player_slug = get_query_var('player_slug');
+$url_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
+if ($player_slug) {
+    $user_by_slug = get_user_by('slug', $player_slug);
+    if ($user_by_slug) {
+        $user_id = $user_by_slug->ID;
+    }
+} elseif ($url_user_id && (lpdh_can_manage_content() || current_user_can('editor'))) {
+    $user_id = $url_user_id;
 }
 
 $target_user = get_userdata($user_id);
