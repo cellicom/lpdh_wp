@@ -130,8 +130,11 @@ function render_help_guide_page()
                     <div class="hg-card">
                         <h5 class="hg-text-purple"><span class="dashicons dashicons-megaphone"></span> Discord Notification</h5>
                         <p class="small">Send a formatted announcement to your Discord server with one click. <br>
-                        Includes an option to add a <strong>Poll (Yes/No/Maybe)</strong>.<br>
-                        Requires Webhook URL in <strong>Theme Settings</strong>.</p>
+                        <strong>Features:</strong><br>
+                        - Sends Event details (Title, Date, Location, Link).<br>
+                        - <strong>Poll:</strong> Adds a "Will you participate?" field with text instructions for reactions (✅ Yes, ❌ No, 🤔 Maybe).<br>
+                        <br>
+                        <strong>Setup:</strong> Go to <i>LPDH > Theme Settings</i> and paste your <strong>Webhook URL</strong>.</p>
                     </div>
                 </div>
             </section>
