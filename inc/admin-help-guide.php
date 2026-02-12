@@ -127,6 +127,12 @@ function render_help_guide_page()
                         <p class="small">After populating rankings, click "Sync Player". The site will match the text names
                             with registered <strong>Player</strong> users to link their ELO history automatically.</p>
                     </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-purple"><span class="dashicons dashicons-megaphone"></span> Discord Notification</h5>
+                        <p class="small">Send a formatted announcement to your Discord server with one click. <br>
+                        Includes an option to add a <strong>Poll (Yes/No/Maybe)</strong>.<br>
+                        Requires Webhook URL in <strong>Theme Settings</strong>.</p>
+                    </div>
                 </div>
             </section>
 
@@ -577,6 +583,10 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Active Theme</strong></td>
                             <td>Switches global design (Bootscore Default, Vaporwave, Vaporwave Green, Lost Wood).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Discord Integration</strong></td>
+                            <td>Set up Webhook URL, Bot Name, and Footer Text for event announcements.</td>
                         </tr>
                         <tr>
                             <td colspan="2" class="hg-table-header">Pages Configuration</td>

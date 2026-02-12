@@ -311,6 +311,9 @@ require_once get_stylesheet_directory() . '/inc/instagram-generator.php';
 // Include Commander Roulette
 require_once get_stylesheet_directory() . '/inc/commander-roulette.php';
 
+// Include Discord Integration
+require_once get_stylesheet_directory() . '/inc/discord.php';
+
 
 /**
  * Enqueue scripts and styles
@@ -1068,6 +1071,9 @@ function lpdh_theme_settings_render()
         update_option('lpdh_facebook_link', esc_url($_POST['lpdh_facebook_link']));
         update_option('lpdh_x_link', esc_url($_POST['lpdh_x_link']));
 
+        // Hook for additional settings save actions
+        do_action('lpdh_after_theme_settings_save');
+
         // Save Custom Logo
         update_option('lpdh_custom_logo_id', intval($_POST['lpdh_custom_logo_id']));
 
@@ -1334,6 +1340,7 @@ function lpdh_theme_settings_render()
             </table>
 
             <hr>
+            <?php do_action('lpdh_after_theme_settings_row'); ?>
             <?php submit_button(); ?>
         </form>
     </div>
