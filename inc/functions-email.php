@@ -23,7 +23,7 @@ require_once get_stylesheet_directory() . '/inc/class-email-template.php';
  */
 function lpdh_get_email_template($type, $data = array())
 {
-    $template_path = get_stylesheet_directory() . '/email-templates/' . $type . '.php';
+    $template_path = get_stylesheet_directory() . '/inc/email-templates/' . $type . '.php';
 
     if (!file_exists($template_path)) {
         error_log('LPDH Email: Template not found - ' . $type);
@@ -433,9 +433,9 @@ function lpdh_render_email_test_page()
                     complete: function () {
                         $btn.prop('disabled', false).html('Send Test Email');
                     }
-                        });
-        });
                 });
+            });
+        });
     </script>
 
     <style>

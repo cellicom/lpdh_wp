@@ -1137,7 +1137,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
                 <!-- Dynamic Template Loading -->
                 <?php
-                $template_file = __DIR__ . "/ig-template/{$ig_type}.php";
+                $template_file = dirname(__DIR__) . "/inc/ig-templates/{$ig_type}.php";
                 if (file_exists($template_file)) {
                     include($template_file);
                 } else {
