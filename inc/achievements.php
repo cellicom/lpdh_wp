@@ -405,6 +405,145 @@ endif;
  * @param string $year 'global' or 'YYYY'
  * @return array ['deck_count', 'win_count', 'event_count', 'clown_count', 'days_registered', 'elo', ...]
  */
+function lpdh_get_player_stats($user_id, $year = 'global')
+{
+    static $stats_cache = [];
+    $cache_key = $user_id . '_' . $year;
+    if (isset($stats_cache[$cache_key]))
+        return $stats_cache[$cache_key];
+
+    $user_data = get_userdata($user_id);
+    $registered = $user_data ? strtotime($user_data->user_registered) : time();
+
+    // Comparison date for 'days_since_reg'
+    $comparison_time = time();
+    if ($year !== 'global') {
+        $comparison_year = intval($year);
+        $comparison_time = strtotime($comparison_year . '-12-31 23:59:59');
+    }
+
+    $days_since_reg = floor(($comparison_time - $registered) / (60 * 60 * 24));
+    if ($days_since_reg < 0)
+        $days_since_reg = 0;
+
+    // 1. Decks Count
+    $deck_args = [
+        'post_type' => 'deck',
+        'author' => $user_id,
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'fields' => 'ids'
+    ];
+    if ($year !== 'global') {
+        $deck_args['date_query'] = [['year' => $year]];
+    }
+    $user_decks = get_posts($deck_args);
+    $deck_count = count($user_decks);
+
+    // 2. Deck with Banned Cards
+    $deck_with_banned = 0;
+    if (function_exists('lpdh_get_banned_card_names')) {
+        $banned_cards = lpdh_get_banned_card_names();
+        if (!empty($banned_cards) && !empty($user_decks)) {
+            foreach ($user_decks as $d_id) {
+                $list_text = get_field('decklist_text', $d_id);
+                $commander = get_field('commander', $d_id);
+                $partner = get_field('partner', $d_id);
+
+                if (is_object($commander))
+                    $commander = $commander->post_title;
+                if (is_object($partner))
+                    $partner = $partner->post_title;
+
+                $full_check_text = strtolower($list_text . ' ' . $commander . ' ' . $partner);
+
+                if (!empty($full_check_text)) {
+                    foreach ($banned_cards as $card) {
+                        if (strpos($full_check_text, $card) !== false) {
+                            $deck_with_banned++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Spinned the Wheel (Global for now)
+    $spinned_wheel_count = intval(get_user_meta($user_id, 'lpdh_lifetime_spins', true));
+
+    // 4. Events, Wins, Clowns & Elo from Leaderboard(s)
+    $events_attended = 0;
+    $win_count = 0;
+    $clown_count = 0;
+    $final_elo = 0;
+    $total_points = 0;
+
+    $leaderboard_args = [
+        'post_type' => 'leaderboard',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    ];
+
+    if ($year !== 'global') {
+        $leaderboard_args['meta_query'] = [
+            [
+                'key' => 'year',
+                'value' => $year
+            ]
+        ];
+    }
+
+    $lb_posts = get_posts($leaderboard_args);
+
+    if (!empty($lb_posts)) {
+        foreach ($lb_posts as $lb_post) {
+            $json = get_field('rankings_json', $lb_post->ID);
+            if (!$json)
+                continue;
+
+            $lb_data = json_decode($json, true);
+            if (!is_array($lb_data))
+                continue;
+
+            foreach ($lb_data as $entry) {
+                $e_id = isset($entry['user_id']) ? $entry['user_id'] : (isset($entry['id']) ? $entry['id'] : 0);
+                $e_name = isset($entry['name']) ? $entry['name'] : '';
+
+                if (($e_id && $e_id == $user_id) || ($e_name && $user_data && strcasecmp($e_name, $user_data->display_name) === 0)) {
+                    $events_attended += isset($entry['count']) ? intval($entry['count']) : 0;
+                    $win_count += isset($entry['first']) ? intval($entry['first']) : 0;
+                    $clown_count += isset($entry['last']) ? intval($entry['last']) : 0;
+                    $total_points += isset($entry['points']) ? intval($entry['points']) : 0;
+
+                    $current_entry_elo = isset($entry['elo']) ? round($entry['elo']) : 0;
+                    if ($year === 'global') {
+                        if ($current_entry_elo > $final_elo)
+                            $final_elo = $current_entry_elo;
+                    } else {
+                        $final_elo = $current_entry_elo;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    $res = [
+        'deck_count' => $deck_count,
+        'win_count' => $win_count,
+        'event_count' => $events_attended,
+        'clown_count' => $clown_count,
+        'deck_with_banned' => $deck_with_banned,
+        'spinned_wheel_count' => $spinned_wheel_count,
+        'days_registered' => $days_since_reg,
+        'elo' => $final_elo,
+        'points' => $total_points
+    ];
+
+    $stats_cache[$cache_key] = $res;
+    return $res;
+}
 
 
 
@@ -485,6 +624,31 @@ function lpdh_compare_string($haystack, $needle, $operator)
     } else {
         // Default to CONTAINS
         return strpos($haystack, $needle) !== false;
+    }
+}
+
+/**
+ * Checks a single condition against a value.
+ */
+function lpdh_check_stat_condition($user_val, $operator, $target_val)
+{
+    if (is_numeric($user_val) && is_numeric($target_val)) {
+        $user_val = floatval($user_val);
+        $target_val = floatval($target_val);
+    }
+    switch ($operator) {
+        case '>':
+            return $user_val > $target_val;
+        case '>=':
+            return $user_val >= $target_val;
+        case '=':
+            return $user_val == $target_val;
+        case '<=':
+            return $user_val <= $target_val;
+        case '<':
+            return $user_val < $target_val;
+        default:
+            return false;
     }
 }
 

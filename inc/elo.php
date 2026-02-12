@@ -71,3 +71,51 @@ function lpdh_perform_elo_math($current_elo, $wins, $draws, $losses, $avg_elo, $
         'position_adjustment' => $position_adjustment
     );
 }
+
+/**
+ * Get final ELO ratings from the previous year's leaderboard.
+ * 
+ * @param int $current_year The year currently being calculated.
+ * @return array Map of [player_key => elo]
+ */
+function lpdh_get_previous_year_elos($current_year)
+{
+    $prev_year = intval($current_year) - 1;
+    $elos = array();
+
+    $args = array(
+        'post_type' => 'leaderboard',
+        'posts_per_page' => 1,
+        'post_status' => 'publish',
+        'meta_query' => array(
+            array(
+                'key' => 'year',
+                'value' => $prev_year,
+                'compare' => '='
+            )
+        )
+    );
+
+    $prev_lb = get_posts($args);
+
+    if (!empty($prev_lb)) {
+        $json = get_field('field_leaderboard_rankings_json', $prev_lb[0]->ID);
+        if ($json) {
+            $data = json_decode($json, true);
+            if (is_array($data)) {
+                foreach ($data as $entry) {
+                    $u_id = isset($entry['user_id']) ? $entry['user_id'] : 0;
+                    $name = isset($entry['name']) ? $entry['name'] : '';
+                    $elo = isset($entry['elo']) ? $entry['elo'] : LPDH_DEFAULT_ELO;
+
+                    $key = $u_id ? 'user_' . $u_id : $name;
+                    if ($key) {
+                        $elos[$key] = $elo;
+                    }
+                }
+            }
+        }
+    }
+
+    return $elos;
+}

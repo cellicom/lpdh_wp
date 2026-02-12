@@ -266,13 +266,24 @@ add_action('acf/input/admin_footer', 'add_update_leaderboard_button');
 /**
  * Helper function to calculate rankings from a list of events
  */
-function lpdh_calculate_rankings_data($events)
+function lpdh_calculate_rankings_data($events, $initial_elos = array())
 {
     $general = array();
-    $player_elos = array();
+    $player_elos = $initial_elos;
 
     foreach ($events as $event) {
         $rankings = get_field('event_ranking', $event->ID);
+
+        // Fallback al JSON se il repeater è vuoto
+        if (empty($rankings) || !is_array($rankings)) {
+            $json_rankings = get_field('event_rankings_json', $event->ID);
+            if (!empty($json_rankings)) {
+                $decoded = json_decode($json_rankings, true);
+                if (is_array($decoded)) {
+                    $rankings = $decoded;
+                }
+            }
+        }
 
         if (is_array($rankings)) {
             $total_players = count($rankings);
@@ -281,27 +292,36 @@ function lpdh_calculate_rankings_data($events)
             $event_participants_names = array();
             $total_event_elo = 0;
 
-            foreach ($rankings as $rank) {
+                foreach ($rankings as $rank) {
                 $name = isset($rank['name']) ? trim($rank['name']) : '';
-                // Risoluzione nome se mancante (logica semplificata per pre-calcolo)
-                if (empty($name)) {
-                    $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : 0;
-                    if (!empty($player_id_field)) {
-                        $uid = is_array($player_id_field) ? $player_id_field['ID'] : $player_id_field;
-                        $u = get_userdata($uid);
-                        if ($u)
-                            $name = $u->display_name;
+                $user_id = 0;
+
+                $player_id_field = isset($rank['player_id']) ? $rank['player_id'] : 0;
+                if (!empty($player_id_field)) {
+                    if (is_array($player_id_field) && isset($player_id_field['ID'])) {
+                        $user_id = $player_id_field['ID'];
+                    } elseif (is_numeric($player_id_field)) {
+                        $user_id = $player_id_field;
                     }
+                }
+
+                if (empty($name) && $user_id) {
+                    $u = get_userdata($user_id);
+                    if ($u)
+                        $name = $u->display_name;
                 }
 
                 if (empty($name))
                     continue;
 
-                if (!isset($player_elos[$name])) {
-                    $player_elos[$name] = LPDH_DEFAULT_ELO; // ELO Base
+                // Identification Key: Priority to user_id (user_{ID}) then name
+                $player_key = $user_id ? 'user_' . $user_id : $name;
+
+                if (!isset($player_elos[$player_key])) {
+                    $player_elos[$player_key] = LPDH_DEFAULT_ELO; // ELO Base
                 }
-                $event_participants_names[] = $name;
-                $total_event_elo += $player_elos[$name];
+                $event_participants_names[] = $player_key;
+                $total_event_elo += $player_elos[$player_key];
             }
 
             $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : LPDH_DEFAULT_ELO;
@@ -329,8 +349,11 @@ function lpdh_calculate_rankings_data($events)
                 if (empty($name))
                     continue;
 
-                if (!isset($general[$name])) {
-                    $general[$name] = array(
+                // Identification Key: Same as above
+                $player_key = $user_id ? 'user_' . $user_id : $name;
+
+                if (!isset($general[$player_key])) {
+                    $general[$player_key] = array(
                         'name' => $name,
                         'user_id' => $user_id,
                         'points' => 0,
@@ -344,8 +367,12 @@ function lpdh_calculate_rankings_data($events)
                     );
                 } else {
                     // Update user_id if it was missing and now we have it
-                    if (empty($general[$name]['user_id']) && $user_id) {
-                        $general[$name]['user_id'] = $user_id;
+                    if (empty($general[$player_key]['user_id']) && $user_id) {
+                        $general[$player_key]['user_id'] = $user_id;
+                    }
+                    // If name was blank but now we have it (or it's the latest name), update it
+                    if (!empty($name)) {
+                        $general[$player_key]['name'] = $name;
                     }
                 }
 
@@ -353,32 +380,32 @@ function lpdh_calculate_rankings_data($events)
                 $draws = intval(isset($rank['draw']) ? $rank['draw'] : 0);
                 $losses = intval(isset($rank['lose']) ? $rank['lose'] : 0);
 
-                $general[$name]['points'] += intval(isset($rank['points']) ? $rank['points'] : 0);
-                $general[$name]['win'] += $wins;
-                $general[$name]['lose'] += $losses;
-                $general[$name]['draw'] += $draws;
-                $general[$name]['count']++;
+                $general[$player_key]['points'] += intval(isset($rank['points']) ? $rank['points'] : 0);
+                $general[$player_key]['win'] += $wins;
+                $general[$player_key]['lose'] += $losses;
+                $general[$player_key]['draw'] += $draws;
+                $general[$player_key]['count']++;
 
                 $pos = intval(isset($rank['pos']) ? $rank['pos'] : 0);
                 if ($pos === 1) {
-                    $general[$name]['first']++;
+                    $general[$player_key]['first']++;
                 }
                 if ($pos === $total_players) {
-                    $general[$name]['last']++;
+                    $general[$player_key]['last']++;
                 }
 
                 // Calcolo ELO
-                $current_elo = $player_elos[$name];
+                $current_elo = $player_elos[$player_key];
                 $games_played = $wins + $draws + $losses;
 
                 if ($games_played > 0) {
                     $elo_data = lpdh_calculate_elo($current_elo, $wins, $draws, $losses, $avg_elo, $pos, $total_players);
                     $new_elo = $elo_data['new_elo'];
 
-                    $player_elos[$name] = $new_elo;
+                    $player_elos[$player_key] = $new_elo;
                 }
 
-                $general[$name]['elo'] = round($player_elos[$name]);
+                $general[$player_key]['elo'] = round($player_elos[$player_key]);
             }
         }
     }
@@ -429,13 +456,20 @@ function ajax_update_leaderboard_rankings()
     $valid_events = array();
     foreach ($all_events as $e) {
         $rank_data = get_field('event_ranking', $e->ID);
-        if (!empty($rank_data) && is_array($rank_data)) {
+        if (empty($rank_data)) {
+            $rank_data = get_field('event_rankings_json', $e->ID);
+        }
+
+        if (!empty($rank_data)) {
             $valid_events[] = $e;
         }
     }
 
+    // 0. Recupero starting Elo dall'anno precedente
+    $starting_elos = lpdh_get_previous_year_elos($year);
+
     // 1. Calcolo Classifica Attuale (Basata solo sui tornei validi)
-    $result = lpdh_calculate_rankings_data($valid_events);
+    $result = lpdh_calculate_rankings_data($valid_events, $starting_elos);
 
     // 2. Calcolo Classifica Precedente (per il trend)
     // Escludiamo l'ultimo torneo VALIDO per vedere come è cambiata la classifica dopo l'ultimo evento reale
@@ -443,19 +477,21 @@ function ajax_update_leaderboard_rankings()
     if (count($previous_events) > 0) {
         array_pop($previous_events);
     }
-    $previous_result = lpdh_calculate_rankings_data($previous_events);
+    $previous_result = lpdh_calculate_rankings_data($previous_events, $starting_elos);
 
     // Mappa posizioni precedenti
     $prev_rank_map = array();
     foreach ($previous_result as $idx => $p) {
-        $prev_rank_map[$p['name']] = $idx + 1;
+        $prev_key = !empty($p['user_id']) ? 'user_' . $p['user_id'] : $p['name'];
+        $prev_rank_map[$prev_key] = $idx + 1;
     }
 
     // Calcola Trend
     foreach ($result as $idx => &$p) {
         $current_rank = $idx + 1;
-        if (isset($prev_rank_map[$p['name']])) {
-            $prev = $prev_rank_map[$p['name']];
+        $current_key = !empty($p['user_id']) ? 'user_' . $p['user_id'] : $p['name'];
+        if (isset($prev_rank_map[$current_key])) {
+            $prev = $prev_rank_map[$current_key];
             $p['trend'] = $prev - $current_rank; // Positivo = salito (es. era 5, ora 2 => +3)
         } else {
             $p['trend'] = 'new';

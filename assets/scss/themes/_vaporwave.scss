@@ -522,7 +522,8 @@ body.theme-vaporwave {
 
     // Rankings Tables (Single Event & Single Leaderboard)
     &.single-event .event-rankings,
-    &.single-leaderboard .leaderboard-rankings {
+    &.single-leaderboard .leaderboard-rankings,
+    &.page-template-page-elo-leaderboard .leaderboard-rankings {
         .table {
             --bs-table-bg: transparent;
             --bs-table-color: var(--lpdh-text);

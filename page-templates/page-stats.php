@@ -91,6 +91,9 @@ $events_query = new WP_Query($event_args);
 
 // ELO Tracking
 $player_elos = array();
+if ($selected_year !== 'global') {
+    $player_elos = lpdh_get_previous_year_elos($selected_year);
+}
 $elo_history_labels = array();
 $elo_history_data = array();
 $last_processed_year = '';
@@ -105,9 +108,8 @@ if ($events_query->have_posts()) {
         $event_date_raw = get_field('event_date', $event_id);
         $event_year = $event_date_raw ? date('Y', strtotime($event_date_raw)) : '';
 
-        // --- Yearly ELO Reset ---
+        // --- Yearly ELO Reset Removed for continuity ---
         if ($event_year && $event_year !== $last_processed_year) {
-            $player_elos = array(); // Reset all to LPDH_DEFAULT_ELO
             $last_processed_year = $event_year;
         }
 
@@ -120,28 +122,29 @@ if ($events_query->have_posts()) {
             $event_participants_names = array();
             $total_event_elo = 0;
             foreach ($rankings as $rank) {
-                $name = isset($rank['name']) ? trim($rank['name']) : '';
-                if (empty($name)) {
-                    $pid = isset($rank['player_id']) ? $rank['player_id'] : 0;
-                    if (is_array($pid) && isset($pid['ID']))
-                        $pid = $pid['ID'];
-                    elseif (is_object($pid))
-                        $pid = $pid->ID;
+                $pid = isset($rank['player_id']) ? $rank['player_id'] : 0;
+                if (is_array($pid) && isset($pid['ID'])) {
+                    $pid = $pid['ID'];
+                } elseif (is_object($pid)) {
+                    $pid = $pid->ID;
+                }
 
-                    if ($pid) {
-                        $u = get_userdata($pid);
-                        if ($u)
-                            $name = $u->display_name;
-                    }
+                $name = isset($rank['name']) ? trim($rank['name']) : '';
+                if (empty($name) && $pid) {
+                    $u = get_userdata($pid);
+                    if ($u)
+                        $name = $u->display_name;
                 }
                 if (empty($name))
                     continue;
 
-                if (!isset($player_elos[$name])) {
-                    $player_elos[$name] = LPDH_DEFAULT_ELO;
+                $p_key = $pid ? 'user_' . $pid : $name;
+
+                if (!isset($player_elos[$p_key])) {
+                    $player_elos[$p_key] = LPDH_DEFAULT_ELO;
                 }
-                $event_participants_names[] = $name;
-                $total_event_elo += $player_elos[$name];
+                $event_participants_names[] = $p_key;
+                $total_event_elo += $player_elos[$p_key];
             }
             $avg_elo = count($event_participants_names) > 0 ? $total_event_elo / count($event_participants_names) : LPDH_DEFAULT_ELO;
 
@@ -160,34 +163,15 @@ if ($events_query->have_posts()) {
                 $name = isset($rank['name']) ? trim($rank['name']) : '';
                 if (empty($name) && $p_id) {
                     $u = get_userdata($p_id);
-                    if ($u)
-                        $name = $u->display_name;
+                    if ($u) $name = $u->display_name;
                 }
 
-                if (!empty($name)) {
-                    $current_elo = $player_elos[$name];
-                    $wins = intval(isset($rank['win']) ? $rank['win'] : 0);
-                    $draws = intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                    $losses = intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                    $games_played = $wins + $draws + $losses;
+                $p_key = $p_id ? 'user_' . $p_id : $name;
 
-                    if ($games_played > 0) {
-                        $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                        $elo_data = lpdh_calculate_elo($current_elo, $wins, $draws, $losses, $avg_elo, $pos, $total_players);
-                        $player_elos[$name] = $elo_data['new_elo'];
-                    }
-                }
-
+                // 1. Chart & Stats logic for TARGET USER (MUST be before update)
                 if ($p_id == $user_id) {
-                    // Found the user
-
-                    // Capture stats for global calculation OR for the 3-year range
-                    // (Note: we already filtered the query to 3 years if not global)
-
-                    // --- Yearly Stats (for Win Rate Trend) ---
                     if ($event_year) {
                         $y_val = intval($event_year);
-                        // If not global, only collect for prev, current, next
                         if ($selected_year === 'global' || ($y_val >= $prev_y && $y_val <= $next_y)) {
                             if (!isset($yearly_stats[$event_year])) {
                                 $yearly_stats[$event_year] = array('wins' => 0, 'total' => 0);
@@ -200,27 +184,68 @@ if ($events_query->have_posts()) {
                         }
                     }
 
-                    // --- ELO History ---
-                    if (!empty($name)) {
-                        // Only add to Elo chart if global OR if it matches the selected year
+                    if ($event_year && !isset($elo_starts_added[$event_year])) {
                         if ($selected_year === 'global' || $event_year === $selected_year) {
-                            // If this is the first tournament of the year, inject the 1500 start point if not present
-                            if ($event_year && !isset($elo_starts_added[$event_year])) {
-                                // For chart continuity, we add a point at Jan 1st
-                                $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
-                                $elo_history_data[] = LPDH_DEFAULT_ELO;
-                                $elo_starts_added[$event_year] = true;
-                            }
+                            $elo_history_labels[] = '01/01/' . date('y', strtotime($event_date_raw));
+                            // Try ID key first, then name key
+                            $start_v = isset($player_elos[$p_key]) ? $player_elos[$p_key] : (isset($player_elos[$name]) ? $player_elos[$name] : LPDH_DEFAULT_ELO);
+                            $elo_history_data[] = round($start_v);
+                            $elo_starts_added[$event_year] = true;
+                        }
+                    }
+                }
 
+                // 2. ELO Update Logic (Always run to keep player_elos current)
+                if (!empty($name)) {
+                    $event_y_int = intval($event_year);
+                    $sel_y_int = ($selected_year === 'global') ? 0 : intval($selected_year);
+
+                    if ($selected_year === 'global' || $event_y_int >= $sel_y_int) {
+                        // Try ID key first, then name key for update base
+                        $current_e = isset($player_elos[$p_key]) ? $player_elos[$p_key] : (isset($player_elos[$name]) ? $player_elos[$name] : LPDH_DEFAULT_ELO);
+                        $wins = intval(isset($rank['win']) ? $rank['win'] : 0);
+                        $draws = intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                        $losses = intval(isset($rank['lose']) ? $rank['lose'] : 0);
+                        $games_played = $wins + $draws + $losses;
+
+                        if ($games_played > 0) {
+                            $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                            $elo_calc = lpdh_calculate_elo($current_e, $wins, $draws, $losses, $avg_elo, $pos, $total_players);
+                            $player_elos[$p_key] = $elo_calc['new_elo'];
+                        }
+                    }
+                }
+
+                // 3. Main Summary & Point Recording for TARGET USER
+                if ($p_id == $user_id) {
+                    if (!empty($name)) {
+                        if ($selected_year === 'global' || $event_year === $selected_year) {
                             $elo_history_labels[] = $event_date_raw ? date('d/m/y', strtotime($event_date_raw)) : 'Event ' . count($elo_history_labels);
-                            $elo_history_data[] = round($player_elos[$name]);
+                            $elo_history_data[] = round($player_elos[$p_key]);
                         }
                     }
 
-                    // Filter for main stats and charts (Attendance, Wins, etc.)
-                    // Only count for the SELECTED year
                     if ($selected_year !== 'global' && $event_year !== $selected_year) {
                         continue;
+                    }
+
+                    $total_attendance++;
+                    $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
+                    if ($pos === 1) $total_wins++;
+                    if ($index === $total_players - 1) $total_last_places++;
+
+                    $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
+                    if ($deck_id) {
+                        if (!isset($deck_usage_counts[$deck_id])) $deck_usage_counts[$deck_id] = 0;
+                        $deck_usage_counts[$deck_id]++;
+                        if (!isset($deck_performance[$deck_id])) {
+                            $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                        }
+                        $deck_performance[$deck_id]['attendance']++;
+                        if ($pos === 1) $deck_performance[$deck_id]['wins']++;
+                        $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
+                        $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
+                        $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
                     }
 
                     $player_events[] = array(
@@ -229,30 +254,6 @@ if ($events_query->have_posts()) {
                         'event_date' => $event_date_raw,
                         'total_players' => $total_players
                     );
-
-                    $total_attendance++;
-                    $pos = isset($rank['pos']) ? intval($rank['pos']) : 0;
-                    if ($pos === 1)
-                        $total_wins++;
-                    if ($index === $total_players - 1)
-                        $total_last_places++;
-
-                    $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
-                    if ($deck_id) {
-                        if (!isset($deck_usage_counts[$deck_id]))
-                            $deck_usage_counts[$deck_id] = 0;
-                        $deck_usage_counts[$deck_id]++;
-
-                        if (!isset($deck_performance[$deck_id])) {
-                            $deck_performance[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
-                        }
-                        $deck_performance[$deck_id]['attendance']++;
-                        if ($pos === 1)
-                            $deck_performance[$deck_id]['wins']++;
-                        $deck_performance[$deck_id]['match_wins'] += intval(isset($rank['win']) ? $rank['win'] : 0);
-                        $deck_performance[$deck_id]['match_draws'] += intval(isset($rank['draw']) ? $rank['draw'] : 0);
-                        $deck_performance[$deck_id]['match_losses'] += intval(isset($rank['lose']) ? $rank['lose'] : 0);
-                    }
                 }
             }
         }
