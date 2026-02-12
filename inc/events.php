@@ -1,7 +1,7 @@
 <?php
 /**
  * Event CPT Functions
- * Registration, ACF fields, admin columns, rankings, OCR, sharing, Instagram.
+ * Registration, ACF fields, admin columns, rankings, OCR, sharing.
  *
  * @package lpdh-wordpress
  */
@@ -2001,14 +2001,6 @@ function lpdh_render_event_ocr_metabox($post)
     <?php
 }
 
-/**
- * Get Instagram Generator URL for Event
- */
-function lpdh_get_instagram_generator_url($event_id)
-{
-    // Return admin page URL instead of frontend page
-    return admin_url('admin.php?page=lpdh-instagram-generator&ig_event_id=' . intval($event_id));
-}
 
 /**
  * Add Share Event Metabox to Events
@@ -2141,35 +2133,3 @@ function lpdh_render_event_share_metabox($post)
     <?php
 }
 
-/**
- * Add Instagram Generator Metabox to Events
- */
-function lpdh_add_instagram_generator_metabox()
-{
-    add_meta_box(
-        'lpdh_instagram_generator',
-        'Instagram Image Generator',
-        'lpdh_render_instagram_generator_metabox',
-        'event',
-        'side',
-        'default'
-    );
-}
-add_action('add_meta_boxes', 'lpdh_add_instagram_generator_metabox');
-
-/**
- * Render Instagram Generator Metabox
- */
-function lpdh_render_instagram_generator_metabox($post)
-{
-    $ig_url = lpdh_get_instagram_generator_url($post->ID);
-
-    if ($ig_url) {
-        echo '<p>Generate a promotional Instagram image for this event\'s top players.</p>';
-        echo '<a href="' . esc_url($ig_url) . '" class="button button-primary button-large" style="width: 100%; text-align: center; display: block;">';
-        echo '<span class="dashicons dashicons-instagram" style="margin-top: 3px;"></span> ';
-        echo 'Generate Instagram Image</a>';
-    } else {
-        echo '<p class="description">Instagram generator page not configured.</p>';
-    }
-}

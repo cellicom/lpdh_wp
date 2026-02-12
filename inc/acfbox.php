@@ -1241,3 +1241,26 @@ acf_add_local_field_group([
     'show_in_rest' => 0,
     'display_title' => '',
 ]);
+
+function getTitleFromAcfBox($box, $id)
+{
+    if (!empty($box['titolo'])) {
+        $cta = $box['titolo'];
+    } else {
+        $cta = $box['acf_fc_layout'] . $id;
+    }
+
+    return $cta;
+}
+
+function getUrlHashtagFromAcfBox($box, $id, $hash = '')
+{
+    if (!empty($box['titolo'])) {
+        $url = $hash . sanitize_title_for_query(strtolower($box['titolo']) . $id);
+    } else {
+        $url = null;
+    }
+
+    return $url;
+}
+

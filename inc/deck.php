@@ -490,3 +490,149 @@ function redirect_players_to_deck_list()
     }
 }
 add_action('current_screen', 'redirect_players_to_deck_list');
+
+/**
+ * Get Commander Image URL
+ */
+function get_commander_image($post_id)
+{
+    // 1. Featured Image
+    if (has_post_thumbnail($post_id)) {
+        return get_the_post_thumbnail_url($post_id, 'medium_large');
+    }
+
+    // 2. Scryfall via Commander Name
+    $commander_name = get_field('commander', $post_id);
+    if ($commander_name) {
+        $scryfall_img = lpdh_get_scryfall_image_url($post_id, $commander_name);
+        if ($scryfall_img && $scryfall_img !== 'error') {
+            return $scryfall_img;
+        }
+    }
+
+    // 3. Fallback
+    return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.jpg';
+}
+
+/**
+ * Get Partner Image URL
+ */
+function get_partner_image($post_id)
+{
+    // 1. Featured Image Partner
+    $partner_img = get_field('featured_image_partner', $post_id);
+    if ($partner_img) {
+        return $partner_img['sizes']['medium_large'] ?? $partner_img['url'];
+    }
+
+    // 2. Scryfall via Partner Name
+    $partner_name = get_field('partner', $post_id);
+    if ($partner_name) {
+        $scryfall_img = lpdh_get_scryfall_image_url($post_id, $partner_name);
+        if ($scryfall_img && $scryfall_img !== 'error') {
+            return $scryfall_img;
+        }
+    }
+
+    // 3. Fallback (only if partner exists)
+    if ($partner_img || $partner_name) {
+        return get_stylesheet_directory_uri() . '/assets/img/minimal_card_back.jpg';
+    }
+
+    return false;
+}
+
+/**
+ * Customize admin users list columns
+ */
+function lpdh_customize_user_columns($columns)
+{
+    unset($columns['posts']); // Hide Posts column
+    $columns['decks'] = __('Decks', 'text_domain'); // Add Decks column
+    return $columns;
+}
+add_filter('manage_users_columns', 'lpdh_customize_user_columns');
+
+/**
+ * Populate Decks column in admin users list
+ */
+function lpdh_populate_user_decks_column($output, $column_name, $user_id)
+{
+    if ($column_name === 'decks') {
+        $count = count_user_posts($user_id, 'deck');
+        if ($count > 0) {
+            // Link to the user's decks in admin
+            $url = admin_url('edit.php?post_type=deck&author=' . $user_id);
+            return '<a href="' . esc_url($url) . '">' . $count . '</a>';
+        }
+        return '0';
+    }
+    return $output;
+}
+add_filter('manage_users_custom_column', 'lpdh_populate_user_decks_column', 10, 3);
+
+/**
+ * Adjust deck list column widths
+ */
+function lpdh_deck_list_column_widths()
+{
+    $screen = get_current_screen();
+    if ($screen && $screen->id === 'edit-deck') {
+        echo '<style>
+            .column-title { width: 35% !important; }
+            .column-commander { width: 35% !important; }
+            .column-decklist { width: 40px !important; text-align: center; }
+        </style>';
+    }
+}
+add_action('admin_head', 'lpdh_deck_list_column_widths');
+
+function lpdh_get_deck_editor_url()
+{
+    $page_id = get_option('lpdh_deck_editor_page_id');
+    return $page_id ? get_permalink($page_id) : home_url('/deck-editor/');
+}
+
+/**
+ * Check if a deck contains banned cards
+ */
+function lpdh_is_deck_legal($deck_id)
+{
+    $banned_names = lpdh_get_banned_card_names();
+    if (empty($banned_names)) {
+        return true;
+    }
+
+    $commander = get_field('commander', $deck_id);
+    $partner = get_field('partner', $deck_id);
+    $decklist_text = get_field('decklist_text', $deck_id);
+
+    $deck_cards = array();
+    if (!empty($commander)) {
+        $deck_cards[] = strtolower(trim($commander));
+    }
+    if (!empty($partner)) {
+        $deck_cards[] = strtolower(trim($partner));
+    }
+
+    if (!empty($decklist_text)) {
+        $lines = explode("\n", $decklist_text);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line))
+                continue;
+
+            // Remove quantity (e.g., "1 Sol Ring" -> "Sol Ring")
+            $card_name = preg_replace('/^\d+x?\s+/', '', $line);
+            $deck_cards[] = strtolower(trim($card_name));
+        }
+    }
+
+    foreach ($deck_cards as $card) {
+        if (in_array($card, $banned_names)) {
+            return false;
+        }
+    }
+
+    return true;
+}
