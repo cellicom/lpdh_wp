@@ -31,6 +31,7 @@ This theme transforms WordPress into a comprehensive tournament management platf
 ### 2. Player Statistics & ELO System
 - **Dynamic ELO Calculation:** A customized formula that updates player rankings based on match outcomes (W-L-D), opponent strength, and final tournament position.
 - **Leaderboards:** Automated annual ranking generation based on competitive performance data.
+- **ELO Leaderboard:** A live, dynamic ranking page showing real-time player standings based on their global ELO score.
 
 ### 3. Deck Management System
 - **Decks:** Players can create, edit, and share their decklists.

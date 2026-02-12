@@ -375,6 +375,9 @@ function render_help_guide_page()
                         </div>
                     </li>
                 </ul>
+                <div class="hg-tip hg-mt-10">
+                    <strong>Note:</strong> Looking for live rankings? See the <strong>ELO Leaderboard Page</strong> section under Stats & ELO.
+                </div>
             </section>
 
             <!-- SECTION: STATS -->
@@ -446,6 +449,15 @@ function render_help_guide_page()
             <span style="color: #a5d6ff;">'position_adjustment'</span> => <span style="color: #79c0ff;">$position_adjustment</span>
         );
     }</pre>
+                </div>
+
+                <div class="hg-card hg-mt-20">
+                    <h5 class="hg-text-blue"><span class="dashicons dashicons-external"></span> ELO Leaderboard Page</h5>
+                    <p class="small">This is a dynamic, real-time ranking page that displays all players ordered by their current ELO. Unlike the annual Leaderboards, this page updates <strong>instantly</strong> whenever an event is synchronized.</p>
+                    <ul class="small">
+                        <li><strong>Template:</strong> To create this page, create a new WordPress Page and select the <strong>ELO Leaderboard</strong> template.</li>
+                        <li><strong>Features:</strong> Includes sortable columns (ELO, Wins, Attendance), tie-breakers based on match wins, and a "Top 3" highlighting system.</li>
+                    </ul>
                 </div>
             </section>
 
