@@ -437,6 +437,11 @@ body.theme-vaporwave,
 body.theme-vaporwave-green {
     #hearts {
         display: inline-block;
+        padding: 10px; // Increase hit area
+        margin: -10px; // Compensate for padding to keep flow mostly same
+        position: relative;
+        z-index: 10;
+        touch-action: manipulation; // Improve mobile touch response
         transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         cursor: pointer;
 
