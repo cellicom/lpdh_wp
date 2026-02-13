@@ -18,8 +18,20 @@ jQuery(document).ready(function ($) {
         eggTrigger.addClass('flipped');
     }
 
-    // 2. Click Handler - Unbind first to prevent duplicates
-    eggTrigger.off('click.vaporwave').on('click.vaporwave', function (e) {
+    // 2. Click Handler - Handle both click and touchend for mobile
+    let lastTouchTime = 0;
+
+    eggTrigger.off('click.vaporwave touchend.vaporwave').on('click.vaporwave touchend.vaporwave', function (e) {
+        // Prevent double firing if both events trigger
+        if (e.type === 'touchend') {
+            lastTouchTime = new Date().getTime();
+        } else if (e.type === 'click') {
+            if (new Date().getTime() - lastTouchTime < 500) {
+                // Ignore click if touchend just happened significantly recently
+                return;
+            }
+        }
+
         e.preventDefault();
         e.stopPropagation(); // Prevent bubbling
 
