@@ -8,6 +8,11 @@
 @import "themes/lost-wood";
 @import "themes/vaporwave-green";
 
+#hearts {
+    color: red !important;
+    cursor: pointer;
+}
+
 // Cookie Consent (bs-cookie-settings)
 #bs-cookie-bar {
     background: rgba(var(--bs-dark-rgb), 0.95) !important;

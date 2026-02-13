@@ -719,6 +719,10 @@ function render_help_guide_page()
                                     or <strong>Mana Tithe</strong> animation. <i>Note:</i> Wilson, Refined Grizzly cannot be
                                     countered!</p>
                             </div>
+                            <div class="hg-card-mini">
+                                <h5 class="hg-text-pink">7. Vaporwave VHS Mode</h5>
+                                <p class="small">Only available in <strong>Vaporwave</strong> themes. Click the <strong>Heart</strong> icon in the footer to toggle a VHS glitch effect with retro TV animations and sounds.</p>
+                            </div>
                         </div>
                     </div>
                 </details>

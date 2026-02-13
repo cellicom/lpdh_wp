@@ -314,6 +314,9 @@ require_once get_stylesheet_directory() . '/inc/commander-roulette.php';
 // Include Discord Integration
 require_once get_stylesheet_directory() . '/inc/discord.php';
 
+// Include Easter Egg Functions
+require_once get_stylesheet_directory() . '/inc/easter-egg.php';
+
 
 /**
  * Enqueue scripts and styles
@@ -1461,7 +1464,7 @@ add_filter('body_class', 'lpdh_apply_theme_body_class');
 function lpdh_get_extra_attributions()
 {
     $attributions = [
-        'Made with <span style="color: red !important; cursor: pointer;">&hearts;</span> by <a class="fw-bold" href="https://linktr.ee/cellicom" target="_blank">cellicom</a>',
+        'Made with <span id="hearts">&hearts;</span> by <a class="fw-bold" href="https://linktr.ee/cellicom" target="_blank">cellicom</a>',
         '<a href="https://github.com/cellicom/lpdh_wp" target="_blank" rel="noopener">View this project on Github</a>',
         '<a href="https://www.vecteezy.com/free-vector/vaporwave-grid" target="_blank" rel="noopener">Vaporwave Grid Vectors by Vecteezy</a>'
     ];
