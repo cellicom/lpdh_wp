@@ -444,6 +444,7 @@ body.theme-vaporwave-green {
         touch-action: manipulation; // Improve mobile touch response
         transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         cursor: pointer;
+        text-decoration: none !important;
 
         &.flipped {
             transform: rotate(180deg);
