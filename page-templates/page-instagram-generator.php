@@ -372,7 +372,7 @@ $site_logo_url = lpdh_get_logo();
 
         .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #ffffff;
             text-transform: uppercase;
@@ -856,7 +856,7 @@ $site_logo_url = lpdh_get_logo();
 
         .instagram-vaporwave .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #ff71ce;
             text-shadow: 0 0 30px rgba(255, 113, 206, 0.8);
@@ -939,7 +939,7 @@ $site_logo_url = lpdh_get_logo();
 
         .instagram-vaporwave-green .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #B1C672;
             text-shadow: 0 0 30px rgba(177, 198, 114, 0.8);
@@ -1004,7 +1004,7 @@ $site_logo_url = lpdh_get_logo();
 
         .instagram-lostwood .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #B1C672;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
@@ -1068,7 +1068,7 @@ $site_logo_url = lpdh_get_logo();
 
         .instagram-bootscore .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: var(--bs-primary, #0d6efd);
             margin-bottom: 15px;
