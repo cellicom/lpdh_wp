@@ -1654,3 +1654,15 @@ function lpdh_register_sw()
     <?php
 }
 add_action('wp_footer', 'lpdh_register_sw');
+
+/**
+ * Filter for Contact Form 7 to allow [hidden user-id default:user_id]
+ */
+add_filter('wpcf7_form_tag_data_option', function ($data, $options, $args) {
+    if (in_array('user_id', $options)) {
+        if (is_user_logged_in()) {
+            return get_current_user_id();
+        }
+    }
+    return $data;
+}, 10, 3);
