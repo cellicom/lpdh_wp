@@ -1666,3 +1666,24 @@ add_filter('wpcf7_form_tag_data_option', function ($data, $options, $args) {
     }
     return $data;
 }, 10, 3);
+
+/**
+ * Change Author Slug from /author/ to /player/
+ */
+function lpdh_change_author_slug()
+{
+    global $wp_rewrite;
+    $wp_rewrite->author_base = 'player';
+}
+add_action('init', 'lpdh_change_author_slug');
+
+/**
+ * Change "Author: Name" to "Player: Name" in Archive Titles
+ */
+add_filter('get_the_archive_title', function ($title) {
+    if (is_author()) {
+        $title = str_replace('Author:', 'Player:', $title);
+        $title = str_replace('Autore:', 'Player:', $title); // Italian fallback
+    }
+    return $title;
+});
