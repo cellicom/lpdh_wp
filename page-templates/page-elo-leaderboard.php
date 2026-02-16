@@ -85,6 +85,14 @@ get_header(); ?>
                                                     $count = isset($rank['count']) ? $rank['count'] : 0;
                                                     $user_id = isset($rank['user_id']) ? $rank['user_id'] : 0;
 
+                                                    // Feature: Use Display Name if available
+                                                    if ($user_id) {
+                                                        $user_info = get_userdata($user_id);
+                                                        if ($user_info) {
+                                                            $name = $user_info->display_name;
+                                                        }
+                                                    }
+
                                                     $player_profile_url = $user_id ? get_author_posts_url($user_id) : '';
 
                                                     // Colors for top 3
