@@ -96,6 +96,10 @@ function render_help_guide_page()
                             <td>URL of the official Facebook event page.</td>
                         </tr>
                         <tr>
+                            <td><strong>Code Event</strong></td>
+                            <td>Unique alphanumeric code for tournament registration via the Companion App.</td>
+                        </tr>
+                        <tr>
                             <td><strong>Rankings JSON</strong></td>
                             <td>Paste your scoring software JSON here. Used by the <strong>Populate</strong> button.</td>
                         </tr>
@@ -132,6 +136,7 @@ function render_help_guide_page()
                         <p class="small">Send a formatted announcement to your Discord server with one click. <br>
                         <strong>Features:</strong><br>
                         - Sends Event details (Title, Date, Location, Link).<br>
+                        - <strong>Event Code:</strong> Automatically included if present.<br>
                         - <strong>Poll:</strong> Adds a "Will you participate?" field with text instructions for reactions (✅ Yes, ❌ No, 🤔 Maybe).<br>
                         <br>
                         <strong>Setup:</strong> Go to <i>LPDH > Theme Settings</i> and paste your <strong>Webhook URL</strong>.</p>
