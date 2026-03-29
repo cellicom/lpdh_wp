@@ -243,13 +243,25 @@ function ajax_send_discord_event_notification()
                         'value' => $place_link ? "[{$place_name}]({$place_link})" : $place_name,
                         'inline' => true
                     ]
-                ],
-                'footer' => [
-                    'text' => $footer_text,
-                    'icon_url' => $icon_url
                 ]
             ]
         ]
+    ];
+
+    // Add Event Code if exists
+    $event_code = get_field('field_event_code', $post_id);
+    if ($event_code) {
+        $payload['embeds'][0]['fields'][] = [
+            'name' => '🔢 Event Code',
+            'value' => "`{$event_code}`",
+            'inline' => true
+        ];
+    }
+
+    // Add Footer
+    $payload['embeds'][0]['footer'] = [
+        'text' => $footer_text,
+        'icon_url' => $icon_url
     ];
     
     // Add thumbnail if place has one

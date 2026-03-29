@@ -68,6 +68,10 @@ function register_deck_post_type()
         'show_in_rest' => true,
         'rest_base' => 'decks',
         'rest_controller_class' => 'WP_REST_Posts_Controller',
+        'rewrite' => array(
+            'slug' => 'player/%player%/deck',
+            'with_front' => false
+        ),
     );
 
     register_post_type('deck', $args);
@@ -636,3 +640,49 @@ function lpdh_is_deck_legal($deck_id)
 
     return true;
 }
+
+/**
+ * Register %player% rewrite tag for Deck CPT
+ */
+function lpdh_add_deck_rewrite_tag() {
+    add_rewrite_tag('%player%', '([^/]+)');
+}
+add_action('init', 'lpdh_add_deck_rewrite_tag', 10);
+
+/**
+ * Filter Deck permalinks to include author nicename
+ */
+function lpdh_deck_post_type_link($post_link, $post) {
+    if ($post->post_type === 'deck') {
+        $author = get_userdata($post->post_author);
+        if ($author) {
+            $post_link = str_replace('%player%', $author->user_nicename, $post_link);
+        } else {
+            // Fallback for posts without authors (though rare)
+            $post_link = str_replace('%player%', 'unknown', $post_link);
+        }
+    }
+    return $post_link;
+}
+add_filter('post_type_link', 'lpdh_deck_post_type_link', 10, 2);
+
+/**
+ * Redirect legacy Deck URLs to the new structure
+ * From /deck/slug/ to /player/user/deck/slug/
+ */
+function lpdh_redirect_old_deck_urls() {
+    if (is_singular('deck')) {
+        $requested_url = $_SERVER['REQUEST_URI'];
+        
+        // If the URL contains /deck/ (old structure) and not the new base /player/
+        // We check for /deck/ specifically at the start or after domain
+        if (preg_match('/\/deck\/([^\/]+)\/?$/', $requested_url, $matches)) {
+            $new_url = get_permalink();
+            if ($new_url && strpos($new_url, '/player/') !== false) {
+                wp_redirect($new_url, 301);
+                exit;
+            }
+        }
+    }
+}
+add_action('template_redirect', 'lpdh_redirect_old_deck_urls');

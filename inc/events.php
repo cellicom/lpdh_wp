@@ -133,6 +133,25 @@ if (function_exists('acf_add_local_field_group')):
                 'default_value' => '',
                 'placeholder' => 'https://facebook.com/events/...',
             ),
+            array(
+                'key' => 'field_event_code',
+                'label' => 'Code Event',
+                'name' => 'event_code',
+                'type' => 'text',
+                'instructions' => 'Enter the alphanumeric code for the Companion App registration.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'e.g. LPDH2024',
+                'prepend' => '',
+                'append' => '',
+                'maxlength' => '',
+            ),
         ),
         'location' => array(
             array(
@@ -441,6 +460,7 @@ function event_custom_columns($columns)
     $new_columns['title'] = $columns['title'];
     $new_columns['event_place'] = 'Place';
     $new_columns['event_date'] = 'Date';
+    $new_columns['event_code'] = 'Code';
     $new_columns['event_fb_link'] = 'FB';
     $new_columns['event_winner'] = 'Winner';
     $new_columns['event_players'] = 'Players';
@@ -468,6 +488,17 @@ function event_custom_columns_data($column, $post_id)
             $event_date = get_field('field_event_date', $post_id);
             if ($event_date) {
                 echo esc_html(date_i18n('d/m/Y', strtotime($event_date))) . '<br>' . esc_html(date_i18n('H:i', strtotime($event_date)));
+            } else {
+                echo '-';
+            }
+            break;
+        case 'event_code':
+            $event_code = get_field('field_event_code', $post_id);
+            if ($event_code) {
+                echo '<span class="lpdh-copyable-code" style="cursor:pointer; background:#f0f0f0; border:1px solid #ccc; padding:2px 5px; border-radius:3px; font-family:monospace; display:inline-block;" title="Click to copy" onclick="lpdhCopyCodeToList(this, event, \'' . esc_attr($event_code) . '\')">';
+                echo esc_html($event_code);
+                echo ' <span class="dashicons dashicons-clipboard" style="font-size:14px; width:14px; height:14px; vertical-align:middle;"></span>';
+                echo '</span>';
             } else {
                 echo '-';
             }
@@ -653,6 +684,7 @@ function lpdh_event_list_column_widths()
             .column-event_players { width: 60px !important; text-align: center; }
             .column-event_fb_link { width: 40px !important; text-align: center; }
             .column-event_date { width: 100px !important; }
+            .column-event_code { width: 100px !important; }
         </style>';
     }
 }
@@ -2028,6 +2060,7 @@ function lpdh_render_event_share_metabox($post)
     $place_obj = get_field('event_place', $post->ID);
     $place_name = $place_obj ? $place_obj->post_title : 'TBA';
     $permalink = get_permalink($post->ID);
+    $event_code = get_field('field_event_code', $post->ID);
 
     // Format date if it exists
     if ($date) {
@@ -2036,7 +2069,11 @@ function lpdh_render_event_share_metabox($post)
         $date_formatted = 'TBA';
     }
 
-    $share_text = $title . "\n" . $date_formatted . " @ " . $place_name . "\n" . $permalink;
+    $share_text = $title . "\n" . $date_formatted . " @ " . $place_name . "\n";
+    if ($event_code) {
+        $share_text .= "Code: " . $event_code . "\n";
+    }
+    $share_text .= $permalink;
 
     echo '<div class="lpdh-share-box">';
     echo '<p class="description" style="margin-bottom: 8px;">Copy this text to share the event on social media or groups:</p>';
@@ -2101,7 +2138,20 @@ function lpdh_render_event_share_metabox($post)
                     }
                 }
 
-                var newText = title + "\n" + date + " @ " + place + "\n" + permalink;
+                // Get Code from ACF
+                var eventCode = '';
+                if (typeof acf !== 'undefined') {
+                    var codeField = acf.getField('field_event_code');
+                    if (codeField) {
+                        eventCode = codeField.val();
+                    }
+                }
+
+                var newText = title + "\n" + date + " @ " + place + "\n";
+                if (eventCode) {
+                    newText += "Code: " + eventCode + "\n";
+                }
+                newText += permalink;
                 $textarea.val(newText);
             }
 
@@ -2110,14 +2160,16 @@ function lpdh_render_event_share_metabox($post)
                 updateShareText();
 
                 var copyText = document.getElementById("lpdh-share-text");
+                if (!copyText) return;
                 copyText.select();
                 copyText.setSelectionRange(0, 99999);
                 navigator.clipboard.writeText(copyText.value).then(function () {
-                    var btn = e.currentTarget;
-                    var originalHtml = btn.innerHTML;
-                    btn.innerHTML = '<span class="dashicons dashicons-yes" style="margin-top: 5px; font-size: 16px;"></span> Copied!';
+                    var $btn = $(e.currentTarget);
+                    var originalHtml = $btn.html();
+                    $btn.html('<span class="dashicons dashicons-yes" style="margin-top: 5px; font-size: 16px;"></span> Copied!');
+                    $btn.addClass('button-primary').removeClass('button-secondary');
                     setTimeout(function () {
-                        btn.innerHTML = originalHtml;
+                        $btn.html(originalHtml).addClass('button-secondary').removeClass('button-primary');
                     }, 2000);
                 });
             };
@@ -2133,3 +2185,57 @@ function lpdh_render_event_share_metabox($post)
     <?php
 }
 
+/**
+ * Event Admin Global Scripts
+ * Ensures copy functions are available on both list and edit pages
+ */
+function lpdh_event_admin_global_scripts() {
+    $screen = get_current_screen();
+    if ($screen && ($screen->post_type === 'event' || $screen->id === 'edit-event')) {
+        ?>
+        <script>
+            (function ($) {
+                // Admin List Copy Function
+                window.lpdhCopyCodeToList = function (el, e, code) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    
+                    var cleanCode = code.trim();
+                    navigator.clipboard.writeText(cleanCode).then(function () {
+                        var $el = $(el);
+                        var $icon = $el.find('.dashicons');
+                        
+                        // Visual feedback: green check icon and background
+                        $el.attr('style', $el.attr('style') + ' background-color: #d1e7dd !important; border-color: #a3cfbb !important; color: #0f5132 !important;');
+                        $icon.removeClass('dashicons-clipboard').addClass('dashicons-yes').attr('style', $icon.attr('style') + ' color: #0f5132 !important;');
+                        
+                        setTimeout(function () {
+                            // Restore styles - removing the added important parts
+                            var style = $el.attr('style');
+                            style = style.replace(' background-color: #d1e7dd !important; border-color: #a3cfbb !important; color: #0f5132 !important;', '');
+                            $el.attr('style', style);
+                            
+                            $icon.removeClass('dashicons-yes').addClass('dashicons-clipboard');
+                            var iconStyle = $icon.attr('style');
+                            iconStyle = iconStyle.replace(' color: #0f5132 !important;', '');
+                            $icon.attr('style', iconStyle);
+                        }, 1500);
+                    });
+                };
+            })(jQuery);
+        </script>
+        <style>
+            #lpdh-copy-event-code .dashicons {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                margin-right: 4px;
+                vertical-align: middle;
+            }
+        </style>
+        <?php
+    }
+}
+add_action('admin_footer', 'lpdh_event_admin_global_scripts');
