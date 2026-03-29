@@ -673,10 +673,11 @@ add_filter('post_type_link', 'lpdh_deck_post_type_link', 10, 2);
 function lpdh_redirect_old_deck_urls() {
     if (is_singular('deck')) {
         $requested_url = $_SERVER['REQUEST_URI'];
+        $home_path = parse_url(home_url(), PHP_URL_PATH) ?: '';
+        $relative_url = ltrim(str_replace($home_path, '', $requested_url), '/');
         
-        // If the URL contains /deck/ (old structure) and not the new base /player/
-        // We check for /deck/ specifically at the start or after domain
-        if (preg_match('/\/deck\/([^\/]+)\/?$/', $requested_url, $matches)) {
+        // If the URL starts with deck/ (old structure) and NOT player/ (new structure)
+        if (0 === strpos($relative_url, 'deck/') && strpos($relative_url, 'player/') === false) {
             $new_url = get_permalink();
             if ($new_url && strpos($new_url, '/player/') !== false) {
                 wp_redirect($new_url, 301);
