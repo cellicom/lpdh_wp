@@ -272,6 +272,13 @@ function lpdh_calculate_rankings_data($events, $initial_elos = array())
     $player_elos = $initial_elos;
 
     foreach ($events as $event) {
+        // Skip events excluded from the annual leaderboard
+        if (get_field('exclude_from_annual_leaderboard', $event->ID)) {
+            continue;
+        }
+
+        $exclude_elo = (bool) get_field('exclude_from_elo_leaderboard', $event->ID);
+
         $rankings = get_field('event_ranking', $event->ID);
 
         // Fallback al JSON se il repeater è vuoto
@@ -394,11 +401,11 @@ function lpdh_calculate_rankings_data($events, $initial_elos = array())
                     $general[$player_key]['last']++;
                 }
 
-                // Calcolo ELO
+                // Calcolo ELO (saltato se l'evento è escluso dal calcolo ELO)
                 $current_elo = $player_elos[$player_key];
                 $games_played = $wins + $draws + $losses;
 
-                if ($games_played > 0) {
+                if ($games_played > 0 && !$exclude_elo) {
                     $elo_data = lpdh_calculate_elo($current_elo, $wins, $draws, $losses, $avg_elo, $pos, $total_players);
                     $new_elo = $elo_data['new_elo'];
 
@@ -452,9 +459,14 @@ function ajax_update_leaderboard_rankings()
 
     $all_events = get_posts($args);
 
-    // Filter events to only include those that actually happened (have rankings)
+    // Filter events to only include those that actually happened (have rankings) and are not excluded from the annual leaderboard
     $valid_events = array();
     foreach ($all_events as $e) {
+        // Skip events explicitly excluded from the annual leaderboard
+        if (get_field('exclude_from_annual_leaderboard', $e->ID)) {
+            continue;
+        }
+
         $rank_data = get_field('event_ranking', $e->ID);
         if (empty($rank_data)) {
             $rank_data = get_field('event_rankings_json', $e->ID);

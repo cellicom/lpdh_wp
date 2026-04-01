@@ -116,6 +116,14 @@ function render_player_stats_page()
             $event_date_raw = get_field('event_date', $event_id);
             $event_year = $event_date_raw ? date('Y', strtotime($event_date_raw)) : '';
 
+            // Respect exclusion flags
+            $exclude_annual = (bool) get_field('exclude_from_annual_leaderboard', $event_id);
+            $exclude_elo    = (bool) get_field('exclude_from_elo_leaderboard', $event_id);
+
+            // If excluded from annual leaderboard, skip this event entirely
+            if ($exclude_annual) {
+                continue;
+            }
 
             $rankings = get_field('event_ranking', $event_id);
 
@@ -217,8 +225,8 @@ function render_player_stats_page()
                         }
                     }
 
-                    // 2. ELO Update Logic (Everyone)
-                    if (!empty($name)) {
+                    // 2. ELO Update Logic (Everyone, unless event is excluded from ELO)
+                    if (!empty($name) && !$exclude_elo) {
                         $event_y_int = intval($event_year);
                         $sel_y_int = ($selected_year === 'global') ? 0 : intval($selected_year);
 
