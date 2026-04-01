@@ -390,3 +390,226 @@
         transform: translate(-50%, -50%) scale(1);
     }
 }
+
+/* --- VHS Glitch Easter Egg --- */
+body.theme-vaporwave.vaporwave-glitch-active,
+body.theme-vaporwave-green.vaporwave-glitch-active {
+    position: relative;
+    overflow-x: hidden;
+
+    &::before {
+        content: " ";
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        z-index: 1000000;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+    }
+
+    &::after {
+        content: " ";
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgba(18, 16, 16, 0.05);
+        opacity: 0;
+        z-index: 1000000;
+        pointer-events: none;
+        animation: flicker 0.15s infinite;
+    }
+
+    // RGB Split Effect on main content
+    #page {
+        animation: rgb-split 3s infinite linear alternate-reverse;
+    }
+}
+
+// Heart Icon Rotation (Scoped to theme)
+body.theme-vaporwave,
+body.theme-vaporwave-green {
+    #hearts {
+        display: inline-block;
+        padding: 10px; // Increase hit area
+        margin: -10px; // Compensate for padding to keep flow mostly same
+        position: relative;
+        z-index: 10;
+        touch-action: manipulation; // Improve mobile touch response
+        transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        cursor: pointer;
+        text-decoration: none !important;
+
+        &.flipped {
+            transform: rotate(180deg);
+            filter: drop-shadow(0 0 5px var(--lpdh-primary));
+        }
+
+        &:hover {
+            filter: drop-shadow(0 0 8px var(--lpdh-primary));
+        }
+    }
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.02795
+    }
+
+    5% {
+        opacity: 0.04417
+    }
+
+    10% {
+        opacity: 0.02102
+    }
+
+    15% {
+        opacity: 0.08864
+    }
+
+    20% {
+        opacity: 0.0076
+    }
+
+    25% {
+        opacity: 0.07639
+    }
+
+    30% {
+        opacity: 0.03541
+    }
+
+    35% {
+        opacity: 0.00742
+    }
+
+    40% {
+        opacity: 0.09886
+    }
+
+    45% {
+        opacity: 0.0837
+    }
+
+    50% {
+        opacity: 0.0787
+    }
+
+    55% {
+        opacity: 0.03264
+    }
+
+    60% {
+        opacity: 0.09819
+    }
+
+    65% {
+        opacity: 0.02279
+    }
+
+    70% {
+        opacity: 0.06076
+    }
+
+    75% {
+        opacity: 0.00595
+    }
+
+    80% {
+        opacity: 0.07639
+    }
+
+    85% {
+        opacity: 0.02705
+    }
+
+    90% {
+        opacity: 0.07545
+    }
+
+    95% {
+        opacity: 0.08013
+    }
+
+    100% {
+        opacity: 0.025
+    }
+}
+
+@keyframes rgb-split {
+    0% {
+        text-shadow: -1px 0 rgba(255, 0, 0, 0.4), 1px 0 rgba(0, 255, 255, 0.4);
+    }
+
+    25% {
+        text-shadow: 1px 0 rgba(255, 0, 0, 0.4), -1px 0 rgba(0, 255, 255, 0.4);
+    }
+
+    50% {
+        text-shadow: -2px 0 rgba(255, 0, 0, 0.4), 2px 0 rgba(0, 255, 255, 0.4);
+    }
+
+    75% {
+        text-shadow: 2px 0 rgba(255, 0, 0, 0.4), -2px 0 rgba(0, 255, 255, 0.4);
+    }
+
+    100% {
+        text-shadow: -1px 0 rgba(255, 0, 0, 0.4), 1px 0 rgba(0, 255, 255, 0.4);
+    }
+}
+
+/* --- TV Turn On/Off Animations --- */
+@keyframes tv-turn-on {
+    0% {
+        transform: scale(1, 0.001);
+        opacity: 0;
+        filter: brightness(3);
+    }
+
+    60% {
+        transform: scale(1, 0.001);
+        opacity: 1;
+        filter: brightness(2);
+    }
+
+    100% {
+        transform: scale(1, 1);
+        opacity: 1;
+        filter: brightness(1);
+    }
+}
+
+@keyframes tv-turn-off {
+    0% {
+        transform: scale(1, 1);
+        opacity: 1;
+        filter: brightness(1);
+    }
+
+    60% {
+        transform: scale(1, 0.001);
+        opacity: 1;
+        filter: brightness(2);
+    }
+
+    100% {
+        transform: scale(0, 0);
+        opacity: 0;
+        filter: brightness(0);
+    }
+}
+
+body.vaporwave-turn-on {
+    animation: tv-turn-on 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+body.vaporwave-turn-off {
+    animation: tv-turn-off 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}

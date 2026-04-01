@@ -1,0 +1,33 @@
+<?php
+$containerclass = $args['acf_fc_layout'];
+if ($args['visible'] ?? true) {
+    $title = $args['title'] ?? '';
+    // Use 'html' key to match ACF field name
+    $html_content = $args['html'] ?? '';
+
+    // Prepare args for helper function which expects 'titolo'
+    $args_for_hash = array_merge($args, ['titolo' => $title]);
+    ?>
+
+    <div class="container-fluid py-5 <?php echo esc_attr($containerclass); ?>">
+        <a name="<?php echo getUrlHashtagFromAcfBox($args_for_hash, $args['acf_index']); ?>"></a>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <?php if ($title) { ?>
+                        <h2 class="section-title mb-4 text-center">
+                            <?php echo esc_html($title); ?>
+                        </h2>
+                    <?php } ?>
+                    <?php if ($html_content) { ?>
+                        <div class="html-content">
+                            <?php echo wp_kses_post($html_content); ?>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+?>

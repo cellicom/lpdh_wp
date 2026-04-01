@@ -27,8 +27,20 @@ get_header();
         <?php the_post(); ?>
         <?php do_action('bootscore_before_title', 'page-sidebar-none'); ?>
         <?php
-        $hero_class = is_front_page() ? 'home-title-hero' : '';
+        $hero_class = '';
+        if (is_front_page()) {
+          $hero_class = 'home-title-hero d-none';
+          ?>
+          <div class="text-center mb-4 laser-logo-container position-relative d-inline-block overflow-hidden"
+            style="--logo-url: url('<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'default')); ?>');">
+            <img src="<?= esc_url(apply_filters('bootscore/logo', lpdh_get_logo(), 'default')); ?>"
+              alt="<?= esc_attr(get_bloginfo('name')); ?>" class="img-fluid homepage-logo">
+          </div>
+          <?php
+        }
+
         the_title('<h1 class="entry-title ' . $hero_class . ' ' . esc_attr(apply_filters('bootscore/class/entry/title', '', 'page-sidebar-none')) . '">', '</h1>');
+
         ?>
         <?php do_action('bootscore_after_title', 'page-sidebar-none'); ?>
         <?php bootscore_post_thumbnail(); ?>

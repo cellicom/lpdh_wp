@@ -55,6 +55,41 @@ get_header(); ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
+
+                                <?php
+                                $event_code = get_field('field_event_code');
+                                if ($event_code): ?>
+                                    <div class="event-code-row d-flex justify-content-center mt-3">
+                                        <div class="event-code bg-dark text-white px-3 py-1 rounded shadow-sm d-flex align-items-center gap-2"
+                                            style="cursor: pointer; transition: all 0.3s ease;"
+                                            title="Click to copy code"
+                                            onclick="lpdhCopyFrontendCode(this, '<?php echo esc_js($event_code); ?>')">
+                                            <i class="fas fa-mobile-alt event-code-icon"></i>
+                                            <span class="fw-bold"><?php echo esc_html($event_code); ?></span>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function lpdhCopyFrontendCode(el, code) {
+                                            navigator.clipboard.writeText(code).then(function() {
+                                                const icon = el.querySelector('.event-code-icon');
+                                                const originalClass = icon.className;
+                                                
+                                                // Feedback: Green check icon
+                                                icon.className = 'fas fa-check-circle';
+                                                icon.style.color = '#28a745';
+                                                el.style.borderColor = '#28a745';
+                                                el.classList.add('border');
+                                                
+                                                setTimeout(() => {
+                                                    icon.className = originalClass;
+                                                    icon.style.color = '';
+                                                    el.style.borderColor = '';
+                                                    el.classList.remove('border');
+                                                }, 2000);
+                                            });
+                                        }
+                                    </script>
+                                <?php endif; ?>
                             </header>
 
                             <?php if (has_post_thumbnail()): ?>

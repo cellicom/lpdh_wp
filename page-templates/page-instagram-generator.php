@@ -193,6 +193,20 @@ if (is_array($rankings) && count($rankings) > 0) {
 // Format date
 $formatted_date = $event_date ? date_i18n('d/m/Y', strtotime($event_date)) : '';
 $place_name = $event_place ? $event_place->post_title : '';
+// Get current active theme to set as default
+$active_theme = get_option('lpdh_active_theme', 'default');
+$default_ig_theme = 'instagram-fantasy'; // Default fallback
+
+if ($active_theme === 'vaporwave') {
+    $default_ig_theme = 'instagram-vaporwave';
+} elseif ($active_theme === 'vaporwave-green') {
+    $default_ig_theme = 'instagram-vaporwave-green';
+} elseif ($active_theme === 'lost-wood') {
+    $default_ig_theme = 'instagram-lostwood';
+}
+
+// Get Site Logo for Templates using helper function
+$site_logo_url = lpdh_get_logo();
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -236,6 +250,9 @@ $place_name = $event_place ? $event_place->post_title : '';
             background: #1e1e1e !important;
             border: 1px solid #333 !important;
             color: #fff !important;
+            max-width: 1080px;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
 
         .selectors-card .form-label {
@@ -251,6 +268,23 @@ $place_name = $event_place ? $event_place->post_title : '';
         .selectors-card .form-select:focus {
             border-color: #6a1b9a !important;
             box-shadow: 0 0 0 0.25rem rgba(106, 27, 154, 0.25) !important;
+        }
+
+        /* Site Logo in Templates */
+        .ig-site-logo {
+            display: block;
+            margin: 0 auto 30px;
+            max-width: 300px; /* Increased size since it's now a header element */
+            height: auto;
+            z-index: 10;
+            opacity: 0.95;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        /* Vaporwave styles might need a glow */
+        .instagram-vaporwave .ig-site-logo,
+        .instagram-vaporwave-green .ig-site-logo {
+            filter: drop-shadow(0 0 10px rgba(255, 113, 206, 0.5));
         }
 
         .instagram-image {
@@ -326,7 +360,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         /* Header Section */
@@ -338,7 +372,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #ffffff;
             text-transform: uppercase;
@@ -479,7 +513,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .first-place-info {
             text-align: center;
-            max-width: 400px;
+            margin-bottom: 30px;
         }
 
         .first-place-position {
@@ -713,7 +747,7 @@ $place_name = $event_place ? $event_place->post_title : '';
         /* Action Buttons */
         .action-buttons {
             max-width: 1080px;
-            margin: 40px auto;
+            margin: 40px auto !important;
             padding: 30px;
             background: white;
             border-radius: 12px;
@@ -811,7 +845,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-vaporwave .header {
@@ -822,7 +856,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-vaporwave .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #ff71ce;
             text-shadow: 0 0 30px rgba(255, 113, 206, 0.8);
@@ -894,7 +928,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-vaporwave-green .header {
@@ -905,7 +939,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-vaporwave-green .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #B1C672;
             text-shadow: 0 0 30px rgba(177, 198, 114, 0.8);
@@ -959,7 +993,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-lostwood .header {
@@ -970,7 +1004,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-lostwood .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: #B1C672;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
@@ -1023,7 +1057,7 @@ $place_name = $event_place ? $event_place->post_title : '';
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 80px 60px 60px;
+            padding: 30px 60px 60px;
         }
 
         .instagram-bootscore .header {
@@ -1034,7 +1068,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
         .instagram-bootscore .event-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 48px;
+            font-size: 35px;
             font-weight: 900;
             color: var(--bs-primary, #0d6efd);
             margin-bottom: 15px;
@@ -1089,11 +1123,11 @@ $place_name = $event_place ? $event_place->post_title : '';
                         <div class="d-flex flex-column">
                             <label for="ig-theme-select" class="form-label fw-bold mb-2">🎨 Select Theme</label>
                             <select id="ig-theme-select" class="form-select form-select-lg border-2">
-                                <option value="instagram-fantasy" selected>🏰 Epic Fantasy</option>
-                                <option value="instagram-vaporwave">🌸 Vaporwave</option>
-                                <option value="instagram-vaporwave-green">💚 Vaporwave Green</option>
-                                <option value="instagram-lostwood">🌲 Lost Wood</option>
-                                <option value="instagram-bootscore">📘 Bootstrap Classic</option>
+                                <option value="instagram-fantasy" <?php selected($default_ig_theme, 'instagram-fantasy'); ?>>🏰 Epic Fantasy</option>
+                                <option value="instagram-vaporwave" <?php selected($default_ig_theme, 'instagram-vaporwave'); ?>>🌸 Vaporwave</option>
+                                <option value="instagram-vaporwave-green" <?php selected($default_ig_theme, 'instagram-vaporwave-green'); ?>>💚 Vaporwave Green</option>
+                                <option value="instagram-lostwood" <?php selected($default_ig_theme, 'instagram-lostwood'); ?>>🌲 Lost Wood</option>
+                                <option value="instagram-bootscore" <?php selected($default_ig_theme, 'instagram-bootscore'); ?>>📘 Bootstrap Classic</option>
                             </select>
                         </div>
                     </div>
@@ -1112,10 +1146,13 @@ $place_name = $event_place ? $event_place->post_title : '';
         </div>
 
         <!-- Image Preview -->
-        <div class="instagram-image instagram-fantasy" id="ig-image">
+        <div class="instagram-image <?php echo esc_attr($default_ig_theme); ?>" id="ig-image">
             <div class="content">
                 <!-- Header -->
                 <div class="header">
+                    <?php if (!empty($site_logo_url)): ?>
+                        <img src="<?php echo esc_url($site_logo_url); ?>" class="ig-site-logo" alt="LPDH Logo">
+                    <?php endif; ?>
                     <div class="event-title">
                         <?php echo esc_html($event_title); ?>
                     </div>
@@ -1137,7 +1174,7 @@ $place_name = $event_place ? $event_place->post_title : '';
 
                 <!-- Dynamic Template Loading -->
                 <?php
-                $template_file = __DIR__ . "/ig-template/{$ig_type}.php";
+                $template_file = dirname(__DIR__) . "/inc/ig-templates/{$ig_type}.php";
                 if (file_exists($template_file)) {
                     include($template_file);
                 } else {

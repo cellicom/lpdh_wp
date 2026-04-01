@@ -40,7 +40,7 @@ jQuery(function ($) {
                         const randomMsg = rejectionMessages[Math.floor(Math.random() * rejectionMessages.length)];
 
                         // Create a "Burn" effect overlay
-                        const $burnOverlay = $('<div class="burn-easter-egg"><div class="burn-content"><h1>' + randomMsg + '</h1><p>Redirecting to a real LPDH deck...</p></div></div>');
+                        const $burnOverlay = $('<div class="burn-easter-egg"><div class="burn-content"><h1>' + randomMsg + '</h1><p>Redirecting to a real LPDH content...</p></div></div>');
                         $('body').append($burnOverlay);
 
                         // Hide search overlay
@@ -287,9 +287,6 @@ jQuery(function ($) {
     ];
 
     /**
-     * POINT 6: Deck Counterspell Easter Egg
-     */
-    /**
      * POINT 6: Deck Counterspell Easter Egg (Wilson Logic)
      */
     // Inject Wilson Styles
@@ -320,4 +317,94 @@ jQuery(function ($) {
             $overlay.fadeOut(500, function () { $(this).remove(); });
         }, 3000);
     }
+
+    /**
+     * POINT 7: LPDH Vaporwave Easter Egg (VHS Glitch)
+     */
+    const eggTrigger = $('#hearts');
+    const body = $('body');
+    const storageKey = 'lpdh_vaporwave_egg_active';
+
+    // Audio Objects
+    // Ensure lpdh_egg_vars exists
+    const audioOn = (typeof lpdh_egg_vars !== 'undefined') ? new Audio(lpdh_egg_vars.audio_on) : null;
+    const audioOff = (typeof lpdh_egg_vars !== 'undefined') ? new Audio(lpdh_egg_vars.audio_off) : null;
+
+    // 1. Check LocalStorage on Load
+    // Only apply if we are in vaporwave theme or if we want to force it
+    // But for safety, let's just check the storage. 
+    // The CSS logic requires .theme-vaporwave, so it won't break other themes effectively.
+    if (localStorage.getItem(storageKey) === 'true') {
+        body.addClass('vaporwave-glitch-active');
+        eggTrigger.addClass('flipped');
+    }
+
+    eggTrigger.off('click.vaporwave').on('click.vaporwave', function (e) {
+        console.log('📼 Egg Trigger Clicked'); // Debug
+        e.preventDefault();
+        e.stopPropagation(); // Prevent bubbling
+
+        if (body.hasClass('vaporwave-glitch-active')) {
+            deactivateGlitch();
+        } else {
+            activateGlitch();
+        }
+    });
+
+    // Helper functions
+    function activateGlitch() {
+        // Play Sound
+        if (audioOn) {
+            audioOn.currentTime = 0;
+            audioOn.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Animation: Turn On
+        body.addClass('vaporwave-turn-on');
+
+        // Add Glitch Class immediately
+        body.addClass('vaporwave-glitch-active');
+        eggTrigger.addClass('flipped');
+
+        localStorage.setItem(storageKey, 'true');
+        console.log('📼 VHS Glitch Activated');
+
+        // Remove animation class after completion
+        setTimeout(() => {
+            body.removeClass('vaporwave-turn-on');
+        }, 400);
+    }
+
+    function deactivateGlitch() {
+        // Play Sound
+        if (audioOff) {
+            audioOff.currentTime = 0;
+            audioOff.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Animation: Turn Off
+        body.addClass('vaporwave-turn-off');
+
+        console.log('📼 VHS Glitch Deactivating...');
+
+        // Wait for Turn Off animation to finish
+        setTimeout(() => {
+            // Remove Glitch
+            body.removeClass('vaporwave-glitch-active');
+            eggTrigger.removeClass('flipped');
+            localStorage.setItem(storageKey, 'false');
+
+            // Remove Turn Off class
+            body.removeClass('vaporwave-turn-off');
+
+            // Animation: Turn On (Normal View)
+            body.addClass('vaporwave-turn-on');
+            setTimeout(() => {
+                body.removeClass('vaporwave-turn-on');
+                console.log('📼 VHS Glitch Deactivated');
+            }, 400);
+
+        }, 400);
+    }
+
 });

@@ -12,38 +12,29 @@ $people = $args['people'] ?? [];
                 if (!($person['visible'] ?? true))
                     continue;
 
-                $icon = $person['icon'] ?? '';
-                $title = $person['title'] ?? '';
-                $nickname = $person['nickname'] ?? '';
+                $profile_id = $person['profile'] ?? 0;
+                if (!$profile_id) continue;
+
+                $user = get_userdata($profile_id);
+                if (!$user) continue;
+
+                $first_name = get_user_meta($profile_id, 'first_name', true);
+                $last_name = get_user_meta($profile_id, 'last_name', true);
+                $full_name = trim($first_name . ' ' . $last_name);
+                if (!$full_name) {
+                    $full_name = $user->display_name;
+                }
+
+                $icon = get_avatar_url($profile_id, ['size' => 160]);
+                $title = $full_name;
+                $nickname = get_user_meta($profile_id, 'nickname', true) ?: $user->user_login;
                 $subtitle = $person['subtitle'] ?? '';
                 $text = $person['text'] ?? '';
-                $url_data = $person['url'] ?? '';
-                $profile = $person['profile'] ?? '';
-
-                // Fallback to profile data if fields are empty
-                if ($profile) {
-                    if (!$title)
-                        $title = $profile['display_name'];
-                    if (!$nickname)
-                        $nickname = $profile['user_nicename'];
-                    if (!$icon)
-                        $icon = get_avatar_url($profile['ID']);
-                }
-
-                if (is_array($url_data)) {
-                    $href = $url_data['url'] ?? '#';
-                    $target = $url_data['target'] ?? '_self';
-                } else {
-                    $href = $url_data ?: '#';
-                    $target = '_self';
-                }
-                $has_link = !empty($url_data);
+                $href = lpdh_get_user_profile_url($profile_id);
+                
                 ?>
                 <div class="col-12">
-                    <?php if ($has_link): ?>
-                        <a href="<?php echo esc_url($href); ?>" target="<?php echo esc_attr($target); ?>"
-                            class="text-decoration-none">
-                        <?php endif; ?>
+                    <a href="<?php echo esc_url($href); ?>" class="text-decoration-none">
                         <div class="card border-0 shadow-sm hover-lift transition-base">
                             <div class="card-body p-4">
                                 <div class="about-card-grid">
@@ -76,17 +67,13 @@ $people = $args['people'] ?? [];
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if ($has_link): ?>
-                                        <div class="item-arrow text-primary">
-                                            <i class="fas fa-chevron-right fa-lg"></i>
-                                        </div>
-                                    <?php endif; ?>
+                                    <div class="item-arrow text-primary">
+                                        <i class="fas fa-chevron-right fa-lg"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <?php if ($has_link): ?>
-                        </a>
-                    <?php endif; ?>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>

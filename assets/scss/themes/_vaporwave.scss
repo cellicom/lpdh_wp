@@ -352,11 +352,11 @@ body.theme-vaporwave {
         span,
         div,
         .widget-title {
-            color: #fff !important;
+            color: #fff;
         }
 
         a {
-            color: #fff !important;
+            color: #fff;
 
             &:hover {
                 color: var(--lpdh-primary) !important;
@@ -522,7 +522,8 @@ body.theme-vaporwave {
 
     // Rankings Tables (Single Event & Single Leaderboard)
     &.single-event .event-rankings,
-    &.single-leaderboard .leaderboard-rankings {
+    &.single-leaderboard .leaderboard-rankings,
+    &.page-template-page-elo-leaderboard .leaderboard-rankings {
         .table {
             --bs-table-bg: transparent;
             --bs-table-color: var(--lpdh-text);
@@ -976,4 +977,46 @@ body.theme-vaporwave {
     background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
+}
+
+/* Laser Logo Animation */
+body.theme-vaporwave {
+    .laser-logo-container {
+        -webkit-mask-image: var(--logo-url);
+        mask-image: var(--logo-url);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-position: center;
+        mask-position: center;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-25deg);
+            animation: laser-shine 3s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+    }
+}
+
+@keyframes laser-shine {
+    0% {
+        left: -100%;
+    }
+
+    80% {
+        left: 200%;
+    }
+
+    100% {
+        left: 200%;
+    }
 }

@@ -95,7 +95,7 @@ class LPDH_Email_Template
     private function get_logo_html()
     {
         $custom_logo_id = get_theme_mod('custom_logo');
-        
+
         if ($custom_logo_id) {
             $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
             if ($logo_url) {
@@ -103,9 +103,9 @@ class LPDH_Email_Template
                 if (strpos($logo_url, 'http') !== 0) {
                     $logo_url = home_url($logo_url);
                 }
-                
+
                 return sprintf(
-                    '<img src="%s" alt="%s" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">',
+                    '<img src="%s" alt="%s" style="max-width: 80%%; height: auto; display: block; margin: 0 auto;">',
                     esc_url($logo_url),
                     esc_attr(get_bloginfo('name'))
                 );
@@ -128,7 +128,7 @@ class LPDH_Email_Template
      */
     public function get_header($title = '')
     {
-        $header_bg = $this->theme === 'vaporwave' || $this->theme === 'vaporwave-green' 
+        $header_bg = $this->theme === 'vaporwave' || $this->theme === 'vaporwave-green'
             ? 'background: linear-gradient(135deg, ' . $this->colors['primary'] . ', ' . $this->colors['secondary'] . ');'
             : 'background: linear-gradient(135deg, ' . $this->colors['primary'] . ', ' . $this->colors['primary_dark'] . ');';
 
@@ -226,7 +226,7 @@ class LPDH_Email_Template
         // Vaporwave background images
         $body_bg = '#f4f4f4';
         $body_extra_styles = '';
-        
+
         if ($this->theme === 'vaporwave') {
             $body_bg = '#1a0033';
             $bg_image_url = get_stylesheet_directory_uri() . '/assets/img/bg/vaporwave.jpg';
@@ -244,8 +244,8 @@ class LPDH_Email_Template
         }
 
         // Card background for vaporwave themes
-        $card_bg = ($this->theme === 'vaporwave' || $this->theme === 'vaporwave-green') 
-            ? 'rgba(26, 0, 51, 0.9)' 
+        $card_bg = ($this->theme === 'vaporwave' || $this->theme === 'vaporwave-green')
+            ? 'rgba(26, 0, 51, 0.9)'
             : 'white';
 
         return sprintf(

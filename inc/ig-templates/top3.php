@@ -92,3 +92,4 @@ if (!isset($players_data) || empty($players_data)) {
         ?>
     </div>
 </div>
+

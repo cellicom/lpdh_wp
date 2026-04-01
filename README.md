@@ -31,6 +31,7 @@ This theme transforms WordPress into a comprehensive tournament management platf
 ### 2. Player Statistics & ELO System
 - **Dynamic ELO Calculation:** A customized formula that updates player rankings based on match outcomes (W-L-D), opponent strength, and final tournament position.
 - **Leaderboards:** Automated annual ranking generation based on competitive performance data.
+- **ELO Leaderboard:** A live, dynamic ranking page showing real-time player standings based on their global ELO score.
 
 ### 3. Deck Management System
 - **Decks:** Players can create, edit, and share their decklists.
@@ -80,8 +81,14 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Co-Administrator:** Specialized role for content managers. Can manage all tournament data, achievements, and decks, but is restricted from system-level changes (themes, plugins, settings).
 - **Player:** Managed via frontend dashboard for profile updates and deck submissions.
 
-### 11. Custom Sync & Matching
+### 12. Custom Sync & Matching
 - **Improved Name Matching:** Robust event synchronization algorithm that handles multi-word surnames and abbreviations.
+
+### 13. Discord Integration 📢
+- **Event Announcements:** Send formatted notifications to a Discord channel via Webhook.
+- **Rich Embeds:** Automatically pulls event title, date, location (with details link), and featured image.
+- **Polls:** Includes a text-based "Will you participate?" poll field for manual reactions (✅/❌/🤔).
+- **Configuration:** Fully manageable via **Theme Settings** (Webhook URL, Bot Name, Footer).
 
 ## ✨ Easter Eggs & Community Interactions
 The theme includes several interactive "secrets" to engage the community. Found it all!

@@ -8,6 +8,12 @@
 @import "themes/lost-wood";
 @import "themes/vaporwave-green";
 
+#hearts {
+    color: red !important;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
 // Cookie Consent (bs-cookie-settings)
 #bs-cookie-bar {
     background: rgba(var(--bs-dark-rgb), 0.95) !important;
@@ -164,8 +170,13 @@ body {
 
     h1 {
         margin-bottom: 0;
-        font-size: 60px;
+        //font-size: 60px;
     }
+}
+
+h1,
+.h1 {
+    font-size: calc(1.375rem + 3vw);
 }
 
 /*
@@ -1721,4 +1732,14 @@ input[type="file"]::file-selector-button {
 
 .achievement-card:hover {
     transform: translateY(-5px);
+}
+
+/* Laser Logo Animation */
+
+.homepage-logo {
+    max-width: 90vw;
+
+    @media (min-width: 992px) {
+        max-width: 70vw;
+    }
 }
