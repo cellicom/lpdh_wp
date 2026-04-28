@@ -1687,3 +1687,34 @@ add_filter('get_the_archive_title', function ($title) {
     }
     return $title;
 });
+
+/**
+ * Add the Registration Date column to the user list
+ */
+function lpdh_add_registration_column($columns) {
+    $columns['registration_date'] = __('Registered', 'text_domain');
+    return $columns;
+}
+add_filter('manage_users_columns', 'lpdh_add_registration_column');
+
+/**
+ * Display the registration date in the custom column
+ */
+function lpdh_show_registration_date($value, $column_name, $user_id) {
+    if ($column_name == 'registration_date') {
+        $user = get_userdata($user_id);
+        $registration_date = $user->user_registered;
+        return date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($registration_date));
+    }
+    return $value;
+}
+add_filter('manage_users_custom_column', 'lpdh_show_registration_date', 10, 3);
+
+/**
+ * Make the Registration Date column sortable
+ */
+function lpdh_sortable_registration_column($columns) {
+    $columns['registration_date'] = 'registered';
+    return $columns;
+}
+add_filter('manage_users_sortable_columns', 'lpdh_sortable_registration_column');
