@@ -392,15 +392,41 @@ function render_help_guide_page()
                 <div class="hg-tip hg-mt-10">
                     <strong>Note:</strong> Looking for live rankings? See the <strong>ELO Leaderboard Page</strong> section under Stats & ELO.
                 </div>
-            </section>
-
-            <!-- SECTION: STATS -->
+                <!-- SECTION: STATS -->
             <section id="stats" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-chart-area"></span> 9. Statistics & ELO
+                    <span class="dashicons dashicons-chart-area"></span> 9. Statistics &amp; ELO
                 </h2>
-                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in
-                    Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
+
+                <div class="hg-grid-2" style="margin-bottom: 25px;">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Players Stats</h5>
+                        <p class="small">Accessible at <strong>Stats &gt; Players Stats</strong> (each player sees only their own data).<br>
+                        Displays a yearly filter (default: Global) and the following sections:</p>
+                        <ul class="small">
+                            <li><strong>Summary card:</strong> Tournament Attendance, Wins, Last Places, ELO, Achievements, Roulette Spins, Decks Owned, Most Used Deck.</li>
+                            <li><strong>Most Used Decks:</strong> Pie chart of the player's own deck usage.</li>
+                            <li><strong>Win Rate Trend:</strong> Line chart showing win rate % by year.</li>
+                            <li><strong>ELO Trend:</strong> Line chart tracking ELO score over time.</li>
+                            <li><strong>My Decks table:</strong> Per-deck performance (Tournament Wins, Match W/D/L, Win Rate, Attendance) — paginated 5/page.</li>
+                            <li><strong>Event History table:</strong> Full list of attended events with position, deck used, and venue — paginated 5/page.</li>
+                        </ul>
+                        <div class="hg-tip">
+                            <strong>Admin override:</strong> Administrators can view any player's stats via the <strong>Select Player</strong> dropdown at the top of the page, or by clicking <strong>View Stats</strong> in the user list row actions.
+                        </div>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-chart-pie"></span> Decks Stats</h5>
+                        <p class="small">Accessible at <strong>Stats &gt; Decks Stats</strong> (Admin / Co-Admin only). Shows aggregated data across all players and all events.</p>
+                        <ul class="small">
+                            <li><strong>Year filter:</strong> Default Global; filter by a specific competition year.</li>
+                            <li><strong>Top Commanders pie chart:</strong> Top 10 commander pairs (Commander / Partner) by total appearances in tournaments.</li>
+                            <li><strong>Deck Usage pie chart:</strong> All registered decks ranked by total appearances.</li>
+                            <li><strong>All Decks table:</strong> Site-wide deck list with Tournament Wins, Match Wins, Match Draws, Match Losses, Win Rate, and Attendance. Paginated at <strong>10 decks/page</strong>, sortable by clicking any column header. Default order: <strong>Win Rate DESC</strong>. Author name links to their frontend profile.</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <h4 style="margin-top: 25px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
@@ -544,6 +570,13 @@ function render_help_guide_page()
                         has also unlocked them.</li>
                     <li><strong>Private Profile:</strong> Hides the User Detail page from the public.</li>
                     <li><strong>Account Deletion:</strong> Permanent removal of profile and assigned decks.</li>
+                </ul>
+
+                <h4 style="margin-top: 20px;">Admin User List Enhancements:</h4>
+                <ul class="hg-list">
+                    <li><strong>Decks column:</strong> Shows the number of decks owned by each user, with a direct link to their deck list.</li>
+                    <li><strong>Registered column:</strong> Shows each user's registration date (formatted according to site date settings). The column is sortable by clicking the header.</li>
+                    <li><strong>View Stats action:</strong> Admins can click <strong>View Stats</strong> in the user row to jump directly to that player's Stats page.</li>
                 </ul>
             </section>
 
@@ -734,7 +767,7 @@ function render_help_guide_page()
             </section>
 
             <footer class="hg-footer">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.0.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.1.0</p>
             </footer>
         </div>
     </div>

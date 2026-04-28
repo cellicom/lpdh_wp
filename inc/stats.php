@@ -4,11 +4,12 @@
  */
 
 /**
- * Enqueue assets for Player Stats page
+ * Enqueue assets for Stats pages
  */
 function lpdh_player_stats_enqueue()
 {
-    if (isset($_GET['page']) && $_GET['page'] === 'player-stats') {
+    $page = isset($_GET['page']) ? $_GET['page'] : '';
+    if ($page === 'player-stats' || $page === 'deck-stats') {
         wp_enqueue_style('select2', get_stylesheet_directory_uri() . '/assets/css/select2.min.css');
         wp_enqueue_script('select2', get_stylesheet_directory_uri() . '/assets/js/select2.min.js', ['jquery'], '4.1.0', true);
     }
@@ -16,10 +17,11 @@ function lpdh_player_stats_enqueue()
 add_action('admin_enqueue_scripts', 'lpdh_player_stats_enqueue');
 
 /**
- * Add Stats page for Players
+ * Register Stats parent menu with Players Stats and Decks Stats subpages
  */
 function register_stats_page()
 {
+    // Parent menu — keeps slug 'player-stats' so existing form actions stay valid
     add_menu_page(
         'Stats',
         'Stats',
@@ -28,6 +30,26 @@ function register_stats_page()
         'render_player_stats_page',
         'dashicons-chart-bar',
         2
+    );
+
+    // Players Stats — replaces the auto-generated "Stats > Stats" duplicate entry
+    add_submenu_page(
+        'player-stats',
+        'Players Stats',
+        'Players Stats',
+        'read',
+        'player-stats',
+        'render_player_stats_page'
+    );
+
+    // Decks Stats — new subpage
+    add_submenu_page(
+        'player-stats',
+        'Decks Stats',
+        'Decks Stats',
+        'read',
+        'deck-stats',
+        'render_deck_stats_page'
     );
 }
 add_action('admin_menu', 'register_stats_page');
@@ -867,3 +889,368 @@ add_filter('user_row_actions', 'add_stats_link_to_user_row', 10, 2);
 /**
  * Checks a single condition against a value.
  */
+
+/**
+ * Render Decks Stats admin page
+ */
+function render_deck_stats_page()
+{
+    // Collect available years from all events
+    $event_args_years = array(
+        'post_type'      => 'event',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'meta_key'       => 'event_date',
+        'orderby'        => 'meta_value',
+        'order'          => 'ASC',
+    );
+    $events_years_query = new WP_Query($event_args_years);
+    $available_years = array();
+    if ($events_years_query->have_posts()) {
+        foreach ($events_years_query->posts as $p) {
+            $d = get_field('event_date', $p->ID);
+            if ($d) {
+                $y = date('Y', strtotime($d));
+                if (!in_array($y, $available_years)) $available_years[] = $y;
+            }
+        }
+        rsort($available_years);
+    }
+
+    $selected_year = isset($_GET['stats_year']) ? sanitize_text_field($_GET['stats_year']) : 'global';
+
+    // Build event query with optional year filter
+    $event_args = array(
+        'post_type'      => 'event',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'meta_key'       => 'event_date',
+        'orderby'        => 'meta_value',
+        'order'          => 'ASC',
+    );
+    if ($selected_year !== 'global') {
+        $sel_y = intval($selected_year);
+        $event_args['meta_query'] = array(array(
+            'key'     => 'event_date',
+            'value'   => array(($sel_y - 1) . '-01-01', ($sel_y + 1) . '-12-31'),
+            'compare' => 'BETWEEN',
+            'type'    => 'DATE',
+        ));
+    }
+    $events_query = new WP_Query($event_args);
+
+    // Aggregate deck stats & commander counts
+    $deck_stats      = array(); // deck_id => [wins, match_wins, match_draws, match_losses, attendance]
+    $commander_counts = array(); // "Commander / Partner" => count
+
+    if ($events_query->have_posts()) {
+        while ($events_query->have_posts()) {
+            $events_query->the_post();
+            $event_id = get_the_ID();
+
+            $event_date_raw = get_field('event_date', $event_id);
+            $event_year = $event_date_raw ? date('Y', strtotime($event_date_raw)) : '';
+
+            if ((bool) get_field('exclude_from_annual_leaderboard', $event_id)) continue;
+            if ($selected_year !== 'global' && $event_year !== $selected_year) continue;
+
+            $rankings = get_field('event_ranking', $event_id);
+            if (empty($rankings) || !is_array($rankings)) {
+                $json = get_field('event_rankings_json', $event_id);
+                if (!empty($json)) {
+                    $decoded = json_decode($json, true);
+                    if (is_array($decoded)) $rankings = $decoded;
+                }
+            }
+            if (!is_array($rankings)) continue;
+
+            foreach ($rankings as $rank) {
+                $deck_id = isset($rank['player_deck_id']) ? intval($rank['player_deck_id']) : 0;
+                if (!$deck_id) continue;
+
+                $pos    = isset($rank['pos'])  ? intval($rank['pos'])  : 0;
+                $m_win  = isset($rank['win'])  ? intval($rank['win'])  : 0;
+                $m_draw = isset($rank['draw']) ? intval($rank['draw']) : 0;
+                $m_lose = isset($rank['lose']) ? intval($rank['lose']) : 0;
+
+                if (!isset($deck_stats[$deck_id])) {
+                    $deck_stats[$deck_id] = array('wins' => 0, 'match_wins' => 0, 'match_draws' => 0, 'match_losses' => 0, 'attendance' => 0);
+                }
+                $deck_stats[$deck_id]['attendance']++;
+                if ($pos === 1) $deck_stats[$deck_id]['wins']++;
+                $deck_stats[$deck_id]['match_wins']   += $m_win;
+                $deck_stats[$deck_id]['match_draws']  += $m_draw;
+                $deck_stats[$deck_id]['match_losses'] += $m_lose;
+
+                // Commander pair key
+                $commander = get_field('commander', $deck_id);
+                if ($commander) {
+                    $partner = get_field('partner', $deck_id);
+                    $cmd_key = $partner ? trim($commander) . ' / ' . trim($partner) : trim($commander);
+                    if (!isset($commander_counts[$cmd_key])) $commander_counts[$cmd_key] = 0;
+                    $commander_counts[$cmd_key]++;
+                }
+            }
+        }
+        wp_reset_postdata();
+    }
+
+    // Top 10 commanders by appearances
+    arsort($commander_counts);
+    $top_commanders = array_slice($commander_counts, 0, 10, true);
+
+    // Pie chart: all decks sorted by attendance DESC
+    $sorted_for_pie = $deck_stats;
+    uasort($sorted_for_pie, function ($a, $b) { return $b['attendance'] - $a['attendance']; });
+    $pie_labels = array();
+    $pie_data   = array();
+    foreach ($sorted_for_pie as $d_id => $ds) {
+        $raw_title   = html_entity_decode(get_the_title($d_id), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $short_title = mb_strlen($raw_title) > 22 ? mb_substr($raw_title, 0, 20) . '…' : $raw_title;
+        $pie_labels[] = $short_title;
+        $pie_data[]   = $ds['attendance'];
+    }
+
+    // Commander pie chart labels (top 10, truncated)
+    $cmd_pie_labels = array();
+    $cmd_pie_data   = array();
+    foreach ($top_commanders as $cmd => $count) {
+        $raw_cmd   = html_entity_decode($cmd, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $short_cmd = mb_strlen($raw_cmd) > 28 ? mb_substr($raw_cmd, 0, 26) . '…' : $raw_cmd;
+        $cmd_pie_labels[] = $short_cmd;
+        $cmd_pie_data[]   = $count;
+    }
+
+    // Build table data sorted by win rate DESC (default)
+    $deck_table = array();
+    foreach ($deck_stats as $d_id => $ds) {
+        $total_matches = $ds['match_wins'] + $ds['match_draws'] + $ds['match_losses'];
+        $win_rate      = $total_matches > 0 ? round(($ds['match_wins'] / $total_matches) * 100, 1) : 0;
+        $deck_post     = get_post($d_id);
+        $author_id     = $deck_post ? $deck_post->post_author : 0;
+        $author_data   = $author_id ? get_userdata($author_id) : null;
+        $deck_table[]  = array(
+            'id'           => $d_id,
+            'title'        => $deck_post ? $deck_post->post_title : '(Deleted)',
+            'commander'    => get_field('commander', $d_id),
+            'partner'      => get_field('partner', $d_id),
+            'author'       => $author_data ? $author_data->display_name : '-',
+            'author_id'    => $author_id,
+            'wins'         => $ds['wins'],
+            'match_wins'   => $ds['match_wins'],
+            'match_draws'  => $ds['match_draws'],
+            'match_losses' => $ds['match_losses'],
+            'attendance'   => $ds['attendance'],
+            'win_rate'     => $win_rate,
+        );
+    }
+    usort($deck_table, function ($a, $b) { return $b['win_rate'] <=> $a['win_rate']; });
+
+    // Pagination: 10 decks per page
+    $paged         = isset($_GET['paged_decks']) ? max(1, intval($_GET['paged_decks'])) : 1;
+    $per_page      = 10;
+    $total_decks   = count($deck_table);
+    $total_pages   = ceil($total_decks / $per_page);
+    $offset        = ($paged - 1) * $per_page;
+    $current_decks = array_slice($deck_table, $offset, $per_page);
+
+    // Chart.js colors
+    $chart_colors = ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#76A346','#E7E9ED','#FDB45C','#949FB1','#4D5360','#FF6B6B','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#82E0AA'];
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Decks Stats', 'text_domain'); ?></h1>
+
+        <form method="get" action="" style="margin: 20px 0;">
+            <input type="hidden" name="page" value="deck-stats">
+            <label for="ds_stats_year" style="font-weight: bold; margin-right: 10px;"><?php esc_html_e('Filter by year:', 'text_domain'); ?></label>
+            <select name="stats_year" id="ds_stats_year" onchange="this.form.submit()">
+                <option value="global" <?php selected($selected_year, 'global'); ?>><?php esc_html_e('Global', 'text_domain'); ?></option>
+                <?php foreach ($available_years as $y): ?>
+                    <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>><?php echo esc_html($y); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+
+            <!-- Top Commanders Pie Chart -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title"><?php esc_html_e('Top Commanders', 'text_domain'); ?></h2>
+                <?php if (!empty($top_commanders)): ?>
+                    <canvas id="ds_commanderPieChart" style="max-height: 350px;"></canvas>
+                <?php else: ?>
+                    <p style="color:#666; margin-top:15px;"><?php esc_html_e('No data available.', 'text_domain'); ?></p>
+                <?php endif; ?>
+            </div>
+
+            <!-- Deck Usage Pie Chart -->
+            <div class="card" style="flex: 1; min-width: 300px; padding: 20px;">
+                <h2 class="title"><?php esc_html_e('Deck Usage', 'text_domain'); ?></h2>
+                <canvas id="ds_deckUsagePieChart" style="max-height: 350px;"></canvas>
+            </div>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var colors = <?php echo json_encode(array_slice(array_merge($chart_colors, $chart_colors, $chart_colors), 0, max(count($pie_data), count($cmd_pie_data)))); ?>;
+
+            // Commander Pie Chart
+            var ctxCmd = document.getElementById('ds_commanderPieChart');
+            if (ctxCmd) {
+                new Chart(ctxCmd.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: <?php echo json_encode($cmd_pie_labels); ?>,
+                        datasets: [{
+                            data: <?php echo json_encode($cmd_pie_data); ?>,
+                            backgroundColor: colors.slice(0, <?php echo count($cmd_pie_data); ?>),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            // Deck Usage Pie Chart
+            var ctxDeck = document.getElementById('ds_deckUsagePieChart');
+            if (ctxDeck) {
+                new Chart(ctxDeck.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: <?php echo json_encode($pie_labels); ?>,
+                        datasets: [{
+                            data: <?php echo json_encode($pie_data); ?>,
+                            backgroundColor: colors.slice(0, <?php echo count($pie_data); ?>),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        });
+        </script>
+
+        <hr style="margin: 30px 0;">
+
+        <h2><?php esc_html_e('All Decks', 'text_domain'); ?></h2>
+        <p style="color:#666;"><?php printf(_n('%d deck found.', '%d decks found.', $total_decks, 'text_domain'), $total_decks); ?></p>
+
+        <table class="wp-list-table widefat fixed striped table-view-list" id="ds-decks-table">
+            <thead>
+                <tr>
+                    <th class="ds-sortable" data-col="0" style="cursor:pointer;">Deck ↕</th>
+                    <th class="ds-sortable" data-col="1" style="cursor:pointer; text-align:center; width:130px;">Tournament Wins ↕</th>
+                    <th class="ds-sortable" data-col="2" style="cursor:pointer; text-align:center; width:110px;">Match Wins ↕</th>
+                    <th class="ds-sortable" data-col="3" style="cursor:pointer; text-align:center; width:110px;">Match Draws ↕</th>
+                    <th class="ds-sortable" data-col="4" style="cursor:pointer; text-align:center; width:115px;">Match Losses ↕</th>
+                    <th class="ds-sortable ds-sorted-desc" data-col="5" style="cursor:pointer; text-align:center; width:100px;">Win Rate ▼</th>
+                    <th class="ds-sortable" data-col="6" style="cursor:pointer; text-align:center; width:100px;">Attendance ↕</th>
+                </tr>
+            </thead>
+            <tbody id="ds-decks-tbody">
+                <?php if (!empty($current_decks)): ?>
+                    <?php foreach ($current_decks as $deck): ?>
+                        <tr>
+                            <td>
+                                <strong><a href="<?php echo esc_url(get_edit_post_link($deck['id'])); ?>"><?php echo esc_html($deck['title']); ?></a></strong>
+                                <?php if ($deck['commander']): ?>
+                                    <br><span class="description">
+                                        <?php echo esc_html($deck['commander']); ?>
+                                        <?php if ($deck['partner']) echo ' / ' . esc_html($deck['partner']); ?>
+                                    </span>
+                                <?php endif; ?>
+                                <br><span class="description" style="color:#aaa;">
+                                    <?php if ($deck['author_id']): ?>
+                                        <a href="<?php echo esc_url(get_author_posts_url($deck['author_id'])); ?>" target="_blank"><?php echo esc_html($deck['author']); ?></a>
+                                    <?php else: ?>
+                                        <?php echo esc_html($deck['author']); ?>
+                                    <?php endif; ?>
+                                </span>
+                            </td>
+                            <td style="text-align:center;"><?php echo intval($deck['wins']); ?></td>
+                            <td style="text-align:center;"><?php echo intval($deck['match_wins']); ?></td>
+                            <td style="text-align:center;"><?php echo intval($deck['match_draws']); ?></td>
+                            <td style="text-align:center;"><?php echo intval($deck['match_losses']); ?></td>
+                            <td style="text-align:center;"><?php echo esc_html($deck['win_rate']); ?>%</td>
+                            <td style="text-align:center;"><?php echo intval($deck['attendance']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="7"><?php esc_html_e('No deck data found.', 'text_domain'); ?></td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <?php
+        if ($total_pages > 1) {
+            $page_links = paginate_links(array(
+                'base'      => add_query_arg('paged_decks', '%#%'),
+                'format'    => '',
+                'prev_text' => '&laquo;',
+                'next_text' => '&raquo;',
+                'total'     => $total_pages,
+                'current'   => $paged,
+                'add_args'  => array('stats_year' => $selected_year),
+            ));
+            if ($page_links) {
+                echo '<div class="tablenav"><div class="tablenav-pages">' . $page_links . '</div></div>';
+            }
+        }
+        ?>
+
+        <script>
+        (function () {
+            var table = document.getElementById('ds-decks-table');
+            if (!table) return;
+            var headers = table.querySelectorAll('th.ds-sortable');
+            var tbody   = document.getElementById('ds-decks-tbody');
+            var sortState = { col: 5, dir: -1 }; // default: win_rate DESC
+
+            function cellVal(row, col) {
+                var cell = row.cells[col];
+                if (!cell) return '';
+                var txt = cell.innerText.replace('%', '').trim().split('\n')[0];
+                var n = parseFloat(txt);
+                return isNaN(n) ? txt.toLowerCase() : n;
+            }
+
+            function applySort(col, dir) {
+                var rows = Array.from(tbody.querySelectorAll('tr'));
+                rows.sort(function (a, b) {
+                    var va = cellVal(a, col), vb = cellVal(b, col);
+                    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
+                    return va < vb ? -dir : va > vb ? dir : 0;
+                });
+                rows.forEach(function (r) { tbody.appendChild(r); });
+                headers.forEach(function (h) {
+                    h.classList.remove('ds-sorted-asc', 'ds-sorted-desc');
+                    h.innerText = h.innerText.replace(' ▲', '').replace(' ▼', '').replace(' ↕', '') + ' ↕';
+                });
+                headers[col].classList.add(dir === 1 ? 'ds-sorted-asc' : 'ds-sorted-desc');
+                headers[col].innerText = headers[col].innerText.replace(' ↕', '') + (dir === 1 ? ' ▲' : ' ▼');
+            }
+
+            headers.forEach(function (th) {
+                th.addEventListener('click', function () {
+                    var col = parseInt(th.getAttribute('data-col'));
+                    var dir = (sortState.col === col) ? -sortState.dir : -1;
+                    sortState = { col: col, dir: dir };
+                    applySort(col, dir);
+                });
+            });
+        })();
+        </script>
+
+    </div>
+    <?php
+}

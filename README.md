@@ -32,6 +32,8 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Dynamic ELO Calculation:** A customized formula that updates player rankings based on match outcomes (W-L-D), opponent strength, and final tournament position.
 - **Leaderboards:** Automated annual ranking generation based on competitive performance data.
 - **ELO Leaderboard:** A live, dynamic ranking page showing real-time player standings based on their global ELO score.
+- **Players Stats Dashboard:** Individual player statistics page with yearly filter, deck usage pie chart, Win Rate trend, ELO trend, deck performance table, and full event history.
+- **Decks Stats Dashboard:** Site-wide deck statistics page (Admin) featuring a Top Commanders pie chart, a Deck Usage pie chart, and a sortable/paginated table of all registered decks with tournament and match performance data.
 
 ### 3. Deck Management System
 - **Decks:** Players can create, edit, and share their decklists.
@@ -80,6 +82,7 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Administrator:** Full, unrestricted control over the entire system.
 - **Co-Administrator:** Specialized role for content managers. Can manage all tournament data, achievements, and decks, but is restricted from system-level changes (themes, plugins, settings).
 - **Player:** Managed via frontend dashboard for profile updates and deck submissions.
+- **Registration Date Column:** The admin user list now displays each user's registration date (sortable) alongside the existing Decks count column.
 
 ### 12. Custom Sync & Matching
 - **Improved Name Matching:** Robust event synchronization algorithm that handles multi-word surnames and abbreviations.
