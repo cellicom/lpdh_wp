@@ -37,6 +37,28 @@ function lpdh_get_banned_card_names()
 }
 
 /**
+ * Helper: get the image HTML for a banned card post.
+ * Used in single-banned_card.php, card-banned-card.php, shortcode-banned-card.php.
+ *
+ * @param int    $pid   Post ID.
+ * @param string $size  WP image size (default 'large').
+ * @param string $class CSS classes for the <img> tag.
+ * @return string Image HTML or empty string.
+ */
+function lpdh_banned_card_image_html($pid, $size = 'large', $class = 'img-fluid rounded shadow-sm')
+{
+    if (has_post_thumbnail($pid)) {
+        return get_the_post_thumbnail($pid, $size, array('class' => $class));
+    }
+    $url = function_exists('lpdh_get_scryfall_image_url') ? lpdh_get_scryfall_image_url($pid) : '';
+    if (!empty($url) && $url !== 'error') {
+        return '<img src="' . esc_url($url) . '" class="' . esc_attr($class) . '" alt="' . esc_attr(get_the_title($pid)) . '">';
+    }
+    return '';
+}
+
+
+/**
  * Register Custom Post Type "Banned Card"
  * Solo gli amministratori possono gestire questo CPT
  */
@@ -124,13 +146,53 @@ if (function_exists('acf_add_local_field_group')):
                 'default_value' => '',
                 'placeholder' => 'https://scryfall.com/card/...',
             ),
+            array(
+                'key'               => 'field_combined_with',
+                'label'             => 'Combined With',
+                'name'              => 'combined_with',
+                'type'              => 'post_object',
+                'instructions'      => 'Select one or more banned cards that are banned only in combination with this card.',
+                'required'          => 0,
+                'conditional_logic' => 0,
+                'wrapper'           => array(
+                    'width' => '',
+                    'class' => 'lpdh-combined-with-field',
+                    'id'    => '',
+                ),
+                'post_type'     => array('banned_card'),
+                'taxonomy'      => '',
+                'allow_null'    => 1,
+                'multiple'      => 1,
+                'return_format' => 'object',
+                'ui'            => 1,
+                'ajax'          => 1,
+            ),
+            array(
+                'key'               => 'field_banned_card_hidden',
+                'label'             => 'Hidden',
+                'name'              => 'hidden',
+                'type'              => 'true_false',
+                'instructions'      => 'If enabled, this card will not appear in the public banlist or archive.',
+                'required'          => 0,
+                'conditional_logic' => 0,
+                'wrapper'           => array(
+                    'width' => '',
+                    'class' => '',
+                    'id'    => '',
+                ),
+                'message'       => 'Hide this card from the public banlist and archive.',
+                'default_value' => 0,
+                'ui'            => 1,
+                'ui_on_text'    => 'Hidden',
+                'ui_off_text'   => 'Visible',
+            ),
         ),
         'location' => array(
             array(
                 array(
-                    'param' => 'post_type',
+                    'param'    => 'post_type',
                     'operator' => '==',
-                    'value' => 'banned_card',
+                    'value'    => 'banned_card',
                 ),
             ),
         ),
@@ -210,7 +272,9 @@ function lpdh_banned_card_list_column_widths()
 add_action('admin_head', 'lpdh_banned_card_list_column_widths');
 
 /**
- * Customize banned_card archive query
+ * Customize banned_card archive query:
+ * - Order by date DESC, show all
+ * - Exclude hidden cards from public view
  */
 function bootscore_child_banned_card_archive_query($query)
 {
@@ -218,6 +282,18 @@ function bootscore_child_banned_card_archive_query($query)
         $query->set('orderby', 'date');
         $query->set('order', 'DESC');
         $query->set('posts_per_page', -1);
+        $query->set('meta_query', array(
+            'relation' => 'OR',
+            array(
+                'key'     => 'hidden',
+                'value'   => '1',
+                'compare' => '!=',
+            ),
+            array(
+                'key'     => 'hidden',
+                'compare' => 'NOT EXISTS',
+            ),
+        ));
     }
 }
 add_action('pre_get_posts', 'bootscore_child_banned_card_archive_query');
@@ -392,6 +468,35 @@ function lpdh_ajax_search_banned_cards()
     wp_send_json($results);
 }
 add_action('wp_ajax_lpdh_search_banned_cards', 'lpdh_ajax_search_banned_cards');
+
+
+
+/**
+ * Restrict ACF post_object 'combined_with' query to only banned_card posts
+ * that have a scryfall_link belonging to the scryfall.com domain.
+ */
+function lpdh_acf_combined_with_query($args, $field, $post_id)
+{
+    if ($field['name'] !== 'combined_with') {
+        return $args;
+    }
+
+    $args['meta_query'] = array(
+        array(
+            'key'     => 'scryfall_link',
+            'value'   => 'scryfall',
+            'compare' => 'LIKE',
+        ),
+    );
+
+    // Exclude the card currently being edited from its own options.
+    if (!empty($post_id)) {
+        $args['post__not_in'] = array((int) $post_id);
+    }
+
+    return $args;
+}
+add_filter('acf/fields/post_object/query', 'lpdh_acf_combined_with_query', 10, 3);
 
 /**
  * Add shortcode generator metabox to Post edit screen
