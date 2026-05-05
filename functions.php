@@ -317,6 +317,9 @@ require_once get_stylesheet_directory() . '/inc/discord.php';
 // Include Easter Egg Functions
 require_once get_stylesheet_directory() . '/inc/easter-egg.php';
 
+// Include iCal / Export Calendar helpers
+require_once get_stylesheet_directory() . '/inc/export-calendar.php';
+
 
 /**
  * Enqueue scripts and styles
