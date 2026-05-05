@@ -13,14 +13,8 @@ get_header(); ?>
 
         <header class="page-header container my-4 text-center">
             <?php
-            // Build the iCal feed URL from the "Page Feed" page
-            $feed_page = get_pages( array(
-                'meta_key'   => '_wp_page_template',
-                'meta_value' => 'page-templates/page-feed.php',
-                'number'     => 1,
-            ) );
-            $ical_base_url = $feed_page ? get_permalink( $feed_page[0]->ID ) : '';
-            $ical_url      = $ical_base_url ? add_query_arg( 'type', 'events', $ical_base_url ) : '';
+            // Build the iCal feed URL from the Theme Settings option (lpdh_feed_page_id)
+            $ical_url = lpdh_get_export_page_url( 'events' );
 
             // webcal:// variant (replaces https:// or http://)
             $webcal_url = $ical_url ? preg_replace( '/^https?:\/\//i', 'webcal://', $ical_url ) : '';

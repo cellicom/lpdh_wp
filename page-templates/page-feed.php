@@ -1,9 +1,9 @@
 <?php
 /**
- * Template Name: Page Feed
+ * Template Name: Page Export
  *
- * Serves machine-readable feeds based on the `type` query parameter.
- * Usage: /page-feed-slug/?type=events
+ * Serves machine-readable export feeds based on the `type` query parameter.
+ * Usage: /page-export-slug/?type=events
  *
  * Supported types:
  *   - events  →  iCal feed (RFC 5545) of all upcoming events

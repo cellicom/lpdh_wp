@@ -1067,6 +1067,7 @@ function lpdh_theme_settings_render()
         update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
         update_option('lpdh_login_register_page_id', intval($_POST['lpdh_login_register_page_id']));
         update_option('lpdh_roulette_page_id', intval($_POST['lpdh_roulette_page_id']));
+        update_option('lpdh_feed_page_id', intval($_POST['lpdh_feed_page_id']));
 
         // Save Social Links
         update_option('lpdh_instagram_link', esc_url($_POST['lpdh_instagram_link']));
@@ -1293,6 +1294,21 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Select Export Page</th>
+                    <td>
+                        <?php
+                        $feed_page_id = get_option('lpdh_feed_page_id', 0);
+                        wp_dropdown_pages(array(
+                            'name'             => 'lpdh_feed_page_id',
+                            'selected'         => $feed_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Page Export" template (iCal calendar feed, etc.).</p>
+                    </td>
+                </tr>
 
             </table>
 
@@ -1442,6 +1458,25 @@ function lpdh_get_login_register_url($section = '')
         $url = add_query_arg('action', 'lostpassword', $url);
     }
 
+    return $url;
+}
+
+/**
+ * Get the Export Page URL (optionally with a ?type= parameter).
+ *
+ * @param string $type Export type slug, e.g. 'events'. Leave empty for the bare page URL.
+ * @return string URL or empty string if the page is not configured.
+ */
+function lpdh_get_export_page_url( $type = '' )
+{
+    $page_id = get_option( 'lpdh_feed_page_id', 0 );
+    if ( ! $page_id ) {
+        return '';
+    }
+    $url = get_permalink( $page_id );
+    if ( $type ) {
+        $url = add_query_arg( 'type', sanitize_key( $type ), $url );
+    }
     return $url;
 }
 
