@@ -93,6 +93,16 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Polls:** Includes a text-based "Will you participate?" poll field for manual reactions (✅/❌/🤔).
 - **Configuration:** Fully manageable via **Theme Settings** (Webhook URL, Bot Name, Footer).
 
+### 14. iCal Events Calendar Export 📅
+- **Page Export Template:** A dedicated WordPress page template (`Page Export`) that serves a standards-compliant iCal feed (`text/calendar`, RFC 5545) at `/your-slug/?type=events`.
+- **Subscribe Buttons:** Three compact circular icon buttons displayed below the title on the Events page allow one-click subscription:
+  - **Google Calendar** — Opens Google's calendar subscription flow with the name *LPDH Events* pre-filled.
+  - **Apple / Outlook** — Triggers the native app via the `webcal://` protocol (macOS, iOS, Windows).
+  - **Download .ics** — Direct file download for manual import into any compatible client.
+- **Auto-updating:** Once subscribed, the calendar syncs automatically — no manual re-imports needed.
+- **Feed details:** All upcoming events, `DTEND` = start +4 h, timezone `Europe/Rome` (CET/CEST), with title, location, description (HTML→plain text), and Facebook link when available.
+- **Configuration:** Set the Export Page in **LPDH → Theme Settings → Pages Configuration → Select Export Page**.
+
 ## ✨ Easter Eggs & Community Interactions
 The theme includes several interactive "secrets" to engage the community. Found it all!
 

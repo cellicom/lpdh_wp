@@ -24,18 +24,26 @@
  */
 function lpdh_ical_fold( $text ) {
     $output   = '';
-    $line_len = 0;
+    $line_len = 0; // current line length in bytes
 
-    // Work byte-by-byte to respect the 75-octet limit
-    $bytes = str_split( $text );
-    foreach ( $bytes as $byte ) {
-        if ( $line_len >= 75 ) {
+    // Split into Unicode code-points (not raw bytes) so we never
+    // break a multibyte UTF-8 sequence across a fold boundary.
+    // mb_str_split() is available from PHP 7.4.
+    $chars = mb_str_split( $text, 1, 'UTF-8' );
+
+    foreach ( $chars as $char ) {
+        $char_bytes = strlen( $char ); // byte-length of this code-point
+
+        // If adding this character would exceed 75 octets, fold first.
+        if ( $line_len + $char_bytes > 75 ) {
             $output  .= "\r\n ";
-            $line_len = 1; // the space counts
+            $line_len = 1; // the leading space counts as 1 octet
         }
-        $output  .= $byte;
-        $line_len++;
+
+        $output   .= $char;
+        $line_len += $char_bytes;
     }
+
     return $output . "\r\n";
 }
 
@@ -70,21 +78,29 @@ function lpdh_html_to_plain( $html ) {
     }
 
     // Block-level elements → newlines
-    $html = preg_replace( '/<br\s*\/?>/i',             "\n",      $html );
-    $html = preg_replace( '/<\/p\s*>/i',               "\n\n",    $html );
-    $html = preg_replace( '/<\/h[1-6]\s*>/i',          "\n\n",    $html );
-    $html = preg_replace( '/<\/li\s*>/i',              "\n",      $html );
-    $html = preg_replace( '/<li[^>]*>/i',              "• ",      $html );
-    $html = preg_replace( '/<\/?(ul|ol)[^>]*>/i',      "\n",      $html );
-    $html = preg_replace( '/<\/?(blockquote)[^>]*>/i', "\n",      $html );
+    $html = preg_replace( '/<br\s*\/?>/i',             "\n",   $html );
+    $html = preg_replace( '/<\/p\s*>/i',               "\n\n", $html );
+    $html = preg_replace( '/<\/h[1-6]\s*>/i',          "\n\n", $html );
+    $html = preg_replace( '/<\/li\s*>/i',              "\n",   $html );
+    $html = preg_replace( '/<li[^>]*>/i',              "• ",   $html );
+    $html = preg_replace( '/<\/?(ul|ol)[^>]*>/i',      "\n",   $html );
+    $html = preg_replace( '/<\/?(blockquote)[^>]*>/i', "\n",   $html );
 
     // Strip remaining tags
     $text = wp_strip_all_tags( $html );
 
-    // Decode HTML entities
+    // Decode HTML entities (handles &#8211;, &amp;, &nbsp;, etc.)
     $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
-    // Collapse more than two consecutive newlines
+    // Remove non-breaking spaces and other invisible Unicode spaces
+    $text = preg_replace( '/[\xc2\xa0\x{00A0}]/u', ' ', $text );
+
+    // Trim trailing spaces from each line
+    $lines = explode( "\n", $text );
+    $lines = array_map( 'trim', $lines );
+    $text  = implode( "\n", $lines );
+
+    // Collapse more than 2 consecutive blank lines into exactly 2
     $text = preg_replace( '/\n{3,}/', "\n\n", $text );
 
     return trim( $text );
@@ -202,13 +218,19 @@ switch ( $feed_type ) {
                     }
                 }
 
-                // Description: use post content, convert from HTML to plain text
+                // Description: event URL first, then content converted from HTML to plain text
+                $event_url   = get_permalink();
                 $raw_content = get_the_content();
-                $description = lpdh_html_to_plain( $raw_content );
+                $body_text   = lpdh_html_to_plain( $raw_content );
+
+                $description = $event_url;
+                if ( $body_text ) {
+                    $description .= "\n\n" . $body_text;
+                }
 
                 // Append Facebook link if present
                 if ( $fb_link ) {
-                    $description .= ( $description ? "\n\n" : '' ) . 'Facebook: ' . $fb_link;
+                    $description .= "\n\nFacebook: " . $fb_link;
                 }
 
                 // UID: stable, unique per-event
@@ -219,7 +241,9 @@ switch ( $feed_type ) {
 
                 echo "BEGIN:VEVENT\r\n";
                 echo lpdh_ical_fold( 'UID:' . $uid );
-                echo lpdh_ical_fold( 'SUMMARY:' . lpdh_ical_escape_text( get_the_title() ) );
+                echo lpdh_ical_fold( 'SUMMARY:' . lpdh_ical_escape_text(
+                    html_entity_decode( get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' )
+                ) );
                 echo lpdh_ical_fold( 'DTSTART;TZID=Europe/Rome:' . date( 'Ymd\THis', $ts_start ) );
                 echo lpdh_ical_fold( 'DTEND;TZID=Europe/Rome:' . date( 'Ymd\THis', $ts_end ) );
                 echo lpdh_ical_fold( 'DTSTAMP:' . lpdh_ical_datetime( time() ) );

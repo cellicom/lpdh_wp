@@ -59,11 +59,12 @@ function render_help_guide_page()
                     <a href="#leaderboards">8. Leaderboards</a>
                     <a href="#stats">9. Statistics & ELO</a>
                     <a href="#instagram" class="hg-pink">10. Instagram Generator 📸</a>
-                    <a href="#profiles">11. Profiles & Preferences</a>
-                    <a href="#roles">12. Roles & Security</a>
-                    <a href="#settings">13. Theme Settings</a>
-                    <a href="#emails">14. Email System 📧</a>
-                    <a href="#easter-eggs" class="hg-red">15. Easter Eggs ✨</a>
+                    <a href="#calendar" class="hg-highlight">11. iCal Calendar Export 📅</a>
+                    <a href="#profiles">12. Profiles & Preferences</a>
+                    <a href="#roles">13. Roles & Security</a>
+                    <a href="#settings">14. Theme Settings</a>
+                    <a href="#emails">15. Email System 📧</a>
+                    <a href="#easter-eggs" class="hg-red">16. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -556,10 +557,74 @@ function render_help_guide_page()
                 </div>
             </section>
 
+            <!-- SECTION: ICAL CALENDAR EXPORT -->
+            <section id="calendar" class="hg-section">
+                <h2 class="hg-section-title hg-title-blue">
+                    <span class="dashicons dashicons-calendar-alt"></span> 11. iCal Calendar Export 📅
+                </h2>
+                <p>Allows players and visitors to subscribe to the LPDH events calendar directly in their preferred calendar app (Google Calendar, Apple Calendar, Outlook) with <strong>automatic updates</strong>.</p>
+
+                <h4>How It Works:</h4>
+                <div class="hg-grid-2">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-page"></span> Page Export Template</h5>
+                        <p class="small">Create a WordPress Page and assign the <strong>"Page Export"</strong> template to it. This page serves as the iCal feed endpoint and must be <strong>published</strong> to be accessible.</p>
+                        <p class="small">The feed URL format is:<br><code>/your-page-slug/?type=events</code></p>
+                        <div class="hg-tip">
+                            <strong>Supported feed types:</strong> Currently <code>events</code> is the only type. Additional types can be added in the future by extending the template's <code>switch</code> block.
+                        </div>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-admin-settings"></span> Theme Settings Configuration</h5>
+                        <p class="small">After creating the page, go to <strong>LPDH &gt; Theme Settings &gt; Pages Configuration</strong> and select it under <strong>"Select Export Page"</strong>.</p>
+                        <p class="small">Once configured, three calendar icons will appear automatically below the title on the <strong>Events</strong> page.</p>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 20px;">Subscribe Buttons on Events Page:</h4>
+                <p>Three compact circular icon buttons are displayed below the page title:</p>
+                <table class="wp-list-table widefat fixed striped hg-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Button</th>
+                            <th>Behaviour</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🔵 Google Calendar</strong></td>
+                            <td>Opens Google Calendar's "Add by URL" flow with the feed pre-configured and the name <em>LPDH Events</em> suggested.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔴 Apple / Outlook</strong></td>
+                            <td>Opens the native calendar app via the <code>webcal://</code> protocol. Works on macOS, iOS, and Windows with Outlook.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>⚫ Download .ics</strong></td>
+                            <td>Downloads the <code>lpdh-events.ics</code> file directly, useful for manual import or unsupported clients.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 20px;">iCal Feed Details:</h4>
+                <ul class="hg-list">
+                    <li><strong>Format:</strong> RFC 5545 compliant iCal feed (<code>text/calendar</code>).</li>
+                    <li><strong>Calendar Name:</strong> <code>LPDH Events</code> (set via <code>X-WR-CALNAME</code>).</li>
+                    <li><strong>Events included:</strong> All future events (no pagination limit), ordered by date ascending.</li>
+                    <li><strong>Duration:</strong> <code>DTEND</code> is set to <strong>+4 hours</strong> from start (no end-date field on events).</li>
+                    <li><strong>Timezone:</strong> <code>Europe/Rome</code> with full <code>VTIMEZONE</code> block (CET/CEST).</li>
+                    <li><strong>Data per event:</strong> Title, Date/Time, Location (Place CPT), Description (HTML stripped to plain text), Event URL, Facebook link (if present).</li>
+                </ul>
+
+                <div class="hg-warning" style="margin-top: 15px;">
+                    <strong>Localhost note:</strong> Google Calendar <strong>cannot</strong> subscribe to a localhost URL because its servers cannot reach your local machine. The subscribe buttons will only work correctly on a publicly accessible domain. Apple Calendar and the .ics download work locally.
+                </div>
+            </section>
+
             <!-- SECTION: PROFILES -->
             <section id="profiles" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-admin-users"></span> 11. Profiles & Preferences
+                    <span class="dashicons dashicons-admin-users"></span> 12. Profiles & Preferences
                 </h2>
                 <p>Manage user visibility, achievement privacy, and data settings.</p>
 
@@ -583,7 +648,7 @@ function render_help_guide_page()
             <!-- SECTION: ROLES -->
             <section id="roles" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-shield"></span> 12. Roles & Security
+                    <span class="dashicons dashicons-shield"></span> 13. Roles & Security
                 </h2>
                 <div class="hg-grid-3">
                     <div class="hg-card">
@@ -609,7 +674,7 @@ function render_help_guide_page()
             <!-- SECTION: SETTINGS -->
             <section id="settings" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-admin-generic"></span> 13. Theme Settings
+                    <span class="dashicons dashicons-admin-generic"></span> 14. Theme Settings
                 </h2>
                 <p>Configure aesthetics and mapping under <strong>LPDH > Theme Settings</strong>.</p>
 
@@ -657,6 +722,10 @@ function render_help_guide_page()
                             <td>Select the page using the "Registration Page" template.</td>
                         </tr>
                         <tr>
+                            <td><strong>Export Page</strong></td>
+                            <td>Select the page using the <strong>"Page Export"</strong> template. Powers the iCal events calendar feed and the subscribe buttons on the Events page.</td>
+                        </tr>
+                        <tr>
                             <td><strong>Enable Admin custom login</strong></td>
                             <td>Toggle to activate the custom split-screen login page styling (replaces default wp-login).
                             </td>
@@ -689,7 +758,7 @@ function render_help_guide_page()
             <!-- SECTION: EMAIL SYSTEM -->
             <section id="emails" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-email-alt"></span> 14. Email System & Testing
+                    <span class="dashicons dashicons-email-alt"></span> 15. Email System & Testing
                 </h2>
                 <p>The theme includes a custom-styled email system that adapts to your active theme's aesthetic.</p>
 
@@ -718,7 +787,7 @@ function render_help_guide_page()
             <!-- SECTION: EASTER EGGS -->
             <section id="easter-eggs" class="hg-section">
                 <h2 class="hg-section-title hg-title-red">
-                    <span class="dashicons dashicons-admin-appearance"></span> 15. Easter Eggs & Hidden Features
+                    <span class="dashicons dashicons-admin-appearance"></span> 16. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
@@ -767,7 +836,7 @@ function render_help_guide_page()
             </section>
 
             <footer class="hg-footer">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.1.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.2.0</p>
             </footer>
         </div>
     </div>
