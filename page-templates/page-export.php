@@ -20,6 +20,10 @@ switch ( $feed_type ) {
         lpdh_export_events_ical(); // defined in inc/export-calendar.php — exits
         break;
 
+    case 'events_json':
+        lpdh_export_events_json(); // defined in inc/export-calendar.php — exits
+        break;
+
     default:
         // Unknown type — redirect to homepage
         wp_redirect( home_url( '/' ), 302 );

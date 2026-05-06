@@ -560,29 +560,26 @@ function render_help_guide_page()
             <!-- SECTION: ICAL CALENDAR EXPORT -->
             <section id="calendar" class="hg-section">
                 <h2 class="hg-section-title hg-title-blue">
-                    <span class="dashicons dashicons-calendar-alt"></span> 11. iCal Calendar Export 📅
+                    <span class="dashicons dashicons-calendar-alt"></span> 11. Calendar & JSON Events Export 📅
                 </h2>
-                <p>Allows players and visitors to subscribe to the LPDH events calendar directly in their preferred calendar app (Google Calendar, Apple Calendar, Outlook) with <strong>automatic updates</strong>.</p>
+                <p>Allows players and visitors to subscribe to the LPDH events calendar directly in their preferred calendar app (Google Calendar, Apple Calendar, Outlook) with <strong>automatic updates</strong>, or pull event data via a JSON API.</p>
 
                 <h4>How It Works:</h4>
                 <div class="hg-grid-2">
                     <div class="hg-card">
                         <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-page"></span> Page Export Template</h5>
-                        <p class="small">Create a WordPress Page and assign the <strong>"Page Export"</strong> template to it. This page serves as the iCal feed endpoint and must be <strong>published</strong> to be accessible.</p>
-                        <p class="small">The feed URL format is:<br><code>/your-page-slug/?type=events</code></p>
-                        <div class="hg-tip">
-                            <strong>Supported feed types:</strong> Currently <code>events</code> is the only type. Additional types can be added in the future by extending the template's <code>switch</code> block.
-                        </div>
+                        <p class="small">Create a WordPress Page and assign the <strong>"Page Export"</strong> template to it. This page serves as the data feed endpoint and must be <strong>published</strong> to be accessible.</p>
+                        <p class="small">Supported feed types:<br><code>?type=events</code> (iCal format)<br><code>?type=events_json</code> (JSON format)</p>
                     </div>
                     <div class="hg-card">
                         <h5 class="hg-text-green"><span class="dashicons dashicons-admin-settings"></span> Theme Settings Configuration</h5>
                         <p class="small">After creating the page, go to <strong>LPDH &gt; Theme Settings &gt; Pages Configuration</strong> and select it under <strong>"Select Export Page"</strong>.</p>
-                        <p class="small">Once configured, three calendar icons will appear automatically below the title on the <strong>Events</strong> page.</p>
+                        <p class="small">Once configured, four calendar icons will appear automatically below the title on the <strong>Events</strong> page.</p>
                     </div>
                 </div>
 
                 <h4 style="margin-top: 20px;">Subscribe Buttons on Events Page:</h4>
-                <p>Three compact circular icon buttons are displayed below the page title:</p>
+                <p>Four compact icon buttons are displayed below the page title. They <strong>dynamically inherit any active filters</strong> (Year, City, Place) applied on the page:</p>
                 <table class="wp-list-table widefat fixed striped hg-table">
                     <thead>
                         <tr>
@@ -592,8 +589,12 @@ function render_help_guide_page()
                     </thead>
                     <tbody>
                         <tr>
+                            <td><strong>🟡 JSON Feed</strong></td>
+                            <td>Returns the event data in a structured JSON array. Includes advanced metadata like cover image, ticket fee, format, and max players.</td>
+                        </tr>
+                        <tr>
                             <td><strong>🔵 Google Calendar</strong></td>
-                            <td>Opens Google Calendar's "Add by URL" flow with the feed pre-configured and the name <em>LPDH Events</em> suggested.</td>
+                            <td>Opens Google Calendar's "Add by URL" flow with the feed pre-configured and the calendar name dynamically generated.</td>
                         </tr>
                         <tr>
                             <td><strong>🔴 Apple / Outlook</strong></td>
@@ -606,14 +607,13 @@ function render_help_guide_page()
                     </tbody>
                 </table>
 
-                <h4 style="margin-top: 20px;">iCal Feed Details:</h4>
+                <h4 style="margin-top: 20px;">Export Feed Details:</h4>
                 <ul class="hg-list">
-                    <li><strong>Format:</strong> RFC 5545 compliant iCal feed (<code>text/calendar</code>).</li>
-                    <li><strong>Calendar Name:</strong> <code>LPDH Events</code> (set via <code>X-WR-CALNAME</code>).</li>
-                    <li><strong>Events included:</strong> All future events (no pagination limit), ordered by date ascending.</li>
-                    <li><strong>Duration:</strong> <code>DTEND</code> is set to <strong>+4 hours</strong> from start (no end-date field on events).</li>
-                    <li><strong>Timezone:</strong> <code>Europe/Rome</code> with full <code>VTIMEZONE</code> block (CET/CEST).</li>
-                    <li><strong>Data per event:</strong> Title, Date/Time, Location (Place CPT), Description (HTML stripped to plain text), Event URL, Facebook link (if present).</li>
+                    <li><strong>Dynamic Calendar Name:</strong> Automatically reflects active filters (e.g., <code>LPDH Events Palermo 2026</code>).</li>
+                    <li><strong>Events included:</strong> All future events matching the active URL filters (or specific year if selected), ordered by date ascending.</li>
+                    <li><strong>iCal Duration:</strong> <code>DTEND</code> is set to <strong>+4 hours</strong> from start. Timezone is <code>Europe/Rome</code> (CET/CEST).</li>
+                    <li><strong>iCal Data per event:</strong> Title, Date/Time, Location (Place CPT), Description (HTML stripped to plain text), Event URL, Facebook link.</li>
+                    <li><strong>JSON Extra Data:</strong> Same as iCal plus Cover image (thumbnail), Ticket Fee, Event Type, Max Players, and Format.</li>
                 </ul>
 
                 <div class="hg-warning" style="margin-top: 15px;">

@@ -124,6 +124,28 @@ function lpdh_ical_datetime( $timestamp ) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Get dynamic calendar name based on active URL GET filters
+ *
+ * @return string Dynamic calendar name (e.g. "LPDH Events Palermo 2026")
+ */
+function lpdh_get_dynamic_calendar_name() {
+    $cal_name_parts = ['LPDH Events'];
+    if ( ! empty( $_GET['event_city'] ) ) {
+        $cal_name_parts[] = sanitize_text_field( $_GET['event_city'] );
+    }
+    if ( ! empty( $_GET['event_place_id'] ) ) {
+        $place = get_post( intval( $_GET['event_place_id'] ) );
+        if ( $place ) {
+            $cal_name_parts[] = $place->post_title;
+        }
+    }
+    if ( ! empty( $_GET['event_year'] ) ) {
+        $cal_name_parts[] = intval( $_GET['event_year'] );
+    }
+    return implode( ' ', $cal_name_parts );
+}
+
+/**
  * Output the iCal events feed and exit.
  *
  * Sends all HTTP headers, builds the VCALENDAR/VEVENT blocks for every
@@ -134,20 +156,49 @@ function lpdh_ical_datetime( $timestamp ) {
 function lpdh_export_events_ical() {
 
     // Pull ALL future events (no pagination limit)
+    $meta_query_args = array(
+        'relation' => 'AND',
+        array(
+            'key'     => 'event_date',
+            'value'   => current_time( 'Y-m-d H:i:s' ),
+            'compare' => '>=',
+            'type'    => 'DATETIME',
+        ),
+    );
+
+    // Apply URL filters if present
+    if ( ! empty( $_GET['event_year'] ) ) {
+        $filter_year = intval( $_GET['event_year'] );
+        // Override the future event rule with the specific year rule (to match page behavior)
+        $meta_query_args[0] = array(
+            'key'     => 'event_date',
+            'value'   => array( $filter_year . '-01-01 00:00:00', $filter_year . '-12-31 23:59:59' ),
+            'compare' => 'BETWEEN',
+            'type'    => 'DATETIME',
+        );
+    }
+    if ( ! empty( $_GET['event_city'] ) ) {
+        $meta_query_args[] = array(
+            'key'     => 'event_city',
+            'value'   => sanitize_text_field( $_GET['event_city'] ),
+            'compare' => '=',
+        );
+    }
+    if ( ! empty( $_GET['event_place_id'] ) ) {
+        $meta_query_args[] = array(
+            'key'     => 'event_place',
+            'value'   => intval( $_GET['event_place_id'] ),
+            'compare' => '=',
+        );
+    }
+
     $args = array(
         'post_type'      => 'event',
         'posts_per_page' => -1,
         'meta_key'       => 'event_date',
         'orderby'        => 'meta_value',
         'order'          => 'ASC',
-        'meta_query'     => array(
-            array(
-                'key'     => 'event_date',
-                'value'   => current_time( 'Y-m-d H:i:s' ),
-                'compare' => '>=',
-                'type'    => 'DATETIME',
-            ),
-        ),
+        'meta_query'     => $meta_query_args,
     );
 
     $events_query = new WP_Query( $args );
@@ -165,14 +216,17 @@ function lpdh_export_events_ical() {
     $prod_id     = '-//' . $site_name . '//Events Calendar//IT';
     $calendar_id = sanitize_title( $site_name ) . '-events@' . parse_url( $site_url, PHP_URL_HOST );
 
+    // --- Build Dynamic Calendar Name ---
+    $cal_name = lpdh_get_dynamic_calendar_name();
+
     // VCALENDAR wrapper
     echo "BEGIN:VCALENDAR\r\n";
     echo "VERSION:2.0\r\n";
     echo lpdh_ical_fold( 'PRODID:' . $prod_id );
     echo "CALSCALE:GREGORIAN\r\n";
     echo "METHOD:PUBLISH\r\n";
-    echo lpdh_ical_fold( 'X-WR-CALNAME:LPDH Events' );
-    echo lpdh_ical_fold( 'X-WR-CALDESC:' . lpdh_ical_escape_text( 'Upcoming events from ' . $site_name ) );
+    echo lpdh_ical_fold( 'X-WR-CALNAME:' . lpdh_ical_escape_text( $cal_name ) );
+    echo lpdh_ical_fold( 'X-WR-CALDESC:' . lpdh_ical_escape_text( 'Upcoming events from ' . $site_name . ' (' . $cal_name . ')' ) );
     echo "X-WR-TIMEZONE:Europe/Rome\r\n";
 
     // VTIMEZONE block for Europe/Rome (CET/CEST)
@@ -271,4 +325,132 @@ function lpdh_export_events_ical() {
     echo "END:VCALENDAR\r\n";
 
     exit; // Stop WordPress from rendering the theme
+}
+
+/**
+ * Output the events feed as JSON and exit.
+ *
+ * @return void
+ */
+function lpdh_export_events_json() {
+
+    // Pull ALL future events (no pagination limit)
+    $meta_query_args = array(
+        'relation' => 'AND',
+        array(
+            'key'     => 'event_date',
+            'value'   => current_time( 'Y-m-d H:i:s' ),
+            'compare' => '>=',
+            'type'    => 'DATETIME',
+        ),
+    );
+
+    // Apply URL filters if present
+    if ( ! empty( $_GET['event_year'] ) ) {
+        $filter_year = intval( $_GET['event_year'] );
+        // Override the future event rule with the specific year rule (to match page behavior)
+        $meta_query_args[0] = array(
+            'key'     => 'event_date',
+            'value'   => array( $filter_year . '-01-01 00:00:00', $filter_year . '-12-31 23:59:59' ),
+            'compare' => 'BETWEEN',
+            'type'    => 'DATETIME',
+        );
+    }
+    if ( ! empty( $_GET['event_city'] ) ) {
+        $meta_query_args[] = array(
+            'key'     => 'event_city',
+            'value'   => sanitize_text_field( $_GET['event_city'] ),
+            'compare' => '=',
+        );
+    }
+    if ( ! empty( $_GET['event_place_id'] ) ) {
+        $meta_query_args[] = array(
+            'key'     => 'event_place',
+            'value'   => intval( $_GET['event_place_id'] ),
+            'compare' => '=',
+        );
+    }
+
+    $args = array(
+        'post_type'      => 'event',
+        'posts_per_page' => -1,
+        'meta_key'       => 'event_date',
+        'orderby'        => 'meta_value',
+        'order'          => 'ASC',
+        'meta_query'     => $meta_query_args,
+    );
+
+    $events_query = new WP_Query( $args );
+    
+    $events_data = [];
+
+    if ( $events_query->have_posts() ) {
+        while ( $events_query->have_posts() ) {
+            $events_query->the_post();
+
+            $post_id    = get_the_ID();
+            $event_date = get_field( 'field_event_date' ); 
+            $place_obj  = get_field( 'field_event_place' );
+            $fb_link    = get_field( 'field_event_fb_link' );
+
+            if ( ! $event_date ) {
+                continue;
+            }
+            
+            $ts_start = strtotime( $event_date );
+
+            $location_name = '';
+            $location_city = '';
+            $location_address = '';
+
+            if ( $place_obj ) {
+                $location_name = $place_obj->post_title;
+                $location_city = get_field( 'field_place_city', $place_obj->ID );
+                $location_address = get_field( 'field_place_address', $place_obj->ID );
+            }
+
+            // Thumbnail (Cover)
+            $thumbnail_url = get_the_post_thumbnail_url( $post_id, 'full' );
+            if ( ! $thumbnail_url ) {
+                // Fallback image as in card-event.php
+                $thumbnail_url = get_stylesheet_directory_uri() . '/assets/img/logo/logo-lpdh-ext-transparent.png';
+            }
+
+            // Extra ACF Fields
+            $event_type  = get_field( 'event_type' ) ?: 'Tournament';
+            $format      = get_field( 'format' ) ?: 'LPDH';
+            $max_players = intval( get_field( 'max_players' ) );
+            $ticket_fee  = get_field( 'ticket_fee' );
+
+            $events_data[] = [
+                'id'          => $post_id,
+                'title'       => html_entity_decode( get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+                'start_time'  => date( 'Y-m-d\TH:i:s', $ts_start ),
+                'url'         => get_permalink(),
+                'thumbnail'   => $thumbnail_url,
+                'event_type'  => $event_type,
+                'format'      => $format,
+                'max_players' => $max_players,
+                'ticket_fee'  => $ticket_fee ? sanitize_text_field( $ticket_fee ) : '',
+                'fb_link'     => $fb_link ? esc_url( $fb_link ) : '',
+                'location'    => [
+                    'name'    => $location_name,
+                    'city'    => $location_city,
+                    'address' => $location_address,
+                ],
+                'description' => lpdh_html_to_plain( get_the_content() )
+            ];
+        }
+        wp_reset_postdata();
+    }
+
+    $cal_name = lpdh_get_dynamic_calendar_name();
+    
+    $response = [
+        'calendar_name' => $cal_name,
+        'events'        => $events_data,
+    ];
+
+    // Restituisce l'output in JSON e termina l'esecuzione
+    wp_send_json( $response );
 }

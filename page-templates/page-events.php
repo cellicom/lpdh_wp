@@ -15,15 +15,35 @@ get_header(); ?>
             <?php
             // Build the iCal feed URL from the Theme Settings option (lpdh_feed_page_id)
             $ical_url = lpdh_get_export_page_url( 'events' );
+            
+            if ( $ical_url ) {
+                $export_args = [];
+                if ( ! empty( $_GET['event_city'] ) ) {
+                    $export_args['event_city'] = sanitize_text_field( $_GET['event_city'] );
+                }
+                if ( ! empty( $_GET['event_place_id'] ) ) {
+                    $export_args['event_place_id'] = intval( $_GET['event_place_id'] );
+                }
+                if ( ! empty( $_GET['event_year'] ) ) {
+                    $export_args['event_year'] = intval( $_GET['event_year'] );
+                }
+                if ( ! empty( $export_args ) ) {
+                    $ical_url = add_query_arg( $export_args, $ical_url );
+                }
+            }
+
+            $cal_name = lpdh_get_dynamic_calendar_name();
 
             // webcal:// variant (replaces https:// or http://)
             $webcal_url = $ical_url ? preg_replace( '/^https?:\/\//i', 'webcal://', $ical_url ) : '';
 
             // Google Calendar subscription link
-            // The &name= parameter sets the calendar display name in Google Calendar
             $gcal_url = $ical_url
-                ? 'https://calendar.google.com/calendar/r?cid=' . urlencode( $webcal_url ) . '&name=' . urlencode( 'LPDH Events' )
+                ? 'https://calendar.google.com/calendar/r?cid=' . urlencode( $webcal_url ) . '&name=' . urlencode( $cal_name )
                 : '';
+
+            // JSON Feed link
+            $json_url = $ical_url ? str_replace( 'type=events', 'type=events_json', $ical_url ) : '';
             ?>
 
             <h1 class="page-title"><?php the_title(); ?></h1>
@@ -77,6 +97,24 @@ get_header(); ?>
                     </span>
                 </a>
 
+                <!-- JSON Feed -->
+                <a href="<?php echo esc_url( $json_url ); ?>"
+                   target="_blank" rel="noopener noreferrer"
+                   class="lpdh-cal-icon-btn lpdh-cal-icon-json"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="bottom"
+                   data-bs-title="JSON Feed"
+                   aria-label="JSON Feed">
+                    <span class="lpdh-cal-icon-wrap">
+                        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <rect width="48" height="48" rx="10" fill="#f0db4f"/>
+                            <text x="24" y="32" text-anchor="middle" font-size="22" font-weight="bold" font-family="monospace" fill="#323330">
+                                {}
+                            </text>
+                        </svg>
+                    </span>
+                </a>
+
                 <!-- Download .ics -->
                 <a href="<?php echo esc_url( $ical_url ); ?>"
                    download="lpdh-events.ics"
@@ -123,10 +161,9 @@ get_header(); ?>
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-            box-shadow: 0 1px 5px rgba(0,0,0,.14);
+            transition: transform 0.18s ease;
             overflow: hidden;
-            background: #fff;
+            background: transparent;
         }
         .lpdh-cal-icon-wrap svg {
             width: 32px;
@@ -136,10 +173,7 @@ get_header(); ?>
         .lpdh-cal-icon-btn:hover .lpdh-cal-icon-wrap,
         .lpdh-cal-icon-btn:focus .lpdh-cal-icon-wrap {
             transform: translateY(-2px) scale(1.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
         }
-        /* Circular background tint on hover for download icon */
-        .lpdh-cal-icon-ics .lpdh-cal-icon-wrap { background: #6c757d; }
         </style>
 
         <div class="container pb-5">

@@ -93,14 +93,15 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Polls:** Includes a text-based "Will you participate?" poll field for manual reactions (✅/❌/🤔).
 - **Configuration:** Fully manageable via **Theme Settings** (Webhook URL, Bot Name, Footer).
 
-### 14. iCal Events Calendar Export 📅
-- **Page Export Template:** A dedicated WordPress page template (`Page Export`) that serves a standards-compliant iCal feed (`text/calendar`, RFC 5545) at `/your-slug/?type=events`.
-- **Subscribe Buttons:** Three compact circular icon buttons displayed below the title on the Events page allow one-click subscription:
-  - **Google Calendar** — Opens Google's calendar subscription flow with the name *LPDH Events* pre-filled.
+### 14. Calendar & JSON Events Export 📅
+- **Page Export Template:** A dedicated WordPress page template (`Page Export`) that serves both a standards-compliant iCal feed (`text/calendar`, RFC 5545) at `?type=events` and a structured JSON API at `?type=events_json`.
+- **Subscribe Buttons:** Four compact icon buttons displayed below the title on the Events page allow one-click subscription/export:
+  - **JSON Feed** — Returns the event data in a structured JSON format including ticket fee, max players, cover image, and more.
+  - **Google Calendar** — Opens Google's calendar subscription flow.
   - **Apple / Outlook** — Triggers the native app via the `webcal://` protocol (macOS, iOS, Windows).
   - **Download .ics** — Direct file download for manual import into any compatible client.
+- **Dynamic Filters:** The export buttons dynamically inherit any active filters (Year, City, Place) on the Events page. The generated feed is customized and the calendar name automatically reflects the active filters (e.g., *LPDH Events Palermo 2026*).
 - **Auto-updating:** Once subscribed, the calendar syncs automatically — no manual re-imports needed.
-- **Feed details:** All upcoming events, `DTEND` = start +4 h, timezone `Europe/Rome` (CET/CEST), with title, location, description (HTML→plain text), and Facebook link when available.
 - **Configuration:** Set the Export Page in **LPDH → Theme Settings → Pages Configuration → Select Export Page**.
 
 ## ✨ Easter Eggs & Community Interactions
