@@ -685,7 +685,10 @@ function render_player_stats_page()
 
         <hr style="margin: 30px 0;">
 
-        <h2>My Decks</h2>
+        <h2 style="display: flex; justify-content: space-between; align-items: center;">
+            My Decks
+            <span style="font-size: 14px; font-weight: normal; background: #e0e0e0; padding: 4px 10px; border-radius: 20px; color: #333;"><?php echo $total_decks; ?></span>
+        </h2>
         <table class="wp-list-table widefat fixed striped table-view-list">
             <thead>
                 <tr>
@@ -766,7 +769,10 @@ function render_player_stats_page()
 
         <hr style="margin: 30px 0;">
 
-        <h2>Event History</h2>
+        <h2 style="display: flex; justify-content: space-between; align-items: center;">
+            Event History
+            <span style="font-size: 14px; font-weight: normal; background: #e0e0e0; padding: 4px 10px; border-radius: 20px; color: #333;"><?php echo $total_events; ?></span>
+        </h2>
         <table class="wp-list-table widefat fixed striped table-view-list">
             <thead>
                 <tr>
