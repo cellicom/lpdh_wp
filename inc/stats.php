@@ -988,17 +988,30 @@ function render_deck_stats_page()
                 $deck_stats[$deck_id]['match_draws']  += $m_draw;
                 $deck_stats[$deck_id]['match_losses'] += $m_lose;
 
-                // Commander pair key
-                $commander = get_field('commander', $deck_id);
-                if ($commander) {
-                    $partner = get_field('partner', $deck_id);
-                    $cmd_key = $partner ? trim($commander) . ' / ' . trim($partner) : trim($commander);
-                    if (!isset($commander_counts[$cmd_key])) $commander_counts[$cmd_key] = 0;
-                    $commander_counts[$cmd_key]++;
-                }
+
             }
         }
         wp_reset_postdata();
+    }
+
+    // Count commanders from all uploaded decks
+    $all_decks = get_posts(array(
+        'post_type'      => 'deck',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'fields'         => 'ids' // Optimization: get only IDs
+    ));
+
+    foreach ($all_decks as $deck_id) {
+        $commander = get_field('commander', $deck_id);
+        if ($commander) {
+            $partner = get_field('partner', $deck_id);
+            $cmd_key = $partner ? trim($commander) . ' / ' . trim($partner) : trim($commander);
+            if (!isset($commander_counts[$cmd_key])) {
+                $commander_counts[$cmd_key] = 0;
+            }
+            $commander_counts[$cmd_key]++;
+        }
     }
 
     // Top 10 commanders by appearances
