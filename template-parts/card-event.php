@@ -66,7 +66,21 @@ $card_classes = 'event-card' . ($is_past ? ' event-past' : '');
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class($card_classes); ?>>
-    <div class="event-card-inner hover-lift d-flex flex-column h-100">
+    <div class="event-card-inner hover-lift d-flex flex-column h-100 position-relative">
+        <?php
+        $event_type_val = get_field('event_type') ?: 'Tournament';
+        $format_val = get_field('format') ?: 'LPDH';
+        $max_players_val = intval(get_field('max_players'));
+        ?>
+        <div class="position-absolute top-0 end-0 p-2 d-flex flex-column gap-1 align-items-end" style="z-index: 3;">
+            <span class="badge bg-primary text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($event_type_val); ?></span>
+            <span class="badge bg-secondary text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($format_val); ?></span>
+            <?php if ($max_players_val > 0): ?>
+                <span class="badge bg-dark text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;">
+                    <i class="fas fa-users me-1" style="font-size: 0.7rem;"></i>Max <?php echo esc_html($max_players_val); ?>
+                </span>
+            <?php endif; ?>
+        </div>
         <div class="event-thumbnail">
             <?php if (has_post_thumbnail()): ?>
                 <?php the_post_thumbnail('medium', array('class' => 'img-fluid w-100')); ?>

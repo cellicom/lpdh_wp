@@ -57,6 +57,29 @@ get_header(); ?>
                                 </div>
 
                                 <?php
+                                $event_type = get_field('event_type') ?: 'Tournament';
+                                $format = get_field('format') ?: 'LPDH';
+                                $ticket_fee = get_field('ticket_fee') !== null && get_field('ticket_fee') !== '' ? get_field('ticket_fee') : '5';
+                                $max_players = intval(get_field('max_players'));
+                                ?>
+                                <div class="event-meta-badges d-flex justify-content-center flex-wrap gap-2 mt-3 mb-2">
+                                    <span class="badge bg-primary px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                        <i class="fas fa-trophy me-1"></i> Tipo: <?php echo esc_html($event_type); ?>
+                                    </span>
+                                    <span class="badge bg-secondary px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                        <i class="fas fa-gamepad me-1"></i> Formato: <?php echo esc_html($format); ?>
+                                    </span>
+                                    <span class="badge bg-success px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                        <i class="fas fa-ticket-alt me-1"></i> Quota: <?php echo esc_html($ticket_fee) . (is_numeric($ticket_fee) ? '€' : ''); ?>
+                                    </span>
+                                    <?php if ($max_players > 0): ?>
+                                        <span class="badge bg-dark px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                            <i class="fas fa-users me-1"></i> Max Giocatori: <?php echo esc_html($max_players); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php
                                 $event_code = get_field('field_event_code');
                                 if ($event_code): ?>
                                     <div class="event-code-row d-flex justify-content-center mt-3">
