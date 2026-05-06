@@ -2375,21 +2375,24 @@ function lpdh_event_city_filter_js()
                 
                 console.log('LPDH Event City Filter Script Loaded.');
 
-                // Helper function to reliably get the selected city value
+                // Helper function to reliably get the selected city value from the <select> tag
                 function getCityVal() {
-                    var cityVal = $('#acf-field_event_city').val();
-                    if (!cityVal) {
-                        cityVal = $('select[name="acf[field_event_city]"]').val();
+                    var cityVal = $('select[name="acf[field_event_city]"]').val() || $('select#acf-field-field_event_city').val();
+                    if (cityVal) {
+                        return cityVal;
                     }
-                    if (!cityVal) {
-                        $('[id*="event_city"], [name*="event_city"]').each(function() {
-                            var val = $(this).val();
-                            if (val) {
-                                cityVal = val;
+                    // Fallback: search all select tags containing event_city in ID or Name
+                    $('select').each(function() {
+                        var id = $(this).attr('id') || '';
+                        var name = $(this).attr('name') || '';
+                        if (id.indexOf('event_city') !== -1 || name.indexOf('event_city') !== -1) {
+                            var v = $(this).val();
+                            if (v) {
+                                cityVal = v;
                                 return false; // break loop
                             }
-                        });
-                    }
+                        }
+                    });
                     return cityVal || '';
                 }
 
