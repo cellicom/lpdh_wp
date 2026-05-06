@@ -2365,52 +2365,50 @@ add_filter('acf/fields/post_object/query', 'lpdh_filter_places_by_city', 20, 3);
  */
 function lpdh_event_city_filter_js()
 {
-    $screen = get_current_screen();
-    if ($screen && $screen->post_type === 'event' && ($screen->base === 'post' || $screen->base === 'add')) {
-        ?>
-        <script type="text/javascript">
-            (function($) {
-                if (typeof acf === 'undefined') return;
-
+    ?>
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                if ($('[id*="event_city"]').length === 0 && $('[name*="event_city"]').length === 0) {
+                    return;
+                }
+                
                 console.log('LPDH Event City Filter Script Loaded.');
 
                 // When the city selection changes, clear the Place selection
-                function clearPlace() {
-                    console.log('City selection changed, clearing Place field.');
-                    var placeField = acf.getField('field_event_place');
-                    if (placeField) {
-                        placeField.val('');
-                    } else {
-                        $('[name="acf[field_event_place]"]').val('').trigger('change');
-                    }
-                }
-
-                acf.addAction('change/name=event_city', clearPlace);
-                acf.addAction('change/key=field_event_city', clearPlace);
-
-                // Append the city parameter to the Place field's Select2 AJAX query
-                acf.add_filter('select2_ajax_data', function(data, args, $el, field, setting) {
-                    if (field && (field.get('name') === 'event_place' || field.get('key') === 'field_event_place')) {
-                        var cityVal = '';
-                        var cityField = acf.getField('field_event_city');
-                        if (cityField) {
-                            cityVal = cityField.val();
-                        }
-                        if (!cityVal) {
-                            cityVal = $('#acf-field_event_city').val() || $('[name="acf[field_event_city]"]').val();
-                        }
-                        
-                        console.log('Select2 AJAX search for Place. Appending city filter:', cityVal);
-                        
-                        if (cityVal) {
-                            data.event_city = cityVal;
+                $(document).on('change', '[id*="event_city"], [name*="event_city"]', function() {
+                    var cityVal = $(this).val();
+                    console.log('City changed to:', cityVal, '- Clearing Place field.');
+                    var $place = $('[id*="event_place"], [name*="event_place"]');
+                    $place.val('').trigger('change');
+                    
+                    // If ACF Select2 is used, we can also use ACF API to clear it
+                    if (typeof acf !== 'undefined') {
+                        var placeField = acf.getField('field_event_place');
+                        if (placeField) {
+                            placeField.val('');
                         }
                     }
-                    return data;
                 });
-            })(jQuery);
-        </script>
-        <?php
-    }
+
+                // Intercept ACF post_object AJAX queries to append selected city
+                if ($.ajaxPrefilter) {
+                    $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+                        if (options.data && (
+                            options.data.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
+                            options.data.indexOf('action=acf/fields/post_object/query') !== -1
+                        )) {
+                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            console.log('Intercepted ACF post_object query. Filtering by city:', cityVal);
+                            if (cityVal) {
+                                options.data += '&event_city=' + encodeURIComponent(cityVal);
+                            }
+                        }
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+    <?php
 }
-add_action('acf/input/admin_footer', 'lpdh_event_city_filter_js');
+add_action('admin_footer', 'lpdh_event_city_filter_js');
