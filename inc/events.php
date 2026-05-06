@@ -2375,6 +2375,24 @@ function lpdh_event_city_filter_js()
                 
                 console.log('LPDH Event City Filter Script Loaded.');
 
+                // Helper function to reliably get the selected city value
+                function getCityVal() {
+                    var cityVal = $('#acf-field_event_city').val();
+                    if (!cityVal) {
+                        cityVal = $('select[name="acf[field_event_city]"]').val();
+                    }
+                    if (!cityVal) {
+                        $('[id*="event_city"], [name*="event_city"]').each(function() {
+                            var val = $(this).val();
+                            if (val) {
+                                cityVal = val;
+                                return false; // break loop
+                            }
+                        });
+                    }
+                    return cityVal || '';
+                }
+
                 // When the city selection changes, clear the Place selection
                 $(document).on('change', '[id*="event_city"], [name*="event_city"]', function() {
                     var cityVal = $(this).val();
@@ -2398,7 +2416,7 @@ function lpdh_event_city_filter_js()
                             init.body.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
                             init.body.indexOf('action=acf/fields/post_object/query') !== -1
                         )) {
-                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            var cityVal = getCityVal();
                             console.log('Intercepted native fetch for post_object. City:', cityVal);
                             if (cityVal) {
                                 if (init.body.indexOf('event_city=') === -1) {
@@ -2419,7 +2437,7 @@ function lpdh_event_city_filter_js()
                             options.data.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
                             options.data.indexOf('action=acf/fields/post_object/query') !== -1
                         )) {
-                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            var cityVal = getCityVal();
                             console.log('Intercepted jQuery AJAX for post_object. City:', cityVal);
                             if (cityVal) {
                                 if (options.data.indexOf('event_city=') === -1) {
@@ -2434,7 +2452,7 @@ function lpdh_event_city_filter_js()
                 if (typeof acf !== 'undefined') {
                     acf.add_filter('select2_ajax_data', function(data, args, $el, field, setting) {
                         if (field && (field.get('name') === 'event_place' || field.get('key') === 'field_event_place')) {
-                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            var cityVal = getCityVal();
                             console.log('ACF Select2 Ajax Filter. City:', cityVal);
                             if (cityVal) {
                                 data.event_city = cityVal;
