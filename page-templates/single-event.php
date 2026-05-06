@@ -126,23 +126,51 @@ get_header(); ?>
 
                                 ?>
 
+                                <style>
+                                    @keyframes badge-anim-sway {
+                                        0%, 100% { transform: rotate(-15deg); }
+                                        50% { transform: rotate(15deg); }
+                                    }
+                                    .badge-anim-sway {
+                                        display: inline-block;
+                                        animation: badge-anim-sway 2s ease-in-out infinite;
+                                    }
+                                    @keyframes badge-anim-rotate-3d {
+                                        0% { transform: rotateY(0deg); }
+                                        100% { transform: rotateY(360deg); }
+                                    }
+                                    .badge-anim-rotate-3d {
+                                        display: inline-block;
+                                        animation: badge-anim-rotate-3d 3s linear infinite;
+                                    }
+                                    @keyframes badge-anim-pulse {
+                                        0% { transform: scale(1); }
+                                        50% { transform: scale(1.2); }
+                                        100% { transform: scale(1); }
+                                    }
+                                    .badge-anim-pulse {
+                                        display: inline-block;
+                                        animation: badge-anim-pulse 1.5s ease-in-out infinite;
+                                    }
+                                </style>
+
                                 <div class="event-meta-badges d-flex justify-content-center flex-wrap gap-2 mt-3 mb-2">
 
                                     <span class="badge px-3 py-2 shadow-sm" style="background-color: #6f42c1 !important; font-size: 0.85rem; border-radius: var(--bs-border-radius);">
 
-                                        <i class="fas fa-trophy me-1"></i> <?php echo esc_html($event_type); ?>
+                                        <i class="fas fa-trophy me-1 badge-anim-sway"></i> <?php echo esc_html($event_type); ?>
 
                                     </span>
 
                                     <span class="badge bg-danger px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: var(--bs-border-radius);">
 
-                                        <i class="fas fa-gamepad me-1"></i> <?php echo esc_html($format); ?>
+                                        <i class="fas fa-hashtag me-1 badge-anim-rotate-3d"></i> <?php echo esc_html($format); ?>
 
                                     </span>
 
                                     <span class="badge px-3 py-2 shadow-sm" style="background-color: #2e7d32 !important; font-size: 0.85rem; border-radius: var(--bs-border-radius);">
 
-                                        <i class="fas fa-ticket me-1"></i> <?php echo esc_html($ticket_fee) . (is_numeric($ticket_fee) ? '€' : ''); ?>
+                                        <i class="fas fa-ticket me-1 badge-anim-pulse"></i> <?php echo esc_html($ticket_fee) . (is_numeric($ticket_fee) ? '€' : ''); ?>
 
                                     </span>
 
