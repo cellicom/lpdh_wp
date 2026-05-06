@@ -63,17 +63,17 @@ get_header(); ?>
                                 $max_players = intval(get_field('max_players'));
                                 ?>
                                 <div class="event-meta-badges d-flex justify-content-center flex-wrap gap-2 mt-3 mb-2">
-                                    <span class="badge px-3 py-2 shadow-sm" style="background-color: #6f42c1 !important; font-size: 0.85rem; border-radius: 30px;">
+                                    <span class="badge px-3 py-2 shadow-sm" style="background-color: #6f42c1 !important; font-size: 0.85rem; border-radius: var(--bs-border-radius);">
                                         <i class="fas fa-trophy me-1"></i> <?php echo esc_html($event_type); ?>
                                     </span>
-                                    <span class="badge bg-danger px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                    <span class="badge bg-danger px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: var(--bs-border-radius);">
                                         <i class="fas fa-gamepad me-1"></i> <?php echo esc_html($format); ?>
                                     </span>
-                                    <span class="badge px-3 py-2 shadow-sm" style="background-color: #2e7d32 !important; font-size: 0.85rem; border-radius: 30px;">
+                                    <span class="badge px-3 py-2 shadow-sm" style="background-color: #2e7d32 !important; font-size: 0.85rem; border-radius: var(--bs-border-radius);">
                                         <i class="fas fa-ticket-alt me-1"></i> <?php echo esc_html($ticket_fee) . (is_numeric($ticket_fee) ? '€' : ''); ?>
                                     </span>
                                     <?php if ($max_players > 0): ?>
-                                        <span class="badge bg-dark px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: 30px;">
+                                        <span class="badge bg-dark px-3 py-2 shadow-sm" style="font-size: 0.85rem; border-radius: var(--bs-border-radius);">
                                             <i class="fas fa-users me-1"></i> <?php echo esc_html($max_players); ?>
                                         </span>
                                     <?php endif; ?>
