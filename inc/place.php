@@ -85,6 +85,22 @@ if (function_exists('acf_add_local_field_group')):
         'title' => 'Place Fields',
         'fields' => array(
             array(
+                'key' => 'field_place_city',
+                'label' => 'City',
+                'name' => 'place_city',
+                'type' => 'text',
+                'instructions' => 'Enter place city',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => 'City',
+            ),
+            array(
                 'key' => 'field_place_address',
                 'label' => 'Address',
                 'name' => 'place_address',
@@ -146,6 +162,7 @@ function place_custom_columns($columns)
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = $columns['title'];
+    $new_columns['place_city'] = 'City';
     $new_columns['place_address'] = 'Address';
     $new_columns['place_homepage'] = 'Website';
     $new_columns['events'] = 'Events';
@@ -160,6 +177,14 @@ add_filter('manage_place_posts_columns', 'place_custom_columns');
 function place_custom_columns_data($column, $post_id)
 {
     switch ($column) {
+        case 'place_city':
+            $place_city = get_field('field_place_city', $post_id);
+            if ($place_city) {
+                echo esc_html($place_city);
+            } else {
+                echo '-';
+            }
+            break;
         case 'place_address':
             $place_address = get_field('field_place_address', $post_id);
             if ($place_address) {
@@ -200,6 +225,7 @@ add_action('manage_place_posts_custom_column', 'place_custom_columns_data', 10, 
  */
 function place_sortable_columns($columns)
 {
+    $columns['place_city'] = 'place_city';
     $columns['place_address'] = 'place_address';
     return $columns;
 }
@@ -216,7 +242,10 @@ function place_column_orderby($query)
 
     $orderby = $query->get('orderby');
 
-    if ('place_address' == $orderby) {
+    if ('place_city' == $orderby) {
+        $query->set('meta_key', 'field_place_city');
+        $query->set('orderby', 'meta_value');
+    } elseif ('place_address' == $orderby) {
         $query->set('meta_key', 'field_place_address');
         $query->set('orderby', 'meta_value');
     }

@@ -215,7 +215,11 @@ function lpdh_export_events_ical() {
             $location = '';
             if ( $place_obj ) {
                 $location = $place_obj->post_title;
+                $place_city = get_field( 'field_place_city', $place_obj->ID );
                 $place_address = get_field( 'field_place_address', $place_obj->ID );
+                if ( $place_city ) {
+                    $location .= ', ' . $place_city;
+                }
                 if ( $place_address ) {
                     $location .= ', ' . $place_address;
                 }

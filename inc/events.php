@@ -79,6 +79,28 @@ if (function_exists('acf_add_local_field_group')):
         'title' => 'Event Details',
         'fields' => array(
             array(
+                'key' => 'field_event_city',
+                'label' => 'City',
+                'name' => 'event_city',
+                'type' => 'select',
+                'instructions' => 'Select a city to filter available places',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => array(),
+                'default_value' => false,
+                'allow_null' => 1,
+                'multiple' => 0,
+                'ui' => 1,
+                'ajax' => 0,
+                'return_format' => 'value',
+                'placeholder' => 'Select a city...',
+            ),
+            array(
                 'key' => 'field_event_place',
                 'label' => 'Place',
                 'name' => 'event_place',
@@ -2277,3 +2299,98 @@ function lpdh_event_admin_global_scripts() {
     }
 }
 add_action('admin_footer', 'lpdh_event_admin_global_scripts');
+
+/**
+ * Retrieve unique cities from Place custom post type, sorted alphabetically.
+ */
+function lpdh_get_unique_place_cities()
+{
+    global $wpdb;
+    $cities = $wpdb->get_col("
+        SELECT DISTINCT TRIM(meta_value)
+        FROM {$wpdb->postmeta} pm
+        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'place_city' 
+          AND pm.meta_value IS NOT NULL 
+          AND TRIM(meta_value) != '' 
+          AND p.post_type = 'place' 
+          AND p.post_status = 'publish'
+        ORDER BY TRIM(meta_value) ASC
+    ");
+    return array_filter($cities);
+}
+
+/**
+ * Populate City choices in Event field dynamically
+ */
+function lpdh_populate_event_city_choices($field)
+{
+    $cities = lpdh_get_unique_place_cities();
+    $field['choices'] = array();
+    if (!empty($cities)) {
+        foreach ($cities as $city) {
+            $field['choices'][$city] = $city;
+        }
+    }
+    return $field;
+}
+add_filter('acf/load_field/name=event_city', 'lpdh_populate_event_city_choices');
+
+/**
+ * Filter available places in event_place field by selected city
+ */
+function lpdh_filter_places_by_city($args, $field, $post_id)
+{
+    if (isset($_REQUEST['event_city']) && !empty($_REQUEST['event_city'])) {
+        $city = sanitize_text_field($_REQUEST['event_city']);
+        $args['meta_query'] = array(
+            array(
+                'key' => 'place_city',
+                'value' => $city,
+                'compare' => '='
+            )
+        );
+    }
+    return $args;
+}
+add_filter('acf/fields/post_object/query/name=event_place', 'lpdh_filter_places_by_city', 10, 3);
+
+/**
+ * Enqueue Select2 filtering JS for Event edit screen
+ */
+function lpdh_event_city_filter_js()
+{
+    $screen = get_current_screen();
+    if ($screen && $screen->post_type === 'event' && ($screen->base === 'post' || $screen->base === 'add')) {
+        ?>
+        <script type="text/javascript">
+            (function($) {
+                if (typeof acf === 'undefined') return;
+
+                // When the city selection changes, clear the Place selection
+                acf.addAction('change_field_key_field_event_city', function(field) {
+                    var placeField = acf.getField('field_event_place');
+                    if (placeField) {
+                        placeField.val('');
+                    }
+                });
+
+                // Append the city parameter to the Place field's Select2 AJAX query
+                acf.add_filter('select2_ajax_data', function(data, args, $el, field, setting) {
+                    if (field.get('name') === 'event_place') {
+                        var cityField = acf.getField('field_event_city');
+                        if (cityField) {
+                            var cityVal = cityField.val();
+                            if (cityVal) {
+                                data.event_city = cityVal;
+                            }
+                        }
+                    }
+                    return data;
+                });
+            })(jQuery);
+        </script>
+        <?php
+    }
+}
+add_action('acf/input/admin_footer', 'lpdh_event_city_filter_js');

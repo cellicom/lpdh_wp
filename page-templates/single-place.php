@@ -18,6 +18,7 @@ get_header(); ?>
                     <?php while (have_posts()):
                         the_post();
                         $place_id = get_the_ID();
+                        $city = get_field('field_place_city');
                         $address = get_field('field_place_address');
                         $homepage = get_field('field_place_homepage');
                         ?>
@@ -28,6 +29,13 @@ get_header(); ?>
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
 
                                 <div class="place-details d-flex justify-content-center gap-4 mt-2 flex-wrap">
+                                    <?php if ($city): ?>
+                                        <div class="place-city">
+                                            <i class="fas fa-city text-primary me-1"></i>
+                                            <?php echo esc_html($city); ?>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <?php if ($address): ?>
                                         <div class="place-address">
                                             <i class="fas fa-map-marker-alt text-primary me-1"></i>

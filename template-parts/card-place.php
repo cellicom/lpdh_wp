@@ -5,6 +5,7 @@
  * @package Bootscore Child
  */
 
+$city = get_field('place_city');
 $address = get_field('place_address');
 $homepage = get_field('place_homepage');
 
@@ -69,6 +70,13 @@ $has_future_events = $events_check_query->have_posts();
                 </div>
 
                 <div class="place-meta">
+                    <?php if ($city): ?>
+                        <div class="d-flex align-items-start mb-2">
+                            <i class="fas fa-city text-primary mt-1 me-2"></i>
+                            <span><?php echo esc_html($city); ?></span>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if ($address): ?>
                         <div class="d-flex align-items-start mb-2">
                             <i class="fas fa-map-marker-alt text-primary mt-1 me-2"></i>
