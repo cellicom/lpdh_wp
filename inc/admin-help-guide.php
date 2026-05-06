@@ -85,6 +85,10 @@ function render_help_guide_page()
                     </thead>
                     <tbody>
                         <tr>
+                            <td><strong>City</strong></td>
+                            <td>City selection used to filter the available Places.</td>
+                        </tr>
+                        <tr>
                             <td><strong>Place</strong></td>
                             <td>Link to a post in the <i>Places</i> CPT. Determines the venue.</td>
                         </tr>
@@ -95,6 +99,22 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Facebook Link</strong></td>
                             <td>URL of the official Facebook event page.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Event Type</strong></td>
+                            <td>Type of the event (Tournament, Draft, Prerelease, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Format</strong></td>
+                            <td>Format played (LPDH, Commander, Pauper, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ticket Fee</strong></td>
+                            <td>Entry price for the event (e.g. 5, Gratuito).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Max Players</strong></td>
+                            <td>Maximum number of allowed participants (0 for unlimited).</td>
                         </tr>
                         <tr>
                             <td><strong>Code Event</strong></td>
