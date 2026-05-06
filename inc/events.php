@@ -2382,7 +2382,6 @@ function lpdh_event_city_filter_js()
                     var $place = $('[id*="event_place"], [name*="event_place"]');
                     $place.val('').trigger('change');
                     
-                    // If ACF Select2 is used, we can also use ACF API to clear it
                     if (typeof acf !== 'undefined') {
                         var placeField = acf.getField('field_event_place');
                         if (placeField) {
@@ -2391,7 +2390,29 @@ function lpdh_event_city_filter_js()
                     }
                 });
 
-                // Intercept ACF post_object AJAX queries to append selected city
+                // 1. Intercept native fetch requests (used by modern browsers / ACF versions)
+                var originalFetch = window.fetch;
+                window.fetch = function(input, init) {
+                    try {
+                        if (init && init.body && typeof init.body === 'string' && (
+                            init.body.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
+                            init.body.indexOf('action=acf/fields/post_object/query') !== -1
+                        )) {
+                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            console.log('Intercepted native fetch for post_object. City:', cityVal);
+                            if (cityVal) {
+                                if (init.body.indexOf('event_city=') === -1) {
+                                    init.body += '&event_city=' + encodeURIComponent(cityVal);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error in fetch interception:', e);
+                    }
+                    return originalFetch.apply(this, arguments);
+                };
+
+                // 2. Intercept jQuery AJAX requests (fallback)
                 if ($.ajaxPrefilter) {
                     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
                         if (options.data && (
@@ -2399,11 +2420,27 @@ function lpdh_event_city_filter_js()
                             options.data.indexOf('action=acf/fields/post_object/query') !== -1
                         )) {
                             var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
-                            console.log('Intercepted ACF post_object query. Filtering by city:', cityVal);
+                            console.log('Intercepted jQuery AJAX for post_object. City:', cityVal);
                             if (cityVal) {
-                                options.data += '&event_city=' + encodeURIComponent(cityVal);
+                                if (options.data.indexOf('event_city=') === -1) {
+                                    options.data += '&event_city=' + encodeURIComponent(cityVal);
+                                }
                             }
                         }
+                    });
+                }
+
+                // 3. ACF Native Select2 Filter (fallback)
+                if (typeof acf !== 'undefined') {
+                    acf.add_filter('select2_ajax_data', function(data, args, $el, field, setting) {
+                        if (field && (field.get('name') === 'event_place' || field.get('key') === 'field_event_place')) {
+                            var cityVal = $('[id*="event_city"]').val() || $('[name*="event_city"]').val();
+                            console.log('ACF Select2 Ajax Filter. City:', cityVal);
+                            if (cityVal) {
+                                data.event_city = cityVal;
+                            }
+                        }
+                        return data;
                     });
                 }
             });
