@@ -18,35 +18,7 @@ get_header(); ?>
         <div class="container pb-5">
 
             <!-- Filters -->
-            <form method="get" class="mb-5">
-                <div class="row justify-content-center g-3">
-                    <div class="col-md-4 col-lg-3">
-                        <select name="event_year" class="form-select" onchange="this.form.submit()">
-                            <option value="">All Years</option>
-                            <?php
-                            global $wpdb;
-                            $years = $wpdb->get_col("SELECT DISTINCT YEAR(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date' ORDER BY meta_value DESC");
-                            foreach ($years as $year) {
-                                $selected = (isset($_GET['event_year']) && $_GET['event_year'] == $year) ? 'selected' : '';
-                                echo '<option value="' . esc_attr($year) . '" ' . $selected . '>' . esc_html($year) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4 col-lg-3">
-                        <select name="event_place_id" class="form-select" onchange="this.form.submit()">
-                            <option value="">All Places</option>
-                            <?php
-                            $places = get_posts(['post_type' => 'place', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC']);
-                            foreach ($places as $place) {
-                                $selected = (isset($_GET['event_place_id']) && $_GET['event_place_id'] == $place->ID) ? 'selected' : '';
-                                echo '<option value="' . esc_attr($place->ID) . '" ' . $selected . '>' . esc_html($place->post_title) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </div>
-            </form>
+            <?php lpdh_render_event_filters(); ?>
 
             <?php if (have_posts()): ?>
                 <div class="event-archive-grid">

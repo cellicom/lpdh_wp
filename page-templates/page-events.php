@@ -145,20 +145,57 @@ get_header(); ?>
         <div class="container pb-5">
             <?php
             $today = date('Y-m-d H:i:s');
+            ?>
+
+            <?php lpdh_render_event_filters(); ?>
+
+            <?php
+            $meta_query_args = array('relation' => 'AND');
+
+            $filter_year = isset($_GET['event_year']) ? intval($_GET['event_year']) : '';
+            $filter_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : '';
+            $filter_place_id = isset($_GET['event_place_id']) ? intval($_GET['event_place_id']) : 0;
+
+            if ($filter_year) {
+                $meta_query_args[] = array(
+                    'key' => 'event_date',
+                    'value' => array($filter_year . '-01-01 00:00:00', $filter_year . '-12-31 23:59:59'),
+                    'compare' => 'BETWEEN',
+                    'type' => 'DATETIME'
+                );
+            } else {
+                // Di default mostra solo eventi futuri
+                $meta_query_args[] = array(
+                    'key' => 'event_date',
+                    'value' => $today,
+                    'compare' => '>=',
+                    'type' => 'DATETIME'
+                );
+            }
+
+            if ($filter_city) {
+                $meta_query_args[] = array(
+                    'key' => 'event_city',
+                    'value' => $filter_city,
+                    'compare' => '='
+                );
+            }
+
+            if ($filter_place_id) {
+                $meta_query_args[] = array(
+                    'key' => 'event_place',
+                    'value' => $filter_place_id,
+                    'compare' => '='
+                );
+            }
+
             $args = array(
                 'post_type' => 'event',
                 'posts_per_page' => 12,
                 'meta_key' => 'event_date',
                 'orderby' => 'meta_value',
                 'order' => 'ASC',
-                'meta_query' => array(
-                    array(
-                        'key' => 'event_date',
-                        'value' => $today,
-                        'compare' => '>=',
-                        'type' => 'DATETIME'
-                    )
-                )
+                'meta_query' => $meta_query_args,
             );
             $events_query = new WP_Query($args);
 

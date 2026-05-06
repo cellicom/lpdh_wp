@@ -1615,6 +1615,15 @@ function bootscore_child_event_archive_filter($query)
             );
         }
 
+        if (isset($_GET['event_city']) && !empty($_GET['event_city'])) {
+            $city = sanitize_text_field($_GET['event_city']);
+            $meta_query[] = array(
+                'key' => 'event_city',
+                'value' => $city,
+                'compare' => '='
+            );
+        }
+
         if (count($meta_query) > 1) {
             $query->set('meta_query', $meta_query);
         }
@@ -2563,3 +2572,132 @@ function lpdh_event_city_filter_js()
     <?php
 }
 add_action('admin_footer', 'lpdh_event_city_filter_js');
+
+/**
+ * Renderizza i filtri per gli archivi/pagine eventi
+ */
+function lpdh_render_event_filters() {
+    global $wpdb;
+
+    $current_year = isset($_GET['event_year']) ? sanitize_text_field($_GET['event_year']) : '';
+    $current_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : '';
+    $current_place_id = isset($_GET['event_place_id']) ? intval($_GET['event_place_id']) : 0;
+
+    // Fetch distinct years
+    $years = $wpdb->get_col("SELECT DISTINCT YEAR(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date' ORDER BY meta_value DESC");
+
+    // Fetch distinct cities
+    $cities = $wpdb->get_col("
+        SELECT DISTINCT meta_value
+        FROM {$wpdb->postmeta} pm
+        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'event_city'
+          AND pm.meta_value IS NOT NULL
+          AND TRIM(pm.meta_value) != ''
+          AND p.post_type = 'event'
+          AND p.post_status = 'publish'
+        ORDER BY meta_value ASC
+    ");
+
+    // Fetch places mapped by city
+    $all_places = $wpdb->get_results("
+        SELECT p.ID, p.post_title, pm.meta_value AS city
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+        WHERE p.post_type = 'place'
+          AND p.post_status = 'publish'
+          AND pm.meta_key = 'place_city'
+          AND pm.meta_value IS NOT NULL
+          AND TRIM(pm.meta_value) != ''
+        ORDER BY p.post_title ASC
+    ");
+
+    $places_by_city = [];
+    foreach ($all_places as $pl) {
+        $places_by_city[$pl->city][] = ['id' => $pl->ID, 'name' => $pl->post_title];
+    }
+    ?>
+    <form method="get" class="mb-5" id="event-archive-filters">
+        <?php 
+        // Preserva i parametri GET esistenti nell'URL (necessario se si usano ugly permalink come ?post_type=event)
+        foreach ($_GET as $key => $val) {
+            if (!in_array($key, ['event_year', 'event_city', 'event_place_id']) && !is_array($val)) {
+                echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($val) . '">';
+            }
+        }
+        ?>
+        <div class="row justify-content-center g-3">
+            <!-- Anno -->
+            <div class="col-md-4 col-lg-3">
+                <select name="event_year" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Years</option>
+                    <?php foreach ((array) $years as $year): 
+                        $selected = ($current_year == $year) ? 'selected' : ''; ?>
+                        <option value="<?php echo esc_attr($year); ?>" <?php echo $selected; ?>><?php echo esc_html($year); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- City -->
+            <div class="col-md-4 col-lg-3">
+                <select name="event_city" class="form-select" id="filter-event-city">
+                    <option value="">All Cities</option>
+                    <?php foreach ((array) $cities as $city): 
+                        $selected = ($current_city === $city) ? 'selected' : ''; ?>
+                        <option value="<?php echo esc_attr($city); ?>" <?php echo $selected; ?>><?php echo esc_html($city); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Place (visibile solo se city selezionata) -->
+            <div class="col-md-4 col-lg-3" id="filter-place-wrap" style="<?php echo $current_city ? '' : 'display:none;'; ?>">
+                <select name="event_place_id" class="form-select" id="filter-event-place" onchange="this.form.submit()">
+                    <option value="">All Places</option>
+                    <?php
+                    // Mostra solo i places della city attuale (fallback server-side)
+                    if ($current_city && isset($places_by_city[$current_city])) {
+                        foreach ($places_by_city[$current_city] as $pl) {
+                            $selected = ($current_place_id === (int)$pl['id']) ? 'selected' : '';
+                            echo '<option value="' . esc_attr($pl['id']) . '" ' . $selected . '>' . esc_html($pl['name']) . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <script>
+    (function () {
+        var placesByCity = <?php echo json_encode($places_by_city, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        var citySelect   = document.getElementById('filter-event-city');
+        var placeWrap    = document.getElementById('filter-place-wrap');
+        var placeSelect  = document.getElementById('filter-event-place');
+        
+        if (citySelect) {
+            citySelect.addEventListener('change', function () {
+                var city = this.value;
+
+                // Nasconde Place e resetta le opzioni
+                placeWrap.style.display = 'none';
+                placeSelect.innerHTML = '<option value="">All Places</option>';
+
+                if (city) {
+                    var places = placesByCity[city] || [];
+                    places.forEach(function (pl) {
+                        var opt = document.createElement('option');
+                        opt.value = pl.id;
+                        opt.textContent = pl.name;
+                        placeSelect.appendChild(opt);
+                    });
+                    placeWrap.style.display = '';
+                }
+
+                // Invia il form: azzera place e filtra per la nuova city
+                citySelect.form.submit();
+            });
+        }
+    })();
+    </script>
+    <?php
+}
