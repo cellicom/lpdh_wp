@@ -72,9 +72,9 @@ $card_classes = 'event-card' . ($is_past ? ' event-past' : '');
         $format_val = get_field('format') ?: 'LPDH';
         $max_players_val = intval(get_field('max_players'));
         ?>
-        <div class="position-absolute top-0 end-0 p-2 d-flex flex-column gap-1 align-items-end" style="z-index: 3;">
-            <span class="badge bg-primary text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($event_type_val); ?></span>
-            <span class="badge bg-secondary text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($format_val); ?></span>
+        <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-1 align-items-start" style="z-index: 3;">
+            <span class="badge text-white shadow-sm" style="background-color: #6f42c1 !important; font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($event_type_val); ?></span>
+            <span class="badge bg-danger text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;"><?php echo esc_html($format_val); ?></span>
             <?php if ($max_players_val > 0): ?>
                 <span class="badge bg-dark text-white shadow-sm" style="font-size: 0.75rem; border-radius: 4px;">
                     <i class="fas fa-users me-1" style="font-size: 0.7rem;"></i>Max <?php echo esc_html($max_players_val); ?>
