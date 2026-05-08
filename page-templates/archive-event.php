@@ -13,6 +13,7 @@ get_header(); ?>
 
         <header class="page-header container my-4 text-center">
             <h1 class="page-title"><?php post_type_archive_title(); ?></h1>
+            <?php lpdh_render_calendar_buttons(); ?>
         </header>
 
         <div class="container pb-5">
