@@ -114,6 +114,22 @@ if ($ig_type === 'top3')
 if ($ig_type === 'top8')
     $max_players = 8;
 
+// Get current ELO rankings for all players to display
+$all_events = get_posts(array(
+    'post_type' => 'event',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'meta_key' => 'event_date',
+    'orderby' => 'meta_value',
+    'order' => 'ASC',
+));
+$all_rankings_data = function_exists('lpdh_calculate_rankings_data') ? lpdh_calculate_rankings_data($all_events) : array();
+$elo_map = array();
+foreach ($all_rankings_data as $rank_item) {
+    $p_key = !empty($rank_item['user_id']) ? 'user_' . $rank_item['user_id'] : $rank_item['name'];
+    $elo_map[$p_key] = $rank_item['elo'];
+}
+
 // Extract players data
 $players_data = array();
 if (is_array($rankings) && count($rankings) > 0) {
@@ -178,6 +194,18 @@ if (is_array($rankings) && count($rankings) > 0) {
             }
         }
 
+        // Determine Player Key for ELO map
+        $user_id_for_key = 0;
+        if ($player_id_field) {
+            if (is_array($player_id_field) && isset($player_id_field['ID'])) {
+                $user_id_for_key = $player_id_field['ID'];
+            } elseif (is_numeric($player_id_field)) {
+                $user_id_for_key = $player_id_field;
+            }
+        }
+        $p_key = $user_id_for_key ? 'user_' . $user_id_for_key : (isset($rank['name']) ? trim($rank['name']) : $player_name);
+        $player_elo = isset($elo_map[$p_key]) ? $elo_map[$p_key] : (defined('LPDH_DEFAULT_ELO') ? LPDH_DEFAULT_ELO : 1500);
+
         $players_data[] = array(
             'position' => $i + 1,
             'player_name' => $player_name,
@@ -185,7 +213,8 @@ if (is_array($rankings) && count($rankings) > 0) {
             'commander_img' => $commander_img,
             'partner_img' => $partner_img,
             'commander_name' => $commander_name,
-            'partner_name' => $partner_name
+            'partner_name' => $partner_name,
+            'elo' => $player_elo
         );
     }
 }
@@ -193,6 +222,7 @@ if (is_array($rankings) && count($rankings) > 0) {
 // Format date
 $formatted_date = $event_date ? date_i18n('d/m/Y', strtotime($event_date)) : '';
 $place_name = $event_place ? $event_place->post_title : '';
+$total_players = is_array($rankings) ? count($rankings) : 0;
 // Get current active theme to set as default
 $active_theme = get_option('lpdh_active_theme', 'default');
 $default_ig_theme = 'instagram-fantasy'; // Default fallback
@@ -268,6 +298,11 @@ $site_logo_url = lpdh_get_logo();
         .selectors-card .form-select:focus {
             border-color: #6a1b9a !important;
             box-shadow: 0 0 0 0.25rem rgba(106, 27, 154, 0.25) !important;
+        }
+
+        /* Hide ELO Utility */
+        .hide-elo .ig-player-elo {
+            display: none !important;
         }
 
         /* Site Logo in Templates */
@@ -1119,7 +1154,7 @@ $site_logo_url = lpdh_get_logo();
         <div class="card mb-4 shadow-sm selectors-card overflow-hidden">
             <div class="card-body p-4">
                 <div class="row align-items-center g-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="d-flex flex-column">
                             <label for="ig-theme-select" class="form-label fw-bold mb-2">🎨 Select Theme</label>
                             <select id="ig-theme-select" class="form-select form-select-lg border-2">
@@ -1131,7 +1166,7 @@ $site_logo_url = lpdh_get_logo();
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="d-flex flex-column">
                             <label for="ig-type-select" class="form-label fw-bold mb-2">🏆 Select Type</label>
                             <select id="ig-type-select" class="form-select form-select-lg border-2">
@@ -1141,12 +1176,21 @@ $site_logo_url = lpdh_get_logo();
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-column">
+                            <label for="ig-elo-select" class="form-label fw-bold mb-2">📊 Show ELO</label>
+                            <select id="ig-elo-select" class="form-select form-select-lg border-2">
+                                <option value="no" selected>No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Image Preview -->
-        <div class="instagram-image <?php echo esc_attr($default_ig_theme); ?>" id="ig-image">
+        <div class="instagram-image <?php echo esc_attr($default_ig_theme); ?> hide-elo" id="ig-image">
             <div class="content">
                 <!-- Header -->
                 <div class="header">
@@ -1167,6 +1211,11 @@ $site_logo_url = lpdh_get_logo();
                         <?php if ($place_name): ?>
                             <span>📍
                                 <?php echo esc_html($place_name); ?>
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($total_players > 0): ?>
+                            <span>👥
+                                <?php echo esc_html($total_players); ?> Players
                             </span>
                         <?php endif; ?>
                     </div>
@@ -1203,9 +1252,24 @@ $site_logo_url = lpdh_get_logo();
         document.getElementById('ig-theme-select').addEventListener('change', function () {
             const theme = this.value;
             const container = document.getElementById('ig-image');
+            
+            // Extract state of other options
+            const isHideElo = container.classList.contains('hide-elo');
 
-            // Remove existing theme classes
-            container.className = 'instagram-image ' + theme;
+            // Construct classes from scratch to avoid pollution
+            container.className = 'instagram-image ' + theme + (isHideElo ? ' hide-elo' : '');
+        });
+
+        // ELO Toggle
+        document.getElementById('ig-elo-select').addEventListener('change', function () {
+            const showElo = this.value === 'yes';
+            const container = document.getElementById('ig-image');
+            
+            if (showElo) {
+                container.classList.remove('hide-elo');
+            } else {
+                container.classList.add('hide-elo');
+            }
         });
 
         // Type Switcher

@@ -35,7 +35,7 @@ if (!isset($players_data) || empty($players_data)) {
                 </div>
                 <div class="place-info">
                     <div class="place-position">1ST PLACE</div>
-                    <div class="place-player"><?php echo esc_html($first['player_name']); ?></div>
+                    <div class="place-player"><?php echo esc_html($first['player_name']); ?> <span class="ig-player-elo" style="opacity: 0.8; font-weight: 500; font-size: 0.7em;">(ELO <?php echo esc_html($first['elo']); ?>)</span></div>
                     <div class="place-commanders">
                         <?php 
                         echo esc_html($first['commander_name']);
@@ -77,7 +77,7 @@ if (!isset($players_data) || empty($players_data)) {
                 </div>
                 <div class="place-info">
                     <div class="place-position"><?php echo $med_positions[$i]['label']; ?></div>
-                    <div class="place-player"><?php echo esc_html($player['player_name']); ?></div>
+                    <div class="place-player"><?php echo esc_html($player['player_name']); ?> <span class="ig-player-elo" style="opacity: 0.8; font-weight: 500; font-size: 0.75em;">(<?php echo esc_html($player['elo']); ?>)</span></div>
                     <div class="place-commanders">
                         <?php 
                         echo esc_html($player['commander_name']);
@@ -118,7 +118,7 @@ if (!isset($players_data) || empty($players_data)) {
                 </div>
                 <div class="place-info">
                     <div class="place-position"><?php echo $pos_label; ?></div>
-                    <div class="place-player"><?php echo esc_html($player['player_name']); ?></div>
+                    <div class="place-player"><?php echo esc_html($player['player_name']); ?> <span class="ig-player-elo" style="opacity: 0.75; font-weight: 500; font-size: 0.8em;">(<?php echo esc_html($player['elo']); ?>)</span></div>
                     <div class="place-commanders">
                         <?php 
                         echo esc_html($player['commander_name']);
