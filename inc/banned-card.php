@@ -37,6 +37,40 @@ function lpdh_get_banned_card_names()
 }
 
 /**
+ * Helper function to retrieve banned cards data including combined restrictions
+ */
+function lpdh_get_banned_cards_data()
+{
+    $banned_cards_query = new WP_Query(array(
+        'post_type' => 'banned_card',
+        'posts_per_page' => -1,
+        'no_found_rows' => true,
+        'update_post_term_cache' => false,
+    ));
+
+    $banned_data = array();
+    if ($banned_cards_query->have_posts()) {
+        foreach ($banned_cards_query->posts as $post) {
+            $name = strtolower(trim($post->post_title));
+            $combined_with = get_field('combined_with', $post->ID);
+            
+            $combined_names = array();
+            if ($combined_with) {
+                foreach ($combined_with as $cw_post) {
+                    $combined_names[] = strtolower(trim($cw_post->post_title));
+                }
+            }
+            
+            $banned_data[$name] = array(
+                'combined_with' => $combined_names
+            );
+        }
+    }
+    
+    return $banned_data;
+}
+
+/**
  * Helper: get the image HTML for a banned card post.
  * Used in single-banned_card.php, card-banned-card.php, shortcode-banned-card.php.
  *
@@ -250,8 +284,8 @@ add_action('manage_banned_card_posts_custom_column', 'banned_card_custom_columns
 function lpdh_localize_banned_cards()
 {
     if (wp_script_is('scryfall-autocomplete-core', 'registered')) {
-        $banned_card_names = lpdh_get_banned_card_names();
-        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_card_names);
+        $banned_cards_data = lpdh_get_banned_cards_data();
+        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_cards_data);
     }
 }
 add_action('wp_enqueue_scripts', 'lpdh_localize_banned_cards');

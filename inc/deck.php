@@ -602,8 +602,8 @@ function lpdh_get_deck_editor_url()
  */
 function lpdh_is_deck_legal($deck_id)
 {
-    $banned_names = lpdh_get_banned_card_names();
-    if (empty($banned_names)) {
+    $banned_data = lpdh_get_banned_cards_data();
+    if (empty($banned_data)) {
         return true;
     }
 
@@ -633,8 +633,20 @@ function lpdh_is_deck_legal($deck_id)
     }
 
     foreach ($deck_cards as $card) {
-        if (in_array($card, $banned_names)) {
-            return false;
+        if (isset($banned_data[$card])) {
+            $combined_with = $banned_data[$card]['combined_with'];
+            
+            if (empty($combined_with)) {
+                // If the banned card has no 'combined_with' restrictions, it's banned outright
+                return false;
+            } else {
+                // It is banned ONLY if combined with one of these specific cards
+                foreach ($combined_with as $cw_card) {
+                    if (in_array($cw_card, $deck_cards)) {
+                        return false; // Found the specific combination
+                    }
+                }
+            }
         }
     }
 

@@ -411,8 +411,8 @@ function lpdh_admin_enqueue_scripts($hook)
         wp_enqueue_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
 
         // Localize Banned Cards for Admin
-        $banned_card_names = lpdh_get_banned_card_names();
-        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_card_names);
+        $banned_cards_data = lpdh_get_banned_cards_data();
+        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_cards_data);
 
         // Add inline style for Banned Badge in Select2 (mimic Bootstrap)
         $custom_admin_css = "
