@@ -1756,3 +1756,64 @@ function lpdh_sortable_registration_column($columns) {
     return $columns;
 }
 add_filter('manage_users_sortable_columns', 'lpdh_sortable_registration_column');
+
+/**
+ * Add Preferred City field to Admin User Profile
+ */
+function lpdh_show_user_preferred_city($user) {
+    $cities = array();
+    $places_query = new WP_Query(array(
+        'post_type' => 'place',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    ));
+    if ($places_query->have_posts()) {
+        while ($places_query->have_posts()) {
+            $places_query->the_post();
+            $city = get_field('place_city');
+            if (!empty($city)) {
+                $cities[$city] = $city;
+            }
+        }
+        wp_reset_postdata();
+    }
+    sort($cities);
+    $user_preferred_city = get_user_meta($user->ID, 'preferred_city', true);
+    ?>
+    <?php if (!empty($cities)): ?>
+        <h3>Preferred City</h3>
+        <table class="form-table">
+            <tr>
+                <th><label for="preferred_city">Preferred City</label></th>
+                <td>
+                    <select name="preferred_city" id="preferred_city">
+                        <option value="">Select a city...</option>
+                        <?php foreach ($cities as $city): ?>
+                            <option value="<?php echo esc_attr($city); ?>" <?php selected($user_preferred_city, $city); ?>>
+                                <?php echo esc_html($city); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="description">Select the preferred city for this user.</p>
+                </td>
+            </tr>
+        </table>
+    <?php endif; ?>
+    <?php
+}
+add_action('show_user_profile', 'lpdh_show_user_preferred_city');
+add_action('edit_user_profile', 'lpdh_show_user_preferred_city');
+
+/**
+ * Save Preferred City from Admin User Profile
+ */
+function lpdh_save_user_preferred_city($user_id) {
+    if (!current_user_can('edit_user', $user_id)) {
+        return false;
+    }
+    if (isset($_POST['preferred_city'])) {
+        update_user_meta($user_id, 'preferred_city', sanitize_text_field($_POST['preferred_city']));
+    }
+}
+add_action('personal_options_update', 'lpdh_save_user_preferred_city');
+add_action('edit_user_profile_update', 'lpdh_save_user_preferred_city');

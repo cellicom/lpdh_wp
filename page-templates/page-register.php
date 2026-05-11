@@ -93,6 +93,7 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
     $user_email = isset($_POST['user_email']) ? sanitize_email($_POST['user_email']) : '';
     $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
     $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+    $preferred_city = isset($_POST['preferred_city']) ? sanitize_text_field($_POST['preferred_city']) : '';
 
     // Validate username
     if (empty($user_login)) {
@@ -110,6 +111,11 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
         $errors->add('invalid_email', __('The email address is invalid.', 'bootscore'));
     } elseif (email_exists($user_email)) {
         $errors->add('email_exists', __('This email address is already registered.', 'bootscore'));
+    }
+
+    // Validate first name
+    if (empty($first_name)) {
+        $errors->add('empty_first_name', __('Please enter your first name.', 'bootscore'));
     }
 
     // If no errors, create user
@@ -138,6 +144,9 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
                 $user_id->get_error_message()
             );
         } else {
+            if (!empty($preferred_city)) {
+                update_user_meta($user_id, 'preferred_city', $preferred_city);
+            }
             bootscore_send_new_user_email($user_id, $password);
             $register_success = true;
         }
@@ -337,14 +346,16 @@ get_header(); ?>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="first_name"
-                                            class="form-label"><?php esc_html_e('First Name', 'bootscore'); ?></label>
+                                        <label for="first_name" class="form-label">
+                                            <?php esc_html_e('First Name', 'bootscore'); ?>
+                                            <span class="text-danger">*</span>
+                                        </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                             <input type="text" name="first_name" id="first_name"
                                                 class="form-control form-control-lg"
                                                 value="<?php echo isset($_POST['first_name']) ? esc_attr(sanitize_text_field($_POST['first_name'])) : ''; ?>"
-                                                autocomplete="given-name"
+                                                autocomplete="given-name" required
                                                 placeholder="<?php esc_attr_e('Your first name', 'bootscore'); ?>">
                                         </div>
                                     </div>
@@ -361,6 +372,46 @@ get_header(); ?>
                                         </div>
                                     </div>
                                 </div>
+
+                                <?php
+                                // Fetch all cities from the place custom post type
+                                $cities = array();
+                                $places_query = new WP_Query(array(
+                                    'post_type' => 'place',
+                                    'posts_per_page' => -1,
+                                    'post_status' => 'publish',
+                                ));
+                                if ($places_query->have_posts()) {
+                                    while ($places_query->have_posts()) {
+                                        $places_query->the_post();
+                                        $city = get_field('place_city');
+                                        if (!empty($city)) {
+                                            $cities[$city] = $city;
+                                        }
+                                    }
+                                    wp_reset_postdata();
+                                }
+                                sort($cities);
+                                ?>
+
+                                <?php if (!empty($cities)): ?>
+                                    <div class="mb-3">
+                                        <label for="preferred_city" class="form-label">
+                                            <?php esc_html_e('Preferred City', 'bootscore'); ?>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                            <select name="preferred_city" id="preferred_city" class="form-select form-select-lg" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;">
+                                                <option value=""><?php esc_html_e('Select your preferred city...', 'bootscore'); ?></option>
+                                                <?php foreach ($cities as $city): ?>
+                                                    <option value="<?php echo esc_attr($city); ?>" <?php selected(isset($_POST['preferred_city']) ? $_POST['preferred_city'] : '', $city); ?>>
+                                                        <?php echo esc_html($city); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
 
                                 <div class="d-grid gap-2 mb-4">
                                     <button type="submit" name="wp-submit" id="wp-submit-register"

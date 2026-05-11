@@ -69,6 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
         // Private Profile
         update_user_meta($user_id, 'private_profile', isset($_POST['private_profile']) ? '1' : '0');
 
+        // Preferred City
+        if (isset($_POST['preferred_city'])) {
+            update_user_meta($user_id, 'preferred_city', sanitize_text_field($_POST['preferred_city']));
+        }
+
         // Basic Info Update
         $userdata = array(
             'ID' => $user_id,
@@ -214,6 +219,44 @@ get_header(); ?>
                                 class="form-control"><?php echo esc_textarea($current_user->description); ?></textarea>
                             <div class="form-text text-info">A short bio about yourself.</div>
                         </div>
+
+                        <?php
+                        $cities = array();
+                        $places_query = new WP_Query(array(
+                            'post_type' => 'place',
+                            'posts_per_page' => -1,
+                            'post_status' => 'publish',
+                        ));
+                        if ($places_query->have_posts()) {
+                            while ($places_query->have_posts()) {
+                                $places_query->the_post();
+                                $city = get_field('place_city');
+                                if (!empty($city)) {
+                                    $cities[$city] = $city;
+                                }
+                            }
+                            wp_reset_postdata();
+                        }
+                        sort($cities);
+                        $user_preferred_city = get_user_meta($user_id, 'preferred_city', true);
+                        ?>
+                        <?php if (!empty($cities)): ?>
+                            <div class="mb-4">
+                                <label for="preferred_city" class="form-label fw-bold">Preferred City</label>
+                                <select name="preferred_city" id="preferred_city" class="form-select form-control">
+                                    <option value="">Select your preferred city...</option>
+                                    <?php foreach ($cities as $city): ?>
+                                        <option value="<?php echo esc_attr($city); ?>" <?php selected($user_preferred_city, $city); ?>>
+                                            <?php echo esc_html($city); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text text-info">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    Your preferred city.
+                                </div>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="mb-4">
                             <label for="user_url" class="form-label fw-bold">Website</label>
