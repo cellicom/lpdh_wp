@@ -39,7 +39,7 @@ get_header(); ?>
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
                                 <div class="d-flex align-items-center justify-content-center small mt-2 text-white">
                                     <i class="<?php echo ($current_city === 'Global') ? 'fas fa-globe-americas' : 'fas fa-map-marker-alt'; ?> me-1" style="color: <?php echo ($current_city === 'Global') ? '#2ed573' : '#ff4757'; ?>;"></i> 
-                                    <select class="fw-bold shadow-none" style="width: auto !important; cursor: pointer !important; font-size: inherit !important; height: auto !important; border: 0 !important; border-bottom: 1px solid white !important; border-radius: 0 !important; padding: 0 2px !important; margin: 0 !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background: transparent !important; color: var(--bs-secondary) !important; box-shadow: none !important;" onchange="const u = new window.URL(window.location.href); if (this.value === 'Global') { u.searchParams.delete('city'); } else { u.searchParams.set('city', this.value); } window.location.href = u.toString();">
+                                    <select class="leaderboard-city-select" onchange="const u = new window.URL(window.location.href); u.searchParams.set('city', this.value); window.location.href = u.toString();">
                                         <option value="Global" <?php selected($current_city, 'Global'); ?>>Global</option>
                                         <?php foreach ($cities as $c): ?>
                                             <option value="<?php echo esc_attr($c); ?>" <?php selected($current_city, $c); ?>>
