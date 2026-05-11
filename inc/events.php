@@ -1615,8 +1615,12 @@ function bootscore_child_event_archive_filter($query)
             );
         }
 
-        if (isset($_GET['event_city']) && !empty($_GET['event_city'])) {
-            $city = sanitize_text_field($_GET['event_city']);
+        $city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : null;
+        if ($city === null && is_user_logged_in()) {
+            $city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+        }
+
+        if (!empty($city)) {
             $meta_query[] = array(
                 'key' => 'event_city',
                 'value' => $city,
@@ -2422,6 +2426,8 @@ function lpdh_get_unique_place_cities()
     return array_filter($cities);
 }
 
+
+
 /**
  * Populate City choices in Event field dynamically
  */
@@ -2580,7 +2586,13 @@ function lpdh_render_event_filters() {
     global $wpdb;
 
     $current_year = isset($_GET['event_year']) ? sanitize_text_field($_GET['event_year']) : '';
-    $current_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : '';
+    $current_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : null;
+    if ($current_city === null && is_user_logged_in()) {
+        $current_city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+    }
+    if ($current_city === null) {
+        $current_city = '';
+    }
     $current_place_id = isset($_GET['event_place_id']) ? intval($_GET['event_place_id']) : 0;
 
     // Fetch distinct years

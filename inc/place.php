@@ -311,3 +311,21 @@ function bootscore_child_place_archive_query($query)
     }
 }
 add_action('pre_get_posts', 'bootscore_child_place_archive_query');
+
+/**
+ * Retrieve all Place IDs located in a specific city.
+ */
+function lpdh_get_place_ids_by_city($city)
+{
+    global $wpdb;
+    if (empty($city)) return array();
+    
+    return $wpdb->get_col($wpdb->prepare("
+        SELECT p.ID
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+        WHERE p.post_type = 'place' 
+          AND pm.meta_key = 'place_city' 
+          AND pm.meta_value = %s
+    ", $city));
+}

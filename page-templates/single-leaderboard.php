@@ -20,8 +20,34 @@ get_header(); ?>
 
                         <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
+                            <?php
+                            $cities = lpdh_get_unique_place_cities();
+                            $current_city = '';
+                            if (isset($_GET['city'])) {
+                                $current_city = sanitize_text_field($_GET['city']);
+                            } elseif (is_user_logged_in()) {
+                                $current_city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+                            }
+                            if (empty($current_city)) {
+                                $current_city = 'Global';
+                            }
+                            ?>
+
                             <header class="entry-header text-center mb-4 mt-4">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
+                                
+                                <div class="d-flex align-items-center justify-content-center small mt-2 text-white">
+                                    <i class="<?php echo ($current_city === 'Global') ? 'fas fa-globe-americas' : 'fas fa-map-marker-alt'; ?> me-1" style="color: <?php echo ($current_city === 'Global') ? '#2ed573' : '#ff4757'; ?>;"></i> 
+                                    <select class="fw-bold shadow-none" style="width: auto !important; cursor: pointer !important; font-size: inherit !important; height: auto !important; border: 0 !important; border-bottom: 1px solid white !important; border-radius: 0 !important; padding: 0 2px !important; margin: 0 !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background: transparent !important; color: var(--bs-secondary) !important; box-shadow: none !important;" onchange="const u = new window.URL(window.location.href); if (this.value === 'Global') { u.searchParams.delete('city'); } else { u.searchParams.set('city', this.value); } window.location.href = u.toString();">
+                                        <option value="Global" <?php selected($current_city, 'Global'); ?>>Global</option>
+                                        <?php foreach ($cities as $c): ?>
+                                            <option value="<?php echo esc_attr($c); ?>" <?php selected($current_city, $c); ?>>
+                                                <?php echo esc_html($c); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <span class="ms-1">Player Rankings</span>
+                                </div>
 
                                 <?php
                                 $year = get_field('field_leaderboard_year');
@@ -32,13 +58,93 @@ get_header(); ?>
                                 <?php endif; ?>
                             </header>
 
-                            <div class="entry-content mb-5">
+                            <div class="entry-content mb-4">
                                 <?php the_content(); ?>
                             </div>
 
+
+
                             <?php
-                            $rankings_json = get_field('field_leaderboard_rankings_json');
-                            $rankings = json_decode($rankings_json, true);
+                            $rankings = array();
+                            if ($current_city === 'Global') {
+                                $rankings_json = get_field('field_leaderboard_rankings_json');
+                                $rankings = json_decode($rankings_json, true);
+                            } else {
+                                // Dinamically calculate ranking based on City selection
+                                if (!$year) {
+                                    $year = date('Y');
+                                }
+
+                                $place_ids = lpdh_get_place_ids_by_city($current_city);
+                                if (empty($place_ids)) {
+                                    $place_ids = array(0);
+                                }
+
+                                $lb_args = array(
+                                    'post_type' => 'event',
+                                    'posts_per_page' => -1,
+                                    'post_status' => 'publish',
+                                    'meta_key' => 'event_date',
+                                    'orderby' => 'meta_value',
+                                    'order' => 'ASC',
+                                    'meta_query' => array(
+                                        'relation' => 'AND',
+                                        array(
+                                            'key' => 'event_date',
+                                            'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
+                                            'compare' => 'BETWEEN',
+                                            'type' => 'DATETIME'
+                                        ),
+                                        array(
+                                            'key' => 'event_place',
+                                            'value' => $place_ids,
+                                            'compare' => 'IN'
+                                        )
+                                    )
+                                );
+                                $city_events = get_posts($lb_args);
+
+                                $valid_city_events = array();
+                                foreach ($city_events as $evt) {
+                                    if (get_field('exclude_from_annual_leaderboard', $evt->ID)) {
+                                        continue;
+                                    }
+                                    $evt_rank_data = get_field('event_ranking', $evt->ID);
+                                    if (empty($evt_rank_data)) {
+                                        $evt_rank_data = get_field('event_rankings_json', $evt->ID);
+                                    }
+                                    if (!empty($evt_rank_data)) {
+                                        $valid_city_events[] = $evt;
+                                    }
+                                }
+
+                                // Perform dynamic calculation replicating what AJAX logic does
+                                $starting_elos = lpdh_get_previous_year_elos($year);
+                                $rankings = lpdh_calculate_rankings_data($valid_city_events, $starting_elos);
+
+                                // Calculate trends dynamically
+                                $prev_city_events = $valid_city_events;
+                                if (count($prev_city_events) > 0) {
+                                    array_pop($prev_city_events);
+                                }
+                                $prev_city_result = lpdh_calculate_rankings_data($prev_city_events, $starting_elos);
+                                
+                                $prev_map = array();
+                                foreach ($prev_city_result as $idx => $p) {
+                                    $prev_k = !empty($p['user_id']) ? 'user_' . $p['user_id'] : $p['name'];
+                                    $prev_map[$prev_k] = $idx + 1;
+                                }
+
+                                foreach ($rankings as $idx => &$prank) {
+                                    $curr_k = !empty($prank['user_id']) ? 'user_' . $prank['user_id'] : $prank['name'];
+                                    if (isset($prev_map[$curr_k])) {
+                                        $prank['trend'] = $prev_map[$curr_k] - ($idx + 1);
+                                    } else {
+                                        $prank['trend'] = 'new';
+                                    }
+                                }
+                                unset($prank);
+                            }
 
                             if (is_array($rankings) && !empty($rankings)): ?>
 
@@ -68,10 +174,11 @@ get_header(); ?>
                                 $best_event = null;
                                 $max_event_players = 0;
                                 if ($year) {
-                                    $events = get_posts(array(
+                                    $best_evt_args = array(
                                         'post_type' => 'event',
                                         'posts_per_page' => -1,
                                         'meta_query' => array(
+                                            'relation' => 'AND',
                                             array(
                                                 'key' => 'event_date',
                                                 'value' => array($year . '-01-01 00:00:00', $year . '-12-31 23:59:59'),
@@ -79,7 +186,19 @@ get_header(); ?>
                                                 'type' => 'DATETIME'
                                             )
                                         )
-                                    ));
+                                    );
+
+                                    if ($current_city !== 'Global') {
+                                        $p_ids = lpdh_get_place_ids_by_city($current_city);
+                                        if (empty($p_ids)) $p_ids = array(0);
+                                        $best_evt_args['meta_query'][] = array(
+                                            'key' => 'event_place',
+                                            'value' => $p_ids,
+                                            'compare' => 'IN'
+                                        );
+                                    }
+
+                                    $events = get_posts($best_evt_args);
 
                                     foreach ($events as $evt) {
                                         $evt_rankings = get_field('event_ranking', $evt->ID);

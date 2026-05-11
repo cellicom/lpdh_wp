@@ -86,9 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
         );
 
         // Password Update
-        if (!empty($_POST['new_password'])) {
-            if ($_POST['new_password'] === $_POST['confirm_password']) {
-                $userdata['user_pass'] = $_POST['new_password'];
+        $pass1 = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
+        $pass2 = isset($_POST['confirm_password']) ? trim($_POST['confirm_password']) : '';
+        
+        if (!empty($pass1) || !empty($pass2)) {
+            if ($pass1 === $pass2) {
+                $userdata['user_pass'] = $pass1;
             } else {
                 $errors[] = "Passwords do not match.";
             }
@@ -345,12 +348,12 @@ get_header(); ?>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="new_password" class="form-label small">New Password</label>
-                                <input type="password" name="new_password" id="new_password" class="form-control">
+                                <input type="password" name="new_password" id="new_password" class="form-control" autocomplete="new-password">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="confirm_password" class="form-label small">Confirm New Password</label>
                                 <input type="password" name="confirm_password" id="confirm_password"
-                                    class="form-control">
+                                    class="form-control" autocomplete="new-password">
                             </div>
                         </div>
                         <div class="form-text text-info mb-4">Leave both blank if you don't want to change your

@@ -28,7 +28,13 @@ get_header(); ?>
             $meta_query_args = array('relation' => 'AND');
 
             $filter_year = isset($_GET['event_year']) ? intval($_GET['event_year']) : '';
-            $filter_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : '';
+            $filter_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : null;
+            if ($filter_city === null && is_user_logged_in()) {
+                $filter_city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+            }
+            if ($filter_city === null) {
+                $filter_city = '';
+            }
             $filter_place_id = isset($_GET['event_place_id']) ? intval($_GET['event_place_id']) : 0;
 
             if ($filter_year) {

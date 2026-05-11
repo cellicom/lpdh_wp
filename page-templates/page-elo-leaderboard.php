@@ -20,27 +20,71 @@ get_header(); ?>
 
                         <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
+                            <?php
+                            $cities = lpdh_get_unique_place_cities();
+                            $current_city = '';
+                            
+                            if (isset($_GET['city'])) {
+                                $current_city = sanitize_text_field($_GET['city']);
+                            } elseif (is_user_logged_in()) {
+                                $current_city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+                            }
+                            
+                            if (empty($current_city)) {
+                                $current_city = 'Global';
+                            }
+                            ?>
+
                             <header class="entry-header text-center mb-4 mt-4">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
-                                <div class="small mt-2">
-                                    <i class="fas fa-globe-americas me-1"></i> Global Player Rankings
+                                <div class="d-flex align-items-center justify-content-center small mt-2 text-white">
+                                    <i class="<?php echo ($current_city === 'Global') ? 'fas fa-globe-americas' : 'fas fa-map-marker-alt'; ?> me-1" style="color: <?php echo ($current_city === 'Global') ? '#2ed573' : '#ff4757'; ?>;"></i> 
+                                    <select class="fw-bold shadow-none" style="width: auto !important; cursor: pointer !important; font-size: inherit !important; height: auto !important; border: 0 !important; border-bottom: 1px solid white !important; border-radius: 0 !important; padding: 0 2px !important; margin: 0 !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background: transparent !important; color: var(--bs-secondary) !important; box-shadow: none !important;" onchange="const u = new window.URL(window.location.href); if (this.value === 'Global') { u.searchParams.delete('city'); } else { u.searchParams.set('city', this.value); } window.location.href = u.toString();">
+                                        <option value="Global" <?php selected($current_city, 'Global'); ?>>Global</option>
+                                        <?php foreach ($cities as $c): ?>
+                                            <option value="<?php echo esc_attr($c); ?>" <?php selected($current_city, $c); ?>>
+                                                <?php echo esc_html($c); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <span class="ms-1">Player Rankings</span>
                                 </div>
                             </header>
 
-                            <div class="entry-content mb-5">
+                            <div class="entry-content mb-4">
                                 <?php the_content(); ?>
                             </div>
 
+
+
                             <?php
                             // Fetch all published events ordered by date ASC to ensure correct ELO calculation
-                            $all_events = get_posts(array(
+                            $event_args = array(
                                 'post_type' => 'event',
                                 'posts_per_page' => -1,
                                 'post_status' => 'publish',
                                 'meta_key' => 'event_date',
                                 'orderby' => 'meta_value',
                                 'order' => 'ASC',
-                            ));
+                            );
+
+                            // Apply city filter if it's not Global
+                            if ($current_city !== 'Global' && !empty($current_city)) {
+                                $place_ids = lpdh_get_place_ids_by_city($current_city);
+                                // Se non ci sono place in quella città, passiamo array vuoto o un valore impossibile 0 per ritornare zero eventi
+                                if (empty($place_ids)) {
+                                    $place_ids = array(0);
+                                }
+                                $event_args['meta_query'] = array(
+                                    array(
+                                        'key' => 'event_place',
+                                        'value' => $place_ids,
+                                        'compare' => 'IN'
+                                    )
+                                );
+                            }
+
+                            $all_events = get_posts($event_args);
 
                             // Use the existing helper to calculate statistics
                             $rankings = lpdh_calculate_rankings_data($all_events);
