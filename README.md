@@ -104,6 +104,12 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Auto-updating:** Once subscribed, the calendar syncs automatically — no manual re-imports needed.
 - **Configuration:** Set the Export Page in **LPDH → Theme Settings → Pages Configuration → Select Export Page**.
 
+### 15. 🛡️ Registration Spam Protection
+- **hCaptcha Integration:** The registration form is protected by **hCaptcha** (free, GDPR-compliant alternative to reCAPTCHA). A challenge widget is displayed before submission and verified server-side via the hCaptcha API.
+- **Powered by Plugin:** The official **"hCaptcha for WP"** plugin manages the API keys and widget rendering — no hardcoded credentials in the theme.
+- **Fail-safe Design:** If the plugin is deactivated, the form continues to function normally (fail-open), preventing admin lockouts during maintenance.
+- **Theme Integration:** The widget is rendered via the plugin's shortcode API (`[hcaptcha]`) and verified using `hcaptcha_get_verify_message()`, keeping the theme code decoupled from the plugin internals.
+
 ## ✨ Easter Eggs & Community Interactions
 The theme includes several interactive "secrets" to engage the community. Found it all!
 
@@ -117,6 +123,7 @@ This is a **Bootscore Child Theme**.
 - **Advanced Custom Fields PRO (v6.x)** - [Download](https://www.advancedcustomfields.com/pro/) - Mandatory for data management and modular boxes.
 - **bs Cookie Settings (v.5.6.x)** - [Download](https://bootscore.me/documentation/bs-cookie-settings/) - Mandatory for GDPR/CCPA compliance and user consents.
 - **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/advanced-custom-fields-font-awesome/) - Mandatory for selecting achievement icons.
+- **hCaptcha for WP** - [Download](https://wordpress.org/plugins/hcaptcha-for-forms-and-more/) - Required for registration spam protection. Configure keys at **Settings → hCaptcha** after activation.
 
 ```bash
 # Compile SCSS to CSS

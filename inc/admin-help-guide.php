@@ -64,7 +64,8 @@ function render_help_guide_page()
                     <a href="#roles">13. Roles & Security</a>
                     <a href="#settings">14. Theme Settings</a>
                     <a href="#emails">15. Email System 📧</a>
-                    <a href="#easter-eggs" class="hg-red">16. Easter Eggs ✨</a>
+                    <a href="#hcaptcha" class="hg-red">16. 🛡️ Spam Protection</a>
+                    <a href="#easter-eggs" class="hg-red">17. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -804,10 +805,75 @@ function render_help_guide_page()
 
             </section>
 
+            <!-- SECTION: HCAPTCHA -->
+            <section id="hcaptcha" class="hg-section">
+                <h2 class="hg-section-title hg-title-red">
+                    <span class="dashicons dashicons-shield"></span> 16. 🛡️ Registration Spam Protection (hCaptcha)
+                </h2>
+                <p>The registration form is protected by <strong>hCaptcha</strong>, a free and GDPR-compliant alternative to Google reCAPTCHA. During a spam attack in May 2026, over 500 fake accounts were created via automated bots &mdash; this integration prevents future attacks.</p>
+
+                <div class="hg-grid-2" style="margin-bottom: 25px;">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-plugins"></span> Plugin Required</h5>
+                        <p class="small">This feature requires the official <strong>"hCaptcha for WP"</strong> plugin, available free on the WordPress Plugin Directory.</p>
+                        <p class="small">The plugin manages API key storage and widget rendering &mdash; no credentials are hardcoded in the theme.</p>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-admin-network"></span> How It Works</h5>
+                        <p class="small">A challenge widget appears in the registration form. On submission, the response token is verified server-side via the hCaptcha API using <code>hcaptcha_get_verify_message()</code>. Bots without a valid token are rejected before any account is created.</p>
+                    </div>
+                </div>
+
+                <h4>Setup (one-time):</h4>
+                <ol class="hg-list" style="margin-top: 8px;">
+                    <li>Install &amp; activate the <strong>"hCaptcha for WP"</strong> plugin from the WordPress Plugin Directory.</li>
+                    <li>Go to <a href="https://www.hcaptcha.com" target="_blank">hcaptcha.com</a>, create a free account, and add your domain.</li>
+                    <li>Copy the <strong>Site Key</strong> and <strong>Secret Key</strong> from your hCaptcha dashboard.</li>
+                    <li>In WordPress, go to <strong>Settings &rarr; hCaptcha</strong> and paste the two keys.</li>
+                    <li>Verify the widget appears on the registration page &mdash; it should show a checkbox or image challenge.</li>
+                </ol>
+
+                <h4 style="margin-top: 20px;">Behavior Summary:</h4>
+                <table class="wp-list-table widefat fixed striped hg-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 220px;">Scenario</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bot submits without CAPTCHA</strong></td>
+                            <td>❌ Blocked &mdash; registration fails with an error message.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bot bypasses frontend widget</strong></td>
+                            <td>❌ Blocked &mdash; server-side API verification catches it regardless.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real user completes CAPTCHA</strong></td>
+                            <td>✅ Registration proceeds normally.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>hCaptcha API network error</strong></td>
+                            <td>✅ Fail-open &mdash; user is not blocked; error is logged in PHP error log.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Plugin deactivated</strong></td>
+                            <td>⚠️ Fail-open &mdash; form works without CAPTCHA. Re-activate plugin ASAP.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="hg-warning" style="margin-top: 15px;">
+                    <strong>Important:</strong> If you deactivate the "hCaptcha for WP" plugin, the registration form will temporarily lose CAPTCHA protection. The theme uses <code>function_exists('hcaptcha_get_verify_message')</code> to detect the plugin and fails-open gracefully &mdash; but re-activate the plugin as soon as possible.
+                </div>
+            </section>
+
             <!-- SECTION: EASTER EGGS -->
             <section id="easter-eggs" class="hg-section">
                 <h2 class="hg-section-title hg-title-red">
-                    <span class="dashicons dashicons-admin-appearance"></span> 16. Easter Eggs & Hidden Features
+                    <span class="dashicons dashicons-admin-appearance"></span> 17. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
@@ -856,7 +922,7 @@ function render_help_guide_page()
             </section>
 
             <footer class="hg-footer">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.2.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.3.0</p>
             </footer>
         </div>
     </div>

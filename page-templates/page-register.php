@@ -118,6 +118,14 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
         $errors->add('empty_first_name', __('Please enter your first name.', 'bootscore'));
     }
 
+    // Validate hCaptcha (via official "hCaptcha for WP" plugin)
+    if ( function_exists( 'hcaptcha_get_verify_message' ) ) {
+        $hcaptcha_error = hcaptcha_get_verify_message( 'lpdh_register_action', 'lpdh_register_nonce' );
+        if ( null !== $hcaptcha_error ) {
+            $errors->add( 'hcaptcha_failed', $hcaptcha_error );
+        }
+    }
+
     // If no errors, create user
     if (empty($errors->errors)) {
 
@@ -412,6 +420,15 @@ get_header(); ?>
                                         </div>
                                     </div>
                                 <?php endif; ?>
+
+                                <?php
+                                // hCaptcha widget — rendered by the official "hCaptcha for WP" plugin
+                                if ( function_exists( 'do_shortcode' ) ) {
+                                    echo do_shortcode(
+                                        '[hcaptcha action="lpdh_register_action" name="lpdh_register_nonce" id="lpdh-register-form"]'
+                                    );
+                                }
+                                ?>
 
                                 <div class="d-grid gap-2 mb-4">
                                     <button type="submit" name="wp-submit" id="wp-submit-register"

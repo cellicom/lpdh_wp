@@ -320,6 +320,8 @@ require_once get_stylesheet_directory() . '/inc/easter-egg.php';
 // Include iCal / Export Calendar helpers
 require_once get_stylesheet_directory() . '/inc/export-calendar.php';
 
+// hCaptcha: handled by the official "hCaptcha for WP" plugin (keys set in Settings > hCaptcha)
+
 
 /**
  * Enqueue scripts and styles
