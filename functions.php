@@ -1819,3 +1819,21 @@ function lpdh_save_user_preferred_city($user_id) {
 }
 add_action('personal_options_update', 'lpdh_save_user_preferred_city');
 add_action('edit_user_profile_update', 'lpdh_save_user_preferred_city');
+
+/**
+ * Redirect default WordPress registration page to the custom registration page.
+ */
+function lpdh_redirect_default_registration() {
+    global $pagenow;
+    if ($pagenow === 'wp-login.php' && isset($_GET['action']) && $_GET['action'] === 'register') {
+        wp_redirect(lpdh_get_login_register_url('register'));
+        exit;
+    }
+}
+add_action('init', 'lpdh_redirect_default_registration');
+
+/**
+ * Disable XML-RPC to prevent brute-force attacks and user creation attempts.
+ */
+add_filter('xmlrpc_enabled', '__return_false');
+

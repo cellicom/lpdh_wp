@@ -118,12 +118,54 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
         $errors->add('empty_first_name', __('Please enter your first name.', 'bootscore'));
     }
 
-    // Validate hCaptcha (via official "hCaptcha for WP" plugin)
+    // 1. Honeypot check (anti-bot)
+    if (!empty($_POST['lpdh_hp_field'])) {
+        $errors->add('bot_detected', __('Security check failed.', 'bootscore'));
+    }
+
+    // 2. Validate hCaptcha (via official "hCaptcha for WP" plugin or manual fallback)
+    $hcaptcha_error = null;
     if ( function_exists( 'hcaptcha_get_verify_message' ) ) {
         $hcaptcha_error = hcaptcha_get_verify_message( 'lpdh_register_action', 'lpdh_register_nonce' );
-        if ( null !== $hcaptcha_error ) {
-            $errors->add( 'hcaptcha_failed', $hcaptcha_error );
+    } else {
+        // Fallback to manual verification using the plugin's secret key from settings
+        $hcaptcha_options = get_option('hcaptcha_options');
+        $secret = '';
+        if (is_array($hcaptcha_options)) {
+            $secret = $hcaptcha_options['secret'] ?? ($hcaptcha_options['secret_key'] ?? '');
         }
+        if (empty($secret)) {
+            $secret = get_option('hcaptcha_secret', get_option('hcaptcha_secret_key', ''));
+        }
+
+        // Only enforce if hCaptcha is configured (has a secret key)
+        if (!empty($secret)) {
+            $hcaptcha_response = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
+            if (empty($hcaptcha_response)) {
+                $hcaptcha_error = __('Please complete the CAPTCHA challenge.', 'bootscore');
+            } else {
+                $verify_response = wp_remote_post('https://api.hcaptcha.com/siteverify', array(
+                    'body' => array(
+                        'secret'   => $secret,
+                        'response' => $hcaptcha_response,
+                        'remoteip' => $_SERVER['REMOTE_ADDR'],
+                    ),
+                ));
+
+                if (is_wp_error($verify_response)) {
+                    $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
+                } else {
+                    $verify_data = json_decode(wp_remote_retrieve_body($verify_response));
+                    if (empty($verify_data->success)) {
+                        $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
+                    }
+                }
+            }
+        }
+    }
+
+    if ( null !== $hcaptcha_error ) {
+        $errors->add( 'hcaptcha_failed', $hcaptcha_error );
     }
 
     // If no errors, create user
@@ -420,6 +462,12 @@ get_header(); ?>
                                         </div>
                                     </div>
                                 <?php endif; ?>
+
+                                <!-- Honeypot anti-bot field -->
+                                <div class="d-none" aria-hidden="true" style="display: none !important;">
+                                    <label for="lpdh_hp_field"><?php esc_html_e('Leave this field empty', 'bootscore'); ?></label>
+                                    <input type="text" name="lpdh_hp_field" id="lpdh_hp_field" tabindex="-1" autocomplete="off">
+                                </div>
 
                                 <?php
                                 // hCaptcha widget — rendered by the official "hCaptcha for WP" plugin
