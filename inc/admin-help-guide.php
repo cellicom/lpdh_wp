@@ -820,7 +820,7 @@ function render_help_guide_page()
                     </div>
                     <div class="hg-card">
                         <h5 class="hg-text-green"><span class="dashicons dashicons-admin-network"></span> How It Works</h5>
-                        <p class="small">A challenge widget appears in the registration form. On submission, the response token is verified server-side via the hCaptcha API using <code>hcaptcha_get_verify_message()</code>. Bots without a valid token are rejected before any account is created.</p>
+                        <p class="small">A challenge widget appears in the registration form. On submission, the response token is verified server-side via the hCaptcha API. Bots without a valid token are rejected before any account is created.</p>
                     </div>
                 </div>
 
@@ -866,7 +866,7 @@ function render_help_guide_page()
                 </table>
 
                 <div class="hg-warning" style="margin-top: 15px;">
-                    <strong>Important:</strong> If you deactivate the "hCaptcha for WP" plugin, the registration form will temporarily lose CAPTCHA protection. The theme uses <code>function_exists('hcaptcha_get_verify_message')</code> to detect the plugin and fails-open gracefully &mdash; but re-activate the plugin as soon as possible.
+                    <strong>Important:</strong> If you deactivate the "hCaptcha for WP" plugin, the registration form will temporarily lose CAPTCHA protection. The theme uses <code>shortcode_exists('hcaptcha')</code> to detect the plugin and fails-open gracefully &mdash; but re-activate the plugin as soon as possible.
                 </div>
             </section>
 

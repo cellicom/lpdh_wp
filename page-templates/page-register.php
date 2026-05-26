@@ -125,42 +125,63 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
 
     // 2. Validate hCaptcha (via official "hCaptcha for WP" plugin or manual fallback)
     $hcaptcha_error = null;
-    if ( function_exists( 'hcaptcha_get_verify_message' ) ) {
-        $hcaptcha_error = hcaptcha_get_verify_message( 'lpdh_register_action', 'lpdh_register_nonce' );
-    } else {
-        // Fallback to manual verification using the plugin's secret key from settings
-        $hcaptcha_options = get_option('hcaptcha_options');
+    $is_hcaptcha_active = shortcode_exists( 'hcaptcha' ) || function_exists( 'hcaptcha_get_verify_message' );
+
+    if ( $is_hcaptcha_active ) {
+        // Attempt to retrieve the hCaptcha secret key from various common WordPress option stores
         $secret = '';
-        if (is_array($hcaptcha_options)) {
-            $secret = $hcaptcha_options['secret'] ?? ($hcaptcha_options['secret_key'] ?? '');
+        
+        // 1. Check 'hcaptcha' option (used by the official "hCaptcha for Forms and More" plugin)
+        $hcaptcha_opt = get_option('hcaptcha');
+        if (is_array($hcaptcha_opt)) {
+            $secret = $hcaptcha_opt['secret'] ?? ($hcaptcha_opt['secret_key'] ?? '');
         }
+        
+        // 2. Check 'hcaptcha_settings' option
+        if (empty($secret)) {
+            $hcaptcha_settings = get_option('hcaptcha_settings');
+            if (is_array($hcaptcha_settings)) {
+                $secret = $hcaptcha_settings['secret_key'] ?? ($hcaptcha_settings['secret'] ?? '');
+            }
+        }
+        
+        // 3. Check 'hcaptcha_options' option
+        if (empty($secret)) {
+            $hcaptcha_options = get_option('hcaptcha_options');
+            if (is_array($hcaptcha_options)) {
+                $secret = $hcaptcha_options['secret'] ?? ($hcaptcha_options['secret_key'] ?? '');
+            }
+        }
+        
+        // 4. Check standalone options
         if (empty($secret)) {
             $secret = get_option('hcaptcha_secret', get_option('hcaptcha_secret_key', ''));
         }
 
-        // Only enforce if hCaptcha is configured (has a secret key)
-        if (!empty($secret)) {
-            $hcaptcha_response = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
-            if (empty($hcaptcha_response)) {
-                $hcaptcha_error = __('Please complete the CAPTCHA challenge.', 'bootscore');
-            } else {
-                $verify_response = wp_remote_post('https://api.hcaptcha.com/siteverify', array(
-                    'body' => array(
-                        'secret'   => $secret,
-                        'response' => $hcaptcha_response,
-                        'remoteip' => $_SERVER['REMOTE_ADDR'],
-                    ),
-                ));
+        // If the plugin is active, hCaptcha is strictly required
+        $hcaptcha_response = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
+        if (empty($hcaptcha_response)) {
+            $hcaptcha_error = __('Please complete the CAPTCHA challenge.', 'bootscore');
+        } elseif (!empty($secret)) {
+            $verify_response = wp_remote_post('https://api.hcaptcha.com/siteverify', array(
+                'body' => array(
+                    'secret'   => $secret,
+                    'response' => $hcaptcha_response,
+                    'remoteip' => $_SERVER['REMOTE_ADDR'],
+                ),
+            ));
 
-                if (is_wp_error($verify_response)) {
+            if (is_wp_error($verify_response)) {
+                $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
+            } else {
+                $verify_data = json_decode(wp_remote_retrieve_body($verify_response));
+                if (empty($verify_data->success)) {
                     $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
-                } else {
-                    $verify_data = json_decode(wp_remote_retrieve_body($verify_response));
-                    if (empty($verify_data->success)) {
-                        $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
-                    }
                 }
             }
+        } else {
+            // Log a warning if the plugin is active but no secret key is configured in settings
+            error_log('hCaptcha warning: hCaptcha plugin is active but the secret key is not configured in WordPress settings.');
         }
     }
 
