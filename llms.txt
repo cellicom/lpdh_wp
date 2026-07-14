@@ -1,0 +1,19 @@
+# LPDH - Legendary Pauper Commander Guide
+
+> LPDH.guide is the official Italian platform and community dedicated to **Legendary Pauper Commander (LPDH)**, a custom and competitive format of the *Magic: The Gathering* trading card game. The site manages tournaments, player rankings via an ELO system, user-submitted deck databases, and unlockable achievement badges.
+
+## General Information
+* [Banned List & Rules](/banned_card/) - The official list of banned cards for the LPDH format, featuring Scryfall integration.
+* [ELO Leaderboard](/elo-leaderboard/) - Real-time player standings based on ELO scores updated after each tournament.
+* [General Statistics](/stats/) - Detailed stats on deck representation, top commanders, win rates, and player performance.
+* [Commander Roulette](/roulette/) - An interactive tool to randomly generate an uncommon legendary creature for your games.
+
+## Decks & Tournaments
+* [Deck Database](/deck/) - The library of decks registered and shared by the community.
+* [Events & Tournaments](/event/) - History and list of upcoming LPDH tournaments organized across Italy.
+* [Places & Venues](/place/) - Physical and digital locations hosting community events.
+
+## Additional Resources
+* [Achievements & Badges](/achievement/) - A list of unlockable badges and milestones players can earn by participating in tournaments.
+* [FAQ](/faq/) - Answers to frequently asked questions about the format, community, and platform.
+* [Export Calendar & Feeds](/export/?type=events) - A standard iCal feed of upcoming tournaments to subscribe to via Google Calendar, Apple Calendar, or Outlook.
