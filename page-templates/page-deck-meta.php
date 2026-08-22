@@ -146,12 +146,15 @@ foreach ($deck_stats as $d_id => $ds) {
         $icon_html = '<div class="d-inline-block me-2 flex-shrink-0">' . $icon_html . '</div>';
     }
 
+    $is_legal = function_exists('lpdh_is_deck_legal') ? lpdh_is_deck_legal($d_id) : true;
+
     $deck_table[] = array(
         'id'           => $d_id,
         'title'        => $deck_post->post_title,
         'permalink'    => get_permalink($d_id),
         'commander'    => $commander_display,
         'icon_html'    => $icon_html,
+        'is_legal'     => $is_legal,
         'author'       => $author_name,
         'author_url'   => $author_id ? get_author_posts_url($author_id) : '',
         'wins'         => $ds['wins'],
@@ -192,17 +195,24 @@ get_header(); ?>
                             
                             <header class="entry-header text-center mb-4 mt-4">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
-                                <div class="d-flex align-items-center justify-content-center small mt-2 text-white">
-                                    <i class="fas fa-calendar-alt me-1" style="color: #2ed573;"></i> 
-                                    <select class="leaderboard-city-select" onchange="const u = new window.URL(window.location.href); u.searchParams.set('stats_year', this.value); window.location.href = u.toString();">
-                                        <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
-                                        <?php foreach ($available_years as $y) : ?>
-                                            <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
-                                                <?php echo esc_html($y); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <span class="ms-1">Deck Statistics</span>
+                                <div class="d-flex align-items-center justify-content-center flex-wrap small mt-2 text-white gap-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-calendar-alt me-1" style="color: #2ed573;"></i> 
+                                        <select class="leaderboard-city-select" onchange="const u = new window.URL(window.location.href); u.searchParams.set('stats_year', this.value); window.location.href = u.toString();">
+                                            <option value="global" <?php selected($selected_year, 'global'); ?>>Global</option>
+                                            <?php foreach ($available_years as $y) : ?>
+                                                <option value="<?php echo esc_attr($y); ?>" <?php selected($selected_year, $y); ?>>
+                                                    <?php echo esc_html($y); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <span class="ms-1">Deck Statistics</span>
+                                    </div>
+                                    <span class="text-white-50 d-none d-sm-inline">|</span>
+                                    <div class="form-check form-switch d-inline-flex align-items-center mb-0">
+                                        <input class="form-check-input me-1" type="checkbox" id="hideIllegalDecks" checked style="cursor: pointer;">
+                                        <label class="form-check-label fw-bold text-white" for="hideIllegalDecks" style="cursor: pointer; font-size: inherit;">Hide illegal decks</label>
+                                    </div>
                                 </div>
                             </header>
 
@@ -242,7 +252,7 @@ get_header(); ?>
                                                         $row_class = 'rank-bronze';
                                                     }
                                                     ?>
-                                                    <tr class="<?php echo esc_attr($row_class); ?>">
+                                                    <tr class="<?php echo esc_attr($row_class); ?>" data-legal="<?php echo $deck['is_legal'] ? 'true' : 'false'; ?>">
                                                         <td class="text-center fw-bold"><?php echo $pos; ?></td>
                                                         <td data-value="<?php echo esc_attr($deck['title']); ?>">
                                                             <div class="d-flex align-items-center">
@@ -251,6 +261,10 @@ get_header(); ?>
                                                                     <a href="<?php echo esc_url($deck['permalink']); ?>" class="text-decoration-none text-white fw-bold">
                                                                         <?php echo esc_html($deck['title']); ?>
                                                                     </a>
+
+                                                                    <?php if (empty($deck['is_legal'])) : ?>
+                                                                        <span class="badge bg-danger ms-1" style="font-size: 0.75em; vertical-align: middle;">Not legal</span>
+                                                                    <?php endif; ?>
                                                                     <?php if ($deck['commander'] !== '-') : ?>
                                                                         <div class="small text-white opacity-75"><?php echo esc_html($deck['commander']); ?></div>
                                                                     <?php endif; ?>
@@ -326,19 +340,49 @@ get_header(); ?>
                                                     return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
                                                 });
 
-                                                rows.forEach((row, index) => {
-                                                    row.children[0].textContent = index + 1;
-
-                                                    // Update top 3 classes
+                                                let visibleCount = 1;
+                                                rows.forEach((row) => {
                                                     row.classList.remove('rank-gold', 'rank-silver', 'rank-bronze');
-                                                    if (index === 0) row.classList.add('rank-gold');
-                                                    else if (index === 1) row.classList.add('rank-silver');
-                                                    else if (index === 2) row.classList.add('rank-bronze');
-
+                                                    if (row.style.display !== 'none') {
+                                                        row.children[0].textContent = visibleCount;
+                                                        if (visibleCount === 1) row.classList.add('rank-gold');
+                                                        else if (visibleCount === 2) row.classList.add('rank-silver');
+                                                        else if (visibleCount === 3) row.classList.add('rank-bronze');
+                                                        visibleCount++;
+                                                    }
                                                     tbody.appendChild(row);
                                                 });
                                             });
                                         });
+
+                                        // Hide illegal decks logic
+                                        const hideCheckbox = document.getElementById('hideIllegalDecks');
+                                        if (hideCheckbox) {
+                                            function toggleLegalityFilter() {
+                                                const hideIllegal = hideCheckbox.checked;
+                                                const rows = Array.from(tbody.querySelectorAll('tr'));
+                                                rows.forEach(row => {
+                                                    if (row.dataset.legal === 'false') {
+                                                        row.style.display = hideIllegal ? 'none' : '';
+                                                    }
+                                                });
+                                                
+                                                let visibleCount = 1;
+                                                rows.forEach(row => {
+                                                    row.classList.remove('rank-gold', 'rank-silver', 'rank-bronze');
+                                                    if (row.style.display !== 'none') {
+                                                        row.children[0].textContent = visibleCount;
+                                                        if (visibleCount === 1) row.classList.add('rank-gold');
+                                                        else if (visibleCount === 2) row.classList.add('rank-silver');
+                                                        else if (visibleCount === 3) row.classList.add('rank-bronze');
+                                                        visibleCount++;
+                                                    }
+                                                });
+                                            }
+                                            
+                                            hideCheckbox.addEventListener('change', toggleLegalityFilter);
+                                            toggleLegalityFilter();
+                                        }
 
                                         // Initialize Bootstrap Popovers
                                         if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {

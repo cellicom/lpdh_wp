@@ -611,6 +611,14 @@ function lpdh_is_deck_legal($deck_id)
     $partner = get_field('partner', $deck_id);
     $decklist_text = get_field('decklist_text', $deck_id);
 
+    // ponytail: handle WP_Post objects for ACF Post Object fields
+    if (is_object($commander)) {
+        $commander = $commander->post_title;
+    }
+    if (is_object($partner)) {
+        $partner = $partner->post_title;
+    }
+
     $deck_cards = array();
     if (!empty($commander)) {
         $deck_cards[] = strtolower(trim($commander));
