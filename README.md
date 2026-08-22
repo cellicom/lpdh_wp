@@ -34,6 +34,7 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **ELO Leaderboard:** A live, dynamic ranking page showing real-time player standings based on their global ELO score.
 - **Players Stats Dashboard:** Individual player statistics page with yearly filter, deck usage pie chart, Win Rate trend, ELO trend, deck performance table, and full event history.
 - **Decks Stats Dashboard:** Site-wide deck statistics page (Admin) featuring a Top Commanders pie chart, a Deck Usage pie chart, and a sortable/paginated table of all registered decks with tournament and match performance data.
+- **Deck Meta Page:** Frontend page template (`Deck Meta`) displaying site-wide deck statistics with a sortable table (ranking, deck title, commander/partner avatars, player name, tournament wins, match W-L-D, win rate, and attendance) and filtering by year, matching the visual style of the ELO Leaderboard.
 
 ### 3. Deck Management System
 - **Decks:** Players can create, edit, and share their decklists.

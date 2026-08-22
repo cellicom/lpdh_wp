@@ -521,6 +521,15 @@ function render_help_guide_page()
                         <li><strong>Features:</strong> Includes sortable columns (ELO, Wins, Attendance), tie-breakers based on match wins, and a "Top 3" highlighting system.</li>
                     </ul>
                 </div>
+
+                <div class="hg-card hg-mt-20">
+                    <h5 class="hg-text-green"><span class="dashicons dashicons-chart-bar"></span> Deck Meta Page</h5>
+                    <p class="small">This is a dynamic, real-time statistics page that displays all site-wide decks ordered by their tournament wins. It includes commander/partner split-avatars with hover popovers, matches the ELO Leaderboard design, and supports year filtering.</p>
+                    <ul class="small">
+                        <li><strong>Template:</strong> To create this page, create a new WordPress Page and select the <strong>Deck Meta</strong> template.</li>
+                        <li><strong>Features:</strong> Fully sortable columns, text-white styling, and visual indicators for the top 3 spots.</li>
+                    </ul>
+                </div>
             </section>
 
             <!-- SECTION: INSTAGRAM GENERATOR -->
@@ -733,6 +742,10 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Player Stats Page</strong></td>
                             <td>Select the page using the "Player Stats" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deck Meta Page</strong></td>
+                            <td>Select the page using the "Deck Meta" template.</td>
                         </tr>
                         <tr>
                             <td><strong>Profile Editor Page</strong></td>
