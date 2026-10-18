@@ -1240,6 +1240,11 @@ function ajax_get_user_decks()
             'decks' => $deck_data,
             'deck_author_id' => $deck_author_id,
         ));
+    } elseif ($current_deck_id) {
+        wp_send_json_success(array(
+            'decks' => array(),
+            'deck_author_id' => $deck_author_id,
+        ));
     } else {
         wp_send_json_error(array('message' => 'Invalid User ID'));
     }
@@ -1286,7 +1291,7 @@ function event_ranking_populate_player_deck()
                 var $deckField = $row.find('.acf-field-ranking-deck');
                 var $deckIdField = $row.find('.acf-field-ranking-player-deck-id');
 
-                if (!$deckField.length || !playerId) {
+                if (!$deckField.length) {
                     return;
                 }
 
@@ -1294,6 +1299,8 @@ function event_ranking_populate_player_deck()
                 var $deckIdInput = $deckIdField.find('input');
                 var initialDeckId = $deckIdInput.val() ? parseInt($deckIdInput.val(), 10) : 0;
                 var initialDeckTitle = $deckInput.val() || '';
+
+                var isUnregistered = (!playerId || parseInt(playerId, 10) === 0);
 
                 // State storage to preserve selections when toggling modes
                 var savedMyDeck = { id: 0, title: '' };
@@ -1348,7 +1355,7 @@ function event_ranking_populate_player_deck()
                 });
 
                 function loadDecks(userId, targetDeckId, onComplete) {
-                    if (!userId) {
+                    if (!userId && !targetDeckId) {
                         $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
                         return;
                     }
@@ -1358,7 +1365,7 @@ function event_ranking_populate_player_deck()
                         type: 'POST',
                         data: {
                             action: 'get_user_decks',
-                            user_id: userId,
+                            user_id: userId || 0,
                             current_deck_id: targetDeckId || 0,
                             nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
                         },
@@ -1403,31 +1410,56 @@ function event_ranking_populate_player_deck()
                     });
                 }
 
-                // Initial load: check if the existing deck belongs to the row player or another player
-                loadDecks(playerId, initialDeckId, function (decks, deckAuthorId) {
-                    if (deckAuthorId && deckAuthorId !== parseInt(playerId, 10)) {
-                        // Borrowed deck detected!
-                        savedNotMyDeck = {
-                            id: initialDeckId,
-                            title: initialDeckTitle,
-                            ownerId: deckAuthorId
-                        };
-                        $checkbox.prop('checked', true);
-                        $checkboxLabel.text('Not My Deck');
-                        $borrowedWrap.show();
-                        $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
-                        loadDecks(deckAuthorId, initialDeckId);
+                if (isUnregistered) {
+                    $checkbox.prop('checked', true).prop('disabled', true);
+                    $checkboxLabel.text('Not My Deck');
+                    $borrowedWrap.show();
+
+                    if (initialDeckId) {
+                        loadDecks(0, initialDeckId, function (decks, deckAuthorId) {
+                            if (deckAuthorId) {
+                                savedNotMyDeck = {
+                                    id: initialDeckId,
+                                    title: initialDeckTitle,
+                                    ownerId: deckAuthorId
+                                };
+                                $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
+                                loadDecks(deckAuthorId, initialDeckId);
+                            }
+                        });
                     } else {
-                        if (initialDeckId) {
-                            savedMyDeck = {
-                                id: initialDeckId,
-                                title: initialDeckTitle
-                            };
-                        }
-                        $checkbox.prop('checked', false);
-                        $checkboxLabel.text('My Deck');
+                        $borrowedPlayerSelect.val('').trigger('change.select2');
+                        $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
                     }
-                });
+                } else {
+                    $checkbox.prop('disabled', false);
+
+                    // Initial load: check if the existing deck belongs to the row player or another player
+                    loadDecks(playerId, initialDeckId, function (decks, deckAuthorId) {
+                        if (deckAuthorId && deckAuthorId !== parseInt(playerId, 10)) {
+                            // Borrowed deck detected!
+                            savedNotMyDeck = {
+                                id: initialDeckId,
+                                title: initialDeckTitle,
+                                ownerId: deckAuthorId
+                            };
+                            $checkbox.prop('checked', true);
+                            $checkboxLabel.text('Not My Deck');
+                            $borrowedWrap.show();
+                            $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
+                            loadDecks(deckAuthorId, initialDeckId);
+                        } else {
+                            if (initialDeckId) {
+                                savedMyDeck = {
+                                    id: initialDeckId,
+                                    title: initialDeckTitle
+                                };
+                            }
+                            $checkbox.prop('checked', false);
+                            $checkboxLabel.text('My Deck');
+                        }
+                    });
+                }
 
                 // When user selects a deck
                 $deckSelect.on('change', function () {
@@ -1511,14 +1543,13 @@ function event_ranking_populate_player_deck()
 
             // Handle ACF's ready/append events
             acf.add_action('ready append', function ($el) {
-                // Find all player_id selects in ranking rows
-                $el.find('select[name*="field_ranking_player_id"], [data-name="player_id"] select').each(function () {
+                // Find all deck fields in ranking rows
+                var $deckFields = $el.is('.acf-field-ranking-deck') ? $el : $el.find('.acf-field-ranking-deck');
+                $deckFields.each(function () {
                     var $row = $(this).closest('tr.acf-row');
-                    var playerId = $(this).val();
+                    var playerId = $row.find('select[name*="field_ranking_player_id"], [data-name="player_id"] select').val();
 
-                    if (playerId) {
-                        addDeckSelector($row, playerId);
-                    }
+                    addDeckSelector($row, playerId);
                 });
             });
 
