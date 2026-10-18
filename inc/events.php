@@ -1206,7 +1206,16 @@ function ajax_get_user_decks()
 {
     check_ajax_referer('get_user_decks_nonce', 'nonce');
 
-    $user_id = intval($_POST['user_id']);
+    $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+    $current_deck_id = isset($_POST['current_deck_id']) ? intval($_POST['current_deck_id']) : 0;
+
+    $deck_author_id = 0;
+    if ($current_deck_id) {
+        $deck_post = get_post($current_deck_id);
+        if ($deck_post && $deck_post->post_type === 'deck') {
+            $deck_author_id = intval($deck_post->post_author);
+        }
+    }
 
     if ($user_id) {
         $decks = get_posts(array(
@@ -1218,18 +1227,19 @@ function ajax_get_user_decks()
             'order' => 'ASC',
         ));
 
+        $deck_data = array();
         if ($decks) {
-            $deck_data = array();
             foreach ($decks as $deck) {
                 $deck_data[] = array(
                     'ID' => $deck->ID,
                     'post_title' => $deck->post_title,
                 );
             }
-            wp_send_json_success($deck_data);
-        } else {
-            wp_send_json_success(array());
         }
+        wp_send_json_success(array(
+            'decks' => $deck_data,
+            'deck_author_id' => $deck_author_id,
+        ));
     } else {
         wp_send_json_error(array('message' => 'Invalid User ID'));
     }
@@ -1244,10 +1254,29 @@ require_once get_stylesheet_directory() . '/inc/function-schema-color.php';
  */
 function event_ranking_populate_player_deck()
 {
+    global $post, $pagenow;
+    if ($pagenow !== 'post.php' && $pagenow !== 'post-new.php') {
+        return;
+    }
+    if ($post && $post->post_type !== 'event') {
+        return;
+    }
+
+    $all_players = get_users(array('orderby' => 'display_name', 'order' => 'ASC'));
+    $player_options = array();
+    foreach ($all_players as $p) {
+        $name = !empty($p->display_name) ? $p->display_name : $p->user_login;
+        $player_options[] = array(
+            'id' => $p->ID,
+            'name' => $name,
+        );
+    }
     ?>
 
     <script type="text/javascript">
         (function ($) {
+            var allPlayers = <?php echo json_encode($player_options); ?>;
+
             // Function to add temporary select with search below deck field
             function addDeckSelector($row, playerId) {
                 // Remove any existing deck selector
@@ -1261,91 +1290,229 @@ function event_ranking_populate_player_deck()
                     return;
                 }
 
-                // Create temporary select element with Select2
+                var $deckInput = $deckField.find('input[type="text"]');
+                var $deckIdInput = $deckIdField.find('input');
+                var initialDeckId = $deckIdInput.val() ? parseInt($deckIdInput.val(), 10) : 0;
+                var initialDeckTitle = $deckInput.val() || '';
+
+                // State storage to preserve selections when toggling modes
+                var savedMyDeck = { id: 0, title: '' };
+                var savedNotMyDeck = { id: 0, title: '', ownerId: 0 };
+
+                var playerOptionsHtml = '<option value="">-- Select Player --</option>';
+                $.each(allPlayers, function (idx, p) {
+                    playerOptionsHtml += '<option value="' + p.id + '">' + $('<div>').text(p.name).html() + '</option>';
+                });
+
                 var $selector = $(
-                    '<div class="temp-deck-selector" style="margin-top:8px;">' +
-                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Select deck:</label>' +
-                    '<select class="deck-quick-select" style="width:100%;">' +
-                    '<option value="">-- Search deck --</option>' +
-                    '</select>' +
+                    '<div class="temp-deck-selector" style="margin-top:6px; padding:6px; background:#f9f9f9; border:1px solid #e5e5e5; border-radius:4px;">' +
+                        '<div style="margin-bottom:6px;">' +
+                            '<label style="font-size:12px; color:#333; cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-weight:600; margin:0;">' +
+                                '<input type="checkbox" class="is-borrowed-deck" style="margin:0;">' +
+                                '<span class="borrowed-deck-label">My Deck</span>' +
+                            '</label>' +
+                        '</div>' +
+                        '<div class="borrowed-player-wrap" style="display:none; margin-bottom:6px;">' +
+                            '<label style="display:block; font-size:11px; color:#666; margin-bottom:2px;">Deck Owner:</label>' +
+                            '<select class="borrowed-player-select" style="width:100%;">' +
+                                playerOptionsHtml +
+                            '</select>' +
+                        '</div>' +
+                        '<div>' +
+                            '<label style="display:block; font-size:11px; color:#666; margin-bottom:2px;">Select Deck:</label>' +
+                            '<select class="deck-quick-select" style="width:100%;">' +
+                                '<option value="">-- Select Deck --</option>' +
+                            '</select>' +
+                        '</div>' +
                     '</div>'
                 );
 
-                // Find the deck input and populate when selection changes
-                var $deckInput = $deckField.find('input[type="text"]');
-                var $deckIdInput = $deckIdField.find('input[type="number"]');
+                var $checkbox = $selector.find('.is-borrowed-deck');
+                var $checkboxLabel = $selector.find('.borrowed-deck-label');
+                var $borrowedWrap = $selector.find('.borrowed-player-wrap');
+                var $borrowedPlayerSelect = $selector.find('.borrowed-player-select');
+                var $deckSelect = $selector.find('.deck-quick-select');
 
-                $selector.find('select').on('change', function () {
-                    var selectedDeckId = $(this).val();
-                    var selectedDeckTitle = $(this).find('option:selected').text();
+                $deckField.append($selector);
+
+                $borrowedPlayerSelect.select2({
+                    placeholder: '-- Select Player --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                $deckSelect.select2({
+                    placeholder: '-- Select Deck --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                function loadDecks(userId, targetDeckId, onComplete) {
+                    if (!userId) {
+                        $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'get_user_decks',
+                            user_id: userId,
+                            current_deck_id: targetDeckId || 0,
+                            nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
+                        },
+                        beforeSend: function () {
+                            $deckSelect.html('<option value="">Loading...</option>').trigger('change.select2');
+                        },
+                        success: function (response) {
+                            var decks = [];
+                            var deckAuthorId = 0;
+                            if (response.success && response.data) {
+                                if (Array.isArray(response.data)) {
+                                    decks = response.data;
+                                } else if (response.data.decks) {
+                                    decks = response.data.decks;
+                                    deckAuthorId = response.data.deck_author_id ? parseInt(response.data.deck_author_id, 10) : 0;
+                                }
+                            }
+
+                            $deckSelect.html('<option value="">-- Select Deck --</option>');
+                            if (decks.length > 0) {
+                                $.each(decks, function (index, deck) {
+                                    var isSel = (targetDeckId && parseInt(deck.ID, 10) === parseInt(targetDeckId, 10));
+                                    $deckSelect.append(
+                                        $('<option></option>')
+                                            .val(deck.ID)
+                                            .text(deck.post_title)
+                                            .prop('selected', isSel)
+                                    );
+                                });
+                            } else {
+                                $deckSelect.html('<option value="">No decks found</option>');
+                            }
+                            $deckSelect.trigger('change.select2');
+
+                            if (typeof onComplete === 'function') {
+                                onComplete(decks, deckAuthorId);
+                            }
+                        },
+                        error: function () {
+                            $deckSelect.html('<option value="">Loading error</option>').trigger('change.select2');
+                        }
+                    });
+                }
+
+                // Initial load: check if the existing deck belongs to the row player or another player
+                loadDecks(playerId, initialDeckId, function (decks, deckAuthorId) {
+                    if (deckAuthorId && deckAuthorId !== parseInt(playerId, 10)) {
+                        // Borrowed deck detected!
+                        savedNotMyDeck = {
+                            id: initialDeckId,
+                            title: initialDeckTitle,
+                            ownerId: deckAuthorId
+                        };
+                        $checkbox.prop('checked', true);
+                        $checkboxLabel.text('Not My Deck');
+                        $borrowedWrap.show();
+                        $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
+                        loadDecks(deckAuthorId, initialDeckId);
+                    } else {
+                        if (initialDeckId) {
+                            savedMyDeck = {
+                                id: initialDeckId,
+                                title: initialDeckTitle
+                            };
+                        }
+                        $checkbox.prop('checked', false);
+                        $checkboxLabel.text('My Deck');
+                    }
+                });
+
+                // When user selects a deck
+                $deckSelect.on('change', function () {
+                    var selectedDeckId = $(this).val() ? parseInt($(this).val(), 10) : 0;
+                    var selectedDeckTitle = selectedDeckId ? $(this).find('option:selected').text() : '';
 
                     if (selectedDeckId) {
                         $deckInput.val(selectedDeckTitle);
                         $deckIdInput.val(selectedDeckId);
                     }
+
+                    if ($checkbox.is(':checked')) {
+                        savedNotMyDeck.id = selectedDeckId;
+                        savedNotMyDeck.title = selectedDeckTitle;
+                        savedNotMyDeck.ownerId = $borrowedPlayerSelect.val() ? parseInt($borrowedPlayerSelect.val(), 10) : 0;
+                    } else {
+                        savedMyDeck.id = selectedDeckId;
+                        savedMyDeck.title = selectedDeckTitle;
+                    }
                 });
 
-                // Add selector after the deck field
-                $deckField.append($selector);
+                // Toggle "My Deck" / "Not My Deck"
+                $checkbox.on('change', function () {
+                    var isChecked = $(this).is(':checked');
+                    $checkboxLabel.text(isChecked ? 'Not My Deck' : 'My Deck');
 
-                // Initialize Select2 on the new select
-                $selector.find('select').select2({
-                    placeholder: '-- Search deck --',
-                    allowClear: true,
-                    width: '100%'
-                });
-
-                // Fetch decks for this player
-                $.ajax({
-                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                    type: 'POST',
-                    data: {
-                        action: 'get_user_decks',
-                        user_id: playerId,
-                        nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
-                    },
-                    beforeSend: function () {
-                        $selector.find('select').html('<option value="">Loading...</option>');
-                    },
-                    success: function (response) {
-                        var $select = $selector.find('select');
-                        $select.html('<option value="">-- Search deck --</option>');
-
-                        if (response.success && response.data && response.data.length > 0) {
-                            $.each(response.data, function (index, deck) {
-                                $select.append(
-                                    $('<option></option>')
-                                        .val(deck.ID)
-                                        .text(deck.post_title)
-                                );
-                            });
+                    if (isChecked) {
+                        $borrowedWrap.slideDown(150);
+                        if (savedNotMyDeck.ownerId) {
+                            $borrowedPlayerSelect.val(savedNotMyDeck.ownerId).trigger('change.select2');
+                            loadDecks(savedNotMyDeck.ownerId, savedNotMyDeck.id);
+                            if (savedNotMyDeck.id) {
+                                $deckInput.val(savedNotMyDeck.title);
+                                $deckIdInput.val(savedNotMyDeck.id);
+                            } else {
+                                $deckInput.val('');
+                                $deckIdInput.val('');
+                            }
                         } else {
-                            $select.html('<option value="">No decks available</option>');
+                            $borrowedPlayerSelect.val('').trigger('change.select2');
+                            $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                            $deckInput.val('');
+                            $deckIdInput.val('');
                         }
+                    } else {
+                        $borrowedWrap.slideUp(150);
+                        if (savedMyDeck.id) {
+                            loadDecks(playerId, savedMyDeck.id);
+                            $deckInput.val(savedMyDeck.title);
+                            $deckIdInput.val(savedMyDeck.id);
+                        } else {
+                            loadDecks(playerId, 0);
+                            $deckInput.val('');
+                            $deckIdInput.val('');
+                        }
+                    }
+                });
 
-                        // Refresh Select2
-                        $select.trigger('change.select2');
-                    },
-                    error: function () {
-                        $selector.find('select').html('<option value="">Loading error</option>');
-                        $selector.find('select').trigger('change.select2');
+                // Lender player selection change
+                $borrowedPlayerSelect.on('change', function () {
+                    if ($checkbox.is(':checked')) {
+                        var lenderId = $(this).val() ? parseInt($(this).val(), 10) : 0;
+                        savedNotMyDeck.ownerId = lenderId;
+                        if (lenderId) {
+                            var targetDeck = (savedNotMyDeck.ownerId === lenderId) ? savedNotMyDeck.id : 0;
+                            loadDecks(lenderId, targetDeck);
+                        } else {
+                            $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                        }
                     }
                 });
             }
 
             // Handler for player_id selection in ranking repeater
-            $(document).on('change', 'select[name*="field_ranking_player_id"]', function (e) {
+            $(document).on('change', 'select[name*="field_ranking_player_id"], [data-name="player_id"] select', function (e) {
                 var $row = $(this).closest('tr.acf-row');
                 var playerId = $(this).val();
 
-                // Update the deck selector for this row
                 addDeckSelector($row, playerId);
             });
 
             // Handle ACF's ready/append events
             acf.add_action('ready append', function ($el) {
                 // Find all player_id selects in ranking rows
-                $el.find('select[name*="field_ranking_player_id"]').each(function () {
+                $el.find('select[name*="field_ranking_player_id"], [data-name="player_id"] select').each(function () {
                     var $row = $(this).closest('tr.acf-row');
                     var playerId = $(this).val();
 

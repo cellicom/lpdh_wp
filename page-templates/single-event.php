@@ -520,17 +520,17 @@ get_header(); ?>
 
                                                     $action_btn = '';
 
-                                                    if (is_user_logged_in() && $user_id && ($user_id == get_current_user_id() || lpdh_can_manage_content())) {
+                                                    if (is_user_logged_in() && (($user_id && $user_id == get_current_user_id()) || lpdh_can_manage_content())) {
 
                                                         $deck_author_id = ($player_deck_id && !empty($deck_post)) ? intval($deck_post->post_author) : 0;
 
                                                         if ($player_deck_id) {
 
-                                                            $action_btn = '<a href="#" class="ms-auto open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" data-player-id="' . esc_attr($user_id) . '" data-deck-author-id="' . esc_attr($deck_author_id) . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
+                                                            $action_btn = '<a href="#" class="ms-auto open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" data-player-id="' . esc_attr($user_id ? $user_id : 0) . '" data-deck-author-id="' . esc_attr($deck_author_id) . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
 
                                                         } else {
 
-                                                            $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id="" data-player-id="' . esc_attr($user_id) . '" data-deck-author-id="0"><i class="fas fa-plus me-1"></i>Add Deck</a>';
+                                                            $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id="" data-player-id="' . esc_attr($user_id ? $user_id : 0) . '" data-deck-author-id="0"><i class="fas fa-plus me-1"></i>Add Deck</a>';
 
                                                         }
 
@@ -982,44 +982,46 @@ get_header(); ?>
 
 
 
-                                            // Se il mazzo salvato appartiene a un altro giocatore, precompila Not My Deck
+                                            var isUnregistered = (!currentTargetPlayerId || parseInt(currentTargetPlayerId, 10) === 0);
 
-                                            if (currentDeckId && currentDeckAuthorId && currentDeckAuthorId !== currentTargetPlayerId) {
-
-                                                $('#deck-source-switch').prop('checked', true);
-
+                                            if (isUnregistered) {
+                                                $('#deck-source-switch').prop('checked', true).prop('disabled', true);
                                                 $('#deck-source-label').text('Not My Deck');
-
                                                 $('#player-select-container').show();
 
-                                                $('#player-select').val(currentDeckAuthorId).trigger('change.select2');
-
-
-
-                                                deckModal.show();
-
-
-
-                                                loadDecksForPlayer(currentDeckAuthorId, currentDeckId);
-
+                                                if (currentDeckAuthorId) {
+                                                    $('#player-select').val(currentDeckAuthorId).trigger('change.select2');
+                                                    deckModal.show();
+                                                    loadDecksForPlayer(currentDeckAuthorId, currentDeckId);
+                                                } else {
+                                                    $('#player-select').val('').trigger('change.select2');
+                                                    deckModal.show();
+                                                    $('#deck-select').html('<option value=""><?php echo esc_js(__('-- Select a player first --', 'bootscore')); ?></option>').val('').trigger('change');
+                                                    checkSaveButtonState();
+                                                }
                                             } else {
+                                                $('#deck-source-switch').prop('disabled', false);
 
-                                                $('#deck-source-switch').prop('checked', false);
+                                                // Se il mazzo salvato appartiene a un altro giocatore, precompila Not My Deck
+                                                if (currentDeckId && currentDeckAuthorId && currentDeckAuthorId !== currentTargetPlayerId) {
+                                                    $('#deck-source-switch').prop('checked', true);
+                                                    $('#deck-source-label').text('Not My Deck');
+                                                    $('#player-select-container').show();
+                                                    $('#player-select').val(currentDeckAuthorId).trigger('change.select2');
 
-                                                $('#deck-source-label').text('My Deck');
+                                                    deckModal.show();
 
-                                                $('#player-select-container').hide();
+                                                    loadDecksForPlayer(currentDeckAuthorId, currentDeckId);
+                                                } else {
+                                                    $('#deck-source-switch').prop('checked', false);
+                                                    $('#deck-source-label').text('My Deck');
+                                                    $('#player-select-container').hide();
+                                                    $('#player-select').val('').trigger('change.select2');
 
-                                                $('#player-select').val('').trigger('change.select2');
+                                                    deckModal.show();
 
-
-
-                                                deckModal.show();
-
-
-
-                                                loadDecksForPlayer(currentTargetPlayerId, currentDeckId);
-
+                                                    loadDecksForPlayer(currentTargetPlayerId, currentDeckId);
+                                                }
                                             }
 
                                         });
@@ -1044,7 +1046,7 @@ get_header(); ?>
 
                                                 } else {
 
-                                                    $('#deck-select').html('<option value=""><?php echo esc_js(__('-- Seleziona prima un giocatore --', 'bootscore')); ?></option>').val('').trigger('change');
+                                                    $('#deck-select').html('<option value=""><?php echo esc_js(__('-- Select a player first --', 'bootscore')); ?></option>').val('').trigger('change');
 
                                                     checkSaveButtonState();
 
