@@ -1675,7 +1675,7 @@ function ajax_update_player_deck_ranking()
         $rank_player_id = intval($rank_player);
     }
 
-    if ($rank_player_id !== $user_id && !current_user_can('administrator') && !current_user_can('player')) {
+    if ($rank_player_id !== $user_id && !lpdh_can_manage_content()) {
         wp_send_json_error('Permission denied');
     }
 
@@ -1761,6 +1761,55 @@ function ajax_update_player_deck_ranking()
     }
 }
 add_action('wp_ajax_update_player_deck_ranking', 'ajax_update_player_deck_ranking');
+
+/**
+ * AJAX Handler to get player's decks for ranking deck modal
+ */
+function ajax_get_player_decks()
+{
+    check_ajax_referer('get_player_decks_nonce', 'nonce');
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Unauthorized');
+    }
+
+    $player_id = isset($_POST['player_id']) ? intval($_POST['player_id']) : 0;
+
+    if (!$player_id) {
+        wp_send_json_success([]);
+    }
+
+    $decks = get_posts([
+        'post_type' => 'deck',
+        'author' => $player_id,
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ]);
+
+    $data = [];
+    foreach ($decks as $deck) {
+        $cmdr = get_field('commander', $deck->ID);
+        $partner = get_field('partner', $deck->ID);
+        $cmdr_text = $cmdr ? esc_html($cmdr) : '';
+        if ($partner) {
+            $cmdr_text .= ' + ' . esc_html($partner);
+        }
+
+        $data[] = [
+            'id' => $deck->ID,
+            'title' => esc_html($deck->post_title),
+            'cmdr' => $cmdr_text,
+            'cmdr_img' => get_commander_image($deck->ID),
+            'partner_img' => get_partner_image($deck->ID),
+        ];
+    }
+
+    wp_send_json_success($data);
+}
+add_action('wp_ajax_get_player_decks', 'ajax_get_player_decks');
+
 
 /**
  * Add OCR Ranking Generator Metabox to Events

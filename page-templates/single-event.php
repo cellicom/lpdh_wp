@@ -520,15 +520,17 @@ get_header(); ?>
 
                                                     $action_btn = '';
 
-                                                    if (is_user_logged_in() && $user_id == get_current_user_id()) {
+                                                    if (is_user_logged_in() && $user_id && ($user_id == get_current_user_id() || lpdh_can_manage_content())) {
+
+                                                        $deck_author_id = ($player_deck_id && !empty($deck_post)) ? intval($deck_post->post_author) : 0;
 
                                                         if ($player_deck_id) {
 
-                                                            $action_btn = '<a href="#" class="ms-auto open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
+                                                            $action_btn = '<a href="#" class="ms-auto open-deck-modal" data-row-index="' . $index . '" data-deck-id="' . $player_deck_id . '" data-player-id="' . esc_attr($user_id) . '" data-deck-author-id="' . esc_attr($deck_author_id) . '" title="Edit Deck"><i class="fas fa-edit"></i></a>';
 
                                                         } else {
 
-                                                            $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id=""><i class="fas fa-plus me-1"></i>Add Deck</a>';
+                                                            $action_btn = '<a href="#" class="btn btn-sm btn-primary fw-bold shadow-sm open-deck-modal ms-auto" data-row-index="' . $index . '" data-deck-id="" data-player-id="' . esc_attr($user_id) . '" data-deck-author-id="0"><i class="fas fa-plus me-1"></i>Add Deck</a>';
 
                                                         }
 
@@ -660,31 +662,9 @@ get_header(); ?>
 
 
 
-                            <?php if (is_user_logged_in()):
-
-                                $current_user_decks = get_posts([
-
-                                    'post_type' => 'deck',
-
-                                    'author' => get_current_user_id(),
-
-                                    'posts_per_page' => -1,
-
-                                    'post_status' => 'publish',
-
-                                    'orderby' => 'title',
-
-                                    'order' => 'ASC'
-
-                                ]);
-
-                                ?>
+                            <?php if (is_user_logged_in()): ?>
 
                                 <!-- Select2 Local Assets Enqueued in functions.php -->
-
-
-
-
 
                                 <!-- Deck Selection Modal -->
 
@@ -696,12 +676,9 @@ get_header(); ?>
 
                                             <div class="modal-header">
 
-                                                <h5 class="modal-title"><?php esc_html_e('Select Your Deck', 'bootscore'); ?>
-
-                                                </h5>
+                                                <h5 class="modal-title"><?php esc_html_e('Select Deck', 'bootscore'); ?></h5>
 
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
-
                                                     aria-label="Close"></button>
 
                                             </div>
@@ -713,58 +690,38 @@ get_header(); ?>
                                                     <input type="hidden" id="modal-row-index" name="row_index" value="">
 
                                                     <input type="hidden" id="modal-event-id" name="event_id"
-
                                                         value="<?php echo get_the_ID(); ?>">
+
+                                                    <!-- Player Select (visibile solo in Not My Deck) -->
+                                                    <div class="mb-3" id="player-select-container" style="display: none;">
+                                                        <label for="player-select"
+                                                            class="form-label"><?php esc_html_e('Choose Player', 'bootscore'); ?></label>
+                                                        <select class="form-select" id="player-select" style="width: 100%;">
+                                                            <option value=""><?php esc_html_e('-- Select Player --', 'bootscore'); ?></option>
+                                                            <?php
+                                                            $all_players = get_users(['orderby' => 'display_name', 'order' => 'ASC']);
+                                                            foreach ($all_players as $p):
+                                                                $p_name = !empty($p->display_name) ? $p->display_name : $p->user_login;
+                                                                $p_avatar = get_avatar_url($p->ID, ['size' => 32]);
+                                                            ?>
+                                                                <option value="<?php echo esc_attr($p->ID); ?>" data-avatar="<?php echo esc_url($p_avatar); ?>">
+                                                                    <?php echo esc_html($p_name); ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
 
                                                     <div class="mb-3">
 
                                                         <label for="deck-select"
-
                                                             class="form-label"><?php esc_html_e('Choose Deck', 'bootscore'); ?></label>
 
                                                         <select class="form-select" id="deck-select" name="deck_id"
-
                                                             style="width: 100%;">
 
                                                             <option value="">
-
                                                                 <?php esc_html_e('-- Select Deck --', 'bootscore'); ?>
-
                                                             </option>
-
-                                                            <?php foreach ($current_user_decks as $deck):
-
-                                                                $cmdr = get_field('commander', $deck->ID);
-
-                                                                $partner = get_field('partner', $deck->ID);
-
-                                                                $cmdr_img = get_commander_image($deck->ID);
-
-                                                                $partner_img = get_partner_image($deck->ID);
-
-
-
-                                                                $cmdr_text = $cmdr ? esc_attr($cmdr) : '';
-
-                                                                if ($partner)
-
-                                                                    $cmdr_text .= ' + ' . esc_attr($partner);
-
-                                                                ?>
-
-                                                                <option value="<?php echo esc_attr($deck->ID); ?>"
-
-                                                                    data-cmdr="<?php echo $cmdr_text; ?>"
-
-                                                                    data-cmdr-img="<?php echo esc_url($cmdr_img); ?>"
-
-                                                                    data-partner-img="<?php echo esc_url($partner_img); ?>">
-
-                                                                    <?php echo esc_html($deck->post_title); ?>
-
-                                                                </option>
-
-                                                            <?php endforeach; ?>
 
                                                         </select>
 
@@ -774,15 +731,20 @@ get_header(); ?>
 
                                             </div>
 
-                                            <div class="modal-footer">
+                                            <div class="modal-footer d-flex justify-content-between align-items-center">
 
-                                                <button type="button" class="btn btn-secondary"
+                                                <!-- Switch a SX nella barra pulsanti -->
+                                                <div class="form-check form-switch m-0 d-flex align-items-center">
+                                                    <input class="form-check-input" type="checkbox" role="switch" id="deck-source-switch" style="cursor: pointer;">
+                                                    <label class="form-check-label fw-bold ms-2" for="deck-source-switch" id="deck-source-label" style="cursor: pointer;">My Deck</label>
+                                                </div>
 
-                                                    data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'bootscore'); ?></button>
-
-                                                <button type="button" class="btn btn-primary"
-
-                                                    id="save-deck-btn"><?php esc_html_e('Add', 'bootscore'); ?></button>
+                                                <div>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'bootscore'); ?></button>
+                                                    <button type="button" class="btn btn-primary"
+                                                        id="save-deck-btn" disabled><?php esc_html_e('Add', 'bootscore'); ?></button>
+                                                </div>
 
                                             </div>
 
@@ -876,7 +838,129 @@ get_header(); ?>
 
 
 
+                                        function formatPlayerState(state) {
+
+                                            if (!state.id) {
+
+                                                return state.text;
+
+                                            }
+
+                                            var $option = $(state.element);
+
+                                            var avatar = $option.length ? $option.data('avatar') : '';
+
+                                            var imgHtml = avatar ? '<img src="' + avatar + '" class="rounded-circle me-2" style="width: 24px; height: 24px; object-fit: cover;" />' : '';
+
+                                            return $('<div class="d-flex align-items-center">' + imgHtml + '<div class="fw-bold">' + state.text + '</div></div>');
+
+                                        }
+
+
+
+                                        $('#player-select').select2({
+
+                                            dropdownParent: $('#deckSelectionModal'),
+
+                                            templateResult: formatPlayerState,
+
+                                            templateSelection: formatPlayerState,
+
+                                            width: '100%'
+
+                                        });
+
+
+
                                         var deckModal = new bootstrap.Modal(document.getElementById('deckSelectionModal'));
+
+                                        var currentTargetPlayerId = 0;
+
+                                        var currentDeckId = 0;
+
+                                        var currentDeckAuthorId = 0;
+
+
+
+                                        function checkSaveButtonState() {
+
+                                            var val = $('#deck-select').val();
+
+                                            $('#save-deck-btn').prop('disabled', !val);
+
+                                        }
+
+
+
+                                        $('#deck-select').on('change', function () {
+
+                                            checkSaveButtonState();
+
+                                        });
+
+
+
+                                        function loadDecksForPlayer(playerId, selectedDeckId) {
+
+                                            if (!playerId) {
+
+                                                $('#deck-select').html('<option value=""><?php echo esc_js(__('-- Select Deck --', 'bootscore')); ?></option>').val('').trigger('change');
+
+                                                checkSaveButtonState();
+
+                                                return;
+
+                                            }
+
+
+
+                                            $('#deck-select').html('<option value="">Caricamento mazzi...</option>').val('').trigger('change');
+
+                                            $('#save-deck-btn').prop('disabled', true);
+
+
+
+                                            $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+
+                                                action: 'get_player_decks',
+
+                                                nonce: '<?php echo wp_create_nonce('get_player_decks_nonce'); ?>',
+
+                                                player_id: playerId
+
+                                            }, function (response) {
+
+                                                var options = '<option value=""><?php echo esc_js(__('-- Select Deck --', 'bootscore')); ?></option>';
+
+                                                if (response.success && response.data && response.data.length > 0) {
+
+                                                    response.data.forEach(function (deck) {
+
+                                                        options += '<option value="' + deck.id + '"' +
+
+                                                            ' data-cmdr="' + (deck.cmdr || '') + '"' +
+
+                                                            ' data-cmdr-img="' + (deck.cmdr_img || '') + '"' +
+
+                                                            ' data-partner-img="' + (deck.partner_img || '') + '">' +
+
+                                                            deck.title + '</option>';
+
+                                                    });
+
+                                                } else {
+
+                                                    options += '<option value="" disabled><?php echo esc_js(__('Nessun mazzo trovato per questo giocatore', 'bootscore')); ?></option>';
+
+                                                }
+
+                                                $('#deck-select').html(options).val(selectedDeckId || '').trigger('change');
+
+                                                checkSaveButtonState();
+
+                                            });
+
+                                        }
 
 
 
@@ -886,23 +970,125 @@ get_header(); ?>
 
                                             var rowIndex = $(this).data('row-index');
 
-                                            var currentDeckId = $(this).data('deck-id');
+                                            currentDeckId = $(this).data('deck-id');
+
+                                            currentTargetPlayerId = $(this).data('player-id');
+
+                                            currentDeckAuthorId = $(this).data('deck-author-id');
 
 
 
                                             $('#modal-row-index').val(rowIndex);
 
-                                            $('#deck-select').val(currentDeckId);
+
+
+                                            // Se il mazzo salvato appartiene a un altro giocatore, precompila Not My Deck
+
+                                            if (currentDeckId && currentDeckAuthorId && currentDeckAuthorId !== currentTargetPlayerId) {
+
+                                                $('#deck-source-switch').prop('checked', true);
+
+                                                $('#deck-source-label').text('Not My Deck');
+
+                                                $('#player-select-container').show();
+
+                                                $('#player-select').val(currentDeckAuthorId).trigger('change.select2');
 
 
 
-                                            deckModal.show();
+                                                deckModal.show();
+
+
+
+                                                loadDecksForPlayer(currentDeckAuthorId, currentDeckId);
+
+                                            } else {
+
+                                                $('#deck-source-switch').prop('checked', false);
+
+                                                $('#deck-source-label').text('My Deck');
+
+                                                $('#player-select-container').hide();
+
+                                                $('#player-select').val('').trigger('change.select2');
+
+
+
+                                                deckModal.show();
+
+
+
+                                                loadDecksForPlayer(currentTargetPlayerId, currentDeckId);
+
+                                            }
+
+                                        });
+
+
+
+                                        $('#deck-source-switch').on('change', function () {
+
+                                            var isNotMyDeck = $(this).is(':checked');
+
+                                            if (isNotMyDeck) {
+
+                                                $('#deck-source-label').text('Not My Deck');
+
+                                                $('#player-select-container').slideDown(200);
+
+                                                var selPlayer = $('#player-select').val();
+
+                                                if (selPlayer) {
+
+                                                    loadDecksForPlayer(selPlayer, '');
+
+                                                } else {
+
+                                                    $('#deck-select').html('<option value=""><?php echo esc_js(__('-- Seleziona prima un giocatore --', 'bootscore')); ?></option>').val('').trigger('change');
+
+                                                    checkSaveButtonState();
+
+                                                }
+
+                                            } else {
+
+                                                $('#deck-source-label').text('My Deck');
+
+                                                $('#player-select-container').slideUp(200);
+
+                                                var deckToSelect = (currentDeckAuthorId === currentTargetPlayerId) ? currentDeckId : '';
+
+                                                loadDecksForPlayer(currentTargetPlayerId, deckToSelect);
+
+                                            }
+
+                                        });
+
+
+
+                                        $('#player-select').on('change', function () {
+
+                                            if ($('#deck-source-switch').is(':checked')) {
+
+                                                var selPlayer = $(this).val();
+
+                                                loadDecksForPlayer(selPlayer, '');
+
+                                            }
 
                                         });
 
 
 
                                         $('#save-deck-btn').on('click', function () {
+
+                                            var selectedDeck = $('#deck-select').val();
+
+                                            if (!selectedDeck) {
+
+                                                return;
+
+                                            }
 
                                             var $btn = $(this);
 
@@ -916,7 +1102,7 @@ get_header(); ?>
 
                                                 row_index: $('#modal-row-index').val(),
 
-                                                deck_id: $('#deck-select').val()
+                                                deck_id: selectedDeck
 
                                             };
 
