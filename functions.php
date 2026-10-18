@@ -317,6 +317,14 @@ require_once get_stylesheet_directory() . '/inc/discord.php';
 // Include Easter Egg Functions
 require_once get_stylesheet_directory() . '/inc/easter-egg.php';
 
+// Include iCal / Export Calendar helpers
+require_once get_stylesheet_directory() . '/inc/export-calendar.php';
+
+// Include LLM.txt support for AI Search Engines
+require_once get_stylesheet_directory() . '/inc/llms.php';
+
+// hCaptcha: handled by the official "hCaptcha for WP" plugin (keys set in Settings > hCaptcha)
+
 
 /**
  * Enqueue scripts and styles
@@ -408,8 +416,8 @@ function lpdh_admin_enqueue_scripts($hook)
         wp_enqueue_script('scryfall-autocomplete-core', get_stylesheet_directory_uri() . '/assets/js/scryfall-autocomplete.js', array('jquery', 'select2-js'), $modified_ScryfallJS, true);
 
         // Localize Banned Cards for Admin
-        $banned_card_names = lpdh_get_banned_card_names();
-        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_card_names);
+        $banned_cards_data = lpdh_get_banned_cards_data();
+        wp_localize_script('scryfall-autocomplete-core', 'LPDH_Banned_Cards', $banned_cards_data);
 
         // Add inline style for Banned Badge in Select2 (mimic Bootstrap)
         $custom_admin_css = "
@@ -1067,6 +1075,7 @@ function lpdh_theme_settings_render()
         update_option('lpdh_stats_page_id', intval($_POST['lpdh_stats_page_id']));
         update_option('lpdh_login_register_page_id', intval($_POST['lpdh_login_register_page_id']));
         update_option('lpdh_roulette_page_id', intval($_POST['lpdh_roulette_page_id']));
+        update_option('lpdh_feed_page_id', intval($_POST['lpdh_feed_page_id']));
 
         // Save Social Links
         update_option('lpdh_instagram_link', esc_url($_POST['lpdh_instagram_link']));
@@ -1293,6 +1302,21 @@ function lpdh_theme_settings_render()
                         <p class="description">Select the page that uses the "Commander Roulette" template.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Select Export Page</th>
+                    <td>
+                        <?php
+                        $feed_page_id = get_option('lpdh_feed_page_id', 0);
+                        wp_dropdown_pages(array(
+                            'name'             => 'lpdh_feed_page_id',
+                            'selected'         => $feed_page_id,
+                            'show_option_none' => '-- Select Page --',
+                            'option_none_value' => '0'
+                        ));
+                        ?>
+                        <p class="description">Select the page that uses the "Page Export" template (iCal calendar feed, etc.).</p>
+                    </td>
+                </tr>
 
             </table>
 
@@ -1442,6 +1466,25 @@ function lpdh_get_login_register_url($section = '')
         $url = add_query_arg('action', 'lostpassword', $url);
     }
 
+    return $url;
+}
+
+/**
+ * Get the Export Page URL (optionally with a ?type= parameter).
+ *
+ * @param string $type Export type slug, e.g. 'events'. Leave empty for the bare page URL.
+ * @return string URL or empty string if the page is not configured.
+ */
+function lpdh_get_export_page_url( $type = '' )
+{
+    $page_id = get_option( 'lpdh_feed_page_id', 0 );
+    if ( ! $page_id ) {
+        return '';
+    }
+    $url = get_permalink( $page_id );
+    if ( $type ) {
+        $url = add_query_arg( 'type', sanitize_key( $type ), $url );
+    }
     return $url;
 }
 
@@ -1687,3 +1730,113 @@ add_filter('get_the_archive_title', function ($title) {
     }
     return $title;
 });
+
+/**
+ * Add the Registration Date column to the user list
+ */
+function lpdh_add_registration_column($columns) {
+    $columns['registration_date'] = __('Registered', 'text_domain');
+    return $columns;
+}
+add_filter('manage_users_columns', 'lpdh_add_registration_column');
+
+/**
+ * Display the registration date in the custom column
+ */
+function lpdh_show_registration_date($value, $column_name, $user_id) {
+    if ($column_name == 'registration_date') {
+        $user = get_userdata($user_id);
+        $registration_date = $user->user_registered;
+        return date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($registration_date));
+    }
+    return $value;
+}
+add_filter('manage_users_custom_column', 'lpdh_show_registration_date', 10, 3);
+
+/**
+ * Make the Registration Date column sortable
+ */
+function lpdh_sortable_registration_column($columns) {
+    $columns['registration_date'] = 'registered';
+    return $columns;
+}
+add_filter('manage_users_sortable_columns', 'lpdh_sortable_registration_column');
+
+/**
+ * Add Preferred City field to Admin User Profile
+ */
+function lpdh_show_user_preferred_city($user) {
+    $cities = array();
+    $places_query = new WP_Query(array(
+        'post_type' => 'place',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    ));
+    if ($places_query->have_posts()) {
+        while ($places_query->have_posts()) {
+            $places_query->the_post();
+            $city = get_field('place_city');
+            if (!empty($city)) {
+                $cities[$city] = $city;
+            }
+        }
+        wp_reset_postdata();
+    }
+    sort($cities);
+    $user_preferred_city = get_user_meta($user->ID, 'preferred_city', true);
+    ?>
+    <?php if (!empty($cities)): ?>
+        <h3>Preferred City</h3>
+        <table class="form-table">
+            <tr>
+                <th><label for="preferred_city">Preferred City</label></th>
+                <td>
+                    <select name="preferred_city" id="preferred_city">
+                        <option value="">Select a city...</option>
+                        <?php foreach ($cities as $city): ?>
+                            <option value="<?php echo esc_attr($city); ?>" <?php selected($user_preferred_city, $city); ?>>
+                                <?php echo esc_html($city); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="description">Select the preferred city for this user.</p>
+                </td>
+            </tr>
+        </table>
+    <?php endif; ?>
+    <?php
+}
+add_action('show_user_profile', 'lpdh_show_user_preferred_city');
+add_action('edit_user_profile', 'lpdh_show_user_preferred_city');
+
+/**
+ * Save Preferred City from Admin User Profile
+ */
+function lpdh_save_user_preferred_city($user_id) {
+    if (!current_user_can('edit_user', $user_id)) {
+        return false;
+    }
+    if (isset($_POST['preferred_city'])) {
+        update_user_meta($user_id, 'preferred_city', sanitize_text_field($_POST['preferred_city']));
+    }
+}
+add_action('personal_options_update', 'lpdh_save_user_preferred_city');
+add_action('edit_user_profile_update', 'lpdh_save_user_preferred_city');
+
+/**
+ * Redirect default WordPress registration page to the custom registration page.
+ */
+function lpdh_redirect_default_registration() {
+    global $pagenow;
+    if ($pagenow === 'wp-login.php' && isset($_GET['action']) && $_GET['action'] === 'register') {
+        wp_redirect(lpdh_get_login_register_url('register'));
+        exit;
+    }
+}
+add_action('init', 'lpdh_redirect_default_registration');
+
+/**
+ * Disable XML-RPC to prevent brute-force attacks and user creation attempts.
+ */
+add_filter('xmlrpc_enabled', '__return_false');
+

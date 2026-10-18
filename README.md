@@ -32,6 +32,9 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Dynamic ELO Calculation:** A customized formula that updates player rankings based on match outcomes (W-L-D), opponent strength, and final tournament position.
 - **Leaderboards:** Automated annual ranking generation based on competitive performance data.
 - **ELO Leaderboard:** A live, dynamic ranking page showing real-time player standings based on their global ELO score.
+- **Players Stats Dashboard:** Individual player statistics page with yearly filter, deck usage pie chart, Win Rate trend, ELO trend, deck performance table, and full event history.
+- **Decks Stats Dashboard:** Site-wide deck statistics page (Admin) featuring a Top Commanders pie chart, a Deck Usage pie chart, and a sortable/paginated table of all registered decks with tournament and match performance data.
+- **Deck Meta Page:** Frontend page template (`Deck Meta`) displaying site-wide deck statistics with a sortable table (ranking, deck title, commander/partner avatars, player name, tournament wins, match W-L-D, win rate, and attendance) and filtering by year, matching the visual style of the ELO Leaderboard.
 
 ### 3. Deck Management System
 - **Decks:** Players can create, edit, and share their decklists.
@@ -80,6 +83,7 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Administrator:** Full, unrestricted control over the entire system.
 - **Co-Administrator:** Specialized role for content managers. Can manage all tournament data, achievements, and decks, but is restricted from system-level changes (themes, plugins, settings).
 - **Player:** Managed via frontend dashboard for profile updates and deck submissions.
+- **Registration Date Column:** The admin user list now displays each user's registration date (sortable) alongside the existing Decks count column.
 
 ### 12. Custom Sync & Matching
 - **Improved Name Matching:** Robust event synchronization algorithm that handles multi-word surnames and abbreviations.
@@ -89,6 +93,23 @@ This theme transforms WordPress into a comprehensive tournament management platf
 - **Rich Embeds:** Automatically pulls event title, date, location (with details link), and featured image.
 - **Polls:** Includes a text-based "Will you participate?" poll field for manual reactions (✅/❌/🤔).
 - **Configuration:** Fully manageable via **Theme Settings** (Webhook URL, Bot Name, Footer).
+
+### 14. Calendar & JSON Events Export 📅
+- **Page Export Template:** A dedicated WordPress page template (`Page Export`) that serves both a standards-compliant iCal feed (`text/calendar`, RFC 5545) at `?type=events` and a structured JSON API at `?type=events_json`.
+- **Subscribe Buttons:** Four compact icon buttons displayed below the title on the Events page allow one-click subscription/export:
+  - **JSON Feed** — Returns the event data in a structured JSON format including ticket fee, max players, cover image, and more.
+  - **Google Calendar** — Opens Google's calendar subscription flow.
+  - **Apple / Outlook** — Triggers the native app via the `webcal://` protocol (macOS, iOS, Windows).
+  - **Download .ics** — Direct file download for manual import into any compatible client.
+- **Dynamic Filters:** The export buttons dynamically inherit any active filters (Year, City, Place) on the Events page. The generated feed is customized and the calendar name automatically reflects the active filters (e.g., *LPDH Events Palermo 2026*).
+- **Auto-updating:** Once subscribed, the calendar syncs automatically — no manual re-imports needed.
+- **Configuration:** Set the Export Page in **LPDH → Theme Settings → Pages Configuration → Select Export Page**.
+
+### 15. 🛡️ Registration Spam Protection
+- **hCaptcha Integration:** The registration form is protected by **hCaptcha** (free, GDPR-compliant alternative to reCAPTCHA). A challenge widget is displayed before submission and verified server-side via the hCaptcha API.
+- **Powered by Plugin:** The official **"hCaptcha for WP"** plugin manages the API keys and widget rendering — no hardcoded credentials in the theme.
+- **Fail-safe Design:** If the plugin is deactivated, the form continues to function normally (fail-open), preventing admin lockouts during maintenance.
+- **Theme Integration:** The widget is rendered via the plugin's shortcode API (`[hcaptcha]`) and verified using `hcaptcha_get_verify_message()`, keeping the theme code decoupled from the plugin internals.
 
 ## ✨ Easter Eggs & Community Interactions
 The theme includes several interactive "secrets" to engage the community. Found it all!
@@ -103,6 +124,7 @@ This is a **Bootscore Child Theme**.
 - **Advanced Custom Fields PRO (v6.x)** - [Download](https://www.advancedcustomfields.com/pro/) - Mandatory for data management and modular boxes.
 - **bs Cookie Settings (v.5.6.x)** - [Download](https://bootscore.me/documentation/bs-cookie-settings/) - Mandatory for GDPR/CCPA compliance and user consents.
 - **ACF Font Awesome (v4.x)** - [Download](https://wordpress.org/plugins/advanced-custom-fields-font-awesome/) - Mandatory for selecting achievement icons.
+- **hCaptcha for WP** - [Download](https://wordpress.org/plugins/hcaptcha-for-forms-and-more/) - Required for registration spam protection. Configure keys at **Settings → hCaptcha** after activation.
 
 ```bash
 # Compile SCSS to CSS

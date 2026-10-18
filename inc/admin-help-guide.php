@@ -59,11 +59,13 @@ function render_help_guide_page()
                     <a href="#leaderboards">8. Leaderboards</a>
                     <a href="#stats">9. Statistics & ELO</a>
                     <a href="#instagram" class="hg-pink">10. Instagram Generator 📸</a>
-                    <a href="#profiles">11. Profiles & Preferences</a>
-                    <a href="#roles">12. Roles & Security</a>
-                    <a href="#settings">13. Theme Settings</a>
-                    <a href="#emails">14. Email System 📧</a>
-                    <a href="#easter-eggs" class="hg-red">15. Easter Eggs ✨</a>
+                    <a href="#calendar" class="hg-highlight">11. iCal Calendar Export 📅</a>
+                    <a href="#profiles">12. Profiles & Preferences</a>
+                    <a href="#roles">13. Roles & Security</a>
+                    <a href="#settings">14. Theme Settings</a>
+                    <a href="#emails">15. Email System 📧</a>
+                    <a href="#hcaptcha" class="hg-red">16. 🛡️ Spam Protection</a>
+                    <a href="#easter-eggs" class="hg-red">17. Easter Eggs ✨</a>
                 </div>
             </nav>
 
@@ -84,6 +86,10 @@ function render_help_guide_page()
                     </thead>
                     <tbody>
                         <tr>
+                            <td><strong>City</strong></td>
+                            <td>City selection used to filter the available Places.</td>
+                        </tr>
+                        <tr>
                             <td><strong>Place</strong></td>
                             <td>Link to a post in the <i>Places</i> CPT. Determines the venue.</td>
                         </tr>
@@ -94,6 +100,22 @@ function render_help_guide_page()
                         <tr>
                             <td><strong>Facebook Link</strong></td>
                             <td>URL of the official Facebook event page.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Event Type</strong></td>
+                            <td>Type of the event (Tournament, Draft, Prerelease, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Format</strong></td>
+                            <td>Format played (LPDH, Commander, Pauper, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ticket Fee</strong></td>
+                            <td>Entry price for the event (e.g. 5, Gratuito).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Max Players</strong></td>
+                            <td>Maximum number of allowed participants (0 for unlimited).</td>
                         </tr>
                         <tr>
                             <td><strong>Code Event</strong></td>
@@ -392,15 +414,41 @@ function render_help_guide_page()
                 <div class="hg-tip hg-mt-10">
                     <strong>Note:</strong> Looking for live rankings? See the <strong>ELO Leaderboard Page</strong> section under Stats & ELO.
                 </div>
-            </section>
-
-            <!-- SECTION: STATS -->
+                <!-- SECTION: STATS -->
             <section id="stats" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-chart-area"></span> 9. Statistics & ELO
+                    <span class="dashicons dashicons-chart-area"></span> 9. Statistics &amp; ELO
                 </h2>
-                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in
-                    Event rankings.</p>
+                <p>Starting ELO is <?php echo LPDH_DEFAULT_ELO; ?>. Stats are calculated based on synced player names in Event rankings.</p>
+
+                <div class="hg-grid-2" style="margin-bottom: 25px;">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-users"></span> Players Stats</h5>
+                        <p class="small">Accessible at <strong>Stats &gt; Players Stats</strong> (each player sees only their own data).<br>
+                        Displays a yearly filter (default: Global) and the following sections:</p>
+                        <ul class="small">
+                            <li><strong>Summary card:</strong> Tournament Attendance, Wins, Last Places, ELO, Achievements, Roulette Spins, Decks Owned, Most Used Deck.</li>
+                            <li><strong>Most Used Decks:</strong> Pie chart of the player's own deck usage.</li>
+                            <li><strong>Win Rate Trend:</strong> Line chart showing win rate % by year.</li>
+                            <li><strong>ELO Trend:</strong> Line chart tracking ELO score over time.</li>
+                            <li><strong>My Decks table:</strong> Per-deck performance (Tournament Wins, Match W/D/L, Win Rate, Attendance) — paginated 5/page.</li>
+                            <li><strong>Event History table:</strong> Full list of attended events with position, deck used, and venue — paginated 5/page.</li>
+                        </ul>
+                        <div class="hg-tip">
+                            <strong>Admin override:</strong> Administrators can view any player's stats via the <strong>Select Player</strong> dropdown at the top of the page, or by clicking <strong>View Stats</strong> in the user list row actions.
+                        </div>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-chart-pie"></span> Decks Stats</h5>
+                        <p class="small">Accessible at <strong>Stats &gt; Decks Stats</strong> (Admin / Co-Admin only). Shows aggregated data across all players and all events.</p>
+                        <ul class="small">
+                            <li><strong>Year filter:</strong> Default Global; filter by a specific competition year.</li>
+                            <li><strong>Top Commanders pie chart:</strong> Top 10 commander pairs (Commander / Partner) by total appearances in tournaments.</li>
+                            <li><strong>Deck Usage pie chart:</strong> All registered decks ranked by total appearances.</li>
+                            <li><strong>All Decks table:</strong> Site-wide deck list with Tournament Wins, Match Wins, Match Draws, Match Losses, Win Rate, and Attendance. Paginated at <strong>10 decks/page</strong>, sortable by clicking any column header. Default order: <strong>Win Rate DESC</strong>. Author name links to their frontend profile.</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <h4 style="margin-top: 25px;">ELO Calculation Logic:</h4>
                 <p>The system uses a modified ELO formula that accounts for match results and overall final position in the
@@ -473,6 +521,15 @@ function render_help_guide_page()
                         <li><strong>Features:</strong> Includes sortable columns (ELO, Wins, Attendance), tie-breakers based on match wins, and a "Top 3" highlighting system.</li>
                     </ul>
                 </div>
+
+                <div class="hg-card hg-mt-20">
+                    <h5 class="hg-text-green"><span class="dashicons dashicons-chart-bar"></span> Deck Meta Page</h5>
+                    <p class="small">This is a dynamic, real-time statistics page that displays all site-wide decks ordered by their tournament wins. It includes commander/partner split-avatars with hover popovers, matches the ELO Leaderboard design, and supports year filtering.</p>
+                    <ul class="small">
+                        <li><strong>Template:</strong> To create this page, create a new WordPress Page and select the <strong>Deck Meta</strong> template.</li>
+                        <li><strong>Features:</strong> Fully sortable columns, text-white styling, and visual indicators for the top 3 spots.</li>
+                    </ul>
+                </div>
             </section>
 
             <!-- SECTION: INSTAGRAM GENERATOR -->
@@ -530,10 +587,74 @@ function render_help_guide_page()
                 </div>
             </section>
 
+            <!-- SECTION: ICAL CALENDAR EXPORT -->
+            <section id="calendar" class="hg-section">
+                <h2 class="hg-section-title hg-title-blue">
+                    <span class="dashicons dashicons-calendar-alt"></span> 11. Calendar & JSON Events Export 📅
+                </h2>
+                <p>Allows players and visitors to subscribe to the LPDH events calendar directly in their preferred calendar app (Google Calendar, Apple Calendar, Outlook) with <strong>automatic updates</strong>, or pull event data via a JSON API.</p>
+
+                <h4>How It Works:</h4>
+                <div class="hg-grid-2">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-page"></span> Page Export Template</h5>
+                        <p class="small">Create a WordPress Page and assign the <strong>"Page Export"</strong> template to it. This page serves as the data feed endpoint and must be <strong>published</strong> to be accessible.</p>
+                        <p class="small">Supported feed types:<br><code>?type=events</code> (iCal format)<br><code>?type=events_json</code> (JSON format)</p>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-admin-settings"></span> Theme Settings Configuration</h5>
+                        <p class="small">After creating the page, go to <strong>LPDH &gt; Theme Settings &gt; Pages Configuration</strong> and select it under <strong>"Select Export Page"</strong>.</p>
+                        <p class="small">Once configured, four calendar icons will appear automatically below the title on the <strong>Events</strong> page.</p>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 20px;">Subscribe Buttons on Events Page:</h4>
+                <p>Four compact icon buttons are displayed below the page title. They <strong>dynamically inherit any active filters</strong> (Year, City, Place) applied on the page:</p>
+                <table class="wp-list-table widefat fixed striped hg-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Button</th>
+                            <th>Behaviour</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🟡 JSON Feed</strong></td>
+                            <td>Returns the event data in a structured JSON array. Includes advanced metadata like cover image, ticket fee, format, and max players.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔵 Google Calendar</strong></td>
+                            <td>Opens Google Calendar's "Add by URL" flow with the feed pre-configured and the calendar name dynamically generated.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔴 Apple / Outlook</strong></td>
+                            <td>Opens the native calendar app via the <code>webcal://</code> protocol. Works on macOS, iOS, and Windows with Outlook.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>⚫ Download .ics</strong></td>
+                            <td>Downloads the <code>lpdh-events.ics</code> file directly, useful for manual import or unsupported clients.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 20px;">Export Feed Details:</h4>
+                <ul class="hg-list">
+                    <li><strong>Dynamic Calendar Name:</strong> Automatically reflects active filters (e.g., <code>LPDH Events Palermo 2026</code>).</li>
+                    <li><strong>Events included:</strong> All future events matching the active URL filters (or specific year if selected), ordered by date ascending.</li>
+                    <li><strong>iCal Duration:</strong> <code>DTEND</code> is set to <strong>+4 hours</strong> from start. Timezone is <code>Europe/Rome</code> (CET/CEST).</li>
+                    <li><strong>iCal Data per event:</strong> Title, Date/Time, Location (Place CPT), Description (HTML stripped to plain text), Event URL, Facebook link.</li>
+                    <li><strong>JSON Extra Data:</strong> Same as iCal plus Cover image (thumbnail), Ticket Fee, Event Type, Max Players, and Format.</li>
+                </ul>
+
+                <div class="hg-warning" style="margin-top: 15px;">
+                    <strong>Localhost note:</strong> Google Calendar <strong>cannot</strong> subscribe to a localhost URL because its servers cannot reach your local machine. The subscribe buttons will only work correctly on a publicly accessible domain. Apple Calendar and the .ics download work locally.
+                </div>
+            </section>
+
             <!-- SECTION: PROFILES -->
             <section id="profiles" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-admin-users"></span> 11. Profiles & Preferences
+                    <span class="dashicons dashicons-admin-users"></span> 12. Profiles & Preferences
                 </h2>
                 <p>Manage user visibility, achievement privacy, and data settings.</p>
 
@@ -545,12 +666,19 @@ function render_help_guide_page()
                     <li><strong>Private Profile:</strong> Hides the User Detail page from the public.</li>
                     <li><strong>Account Deletion:</strong> Permanent removal of profile and assigned decks.</li>
                 </ul>
+
+                <h4 style="margin-top: 20px;">Admin User List Enhancements:</h4>
+                <ul class="hg-list">
+                    <li><strong>Decks column:</strong> Shows the number of decks owned by each user, with a direct link to their deck list.</li>
+                    <li><strong>Registered column:</strong> Shows each user's registration date (formatted according to site date settings). The column is sortable by clicking the header.</li>
+                    <li><strong>View Stats action:</strong> Admins can click <strong>View Stats</strong> in the user row to jump directly to that player's Stats page.</li>
+                </ul>
             </section>
 
             <!-- SECTION: ROLES -->
             <section id="roles" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-shield"></span> 12. Roles & Security
+                    <span class="dashicons dashicons-shield"></span> 13. Roles & Security
                 </h2>
                 <div class="hg-grid-3">
                     <div class="hg-card">
@@ -576,7 +704,7 @@ function render_help_guide_page()
             <!-- SECTION: SETTINGS -->
             <section id="settings" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-admin-generic"></span> 13. Theme Settings
+                    <span class="dashicons dashicons-admin-generic"></span> 14. Theme Settings
                 </h2>
                 <p>Configure aesthetics and mapping under <strong>LPDH > Theme Settings</strong>.</p>
 
@@ -616,12 +744,20 @@ function render_help_guide_page()
                             <td>Select the page using the "Player Stats" template.</td>
                         </tr>
                         <tr>
+                            <td><strong>Deck Meta Page</strong></td>
+                            <td>Select the page using the "Deck Meta" template.</td>
+                        </tr>
+                        <tr>
                             <td><strong>Profile Editor Page</strong></td>
                             <td>Select the page using the "Profile Editor" template.</td>
                         </tr>
                         <tr>
                             <td><strong>Login/Register Page</strong></td>
                             <td>Select the page using the "Registration Page" template.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Export Page</strong></td>
+                            <td>Select the page using the <strong>"Page Export"</strong> template. Powers the iCal events calendar feed and the subscribe buttons on the Events page.</td>
                         </tr>
                         <tr>
                             <td><strong>Enable Admin custom login</strong></td>
@@ -656,7 +792,7 @@ function render_help_guide_page()
             <!-- SECTION: EMAIL SYSTEM -->
             <section id="emails" class="hg-section">
                 <h2 class="hg-section-title">
-                    <span class="dashicons dashicons-email-alt"></span> 14. Email System & Testing
+                    <span class="dashicons dashicons-email-alt"></span> 15. Email System & Testing
                 </h2>
                 <p>The theme includes a custom-styled email system that adapts to your active theme's aesthetic.</p>
 
@@ -682,10 +818,75 @@ function render_help_guide_page()
 
             </section>
 
+            <!-- SECTION: HCAPTCHA -->
+            <section id="hcaptcha" class="hg-section">
+                <h2 class="hg-section-title hg-title-red">
+                    <span class="dashicons dashicons-shield"></span> 16. 🛡️ Registration Spam Protection (hCaptcha)
+                </h2>
+                <p>The registration form is protected by <strong>hCaptcha</strong>, a free and GDPR-compliant alternative to Google reCAPTCHA. During a spam attack in May 2026, over 500 fake accounts were created via automated bots &mdash; this integration prevents future attacks.</p>
+
+                <div class="hg-grid-2" style="margin-bottom: 25px;">
+                    <div class="hg-card">
+                        <h5 class="hg-text-blue"><span class="dashicons dashicons-admin-plugins"></span> Plugin Required</h5>
+                        <p class="small">This feature requires the official <strong>"hCaptcha for WP"</strong> plugin, available free on the WordPress Plugin Directory.</p>
+                        <p class="small">The plugin manages API key storage and widget rendering &mdash; no credentials are hardcoded in the theme.</p>
+                    </div>
+                    <div class="hg-card">
+                        <h5 class="hg-text-green"><span class="dashicons dashicons-admin-network"></span> How It Works</h5>
+                        <p class="small">A challenge widget appears in the registration form. On submission, the response token is verified server-side via the hCaptcha API. Bots without a valid token are rejected before any account is created.</p>
+                    </div>
+                </div>
+
+                <h4>Setup (one-time):</h4>
+                <ol class="hg-list" style="margin-top: 8px;">
+                    <li>Install &amp; activate the <strong>"hCaptcha for WP"</strong> plugin from the WordPress Plugin Directory.</li>
+                    <li>Go to <a href="https://www.hcaptcha.com" target="_blank">hcaptcha.com</a>, create a free account, and add your domain.</li>
+                    <li>Copy the <strong>Site Key</strong> and <strong>Secret Key</strong> from your hCaptcha dashboard.</li>
+                    <li>In WordPress, go to <strong>Settings &rarr; hCaptcha</strong> and paste the two keys.</li>
+                    <li>Verify the widget appears on the registration page &mdash; it should show a checkbox or image challenge.</li>
+                </ol>
+
+                <h4 style="margin-top: 20px;">Behavior Summary:</h4>
+                <table class="wp-list-table widefat fixed striped hg-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 220px;">Scenario</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bot submits without CAPTCHA</strong></td>
+                            <td>❌ Blocked &mdash; registration fails with an error message.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bot bypasses frontend widget</strong></td>
+                            <td>❌ Blocked &mdash; server-side API verification catches it regardless.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real user completes CAPTCHA</strong></td>
+                            <td>✅ Registration proceeds normally.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>hCaptcha API network error</strong></td>
+                            <td>✅ Fail-open &mdash; user is not blocked; error is logged in PHP error log.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Plugin deactivated</strong></td>
+                            <td>⚠️ Fail-open &mdash; form works without CAPTCHA. Re-activate plugin ASAP.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="hg-warning" style="margin-top: 15px;">
+                    <strong>Important:</strong> If you deactivate the "hCaptcha for WP" plugin, the registration form will temporarily lose CAPTCHA protection. The theme uses <code>shortcode_exists('hcaptcha')</code> to detect the plugin and fails-open gracefully &mdash; but re-activate the plugin as soon as possible.
+                </div>
+            </section>
+
             <!-- SECTION: EASTER EGGS -->
             <section id="easter-eggs" class="hg-section">
                 <h2 class="hg-section-title hg-title-red">
-                    <span class="dashicons dashicons-admin-appearance"></span> 15. Easter Eggs & Hidden Features
+                    <span class="dashicons dashicons-admin-appearance"></span> 17. Easter Eggs & Hidden Features
                 </h2>
                 <p>Curated secret animations and interactions for the LPDH community.</p>
 
@@ -734,7 +935,7 @@ function render_help_guide_page()
             </section>
 
             <footer class="hg-footer">
-                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.0.0</p>
+                <p>Document updated: <?php echo date('F j, Y'); ?> - Version 2.3.0</p>
             </footer>
         </div>
     </div>

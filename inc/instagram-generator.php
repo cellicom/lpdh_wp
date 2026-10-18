@@ -16,7 +16,7 @@ function lpdh_register_instagram_generator_page()
         'lpdh-main',
         'Instagram Generator',
         'Instagram Generator',
-        'manage_options',
+        'manage_lpdh_content',
         'lpdh-instagram-generator',
         'lpdh_render_instagram_generator_page'
     );
@@ -29,7 +29,7 @@ add_action('admin_menu', 'lpdh_register_instagram_generator_page');
 function lpdh_render_instagram_generator_page()
 {
     // Security check - admin only
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('manage_lpdh_content')) {
         wp_die(__('You do not have permission to access this page.'));
     }
 

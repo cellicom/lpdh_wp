@@ -1743,3 +1743,23 @@ input[type="file"]::file-selector-button {
         max-width: 70vw;
     }
 }
+
+/* Leaderboard Filter Selects */
+.leaderboard-city-select {
+    width: auto !important;
+    cursor: pointer !important;
+    font-size: inherit !important;
+    height: auto !important;
+    border: 0 !important;
+    border-bottom: 1px solid white !important;
+    border-radius: 0 !important;
+    padding: 0 2px !important;
+    margin: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background: transparent !important;
+    color: var(--bs-secondary) !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
+}

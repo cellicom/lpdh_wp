@@ -13,34 +13,48 @@ get_header(); ?>
         <div class="container py-5">
             <?php while (have_posts()):
                 the_post();
-                $scryfall_link = get_field('scryfall_link');
+                $scryfall_link   = get_field('scryfall_link');
+                $combined_with   = get_field('combined_with'); // array of WP_Post objects (multiple)
+                $has_combined    = !empty($combined_with);
                 ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     <header class="entry-header text-center mb-5">
-                        <?php the_title('<h1 class="entry-title text-danger">', '</h1>'); ?>
+                        <?php
+                        if ($has_combined) {
+                            $combined_names = array_map(function($p) { return get_the_title($p->ID); }, $combined_with);
+                            $combined_label = implode(' + ', $combined_names);
+                            echo '<h1 class="entry-title text-danger">' . esc_html(get_the_title()) . ' + ' . esc_html($combined_label) . '</h1>';
+                        } else {
+                            the_title('<h1 class="entry-title text-danger">', '</h1>');
+                        }
+                        ?>
                     </header>
 
                     <div class="row justify-content-center">
                         <div class="col-md-4 text-center mb-4 mb-md-0">
+                            <div class="d-flex align-items-start justify-content-center gap-2 flex-wrap">
                             <?php
-                            $image_html = '';
-                            if (has_post_thumbnail()) {
-                                $image_html = get_the_post_thumbnail(null, 'large', array('class' => 'img-fluid rounded shadow-sm'));
-                            } else {
-                                $scryfall_image_url = function_exists('lpdh_get_scryfall_image_url') ? lpdh_get_scryfall_image_url(get_the_ID()) : '';
-                                if (!empty($scryfall_image_url) && $scryfall_image_url !== 'error') {
-                                    $image_html = '<img src="' . esc_url($scryfall_image_url) . '" class="img-fluid rounded shadow-sm" alt="' . esc_attr(get_the_title()) . '">';
-                                }
-                            }
-
-                            if (!empty($image_html)):
-                                echo $image_html;
-                            else: ?>
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center p-5"
-                                    style="min-height: 300px;">
+                            // Main card image
+                            $main_img = lpdh_banned_card_image_html(get_the_ID());
+                            if ($main_img) {
+                                echo $main_img;
+                            } else { ?>
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center p-5" style="min-height: 300px;">
                                     <i class="fas fa-ban fa-5x text-danger opacity-25"></i>
                                 </div>
-                            <?php endif; ?>
+                            <?php }
+
+                            // Combined-with card images
+                            if ($has_combined) {
+                                foreach ($combined_with as $cw_post) {
+                                    $cw_img = lpdh_banned_card_image_html($cw_post->ID);
+                                    if ($cw_img) {
+                                        echo $cw_img;
+                                    }
+                                }
+                            }
+                            ?>
+                        </div>
                         </div>
                         <div class="col-md-8">
                             <div class="card border-0 bg-light h-100">

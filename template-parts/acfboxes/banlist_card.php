@@ -8,13 +8,25 @@ if ($args['visible']) {
     // Prepare args for hashtag function
     $args_for_hash = array_merge($args, ['titolo' => $title]);
 
-    // WP_Query for 'banned_card' CPT
+    // WP_Query for 'banned_card' CPT — exclude hidden cards
     $banned_cards_query = new WP_Query([
-        'post_type' => 'banned_card',
+        'post_type'   => 'banned_card',
         'posts_per_page' => -1,
         'post_status' => 'publish',
-        'orderby' => 'date',
-        'order' => 'DESC'
+        'orderby'     => 'date',
+        'order'       => 'DESC',
+        'meta_query'  => [
+            'relation' => 'OR',
+            [
+                'key'     => 'hidden',
+                'value'   => '1',
+                'compare' => '!=',
+            ],
+            [
+                'key'     => 'hidden',
+                'compare' => 'NOT EXISTS',
+            ],
+        ],
     ]);
     ?>
 

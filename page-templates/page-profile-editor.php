@@ -69,6 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
         // Private Profile
         update_user_meta($user_id, 'private_profile', isset($_POST['private_profile']) ? '1' : '0');
 
+        // Preferred City
+        if (isset($_POST['preferred_city'])) {
+            update_user_meta($user_id, 'preferred_city', sanitize_text_field($_POST['preferred_city']));
+        }
+
         // Basic Info Update
         $userdata = array(
             'ID' => $user_id,
@@ -81,9 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
         );
 
         // Password Update
-        if (!empty($_POST['new_password'])) {
-            if ($_POST['new_password'] === $_POST['confirm_password']) {
-                $userdata['user_pass'] = $_POST['new_password'];
+        $pass1 = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
+        $pass2 = isset($_POST['confirm_password']) ? trim($_POST['confirm_password']) : '';
+        
+        if (!empty($pass1) || !empty($pass2)) {
+            if ($pass1 === $pass2) {
+                $userdata['user_pass'] = $pass1;
             } else {
                 $errors[] = "Passwords do not match.";
             }
@@ -215,6 +223,44 @@ get_header(); ?>
                             <div class="form-text text-info">A short bio about yourself.</div>
                         </div>
 
+                        <?php
+                        $cities = array();
+                        $places_query = new WP_Query(array(
+                            'post_type' => 'place',
+                            'posts_per_page' => -1,
+                            'post_status' => 'publish',
+                        ));
+                        if ($places_query->have_posts()) {
+                            while ($places_query->have_posts()) {
+                                $places_query->the_post();
+                                $city = get_field('place_city');
+                                if (!empty($city)) {
+                                    $cities[$city] = $city;
+                                }
+                            }
+                            wp_reset_postdata();
+                        }
+                        sort($cities);
+                        $user_preferred_city = get_user_meta($user_id, 'preferred_city', true);
+                        ?>
+                        <?php if (!empty($cities)): ?>
+                            <div class="mb-4">
+                                <label for="preferred_city" class="form-label fw-bold">Preferred City</label>
+                                <select name="preferred_city" id="preferred_city" class="form-select form-control">
+                                    <option value="">Select your preferred city...</option>
+                                    <?php foreach ($cities as $city): ?>
+                                        <option value="<?php echo esc_attr($city); ?>" <?php selected($user_preferred_city, $city); ?>>
+                                            <?php echo esc_html($city); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text text-info">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    Your preferred city.
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="mb-4">
                             <label for="user_url" class="form-label fw-bold">Website</label>
                             <input type="url" name="user_url" id="user_url" class="form-control"
@@ -302,12 +348,12 @@ get_header(); ?>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="new_password" class="form-label small">New Password</label>
-                                <input type="password" name="new_password" id="new_password" class="form-control">
+                                <input type="password" name="new_password" id="new_password" class="form-control" autocomplete="new-password">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="confirm_password" class="form-label small">Confirm New Password</label>
                                 <input type="password" name="confirm_password" id="confirm_password"
-                                    class="form-control">
+                                    class="form-control" autocomplete="new-password">
                             </div>
                         </div>
                         <div class="form-text text-info mb-4">Leave both blank if you don't want to change your

@@ -79,6 +79,28 @@ if (function_exists('acf_add_local_field_group')):
         'title' => 'Event Details',
         'fields' => array(
             array(
+                'key' => 'field_event_city',
+                'label' => 'City',
+                'name' => 'event_city',
+                'type' => 'select',
+                'instructions' => 'Select a city to filter available places',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => array(),
+                'default_value' => false,
+                'allow_null' => 1,
+                'multiple' => 0,
+                'ui' => 1,
+                'ajax' => 0,
+                'return_format' => 'value',
+                'placeholder' => 'Select a city...',
+            ),
+            array(
                 'key' => 'field_event_place',
                 'label' => 'Place',
                 'name' => 'event_place',
@@ -87,7 +109,7 @@ if (function_exists('acf_add_local_field_group')):
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '',
+                    'width' => '50',
                     'class' => '',
                     'id' => '',
                 ),
@@ -109,7 +131,7 @@ if (function_exists('acf_add_local_field_group')):
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '',
+                    'width' => '50',
                     'class' => '',
                     'id' => '',
                 ),
@@ -126,12 +148,105 @@ if (function_exists('acf_add_local_field_group')):
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '',
+                    'width' => '50',
                     'class' => '',
                     'id' => '',
                 ),
                 'default_value' => '',
                 'placeholder' => 'https://facebook.com/events/...',
+            ),
+            array(
+                'key' => 'field_event_type',
+                'label' => 'Event Type',
+                'name' => 'event_type',
+                'type' => 'select',
+                'instructions' => 'Select the type of the event.',
+                'required' => 1,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => array(
+                    'Tournament' => 'Tournament',
+                    'Two Head Giant' => 'Two Head Giant',
+                    'Draft' => 'Draft',
+                    'Prerelease' => 'Prerelease',
+                    'Other' => 'Other',
+                ),
+                'default_value' => 'Tournament',
+                'allow_null' => 0,
+                'multiple' => 0,
+                'ui' => 0,
+                'ajax' => 0,
+                'return_format' => 'value',
+            ),
+            array(
+                'key' => 'field_format',
+                'label' => 'Format',
+                'name' => 'format',
+                'type' => 'select',
+                'instructions' => 'Select the format of the event.',
+                'required' => 1,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => array(
+                    'LPDH' => 'LPDH',
+                    'Commander' => 'Commander',
+                    'Pauper' => 'Pauper',
+                    'Modern' => 'Modern',
+                    'Standard' => 'Standard',
+                    'Other' => 'Other',
+                ),
+                'default_value' => 'LPDH',
+                'allow_null' => 0,
+                'multiple' => 0,
+                'ui' => 0,
+                'ajax' => 0,
+                'return_format' => 'value',
+            ),
+            array(
+                'key' => 'field_ticket_fee',
+                'label' => 'Ticket Fee',
+                'name' => 'ticket_fee',
+                'type' => 'text',
+                'instructions' => 'Enter the ticket fee/entry price.',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '5',
+                'placeholder' => 'e.g. 5, Gratuito',
+                'prepend' => '',
+                'append' => '',
+                'maxlength' => '',
+            ),
+            array(
+                'key' => 'field_max_players',
+                'label' => 'Max Players',
+                'name' => 'max_players',
+                'type' => 'number',
+                'instructions' => 'Enter maximum number of players allowed (0 for unlimited).',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => 0,
+                'min' => 0,
+                'max' => '',
+                'step' => 1,
+                'placeholder' => '',
             ),
             array(
                 'key' => 'field_event_code',
@@ -142,7 +257,7 @@ if (function_exists('acf_add_local_field_group')):
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '50',
+                    'width' => '',
                     'class' => '',
                     'id' => '',
                 ),
@@ -176,6 +291,44 @@ if (function_exists('acf_add_local_field_group')):
         'key' => 'group_event_rankings',
         'title' => 'Ranking Fields',
         'fields' => array(
+            array(
+                'key'               => 'field_event_exclude_annual',
+                'label'             => 'Exclude from Annual Leaderboard',
+                'name'              => 'exclude_from_annual_leaderboard',
+                'type'              => 'true_false',
+                'instructions'      => 'If checked, this event will NOT be counted in the annual leaderboard calculation.',
+                'required'          => 0,
+                'conditional_logic' => 0,
+                'wrapper'           => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id'    => '',
+                ),
+                'message'       => '',
+                'default_value' => 0,
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+            ),
+            array(
+                'key'               => 'field_event_exclude_elo',
+                'label'             => 'Exclude from ELO Leaderboard',
+                'name'              => 'exclude_from_elo_leaderboard',
+                'type'              => 'true_false',
+                'instructions'      => 'If checked, this event will NOT affect players\' ELO ratings.',
+                'required'          => 0,
+                'conditional_logic' => 0,
+                'wrapper'           => array(
+                    'width' => '50',
+                    'class' => '',
+                    'id'    => '',
+                ),
+                'message'       => '',
+                'default_value' => 0,
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+            ),
             array(
                 'key' => 'field_event_rankings_json',
                 'label' => 'Rankings JSON',
@@ -1053,7 +1206,16 @@ function ajax_get_user_decks()
 {
     check_ajax_referer('get_user_decks_nonce', 'nonce');
 
-    $user_id = intval($_POST['user_id']);
+    $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+    $current_deck_id = isset($_POST['current_deck_id']) ? intval($_POST['current_deck_id']) : 0;
+
+    $deck_author_id = 0;
+    if ($current_deck_id) {
+        $deck_post = get_post($current_deck_id);
+        if ($deck_post && $deck_post->post_type === 'deck') {
+            $deck_author_id = intval($deck_post->post_author);
+        }
+    }
 
     if ($user_id) {
         $decks = get_posts(array(
@@ -1065,18 +1227,24 @@ function ajax_get_user_decks()
             'order' => 'ASC',
         ));
 
+        $deck_data = array();
         if ($decks) {
-            $deck_data = array();
             foreach ($decks as $deck) {
                 $deck_data[] = array(
                     'ID' => $deck->ID,
                     'post_title' => $deck->post_title,
                 );
             }
-            wp_send_json_success($deck_data);
-        } else {
-            wp_send_json_success(array());
         }
+        wp_send_json_success(array(
+            'decks' => $deck_data,
+            'deck_author_id' => $deck_author_id,
+        ));
+    } elseif ($current_deck_id) {
+        wp_send_json_success(array(
+            'decks' => array(),
+            'deck_author_id' => $deck_author_id,
+        ));
     } else {
         wp_send_json_error(array('message' => 'Invalid User ID'));
     }
@@ -1091,10 +1259,29 @@ require_once get_stylesheet_directory() . '/inc/function-schema-color.php';
  */
 function event_ranking_populate_player_deck()
 {
+    global $post, $pagenow;
+    if ($pagenow !== 'post.php' && $pagenow !== 'post-new.php') {
+        return;
+    }
+    if ($post && $post->post_type !== 'event') {
+        return;
+    }
+
+    $all_players = get_users(array('orderby' => 'display_name', 'order' => 'ASC'));
+    $player_options = array();
+    foreach ($all_players as $p) {
+        $name = !empty($p->display_name) ? $p->display_name : $p->user_login;
+        $player_options[] = array(
+            'id' => $p->ID,
+            'name' => $name,
+        );
+    }
     ?>
 
     <script type="text/javascript">
         (function ($) {
+            var allPlayers = <?php echo json_encode($player_options); ?>;
+
             // Function to add temporary select with search below deck field
             function addDeckSelector($row, playerId) {
                 // Remove any existing deck selector
@@ -1104,101 +1291,265 @@ function event_ranking_populate_player_deck()
                 var $deckField = $row.find('.acf-field-ranking-deck');
                 var $deckIdField = $row.find('.acf-field-ranking-player-deck-id');
 
-                if (!$deckField.length || !playerId) {
+                if (!$deckField.length) {
                     return;
                 }
 
-                // Create temporary select element with Select2
+                var $deckInput = $deckField.find('input[type="text"]');
+                var $deckIdInput = $deckIdField.find('input');
+                var initialDeckId = $deckIdInput.val() ? parseInt($deckIdInput.val(), 10) : 0;
+                var initialDeckTitle = $deckInput.val() || '';
+
+                var isUnregistered = (!playerId || parseInt(playerId, 10) === 0);
+
+                // State storage to preserve selections when toggling modes
+                var savedMyDeck = { id: 0, title: '' };
+                var savedNotMyDeck = { id: 0, title: '', ownerId: 0 };
+
+                var playerOptionsHtml = '<option value="">-- Select Player --</option>';
+                $.each(allPlayers, function (idx, p) {
+                    playerOptionsHtml += '<option value="' + p.id + '">' + $('<div>').text(p.name).html() + '</option>';
+                });
+
                 var $selector = $(
-                    '<div class="temp-deck-selector" style="margin-top:8px;">' +
-                    '<label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">Select deck:</label>' +
-                    '<select class="deck-quick-select" style="width:100%;">' +
-                    '<option value="">-- Search deck --</option>' +
-                    '</select>' +
+                    '<div class="temp-deck-selector" style="margin-top:6px; padding:6px; background:#f9f9f9; border:1px solid #e5e5e5; border-radius:4px;">' +
+                        '<div style="margin-bottom:6px;">' +
+                            '<label style="font-size:12px; color:#333; cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-weight:600; margin:0;">' +
+                                '<input type="checkbox" class="is-borrowed-deck" style="margin:0;">' +
+                                '<span class="borrowed-deck-label">My Deck</span>' +
+                            '</label>' +
+                        '</div>' +
+                        '<div class="borrowed-player-wrap" style="display:none; margin-bottom:6px;">' +
+                            '<label style="display:block; font-size:11px; color:#666; margin-bottom:2px;">Deck Owner:</label>' +
+                            '<select class="borrowed-player-select" style="width:100%;">' +
+                                playerOptionsHtml +
+                            '</select>' +
+                        '</div>' +
+                        '<div>' +
+                            '<label style="display:block; font-size:11px; color:#666; margin-bottom:2px;">Select Deck:</label>' +
+                            '<select class="deck-quick-select" style="width:100%;">' +
+                                '<option value="">-- Select Deck --</option>' +
+                            '</select>' +
+                        '</div>' +
                     '</div>'
                 );
 
-                // Find the deck input and populate when selection changes
-                var $deckInput = $deckField.find('input[type="text"]');
-                var $deckIdInput = $deckIdField.find('input[type="number"]');
+                var $checkbox = $selector.find('.is-borrowed-deck');
+                var $checkboxLabel = $selector.find('.borrowed-deck-label');
+                var $borrowedWrap = $selector.find('.borrowed-player-wrap');
+                var $borrowedPlayerSelect = $selector.find('.borrowed-player-select');
+                var $deckSelect = $selector.find('.deck-quick-select');
 
-                $selector.find('select').on('change', function () {
-                    var selectedDeckId = $(this).val();
-                    var selectedDeckTitle = $(this).find('option:selected').text();
+                $deckField.append($selector);
+
+                $borrowedPlayerSelect.select2({
+                    placeholder: '-- Select Player --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                $deckSelect.select2({
+                    placeholder: '-- Select Deck --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                function loadDecks(userId, targetDeckId, onComplete) {
+                    if (!userId && !targetDeckId) {
+                        $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'get_user_decks',
+                            user_id: userId || 0,
+                            current_deck_id: targetDeckId || 0,
+                            nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
+                        },
+                        beforeSend: function () {
+                            $deckSelect.html('<option value="">Loading...</option>').trigger('change.select2');
+                        },
+                        success: function (response) {
+                            var decks = [];
+                            var deckAuthorId = 0;
+                            if (response.success && response.data) {
+                                if (Array.isArray(response.data)) {
+                                    decks = response.data;
+                                } else if (response.data.decks) {
+                                    decks = response.data.decks;
+                                    deckAuthorId = response.data.deck_author_id ? parseInt(response.data.deck_author_id, 10) : 0;
+                                }
+                            }
+
+                            $deckSelect.html('<option value="">-- Select Deck --</option>');
+                            if (decks.length > 0) {
+                                $.each(decks, function (index, deck) {
+                                    var isSel = (targetDeckId && parseInt(deck.ID, 10) === parseInt(targetDeckId, 10));
+                                    $deckSelect.append(
+                                        $('<option></option>')
+                                            .val(deck.ID)
+                                            .text(deck.post_title)
+                                            .prop('selected', isSel)
+                                    );
+                                });
+                            } else {
+                                $deckSelect.html('<option value="">No decks found</option>');
+                            }
+                            $deckSelect.trigger('change.select2');
+
+                            if (typeof onComplete === 'function') {
+                                onComplete(decks, deckAuthorId);
+                            }
+                        },
+                        error: function () {
+                            $deckSelect.html('<option value="">Loading error</option>').trigger('change.select2');
+                        }
+                    });
+                }
+
+                if (isUnregistered) {
+                    $checkbox.prop('checked', true).prop('disabled', true);
+                    $checkboxLabel.text('Not My Deck');
+                    $borrowedWrap.show();
+
+                    if (initialDeckId) {
+                        loadDecks(0, initialDeckId, function (decks, deckAuthorId) {
+                            if (deckAuthorId) {
+                                savedNotMyDeck = {
+                                    id: initialDeckId,
+                                    title: initialDeckTitle,
+                                    ownerId: deckAuthorId
+                                };
+                                $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
+                                loadDecks(deckAuthorId, initialDeckId);
+                            }
+                        });
+                    } else {
+                        $borrowedPlayerSelect.val('').trigger('change.select2');
+                        $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                    }
+                } else {
+                    $checkbox.prop('disabled', false);
+
+                    // Initial load: check if the existing deck belongs to the row player or another player
+                    loadDecks(playerId, initialDeckId, function (decks, deckAuthorId) {
+                        if (deckAuthorId && deckAuthorId !== parseInt(playerId, 10)) {
+                            // Borrowed deck detected!
+                            savedNotMyDeck = {
+                                id: initialDeckId,
+                                title: initialDeckTitle,
+                                ownerId: deckAuthorId
+                            };
+                            $checkbox.prop('checked', true);
+                            $checkboxLabel.text('Not My Deck');
+                            $borrowedWrap.show();
+                            $borrowedPlayerSelect.val(deckAuthorId).trigger('change.select2');
+                            loadDecks(deckAuthorId, initialDeckId);
+                        } else {
+                            if (initialDeckId) {
+                                savedMyDeck = {
+                                    id: initialDeckId,
+                                    title: initialDeckTitle
+                                };
+                            }
+                            $checkbox.prop('checked', false);
+                            $checkboxLabel.text('My Deck');
+                        }
+                    });
+                }
+
+                // When user selects a deck
+                $deckSelect.on('change', function () {
+                    var selectedDeckId = $(this).val() ? parseInt($(this).val(), 10) : 0;
+                    var selectedDeckTitle = selectedDeckId ? $(this).find('option:selected').text() : '';
 
                     if (selectedDeckId) {
                         $deckInput.val(selectedDeckTitle);
                         $deckIdInput.val(selectedDeckId);
                     }
+
+                    if ($checkbox.is(':checked')) {
+                        savedNotMyDeck.id = selectedDeckId;
+                        savedNotMyDeck.title = selectedDeckTitle;
+                        savedNotMyDeck.ownerId = $borrowedPlayerSelect.val() ? parseInt($borrowedPlayerSelect.val(), 10) : 0;
+                    } else {
+                        savedMyDeck.id = selectedDeckId;
+                        savedMyDeck.title = selectedDeckTitle;
+                    }
                 });
 
-                // Add selector after the deck field
-                $deckField.append($selector);
+                // Toggle "My Deck" / "Not My Deck"
+                $checkbox.on('change', function () {
+                    var isChecked = $(this).is(':checked');
+                    $checkboxLabel.text(isChecked ? 'Not My Deck' : 'My Deck');
 
-                // Initialize Select2 on the new select
-                $selector.find('select').select2({
-                    placeholder: '-- Search deck --',
-                    allowClear: true,
-                    width: '100%'
-                });
-
-                // Fetch decks for this player
-                $.ajax({
-                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                    type: 'POST',
-                    data: {
-                        action: 'get_user_decks',
-                        user_id: playerId,
-                        nonce: '<?php echo wp_create_nonce('get_user_decks_nonce'); ?>'
-                    },
-                    beforeSend: function () {
-                        $selector.find('select').html('<option value="">Loading...</option>');
-                    },
-                    success: function (response) {
-                        var $select = $selector.find('select');
-                        $select.html('<option value="">-- Search deck --</option>');
-
-                        if (response.success && response.data && response.data.length > 0) {
-                            $.each(response.data, function (index, deck) {
-                                $select.append(
-                                    $('<option></option>')
-                                        .val(deck.ID)
-                                        .text(deck.post_title)
-                                );
-                            });
+                    if (isChecked) {
+                        $borrowedWrap.slideDown(150);
+                        if (savedNotMyDeck.ownerId) {
+                            $borrowedPlayerSelect.val(savedNotMyDeck.ownerId).trigger('change.select2');
+                            loadDecks(savedNotMyDeck.ownerId, savedNotMyDeck.id);
+                            if (savedNotMyDeck.id) {
+                                $deckInput.val(savedNotMyDeck.title);
+                                $deckIdInput.val(savedNotMyDeck.id);
+                            } else {
+                                $deckInput.val('');
+                                $deckIdInput.val('');
+                            }
                         } else {
-                            $select.html('<option value="">No decks available</option>');
+                            $borrowedPlayerSelect.val('').trigger('change.select2');
+                            $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                            $deckInput.val('');
+                            $deckIdInput.val('');
                         }
+                    } else {
+                        $borrowedWrap.slideUp(150);
+                        if (savedMyDeck.id) {
+                            loadDecks(playerId, savedMyDeck.id);
+                            $deckInput.val(savedMyDeck.title);
+                            $deckIdInput.val(savedMyDeck.id);
+                        } else {
+                            loadDecks(playerId, 0);
+                            $deckInput.val('');
+                            $deckIdInput.val('');
+                        }
+                    }
+                });
 
-                        // Refresh Select2
-                        $select.trigger('change.select2');
-                    },
-                    error: function () {
-                        $selector.find('select').html('<option value="">Loading error</option>');
-                        $selector.find('select').trigger('change.select2');
+                // Lender player selection change
+                $borrowedPlayerSelect.on('change', function () {
+                    if ($checkbox.is(':checked')) {
+                        var lenderId = $(this).val() ? parseInt($(this).val(), 10) : 0;
+                        savedNotMyDeck.ownerId = lenderId;
+                        if (lenderId) {
+                            var targetDeck = (savedNotMyDeck.ownerId === lenderId) ? savedNotMyDeck.id : 0;
+                            loadDecks(lenderId, targetDeck);
+                        } else {
+                            $deckSelect.html('<option value="">-- Select a player first --</option>').trigger('change.select2');
+                        }
                     }
                 });
             }
 
             // Handler for player_id selection in ranking repeater
-            $(document).on('change', 'select[name*="field_ranking_player_id"]', function (e) {
+            $(document).on('change', 'select[name*="field_ranking_player_id"], [data-name="player_id"] select', function (e) {
                 var $row = $(this).closest('tr.acf-row');
                 var playerId = $(this).val();
 
-                // Update the deck selector for this row
                 addDeckSelector($row, playerId);
             });
 
             // Handle ACF's ready/append events
             acf.add_action('ready append', function ($el) {
-                // Find all player_id selects in ranking rows
-                $el.find('select[name*="field_ranking_player_id"]').each(function () {
+                // Find all deck fields in ranking rows
+                var $deckFields = $el.is('.acf-field-ranking-deck') ? $el : $el.find('.acf-field-ranking-deck');
+                $deckFields.each(function () {
                     var $row = $(this).closest('tr.acf-row');
-                    var playerId = $(this).val();
+                    var playerId = $row.find('select[name*="field_ranking_player_id"], [data-name="player_id"] select').val();
 
-                    if (playerId) {
-                        addDeckSelector($row, playerId);
-                    }
+                    addDeckSelector($row, playerId);
                 });
             });
 
@@ -1462,6 +1813,19 @@ function bootscore_child_event_archive_filter($query)
             );
         }
 
+        $city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : null;
+        if ($city === null && is_user_logged_in()) {
+            $city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+        }
+
+        if (!empty($city)) {
+            $meta_query[] = array(
+                'key' => 'event_city',
+                'value' => $city,
+                'compare' => '='
+            );
+        }
+
         if (count($meta_query) > 1) {
             $query->set('meta_query', $meta_query);
         }
@@ -1509,7 +1873,7 @@ function ajax_update_player_deck_ranking()
         $rank_player_id = intval($rank_player);
     }
 
-    if ($rank_player_id !== $user_id && !current_user_can('administrator') && !current_user_can('player')) {
+    if ($rank_player_id !== $user_id && !lpdh_can_manage_content()) {
         wp_send_json_error('Permission denied');
     }
 
@@ -1595,6 +1959,55 @@ function ajax_update_player_deck_ranking()
     }
 }
 add_action('wp_ajax_update_player_deck_ranking', 'ajax_update_player_deck_ranking');
+
+/**
+ * AJAX Handler to get player's decks for ranking deck modal
+ */
+function ajax_get_player_decks()
+{
+    check_ajax_referer('get_player_decks_nonce', 'nonce');
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Unauthorized');
+    }
+
+    $player_id = isset($_POST['player_id']) ? intval($_POST['player_id']) : 0;
+
+    if (!$player_id) {
+        wp_send_json_success([]);
+    }
+
+    $decks = get_posts([
+        'post_type' => 'deck',
+        'author' => $player_id,
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ]);
+
+    $data = [];
+    foreach ($decks as $deck) {
+        $cmdr = get_field('commander', $deck->ID);
+        $partner = get_field('partner', $deck->ID);
+        $cmdr_text = $cmdr ? esc_html($cmdr) : '';
+        if ($partner) {
+            $cmdr_text .= ' + ' . esc_html($partner);
+        }
+
+        $data[] = [
+            'id' => $deck->ID,
+            'title' => esc_html($deck->post_title),
+            'cmdr' => $cmdr_text,
+            'cmdr_img' => get_commander_image($deck->ID),
+            'partner_img' => get_partner_image($deck->ID),
+        ];
+    }
+
+    wp_send_json_success($data);
+}
+add_action('wp_ajax_get_player_decks', 'ajax_get_player_decks');
+
 
 /**
  * Add OCR Ranking Generator Metabox to Events
@@ -2239,3 +2652,311 @@ function lpdh_event_admin_global_scripts() {
     }
 }
 add_action('admin_footer', 'lpdh_event_admin_global_scripts');
+
+/**
+ * Retrieve unique cities from Place custom post type, sorted alphabetically.
+ */
+function lpdh_get_unique_place_cities()
+{
+    global $wpdb;
+    $cities = $wpdb->get_col("
+        SELECT DISTINCT TRIM(meta_value)
+        FROM {$wpdb->postmeta} pm
+        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'place_city' 
+          AND pm.meta_value IS NOT NULL 
+          AND TRIM(meta_value) != '' 
+          AND p.post_type = 'place' 
+          AND p.post_status = 'publish'
+        ORDER BY TRIM(meta_value) ASC
+    ");
+    return array_filter($cities);
+}
+
+
+
+/**
+ * Populate City choices in Event field dynamically
+ */
+function lpdh_populate_event_city_choices($field)
+{
+    $cities = lpdh_get_unique_place_cities();
+    $field['choices'] = array();
+    if (!empty($cities)) {
+        foreach ($cities as $city) {
+            $field['choices'][$city] = $city;
+        }
+    }
+    return $field;
+}
+add_filter('acf/load_field/name=event_city', 'lpdh_populate_event_city_choices');
+
+/**
+ * Filter available places in event_place field by selected city
+ */
+function lpdh_filter_places_by_city($args, $field, $post_id)
+{
+    if (isset($_REQUEST['event_city']) && !empty($_REQUEST['event_city'])) {
+        $city = sanitize_text_field($_REQUEST['event_city']);
+        
+        if (!isset($args['meta_query'])) {
+            $args['meta_query'] = array();
+        }
+        
+        $args['meta_query'][] = array(
+            'key' => 'place_city',
+            'value' => $city,
+            'compare' => '='
+        );
+    }
+    return $args;
+}
+add_filter('acf/fields/post_object/query/name=event_place', 'lpdh_filter_places_by_city', 20, 3);
+add_filter('acf/fields/post_object/query/key=field_event_place', 'lpdh_filter_places_by_city', 20, 3);
+add_filter('acf/fields/post_object/query', 'lpdh_filter_places_by_city', 20, 3);
+
+/**
+ * Enqueue Select2 filtering JS for Event edit screen
+ */
+function lpdh_event_city_filter_js()
+{
+    ?>
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                if ($('[id*="event_city"]').length === 0 && $('[name*="event_city"]').length === 0) {
+                    return;
+                }
+                
+                console.log('LPDH Event City Filter Script Loaded.');
+
+                // Helper function to reliably get the selected city value from the <select> tag
+                function getCityVal() {
+                    var cityVal = $('select[name="acf[field_event_city]"]').val() || $('select#acf-field-field_event_city').val();
+                    if (cityVal) {
+                        return cityVal;
+                    }
+                    // Fallback: search all select tags containing event_city in ID or Name
+                    $('select').each(function() {
+                        var id = $(this).attr('id') || '';
+                        var name = $(this).attr('name') || '';
+                        if (id.indexOf('event_city') !== -1 || name.indexOf('event_city') !== -1) {
+                            var v = $(this).val();
+                            if (v) {
+                                cityVal = v;
+                                return false; // break loop
+                            }
+                        }
+                    });
+                    return cityVal || '';
+                }
+
+                // When the city selection changes, clear the Place selection
+                $(document).on('change', '[id*="event_city"], [name*="event_city"]', function() {
+                    var cityVal = $(this).val();
+                    console.log('City changed to:', cityVal, '- Clearing Place field.');
+                    var $place = $('[id*="event_place"], [name*="event_place"]');
+                    $place.val('').trigger('change');
+                    
+                    if (typeof acf !== 'undefined') {
+                        var placeField = acf.getField('field_event_place');
+                        if (placeField) {
+                            placeField.val('');
+                        }
+                    }
+                });
+
+                // 1. Intercept native fetch requests (used by modern browsers / ACF versions)
+                var originalFetch = window.fetch;
+                window.fetch = function(input, init) {
+                    try {
+                        if (init && init.body && typeof init.body === 'string' && (
+                            init.body.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
+                            init.body.indexOf('action=acf/fields/post_object/query') !== -1
+                        )) {
+                            var cityVal = getCityVal();
+                            console.log('Intercepted native fetch for post_object. City:', cityVal);
+                            if (cityVal) {
+                                if (init.body.indexOf('event_city=') === -1) {
+                                    init.body += '&event_city=' + encodeURIComponent(cityVal);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error in fetch interception:', e);
+                    }
+                    return originalFetch.apply(this, arguments);
+                };
+
+                // 2. Intercept jQuery AJAX requests (fallback)
+                if ($.ajaxPrefilter) {
+                    $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+                        if (options.data && (
+                            options.data.indexOf('action=acf%2Ffields%2Fpost_object%2Fquery') !== -1 ||
+                            options.data.indexOf('action=acf/fields/post_object/query') !== -1
+                        )) {
+                            var cityVal = getCityVal();
+                            console.log('Intercepted jQuery AJAX for post_object. City:', cityVal);
+                            if (cityVal) {
+                                if (options.data.indexOf('event_city=') === -1) {
+                                    options.data += '&event_city=' + encodeURIComponent(cityVal);
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 3. ACF Native Select2 Filter (fallback)
+                if (typeof acf !== 'undefined') {
+                    acf.add_filter('select2_ajax_data', function(data, args, $el, field, setting) {
+                        if (field && (field.get('name') === 'event_place' || field.get('key') === 'field_event_place')) {
+                            var cityVal = getCityVal();
+                            console.log('ACF Select2 Ajax Filter. City:', cityVal);
+                            if (cityVal) {
+                                data.event_city = cityVal;
+                            }
+                        }
+                        return data;
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+    <?php
+}
+add_action('admin_footer', 'lpdh_event_city_filter_js');
+
+/**
+ * Renderizza i filtri per gli archivi/pagine eventi
+ */
+function lpdh_render_event_filters() {
+    global $wpdb;
+
+    $current_year = isset($_GET['event_year']) ? sanitize_text_field($_GET['event_year']) : '';
+    $current_city = isset($_GET['event_city']) ? sanitize_text_field($_GET['event_city']) : null;
+    if ($current_city === null && is_user_logged_in()) {
+        $current_city = get_user_meta(get_current_user_id(), 'preferred_city', true);
+    }
+    if ($current_city === null) {
+        $current_city = '';
+    }
+    $current_place_id = isset($_GET['event_place_id']) ? intval($_GET['event_place_id']) : 0;
+
+    // Fetch distinct years
+    $years = $wpdb->get_col("SELECT DISTINCT YEAR(meta_value) FROM $wpdb->postmeta WHERE meta_key = 'event_date' ORDER BY meta_value DESC");
+
+    // Fetch distinct cities
+    $cities = $wpdb->get_col("
+        SELECT DISTINCT meta_value
+        FROM {$wpdb->postmeta} pm
+        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'event_city'
+          AND pm.meta_value IS NOT NULL
+          AND TRIM(pm.meta_value) != ''
+          AND p.post_type = 'event'
+          AND p.post_status = 'publish'
+        ORDER BY meta_value ASC
+    ");
+
+    // Fetch places mapped by city
+    $all_places = $wpdb->get_results("
+        SELECT p.ID, p.post_title, pm.meta_value AS city
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+        WHERE p.post_type = 'place'
+          AND p.post_status = 'publish'
+          AND pm.meta_key = 'place_city'
+          AND pm.meta_value IS NOT NULL
+          AND TRIM(pm.meta_value) != ''
+        ORDER BY p.post_title ASC
+    ");
+
+    $places_by_city = [];
+    foreach ($all_places as $pl) {
+        $places_by_city[$pl->city][] = ['id' => $pl->ID, 'name' => $pl->post_title];
+    }
+    ?>
+    <form method="get" class="mb-5" id="event-archive-filters">
+        <?php 
+        // Preserva i parametri GET esistenti nell'URL (necessario se si usano ugly permalink come ?post_type=event)
+        foreach ($_GET as $key => $val) {
+            if (!in_array($key, ['event_year', 'event_city', 'event_place_id']) && !is_array($val)) {
+                echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($val) . '">';
+            }
+        }
+        ?>
+        <div class="row justify-content-center g-3">
+            <!-- Anno -->
+            <div class="col-md-4 col-lg-3">
+                <select name="event_year" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Years</option>
+                    <?php foreach ((array) $years as $year): 
+                        $selected = ($current_year == $year) ? 'selected' : ''; ?>
+                        <option value="<?php echo esc_attr($year); ?>" <?php echo $selected; ?>><?php echo esc_html($year); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- City -->
+            <div class="col-md-4 col-lg-3">
+                <select name="event_city" class="form-select" id="filter-event-city">
+                    <option value="">All Cities</option>
+                    <?php foreach ((array) $cities as $city): 
+                        $selected = ($current_city === $city) ? 'selected' : ''; ?>
+                        <option value="<?php echo esc_attr($city); ?>" <?php echo $selected; ?>><?php echo esc_html($city); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Place (visibile solo se city selezionata) -->
+            <div class="col-md-4 col-lg-3" id="filter-place-wrap" style="<?php echo $current_city ? '' : 'display:none;'; ?>">
+                <select name="event_place_id" class="form-select" id="filter-event-place" onchange="this.form.submit()">
+                    <option value="">All Places</option>
+                    <?php
+                    // Mostra solo i places della city attuale (fallback server-side)
+                    if ($current_city && isset($places_by_city[$current_city])) {
+                        foreach ($places_by_city[$current_city] as $pl) {
+                            $selected = ($current_place_id === (int)$pl['id']) ? 'selected' : '';
+                            echo '<option value="' . esc_attr($pl['id']) . '" ' . $selected . '>' . esc_html($pl['name']) . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <script>
+    (function () {
+        var placesByCity = <?php echo json_encode($places_by_city, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        var citySelect   = document.getElementById('filter-event-city');
+        var placeWrap    = document.getElementById('filter-place-wrap');
+        var placeSelect  = document.getElementById('filter-event-place');
+        
+        if (citySelect) {
+            citySelect.addEventListener('change', function () {
+                var city = this.value;
+
+                // Nasconde Place e resetta le opzioni
+                placeWrap.style.display = 'none';
+                placeSelect.innerHTML = '<option value="">All Places</option>';
+
+                if (city) {
+                    var places = placesByCity[city] || [];
+                    places.forEach(function (pl) {
+                        var opt = document.createElement('option');
+                        opt.value = pl.id;
+                        opt.textContent = pl.name;
+                        placeSelect.appendChild(opt);
+                    });
+                    placeWrap.style.display = '';
+                }
+
+                // Invia il form: azzera place e filtra per la nuova city
+                citySelect.form.submit();
+            });
+        }
+    })();
+    </script>
+    <?php
+}

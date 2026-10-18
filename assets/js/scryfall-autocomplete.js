@@ -15,9 +15,58 @@ var LPDH_Scryfall = (function ($) {
 
         // Banned Check
         var isBanned = false;
-        if (typeof LPDH_Banned_Cards !== 'undefined' && Array.isArray(LPDH_Banned_Cards)) {
-            if (LPDH_Banned_Cards.includes(card.text.toLowerCase().trim())) {
-                isBanned = true;
+        if (typeof LPDH_Banned_Cards !== 'undefined') {
+            var cardNameLower = card.text.toLowerCase().trim();
+            
+            // New structure: LPDH_Banned_Cards is an object
+            if (typeof LPDH_Banned_Cards === 'object' && !Array.isArray(LPDH_Banned_Cards)) {
+                if (LPDH_Banned_Cards.hasOwnProperty(cardNameLower)) {
+                    var bannedInfo = LPDH_Banned_Cards[cardNameLower];
+                    
+                    if (!bannedInfo.combined_with || bannedInfo.combined_with.length === 0) {
+                        isBanned = true; // Outright banned
+                    } else {
+                        // Banned only if combined. Check currently selected cards in the UI.
+                        var currentCards = [];
+                        
+                        // 1. Check ACF text inputs for Commander/Partner
+                        jQuery('.scryfall-autocomplete input[type="text"], .acf-field[data-name="commander"] input, .acf-field[data-name="partner"] input').each(function() {
+                            var val = jQuery(this).val();
+                            if (val) {
+                                currentCards.push(val.toLowerCase().trim());
+                            }
+                        });
+                        
+                        // 2. Check decklist textarea if present
+                        var decklistText = jQuery('textarea[name="acf[field_decklist_text]"]').val() || jQuery('.acf-field[data-name="decklist_text"] textarea').val() || '';
+                        if (decklistText) {
+                            var lines = decklistText.split('\n');
+                            for (var i = 0; i < lines.length; i++) {
+                                var line = lines[i].trim();
+                                if (line) {
+                                    var match = line.match(/^\d+x?\s+(.+)/);
+                                    if (match && match[1]) {
+                                        currentCards.push(match[1].toLowerCase().trim());
+                                    } else {
+                                        currentCards.push(line.toLowerCase().trim());
+                                    }
+                                }
+                            }
+                        }
+                        
+                        for (var i = 0; i < bannedInfo.combined_with.length; i++) {
+                            if (currentCards.includes(bannedInfo.combined_with[i])) {
+                                isBanned = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else if (Array.isArray(LPDH_Banned_Cards)) {
+                // Fallback for older array structure
+                if (LPDH_Banned_Cards.includes(cardNameLower)) {
+                    isBanned = true;
+                }
             }
         } else {
             console.warn('LPDH Scryfall: Banned cards list not loaded.');

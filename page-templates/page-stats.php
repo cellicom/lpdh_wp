@@ -588,7 +588,10 @@ get_header(); ?>
                 <!-- Decks Table -->
                 <div class="col-12">
                     <div id="decks-partial" class="deck-performance-ajax deck-performance mb-5">
-                        <h3 class="mb-3 border-bottom pb-2"><i class="fas fa-layer-group me-2"></i>Deck Performance</h3>
+                        <h3 class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-layer-group me-2"></i>Deck Performance</span>
+                            <span class="badge bg-secondary rounded-pill fs-6"><?php echo count($all_user_decks); ?></span>
+                        </h3>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle bg-transparent">
                                 <thead class="table-dark">
@@ -671,7 +674,10 @@ get_header(); ?>
                 <!-- Event History Table -->
                 <div class="col-12">
                     <div id="events-partial" class="event-history-ajax event-history mb-5">
-                        <h3 class="mb-3 border-bottom pb-2"><i class="fas fa-history me-2"></i>Event History</h3>
+                        <h3 class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-history me-2"></i>Event History</span>
+                            <span class="badge bg-secondary rounded-pill fs-6"><?php echo $total_player_events; ?></span>
+                        </h3>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle bg-transparent">
                                 <thead class="table-dark">

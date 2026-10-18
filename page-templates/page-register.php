@@ -93,6 +93,7 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
     $user_email = isset($_POST['user_email']) ? sanitize_email($_POST['user_email']) : '';
     $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
     $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+    $preferred_city = isset($_POST['preferred_city']) ? sanitize_text_field($_POST['preferred_city']) : '';
 
     // Validate username
     if (empty($user_login)) {
@@ -110,6 +111,82 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
         $errors->add('invalid_email', __('The email address is invalid.', 'bootscore'));
     } elseif (email_exists($user_email)) {
         $errors->add('email_exists', __('This email address is already registered.', 'bootscore'));
+    }
+
+    // Validate first name
+    if (empty($first_name)) {
+        $errors->add('empty_first_name', __('Please enter your first name.', 'bootscore'));
+    }
+
+    // 1. Honeypot check (anti-bot)
+    if (!empty($_POST['lpdh_hp_field'])) {
+        $errors->add('bot_detected', __('Security check failed.', 'bootscore'));
+    }
+
+    // 2. Validate hCaptcha (via official "hCaptcha for WP" plugin or manual fallback)
+    $hcaptcha_error = null;
+    $is_hcaptcha_active = shortcode_exists( 'hcaptcha' ) || function_exists( 'hcaptcha_get_verify_message' );
+
+    if ( $is_hcaptcha_active ) {
+        // Attempt to retrieve the hCaptcha secret key from various common WordPress option stores
+        $secret = '';
+        
+        // 1. Check 'hcaptcha' option (used by the official "hCaptcha for Forms and More" plugin)
+        $hcaptcha_opt = get_option('hcaptcha');
+        if (is_array($hcaptcha_opt)) {
+            $secret = $hcaptcha_opt['secret'] ?? ($hcaptcha_opt['secret_key'] ?? '');
+        }
+        
+        // 2. Check 'hcaptcha_settings' option
+        if (empty($secret)) {
+            $hcaptcha_settings = get_option('hcaptcha_settings');
+            if (is_array($hcaptcha_settings)) {
+                $secret = $hcaptcha_settings['secret_key'] ?? ($hcaptcha_settings['secret'] ?? '');
+            }
+        }
+        
+        // 3. Check 'hcaptcha_options' option
+        if (empty($secret)) {
+            $hcaptcha_options = get_option('hcaptcha_options');
+            if (is_array($hcaptcha_options)) {
+                $secret = $hcaptcha_options['secret'] ?? ($hcaptcha_options['secret_key'] ?? '');
+            }
+        }
+        
+        // 4. Check standalone options
+        if (empty($secret)) {
+            $secret = get_option('hcaptcha_secret', get_option('hcaptcha_secret_key', ''));
+        }
+
+        // If the plugin is active, hCaptcha is strictly required
+        $hcaptcha_response = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
+        if (empty($hcaptcha_response)) {
+            $hcaptcha_error = __('Please complete the CAPTCHA challenge.', 'bootscore');
+        } elseif (!empty($secret)) {
+            $verify_response = wp_remote_post('https://api.hcaptcha.com/siteverify', array(
+                'body' => array(
+                    'secret'   => $secret,
+                    'response' => $hcaptcha_response,
+                    'remoteip' => $_SERVER['REMOTE_ADDR'],
+                ),
+            ));
+
+            if (is_wp_error($verify_response)) {
+                $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
+            } else {
+                $verify_data = json_decode(wp_remote_retrieve_body($verify_response));
+                if (empty($verify_data->success)) {
+                    $hcaptcha_error = __('CAPTCHA verification failed. Please try again.', 'bootscore');
+                }
+            }
+        } else {
+            // Log a warning if the plugin is active but no secret key is configured in settings
+            error_log('hCaptcha warning: hCaptcha plugin is active but the secret key is not configured in WordPress settings.');
+        }
+    }
+
+    if ( null !== $hcaptcha_error ) {
+        $errors->add( 'hcaptcha_failed', $hcaptcha_error );
     }
 
     // If no errors, create user
@@ -138,6 +215,9 @@ if (isset($_POST['bootscore_register_nonce']) && wp_verify_nonce($_POST['bootsco
                 $user_id->get_error_message()
             );
         } else {
+            if (!empty($preferred_city)) {
+                update_user_meta($user_id, 'preferred_city', $preferred_city);
+            }
             bootscore_send_new_user_email($user_id, $password);
             $register_success = true;
         }
@@ -337,14 +417,16 @@ get_header(); ?>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="first_name"
-                                            class="form-label"><?php esc_html_e('First Name', 'bootscore'); ?></label>
+                                        <label for="first_name" class="form-label">
+                                            <?php esc_html_e('First Name', 'bootscore'); ?>
+                                            <span class="text-danger">*</span>
+                                        </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                             <input type="text" name="first_name" id="first_name"
                                                 class="form-control form-control-lg"
                                                 value="<?php echo isset($_POST['first_name']) ? esc_attr(sanitize_text_field($_POST['first_name'])) : ''; ?>"
-                                                autocomplete="given-name"
+                                                autocomplete="given-name" required
                                                 placeholder="<?php esc_attr_e('Your first name', 'bootscore'); ?>">
                                         </div>
                                     </div>
@@ -361,6 +443,61 @@ get_header(); ?>
                                         </div>
                                     </div>
                                 </div>
+
+                                <?php
+                                // Fetch all cities from the place custom post type
+                                $cities = array();
+                                $places_query = new WP_Query(array(
+                                    'post_type' => 'place',
+                                    'posts_per_page' => -1,
+                                    'post_status' => 'publish',
+                                ));
+                                if ($places_query->have_posts()) {
+                                    while ($places_query->have_posts()) {
+                                        $places_query->the_post();
+                                        $city = get_field('place_city');
+                                        if (!empty($city)) {
+                                            $cities[$city] = $city;
+                                        }
+                                    }
+                                    wp_reset_postdata();
+                                }
+                                sort($cities);
+                                ?>
+
+                                <?php if (!empty($cities)): ?>
+                                    <div class="mb-3">
+                                        <label for="preferred_city" class="form-label">
+                                            <?php esc_html_e('Preferred City', 'bootscore'); ?>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                            <select name="preferred_city" id="preferred_city" class="form-select form-select-lg" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;">
+                                                <option value=""><?php esc_html_e('Select your preferred city...', 'bootscore'); ?></option>
+                                                <?php foreach ($cities as $city): ?>
+                                                    <option value="<?php echo esc_attr($city); ?>" <?php selected(isset($_POST['preferred_city']) ? $_POST['preferred_city'] : '', $city); ?>>
+                                                        <?php echo esc_html($city); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Honeypot anti-bot field -->
+                                <div class="d-none" aria-hidden="true" style="display: none !important;">
+                                    <label for="lpdh_hp_field"><?php esc_html_e('Leave this field empty', 'bootscore'); ?></label>
+                                    <input type="text" name="lpdh_hp_field" id="lpdh_hp_field" tabindex="-1" autocomplete="off">
+                                </div>
+
+                                <?php
+                                // hCaptcha widget — rendered by the official "hCaptcha for WP" plugin
+                                if ( function_exists( 'do_shortcode' ) ) {
+                                    echo do_shortcode(
+                                        '[hcaptcha action="lpdh_register_action" name="lpdh_register_nonce" id="lpdh-register-form"]'
+                                    );
+                                }
+                                ?>
 
                                 <div class="d-grid gap-2 mb-4">
                                     <button type="submit" name="wp-submit" id="wp-submit-register"

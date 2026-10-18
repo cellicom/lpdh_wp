@@ -203,23 +203,37 @@ $profile_editor_url = lpdh_get_profile_editor_url();
                 ?>
 
 
-                <?php if (is_user_logged_in() && get_current_user_id() == $author_id): ?>
+                <?php 
+                // ponytail: roles checked directly via current_user_can
+                $is_my_profile = is_user_logged_in() && (get_current_user_id() == $author_id);
+                $is_admin_or_co = is_user_logged_in() && (current_user_can('administrator') || current_user_can('co_administrator'));
+                if ($is_my_profile || $is_admin_or_co): ?>
                     <div class="row justify-content-center my-4 g-2">
-                        <div class="col-auto">
-                            <a href="<?php echo esc_url(lpdh_get_stats_url($author_id)); ?>" class="btn btn-primary btn-lg">
-                                <i class="fas fa-chart-bar me-2"></i> View my Stats
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <a href="<?php echo esc_url($profile_editor_url); ?>" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-edit me-2"></i> Edit my Profile
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <a href="<?php echo esc_url($deck_editor_url); ?>" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus me-2"></i> Add Deck
-                            </a>
-                        </div>
+                        <?php if ($is_admin_or_co): ?>
+                            <div class="col-auto">
+                                <a href="<?php echo esc_url(admin_url()); ?>" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-user-cog me-2"></i> Admin panel
+                                </a>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($is_my_profile): ?>
+                            <div class="col-auto">
+                                <a href="<?php echo esc_url(lpdh_get_stats_url($author_id)); ?>" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-chart-bar me-2"></i> View my Stats
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="<?php echo esc_url($profile_editor_url); ?>" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-edit me-2"></i> Edit my Profile
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="<?php echo esc_url($deck_editor_url); ?>" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i> Add Deck
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
