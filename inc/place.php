@@ -280,9 +280,13 @@ function lpdh_place_search_where($where, $query)
 {
     if (!is_admin() && $query->is_main_query() && is_post_type_archive('place') && $query->get('place_q')) {
         global $wpdb;
-        $search_term = $wpdb->esc_like($query->get('place_q'));
+        $like_term = '%' . $wpdb->esc_like(sanitize_text_field($query->get('place_q'))) . '%';
         // Search in Title OR place_address meta
-        $where .= " AND ({$wpdb->posts}.post_title LIKE '%{$search_term}%' OR {$wpdb->postmeta}.meta_value LIKE '%{$search_term}%') ";
+        $where .= $wpdb->prepare(
+            " AND ({$wpdb->posts}.post_title LIKE %s OR {$wpdb->postmeta}.meta_value LIKE %s) ",
+            $like_term,
+            $like_term
+        );
     }
     return $where;
 }

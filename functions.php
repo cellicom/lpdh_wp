@@ -110,6 +110,10 @@ function lpdh_get_logo()
  */
 function lpdh_register_co_administrator_role()
 {
+    if (get_option('lpdh_roles_setup_ver') === '1.0.1') {
+        return;
+    }
+
     $admin_role = get_role('administrator');
     if (!$admin_role) {
         return;
@@ -198,6 +202,8 @@ function lpdh_register_co_administrator_role()
     } else {
         add_role('co_administrator', __('Co-Administrator', 'text_domain'), $caps);
     }
+
+    update_option('lpdh_roles_setup_ver', '1.0.1');
 }
 add_action('init', 'lpdh_register_co_administrator_role');
 
@@ -578,48 +584,35 @@ function redirect_players_from_restricted_pages()
     }
 
     if (current_user_can('player')) {
-        $current_page = $_GET['page'] ?? '';
-        $restricted_pages = array(
-            'edit.php',
-            'upload.php',
-            'edit.php?post_type=page',
-            'edit-comments.php',
-            'themes.php',
-            'plugins.php',
-            'users.php',
-            'tools.php',
-            'options-general.php',
-        );
+        global $pagenow;
 
-        if (in_array($current_page, $restricted_pages) || in_array($GLOBALS['pagenow'], array('users.php', 'profile.php'))) {
-            // Allow profile page
-            if ($GLOBALS['pagenow'] === 'profile.php') {
-                return;
-            }
-
-            // Allow deck management
-            if (isset($_GET['post_type']) && $_GET['post_type'] === 'deck') {
-                return;
-            }
-
-            // Block other custom post types
-            $blocked_cpts = array('leaderboard', 'banned_card', 'place', 'faq', 'event', 'achievement');
-            if (isset($_GET['post_type']) && in_array($_GET['post_type'], $blocked_cpts)) {
-                wp_redirect(admin_url());
-                exit;
-            }
-
-            // Also check current screen for direct access
-            $screen = get_current_screen();
-            if ($screen && in_array($screen->post_type, $blocked_cpts)) {
-                wp_redirect(admin_url());
-                exit;
-            }
-
-            // Redirect to dashboard
-            wp_redirect(admin_url());
-            exit;
+        // Allow AJAX requests to pass through
+        if (wp_doing_ajax()) {
+            return;
         }
+
+        // Allow profile page and dashboard
+        if ($pagenow === 'profile.php' || $pagenow === 'index.php') {
+            return;
+        }
+
+        // Determine post_type being accessed
+        $post_type = $_GET['post_type'] ?? '';
+        if (empty($post_type) && isset($_GET['post'])) {
+            $post_type = get_post_type(intval($_GET['post']));
+        }
+        if (empty($post_type) && isset($_POST['post_ID'])) {
+            $post_type = get_post_type(intval($_POST['post_ID']));
+        }
+
+        // Allow deck management only
+        if ($post_type === 'deck') {
+            return;
+        }
+
+        // Block all other admin screens (posts, pages, media, users, settings, other CPTs)
+        wp_redirect(admin_url('index.php'));
+        exit;
     }
 }
 add_action('admin_init', 'redirect_players_from_restricted_pages');

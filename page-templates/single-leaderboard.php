@@ -325,6 +325,43 @@ get_header(); ?>
                                             </thead>
                                             <tbody>
                                                 <?php
+                                                // PERF-02: Pre-fetch users for rankings missing user_id to eliminate N+1 queries
+                                                $missing_names = array();
+                                                $known_user_ids = array();
+                                                if (!empty($rankings) && is_array($rankings)) {
+                                                    foreach ($rankings as $r) {
+                                                        if (!empty($r['user_id'])) {
+                                                            $known_user_ids[] = intval($r['user_id']);
+                                                        } elseif (!empty($r['name'])) {
+                                                            $missing_names[] = trim($r['name']);
+                                                        }
+                                                    }
+                                                }
+
+                                                $user_lookup_by_name = array();
+                                                if (!empty($missing_names)) {
+                                                    global $wpdb;
+                                                    $unique_names = array_values(array_unique($missing_names));
+                                                    $placeholders = implode(',', array_fill(0, count($unique_names), '%s'));
+                                                    $query = $wpdb->prepare(
+                                                        "SELECT ID, display_name, user_login FROM {$wpdb->users} WHERE display_name IN ($placeholders) OR user_login IN ($placeholders)",
+                                                        array_merge($unique_names, $unique_names)
+                                                    );
+                                                    $found_users = $wpdb->get_results($query);
+                                                    if (!empty($found_users)) {
+                                                        foreach ($found_users as $u) {
+                                                            $user_lookup_by_name[strtolower(trim($u->display_name))] = intval($u->ID);
+                                                            $user_lookup_by_name[strtolower(trim($u->user_login))] = intval($u->ID);
+                                                            $known_user_ids[] = intval($u->ID);
+                                                        }
+                                                    }
+                                                }
+
+                                                // Pre-prime user cache if supported
+                                                if (!empty($known_user_ids) && function_exists('_prime_user_caches')) {
+                                                    _prime_user_caches(array_unique($known_user_ids));
+                                                }
+
                                                 foreach ($rankings as $index => $rank):
                                                     $pos = $index + 1;
                                                     $name = isset($rank['name']) ? $rank['name'] : '';
@@ -339,15 +376,11 @@ get_header(); ?>
                                                     $user_id = isset($rank['user_id']) ? $rank['user_id'] : 0;
                                                     $trend = isset($rank['trend']) ? $rank['trend'] : 0;
 
-                                                    // Fallback: try to find user by display name if ID is missing
+                                                    // Fast batch lookup if user_id was missing
                                                     if (!$user_id && !empty($name)) {
-                                                        $user = get_users(array(
-                                                            'search' => $name,
-                                                            'search_columns' => array('display_name'),
-                                                            'number' => 1
-                                                        ));
-                                                        if (!empty($user)) {
-                                                            $user_id = $user[0]->ID;
+                                                        $lookup_key = strtolower(trim($name));
+                                                        if (isset($user_lookup_by_name[$lookup_key])) {
+                                                            $user_id = $user_lookup_by_name[$lookup_key];
                                                         }
                                                     }
 

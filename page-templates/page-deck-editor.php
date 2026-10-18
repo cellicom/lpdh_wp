@@ -21,7 +21,7 @@ $is_edit = false;
 
 if ($edit_id) {
     $deck_to_edit = get_post($edit_id);
-    if ($deck_to_edit && $deck_to_edit->post_type === 'deck' && (intval($deck_to_edit->post_author) === get_current_user_id() || current_user_can('administrator'))) {
+    if ($deck_to_edit && $deck_to_edit->post_type === 'deck' && (intval($deck_to_edit->post_author) === get_current_user_id() || lpdh_can_manage_content())) {
         $is_edit = true;
 
         // Update browser tab title

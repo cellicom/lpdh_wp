@@ -100,6 +100,10 @@ add_action('init', 'add_player_role', 5);
  */
 function grant_player_capabilities()
 {
+    if (get_option('lpdh_player_caps_ver') === '1.0.1') {
+        return;
+    }
+
     $role = get_role('player');
     if ($role) {
         $role->add_cap('edit_posts');
@@ -109,6 +113,8 @@ function grant_player_capabilities()
         $role->add_cap('delete_published_posts');
         $role->add_cap('read');
     }
+
+    update_option('lpdh_player_caps_ver', '1.0.1');
 }
 add_action('init', 'grant_player_capabilities', 15);
 

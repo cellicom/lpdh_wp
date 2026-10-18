@@ -68,6 +68,10 @@ add_action('init', 'register_leaderboard_cpt', 0);
  */
 function add_leaderboard_caps_to_admin()
 {
+    if (get_option('lpdh_lb_caps_ver') === '1.0.1') {
+        return;
+    }
+
     $roles = array('administrator', 'co_administrator');
 
     foreach ($roles as $role_slug) {
@@ -101,6 +105,8 @@ function add_leaderboard_caps_to_admin()
             }
         }
     }
+
+    update_option('lpdh_lb_caps_ver', '1.0.1');
 }
 add_action('admin_init', 'add_leaderboard_caps_to_admin');
 

@@ -175,7 +175,7 @@ function ajax_send_discord_event_notification()
 {
     check_ajax_referer('lpdh_discord_ajax_nonce', 'security');
 
-    if (!current_user_can('edit_posts')) {
+    if (!lpdh_can_manage_content()) {
         wp_send_json_error('Insufficient permissions.');
     }
 
