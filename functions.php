@@ -8,6 +8,9 @@
 // Exit if accessed directly
 defined('ABSPATH') || exit;
 
+// Theme Revision (Date of latest commit/release on main in format YYYYMMDD)
+define('LPDH_THEME_REVISION', '20261019');
+
 /**
  * Dependency Check: Advanced Custom Fields PRO
  * This theme requires ACF Pro to function correctly.
@@ -1522,6 +1525,41 @@ function lpdh_get_extra_attributions()
 
     return $output;
 }
+
+/**
+ * Get Theme Revision Date
+ *
+ * Returns the release revision date (YYYYMMDD). Falls back to git commit date if
+ * available in dev environment, or the defined constant.
+ *
+ * @return string YYYYMMDD
+ */
+function lpdh_get_theme_revision()
+{
+    if (defined('LPDH_THEME_REVISION') && !empty(LPDH_THEME_REVISION)) {
+        return LPDH_THEME_REVISION;
+    }
+
+    // Dynamic fallback if .git directory is present (local/dev environments)
+    $git_dir = get_stylesheet_directory() . '/.git';
+    if (file_exists($git_dir) && function_exists('exec')) {
+        $transient_key = 'lpdh_theme_rev_date';
+        $rev = get_transient($transient_key);
+        if ($rev === false) {
+            $output = @exec('git log -1 --format="%cd" --date=format:"%Y%m%d" ' . escapeshellarg(get_stylesheet_directory()));
+            if (!empty($output) && preg_match('/^\d{8}$/', trim($output))) {
+                $rev = trim($output);
+                set_transient($transient_key, $rev, HOUR_IN_SECONDS);
+            }
+        }
+        if (!empty($rev)) {
+            return $rev;
+        }
+    }
+
+    return date_i18n('Ymd');
+}
+
 /**
  * Get Social Links HTML for Footer
  */

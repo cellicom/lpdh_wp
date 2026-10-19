@@ -106,6 +106,12 @@ defined('ABSPATH') || exit;
                     <?= esc_html(date_i18n('Y')); ?>
                     <?= esc_html(get_bloginfo('name')); ?>
                 </div>
+                <?php if (function_exists('lpdh_get_theme_revision') && ($theme_rev = lpdh_get_theme_revision())): ?>
+                    <span class="small opacity-50 px-1">|</span>
+                    <div class="small bootscore-revision d-inline-block">
+                        rev. <?= esc_html($theme_rev); ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
