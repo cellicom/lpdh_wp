@@ -136,7 +136,8 @@ function lpdh_get_type_caps($plural, $own_only = false)
  * Sync role capabilities for the LPDH custom post types.
  *
  * - Decks ('deck'/'decks'): players manage only their own; admins/co-admins everything.
- * - Event, Place, Banned Card, FAQ, Achievement ('lpdh_item'/'lpdh_items'):
+ * - Events ('event'/'events'): admins, co-admins and editors.
+ * - Place, Banned Card, FAQ, Achievement ('lpdh_item'/'lpdh_items'):
  *   admins/co-admins only.
  * - Players lose the generic post caps (edit_posts, publish_posts, ...), which
  *   previously let them publish any 'post'-typed CPT through the REST API.
@@ -145,22 +146,27 @@ function lpdh_get_type_caps($plural, $own_only = false)
  */
 function lpdh_sync_capabilities()
 {
-    $version = '2.0.0';
+    $version = '2.1.0';
     if (get_option('lpdh_caps_ver') === $version) {
         return;
     }
 
-    $manager_caps = array_merge(
-        lpdh_get_type_caps('decks'),
-        lpdh_get_type_caps('lpdh_items')
+    $roles_caps = array(
+        'administrator' => array_merge(
+            lpdh_get_type_caps('decks'),
+            lpdh_get_type_caps('events'),
+            lpdh_get_type_caps('lpdh_items')
+        ),
+        'editor' => lpdh_get_type_caps('events'),
     );
+    $roles_caps['co_administrator'] = $roles_caps['administrator'];
 
-    foreach (array('administrator', 'co_administrator') as $role_slug) {
+    foreach ($roles_caps as $role_slug => $caps) {
         $role = get_role($role_slug);
         if (!$role) {
             continue;
         }
-        foreach ($manager_caps as $cap) {
+        foreach ($caps as $cap) {
             $role->add_cap($cap);
         }
     }

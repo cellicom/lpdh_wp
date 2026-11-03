@@ -244,6 +244,15 @@ function lpdh_can_manage_content()
     return current_user_can('administrator') || current_user_can('manage_lpdh_content');
 }
 
+/**
+ * Check if the current user can manage events
+ * (Administrators, Co-Administrators and Editors — see lpdh_sync_capabilities)
+ */
+function lpdh_can_manage_events()
+{
+    return lpdh_can_manage_content() || current_user_can('edit_others_events');
+}
+
 
 
 /**
@@ -1672,6 +1681,73 @@ function lpdh_save_private_profile_field($user_id)
 }
 add_action('personal_options_update', 'lpdh_save_private_profile_field');
 add_action('edit_user_profile_update', 'lpdh_save_private_profile_field');
+
+/**
+ * Minimum length for passwords chosen by users on the frontend.
+ */
+if (!defined('LPDH_MIN_PASSWORD_LENGTH')) {
+    define('LPDH_MIN_PASSWORD_LENGTH', 8);
+}
+
+/**
+ * Check whether a display name is already used by another user
+ * (as display name or username), case-insensitive.
+ *
+ * Rankings are matched to players by name, so a duplicated display name
+ * would let a user impersonate another player.
+ *
+ * @param string $name            Unslashed display name.
+ * @param int    $exclude_user_id User allowed to keep the name (the owner).
+ * @return bool
+ */
+function lpdh_display_name_taken($name, $exclude_user_id = 0)
+{
+    global $wpdb;
+
+    $name = trim($name);
+    if ($name === '') {
+        return false;
+    }
+
+    $found = $wpdb->get_var($wpdb->prepare(
+        "SELECT ID FROM {$wpdb->users}
+         WHERE ID != %d AND (LOWER(display_name) = LOWER(%s) OR LOWER(user_login) = LOWER(%s))
+         LIMIT 1",
+        intval($exclude_user_id),
+        $name,
+        $name
+    ));
+
+    return !empty($found);
+}
+
+/**
+ * Enforce unique display names on the wp-admin profile screens too
+ * (players can reach profile.php).
+ */
+function lpdh_validate_unique_display_name($errors, $update, $user)
+{
+    if (empty($user->display_name)) {
+        return;
+    }
+
+    $user_id = !empty($user->ID) ? intval($user->ID) : 0;
+    $new_name = wp_unslash($user->display_name);
+
+    // Only validate changes, so pre-existing duplicates don't block unrelated profile edits
+    $existing = $user_id ? get_userdata($user_id) : false;
+    if ($existing && strcasecmp(trim($existing->display_name), trim($new_name)) === 0) {
+        return;
+    }
+
+    if (lpdh_display_name_taken($new_name, $user_id)) {
+        $errors->add(
+            'display_name_taken',
+            __('<strong>Error:</strong> This display name is already used by another user.', 'bootscore')
+        );
+    }
+}
+add_action('user_profile_update_errors', 'lpdh_validate_unique_display_name', 10, 3);
 
 require_once get_stylesheet_directory() . '/inc/admin-help-guide.php';
 

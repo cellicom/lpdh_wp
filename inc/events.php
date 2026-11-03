@@ -59,7 +59,7 @@ function register_event_post_type()
         'has_archive' => true,
         'exclude_from_search' => false,
         'publicly_queryable' => true,
-        'capability_type' => array('lpdh_item', 'lpdh_items'), // admin & co-admin only (see lpdh_sync_capabilities)
+        'capability_type' => array('event', 'events'), // admin, co-admin & editor (see lpdh_sync_capabilities)
         'map_meta_cap' => true,
         'show_in_rest' => true,
         'rest_base' => 'events',
@@ -816,11 +816,11 @@ function event_column_orderby($query)
 add_action('pre_get_posts', 'event_column_orderby');
 
 /**
- * Hide Event menu from non-administrators
+ * Hide Event menu from users who cannot manage events
  */
 function hide_event_menu_from_players()
 {
-    if (!lpdh_can_manage_content()) {
+    if (!lpdh_can_manage_events()) {
         remove_menu_page('edit.php?post_type=event');
     }
 }
@@ -844,22 +844,9 @@ function lpdh_event_list_column_widths()
 }
 add_action('admin_head', 'lpdh_event_list_column_widths');
 
-/**
- * Restrict access to Event admin pages for non-administrators
- */
-function restrict_event_admin_access()
-{
-    // Check if we're on event post type admin pages
-    if (!lpdh_can_manage_content()) {
-        $current_screen = get_current_screen();
-
-        if ($current_screen && $current_screen->post_type === 'event') {
-            wp_redirect(admin_url());
-            exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_event_admin_access', 999);
+// Access to the Event admin screens is enforced by the 'event' capability type
+// (see lpdh_sync_capabilities). The previous admin_init redirect was a no-op
+// because get_current_screen() is not available yet at that point.
 
 /**
  * Auto-fill ranking name field when player is selected
@@ -1011,7 +998,12 @@ function event_ranking_auto_fill_name()
                     success: function (response) {
                         if (response.success && response.data) {
                             var matchCount = 0;
+                            var ambiguousNames = [];
                             response.data.forEach(function (match) {
+                                if (match.ambiguous) {
+                                    ambiguousNames.push(match.name);
+                                    return;
+                                }
                                 var $row = $rows.eq(match.row_index);
                                 var $select = $row.find('[data-name="player_id"] select');
 
@@ -1024,7 +1016,11 @@ function event_ranking_auto_fill_name()
                                     matchCount++;
                                 }
                             });
-                            $msg.text('Sync completed: ' + matchCount + ' players matched.').css('color', '#46b450').show();
+                            var syncText = 'Sync completed: ' + matchCount + ' players matched.';
+                            if (ambiguousNames.length) {
+                                syncText += ' Ambiguous (assign manually): ' + ambiguousNames.join(', ');
+                            }
+                            $msg.text(syncText).css('color', ambiguousNames.length ? '#dba617' : '#46b450').show();
                         } else {
                             $msg.text('No players found.').css('color', '#d63638').show();
                         }
@@ -1112,7 +1108,7 @@ function ajax_sync_ranking_players()
 {
     check_ajax_referer('sync_ranking_players_nonce', 'nonce');
 
-    if (!lpdh_can_manage_content()) {
+    if (!lpdh_can_manage_events()) {
         wp_send_json_error('Insufficient permissions.', 403);
     }
 
@@ -1136,25 +1132,43 @@ function ajax_sync_ranking_players()
             if ($search_name_clean === '') {
                 continue;
             }
-            $found_user = null;
+            // Exact matches (display name, first + last name, username) take priority;
+            // prefix matches ("Mario R.") are used only when there is no exact one.
+            $exact = array();
+            $prefix = array();
 
             foreach ($users as $user) {
-                // Combine names for comparison
-                $full_name = trim($user->first_name . ' ' . $user->last_name);
-                $display_name = $user->display_name;
+                $candidates = array(
+                    $user->display_name,
+                    trim($user->first_name . ' ' . $user->last_name),
+                    $user->user_login,
+                );
 
-                // Try to match based on display name or combined first/last name
-                // Checking if the candidate name starts with the search string
-                if (
-                    (stripos($display_name, $search_name_clean) === 0) ||
-                    (stripos($full_name, $search_name_clean) === 0)
-                ) {
-                    $found_user = $user;
-                    break;
+                foreach ($candidates as $candidate) {
+                    if ($candidate === '') {
+                        continue;
+                    }
+                    if (strcasecmp($candidate, $search_name_clean) === 0) {
+                        $exact[$user->ID] = $user;
+                    } elseif (stripos($candidate, $search_name_clean) === 0) {
+                        $prefix[$user->ID] = $user;
+                    }
                 }
             }
 
-            if ($found_user) {
+            $pool = !empty($exact) ? $exact : $prefix;
+
+            // Never guess between several players: an admin must assign them manually.
+            // This also stops a user from hijacking results by copying someone else's name.
+            if (count($pool) > 1) {
+                $matches[] = array(
+                    'row_index' => $item['row_index'],
+                    'user_id' => 0,
+                    'ambiguous' => true,
+                    'name' => $search_name,
+                );
+            } elseif (count($pool) === 1) {
+                $found_user = reset($pool);
                 $matches[] = array(
                     'row_index' => $item['row_index'],
                     'user_id' => $found_user->ID,
@@ -1218,6 +1232,10 @@ add_action('acf/save_post', 'event_populate_ranking_name_on_save', 20);
 function ajax_get_user_decks()
 {
     check_ajax_referer('get_user_decks_nonce', 'nonce');
+
+    if (!lpdh_can_manage_events()) {
+        wp_send_json_error(array('message' => 'Insufficient permissions.'), 403);
+    }
 
     $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
     $current_deck_id = isset($_POST['current_deck_id']) ? intval($_POST['current_deck_id']) : 0;
@@ -1886,7 +1904,7 @@ function ajax_update_player_deck_ranking()
         $rank_player_id = intval($rank_player);
     }
 
-    if ($rank_player_id !== $user_id && !lpdh_can_manage_content()) {
+    if ($rank_player_id !== $user_id && !lpdh_can_manage_events()) {
         wp_send_json_error('Permission denied');
     }
 

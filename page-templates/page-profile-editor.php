@@ -118,15 +118,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_editor_nonce'
             'user_url' => $user_url,
         );
 
+        // Display name must not impersonate another user
+        if ($display_name === '') {
+            $errors[] = "Display name cannot be empty.";
+        } elseif (
+            strcasecmp(trim($current_user->display_name), trim(wp_unslash($display_name))) !== 0
+            && lpdh_display_name_taken(wp_unslash($display_name), $user_id)
+        ) {
+            $errors[] = "This display name is already used by another player. Please choose a different one.";
+        }
+
         // Password Update
-        $pass1 = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
-        $pass2 = isset($_POST['confirm_password']) ? trim($_POST['confirm_password']) : '';
-        
+        $pass1 = isset($_POST['new_password']) ? trim(wp_unslash($_POST['new_password'])) : '';
+        $pass2 = isset($_POST['confirm_password']) ? trim(wp_unslash($_POST['confirm_password'])) : '';
+        $current_pass = isset($_POST['current_password']) ? wp_unslash($_POST['current_password']) : '';
+
         if (!empty($pass1) || !empty($pass2)) {
-            if ($pass1 === $pass2) {
-                $userdata['user_pass'] = $pass1;
-            } else {
+            if (empty($current_pass) || !wp_check_password($current_pass, $current_user->user_pass, $user_id)) {
+                $errors[] = "Your current password is incorrect.";
+            } elseif ($pass1 !== $pass2) {
                 $errors[] = "Passwords do not match.";
+            } elseif (strlen($pass1) < LPDH_MIN_PASSWORD_LENGTH) {
+                $errors[] = sprintf("The new password must be at least %d characters long.", LPDH_MIN_PASSWORD_LENGTH);
+            } else {
+                $userdata['user_pass'] = $pass1;
             }
         }
 
@@ -380,6 +395,12 @@ get_header(); ?>
                         <h4 class="mb-4 text-primary"><i class="fas fa-lock me-2"></i>Change Password</h4>
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label for="current_password" class="form-label small">Current Password</label>
+                                <input type="password" name="current_password" id="current_password" class="form-control" autocomplete="current-password">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label for="new_password" class="form-label small">New Password</label>
                                 <input type="password" name="new_password" id="new_password" class="form-control" autocomplete="new-password">
                             </div>
@@ -389,8 +410,8 @@ get_header(); ?>
                                     class="form-control" autocomplete="new-password">
                             </div>
                         </div>
-                        <div class="form-text text-info mb-4">Leave both blank if you don't want to change your
-                            password.</div>
+                        <div class="form-text text-info mb-4">Leave these fields blank if you don't want to change your
+                            password. The new password must be at least <?php echo (int) LPDH_MIN_PASSWORD_LENGTH; ?> characters long.</div>
 
                         <!-- Actions -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
