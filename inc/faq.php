@@ -64,7 +64,8 @@ function register_faq_post_type()
         'has_archive' => true,
         'exclude_from_search' => false,
         'publicly_queryable' => true,
-        'capability_type' => 'post',
+        'capability_type' => array('lpdh_item', 'lpdh_items'), // admin & co-admin only (see lpdh_sync_capabilities)
+        'map_meta_cap' => true,
         'show_in_rest' => true,
         'rest_base' => 'faq',
         'rest_controller_class' => 'WP_REST_Posts_Controller',

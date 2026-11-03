@@ -23,27 +23,60 @@ $errors = array();
 
 // Handle Account Deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_account') {
-    if (wp_verify_nonce($_POST['delete_account_nonce'], 'delete_account_action')) {
+    if (!isset($_POST['delete_account_nonce']) || !wp_verify_nonce($_POST['delete_account_nonce'], 'delete_account_action')) {
+        $errors[] = "Security check failed for account deletion.";
+    } elseif (lpdh_can_manage_content()) {
+        // Admins/co-admins author events, places, etc.: they must be removed from wp-admin,
+        // where content reassignment can be chosen explicitly.
+        $errors[] = "Administrator accounts cannot be deleted from this page. Please contact another administrator.";
+    } else {
         require_once(ABSPATH . 'wp-admin/includes/user.php');
 
-        // Permanently delete user's decks
-        $decks = get_posts(array(
-            'post_type' => 'deck',
-            'author' => $user_id,
-            'posts_per_page' => -1,
-            'post_status' => 'any'
+        // Any other content owned by the user is reassigned to an administrator,
+        // because wp_delete_user() without $reassign deletes ALL of the user's posts.
+        $reassign_admins = get_users(array(
+            'role' => 'administrator',
+            'exclude' => array($user_id),
+            'number' => 1,
+            'orderby' => 'ID',
+            'order' => 'ASC',
+            'fields' => 'ID',
         ));
+        $reassign_id = !empty($reassign_admins) ? intval($reassign_admins[0]) : 0;
 
-        foreach ($decks as $deck) {
-            wp_delete_post($deck->ID, true);
+        if (!$reassign_id) {
+            $errors[] = "Account deletion is temporarily unavailable. Please contact an administrator.";
+        } else {
+            // Permanently delete user's decks
+            $decks = get_posts(array(
+                'post_type' => 'deck',
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'post_status' => 'any',
+                'fields' => 'ids',
+            ));
+
+            foreach ($decks as $deck_id) {
+                wp_delete_post($deck_id, true);
+            }
+
+            // Permanently delete the user's uploads (deck images)
+            $attachments = get_posts(array(
+                'post_type' => 'attachment',
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'post_status' => 'any',
+                'fields' => 'ids',
+            ));
+
+            foreach ($attachments as $attachment_id) {
+                wp_delete_attachment($attachment_id, true);
+            }
+
+            wp_delete_user($user_id, $reassign_id);
+            wp_redirect(home_url());
+            exit;
         }
-
-        // Delete user (without reassignment for other posts to keep events unchanged)
-        wp_delete_user($user_id);
-        wp_redirect(home_url());
-        exit;
-    } else {
-        $errors[] = "Security check failed for account deletion.";
     }
 }
 
@@ -371,6 +404,7 @@ get_header(); ?>
                         </div>
                     </form>
 
+                    <?php if (!lpdh_can_manage_content()): ?>
                     <!-- Danger Zone -->
                     <div class="card border-danger bg-dark shadow-lg mt-5">
                         <div class="card-body p-4">
@@ -388,6 +422,7 @@ get_header(); ?>
                             </button>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

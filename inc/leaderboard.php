@@ -439,11 +439,20 @@ function ajax_update_leaderboard_rankings()
 {
     check_ajax_referer('update_leaderboard_nonce', 'nonce');
 
+    if (!lpdh_can_manage_content()) {
+        wp_send_json_error('Insufficient permissions.', 403);
+    }
+
     $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
     $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
 
     if (!$year) {
         wp_send_json_error('Invalid year');
+    }
+
+    // Only write to an actual leaderboard post the user is allowed to edit
+    if ($post_id && (get_post_type($post_id) !== 'leaderboard' || !current_user_can('edit_post', $post_id))) {
+        wp_send_json_error('Invalid leaderboard.', 403);
     }
 
     $args = array(

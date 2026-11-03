@@ -64,7 +64,8 @@ function register_deck_post_type()
         'has_archive' => true,
         'exclude_from_search' => false,
         'publicly_queryable' => true,
-        'capability_type' => 'post',
+        'capability_type' => array('deck', 'decks'), // see lpdh_sync_capabilities
+        'map_meta_cap' => true,
         'show_in_rest' => true,
         'rest_base' => 'decks',
         'rest_controller_class' => 'WP_REST_Posts_Controller',
@@ -79,11 +80,16 @@ function register_deck_post_type()
 add_action('init', 'register_deck_post_type', 0);
 
 /**
- * Add custom "player" role based on author capabilities
+ * Add custom "player" role.
+ * Only creates the role when missing: add_role()/remove_role() write to the
+ * options table, so they must never run on every request.
  */
 function add_player_role()
 {
-    remove_role('player'); // Remove if exists
+    if (get_role('player')) {
+        return;
+    }
+
     add_role(
         'player',
         'Player',
@@ -96,27 +102,89 @@ function add_player_role()
 add_action('init', 'add_player_role', 5);
 
 /**
- * Grant author-level capabilities to player role on init
+ * Build the primitive capability list for a capability type registered with
+ * map_meta_cap => true (e.g. 'deck' / 'decks').
+ *
+ * @param string $plural Plural capability type.
+ * @param bool   $own_only Return only the caps needed to manage one's own posts.
+ * @return string[]
  */
-function grant_player_capabilities()
+function lpdh_get_type_caps($plural, $own_only = false)
 {
-    if (get_option('lpdh_player_caps_ver') === '1.0.1') {
+    $own = array(
+        "edit_{$plural}",
+        "edit_published_{$plural}",
+        "publish_{$plural}",
+        "delete_{$plural}",
+        "delete_published_{$plural}",
+    );
+
+    if ($own_only) {
+        return $own;
+    }
+
+    return array_merge($own, array(
+        "edit_others_{$plural}",
+        "edit_private_{$plural}",
+        "read_private_{$plural}",
+        "delete_others_{$plural}",
+        "delete_private_{$plural}",
+    ));
+}
+
+/**
+ * Sync role capabilities for the LPDH custom post types.
+ *
+ * - Decks ('deck'/'decks'): players manage only their own; admins/co-admins everything.
+ * - Event, Place, Banned Card, FAQ, Achievement ('lpdh_item'/'lpdh_items'):
+ *   admins/co-admins only.
+ * - Players lose the generic post caps (edit_posts, publish_posts, ...), which
+ *   previously let them publish any 'post'-typed CPT through the REST API.
+ *
+ * Versioned so it only writes to the database once per change.
+ */
+function lpdh_sync_capabilities()
+{
+    $version = '2.0.0';
+    if (get_option('lpdh_caps_ver') === $version) {
         return;
     }
 
-    $role = get_role('player');
-    if ($role) {
-        $role->add_cap('edit_posts');
-        $role->add_cap('edit_published_posts');
-        $role->add_cap('publish_posts');
-        $role->add_cap('delete_posts');
-        $role->add_cap('delete_published_posts');
-        $role->add_cap('read');
+    $manager_caps = array_merge(
+        lpdh_get_type_caps('decks'),
+        lpdh_get_type_caps('lpdh_items')
+    );
+
+    foreach (array('administrator', 'co_administrator') as $role_slug) {
+        $role = get_role($role_slug);
+        if (!$role) {
+            continue;
+        }
+        foreach ($manager_caps as $cap) {
+            $role->add_cap($cap);
+        }
     }
 
-    update_option('lpdh_player_caps_ver', '1.0.1');
+    $player = get_role('player');
+    if ($player) {
+        $legacy_caps = array('edit_posts', 'edit_published_posts', 'publish_posts', 'delete_posts', 'delete_published_posts');
+        foreach ($legacy_caps as $cap) {
+            $player->remove_cap($cap);
+        }
+        foreach (lpdh_get_type_caps('decks', true) as $cap) {
+            $player->add_cap($cap);
+        }
+        $player->add_cap('read');
+        $player->add_cap('upload_files');
+    }
+
+    // Legacy option from the previous implementation
+    delete_option('lpdh_player_caps_ver');
+
+    update_option('lpdh_caps_ver', $version);
 }
-add_action('init', 'grant_player_capabilities', 15);
+// After the co_administrator role registration (default priority 10)
+add_action('init', 'lpdh_sync_capabilities', 20);
 
 /**
  * Register ACF Field Group for Deck Custom Post Type

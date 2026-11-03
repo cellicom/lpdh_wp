@@ -59,7 +59,8 @@ function register_event_post_type()
         'has_archive' => true,
         'exclude_from_search' => false,
         'publicly_queryable' => true,
-        'capability_type' => 'post',
+        'capability_type' => array('lpdh_item', 'lpdh_items'), // admin & co-admin only (see lpdh_sync_capabilities)
+        'map_meta_cap' => true,
         'show_in_rest' => true,
         'rest_base' => 'events',
         'rest_controller_class' => 'WP_REST_Posts_Controller',
@@ -1111,7 +1112,11 @@ function ajax_sync_ranking_players()
 {
     check_ajax_referer('sync_ranking_players_nonce', 'nonce');
 
-    $names = isset($_POST['names']) ? $_POST['names'] : array();
+    if (!lpdh_can_manage_content()) {
+        wp_send_json_error('Insufficient permissions.', 403);
+    }
+
+    $names = isset($_POST['names']) && is_array($_POST['names']) ? wp_unslash($_POST['names']) : array();
     $matches = array();
 
     if (!empty($names)) {
@@ -1121,8 +1126,16 @@ function ajax_sync_ranking_players()
         ));
 
         foreach ($names as $item) {
-            $search_name = trim($item['name']);
+            if (!is_array($item) || !isset($item['name'], $item['row_index'])) {
+                continue;
+            }
+            $item['row_index'] = intval($item['row_index']);
+            $search_name = trim(sanitize_text_field($item['name']));
             $search_name_clean = rtrim($search_name, '.'); // Remove trailing dot if present
+            // An empty needle would prefix-match the first user in the list
+            if ($search_name_clean === '') {
+                continue;
+            }
             $found_user = null;
 
             foreach ($users as $user) {

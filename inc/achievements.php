@@ -38,7 +38,8 @@ function lpdh_register_achievement_cpt()
         'show_in_menu' => true,
         'menu_position' => 4,
         'menu_icon' => 'dashicons-awards',
-        'capability_type' => 'post',
+        'capability_type' => array('lpdh_item', 'lpdh_items'), // admin & co-admin only (see lpdh_sync_capabilities)
+        'map_meta_cap' => true,
         'hierarchical' => false,
         'supports' => ['title', 'editor'],
         'show_in_rest' => true,
