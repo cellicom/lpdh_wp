@@ -1893,7 +1893,9 @@ function ajax_update_player_deck_ranking()
     }
 
     // Verify user permission (must be the player in the row)
-    $rank_player = $rankings[$row_index]['player_id'];
+    // Raw (unformatted) repeater rows are keyed by sub-field key, not by name
+    $row = $rankings[$row_index];
+    $rank_player = $row['field_ranking_player_id'] ?? $row['player_id'] ?? 0;
     $rank_player_id = 0;
 
     if (is_array($rank_player) && isset($rank_player['ID'])) {
@@ -1918,11 +1920,14 @@ function ajax_update_player_deck_ranking()
     }
 
     // Check if value is actually changing to avoid update_field returning false on no change
-    if (isset($rankings[$row_index]['player_deck_id']) && $rankings[$row_index]['player_deck_id'] == $deck_id) {
+    $current_deck_id = $row['field_ranking_player_deck_id'] ?? $row['player_deck_id'] ?? null;
+    if ($current_deck_id !== null && $current_deck_id == $deck_id) {
         wp_send_json_success();
     }
 
-    // Update the specific row
+    // Update the specific row (ACF reads the key before the name when saving, so set both)
+    $rankings[$row_index]['field_ranking_player_deck_id'] = $deck_id;
+    $rankings[$row_index]['field_ranking_deck'] = $deck_title;
     $rankings[$row_index]['player_deck_id'] = $deck_id;
     $rankings[$row_index]['deck'] = $deck_title;
 
@@ -1937,7 +1942,8 @@ function ajax_update_player_deck_ranking()
         $updated_rankings = get_field('event_ranking', $event_id, false);
     }
 
-    if (isset($updated_rankings[$row_index]['player_deck_id']) && $updated_rankings[$row_index]['player_deck_id'] == $deck_id) {
+    $saved_deck_id = $updated_rankings[$row_index]['field_ranking_player_deck_id'] ?? $updated_rankings[$row_index]['player_deck_id'] ?? null;
+    if ($saved_deck_id !== null && $saved_deck_id == $deck_id) {
         // Also update the JSON version of rankings (event_rankings_json) to keep it in sync
         // IMPORTANT: We use the local $rankings array because we manually set the 'deck' title in it above.
         // Fetching from DB ($updated_rankings) might return the old 'deck' text value due to race conditions or caching.
